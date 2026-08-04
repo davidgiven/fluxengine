@@ -1,5 +1,8 @@
 [
 {
+  "name":"[Lcom.fazecast.jSerialComm.SerialPort;"
+},
+{
   "name":"[Lorg.usb4java.EndpointDescriptor;"
 },
 {
@@ -7,6 +10,14 @@
 },
 {
   "name":"[Lorg.usb4java.InterfaceDescriptor;"
+},
+{
+  "name":"com.fazecast.jSerialComm.SerialPort",
+  "fields":[{"name":"autoFlushIOBuffers"}, {"name":"baudRate"}, {"name":"comPort"}, {"name":"dataBits"}, {"name":"disableConfig"}, {"name":"disableExclusiveLock"}, {"name":"eventFlags"}, {"name":"eventListenerRunning"}, {"name":"flowControl"}, {"name":"friendlyName"}, {"name":"isDtrEnabled"}, {"name":"isRtsEnabled"}, {"name":"manufacturer"}, {"name":"parity"}, {"name":"portDescription"}, {"name":"portHandle"}, {"name":"portLocation"}, {"name":"productID"}, {"name":"readTimeout"}, {"name":"receiveDeviceQueueSize"}, {"name":"requestElevatedPermissions"}, {"name":"rs485ActiveHigh"}, {"name":"rs485DelayAfter"}, {"name":"rs485DelayBefore"}, {"name":"rs485EnableTermination"}, {"name":"rs485Mode"}, {"name":"rs485ModeControlEnabled"}, {"name":"rs485RxDuringTx"}, {"name":"sendDeviceQueueSize"}, {"name":"serialNumber"}, {"name":"stopBits"}, {"name":"timeoutMode"}, {"name":"vendorID"}, {"name":"writeTimeout"}, {"name":"xoffStopChar"}, {"name":"xonStartChar"}],
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"java.lang.Exception"
 },
 {
   "name":"org.usb4java.ConfigDescriptor",

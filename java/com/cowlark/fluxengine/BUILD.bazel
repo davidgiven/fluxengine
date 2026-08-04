@@ -26,6 +26,7 @@ native_image(
     extra_args = [
         "--no-fallback",
         "-O2",
+        "-H:IncludeResources=(javax.usb.properties|org/usb4java/.*/libusb4java\\..*|.*/libjSerialComm.*|.*/jSerialComm.dll)",
     ],
     jni_config = ["jni-config.json"],
     reflection_config = ["reflect-config.json"],

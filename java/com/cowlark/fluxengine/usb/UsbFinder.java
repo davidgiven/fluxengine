@@ -1,5 +1,6 @@
 package com.cowlark.fluxengine.usb;
 
+import com.fazecast.jSerialComm.SerialPort;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 import java.util.Set;
@@ -111,12 +112,28 @@ public final class UsbFinder
                 candidate.type = DeviceType.FLUXENGINE;
 
             if (id == GREASEWEAZLE_ID || id == APPLESAUCE_ID)
-            {
-                // TODO: map the USB device to an OS serial port (CDC-ACM).
-                candidate.serialPort = null;
-            }
+                candidate.serialPort = findSerialPort(id, candidate.serial);
 
             candidates.add(candidate);
         }
+    }
+
+    private static String findSerialPort(int id, String serial)
+    {
+        int vendorId = id >>> 16;
+        int productId = id & 0xffff;
+        for (SerialPort port : SerialPort.getCommPorts())
+        {
+            if (port.getVendorID() == vendorId && port.getProductID() == productId)
+            {
+                String portSerial = port.getSerialNumber();
+                if (serial == null || serial.isEmpty() || portSerial == null ||
+                    serial.equals(portSerial))
+                {
+                    return port.getSystemPortName();
+                }
+            }
+        }
+        return null;
     }
 }
