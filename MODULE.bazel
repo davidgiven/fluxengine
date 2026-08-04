@@ -14,6 +14,7 @@ maven.install(
         "com.fazecast:jSerialComm:2.11.4",
         "com.google.dagger:dagger:2.51.1",
         "com.google.dagger:dagger-compiler:2.51.1",
+        "com.google.guava:guava:33.6.0-jre",
         "info.picocli:picocli:4.7.7",
         "info.picocli:picocli-codegen:4.7.7",
         "javax.usb:usb-api:1.0.2",

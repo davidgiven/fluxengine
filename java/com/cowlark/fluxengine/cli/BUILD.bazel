@@ -16,6 +16,7 @@ java_library(
         "//java/com/cowlark/fluxengine/usb",
         "//java/com/cowlark/fluxengine/wiring",
         "@maven//:com_google_dagger_dagger",
+        "@maven//:com_google_guava_guava",
         "@maven//:info_picocli_picocli",
         "@maven//:javax_inject_javax_inject",
     ],

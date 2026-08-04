@@ -1,6 +1,9 @@
 package com.cowlark.fluxengine.cli;
 
+import static com.google.common.base.Strings.nullToEmpty;
+
 import com.cowlark.fluxengine.usb.UsbFinder;
+import com.google.common.base.Strings;
 import java.util.List;
 import picocli.CommandLine.Command;
 import javax.inject.Inject;
@@ -43,7 +46,7 @@ public class TestDevicesCommand implements Runnable
                 System.out.println(String.format("%-15s %-30s %s",
                     candidate.type.getDeviceName(),
                     candidate.serial,
-                    candidate.serialPort == null ? "" : candidate.serialPort));
+                    nullToEmpty(candidate.serialPort)));
             }
         }
     }

@@ -1,6 +1,6 @@
 package com.cowlark.fluxengine.usb;
 
-import java.util.ArrayList;
+import com.google.common.collect.ImmutableList;
 import java.util.List;
 import java.util.Set;
 import javax.inject.Inject;
@@ -68,9 +68,9 @@ public final class UsbFinder
         }
     }
 
-    public List<CandidateDevice> findUsbDevices()
+    public ImmutableList<CandidateDevice> findUsbDevices()
     {
-        List<CandidateDevice> candidates = new ArrayList<>();
+        ImmutableList.Builder<CandidateDevice> candidates = ImmutableList.builder();
         try
         {
             UsbServices services = new Services();
@@ -81,10 +81,10 @@ public final class UsbFinder
         {
             System.err.println("USB error: " + e.getMessage());
         }
-        return candidates;
+        return candidates.build();
     }
 
-    private static void walkHub(UsbHub hub, List<CandidateDevice> candidates)
+    private static void walkHub(UsbHub hub, ImmutableList.Builder<CandidateDevice> candidates)
     {
         for (Object o : hub.getAttachedUsbDevices())
         {
