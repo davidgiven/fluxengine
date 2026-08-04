@@ -8,7 +8,7 @@ import javax.inject.Singleton;
  * Application module that provides application-scoped dependencies.
  */
 @Module
-class FluxengineModule
+class FluxEngineModule
 {
     @Provides
     @Singleton

@@ -8,13 +8,13 @@ import javax.inject.Singleton;
  * Concrete application class with injected dependencies (Guice-style).
  */
 @Singleton
-class Fluxengine
+class FluxEngine
 {
     private final Greeter greeter;
     private final String[] args;
 
     @Inject
-    public Fluxengine(Greeter greeter, @CliParameters String[] args)
+    public FluxEngine(Greeter greeter, @CliParameters String[] args)
     {
         this.greeter = greeter;
         this.args = args;

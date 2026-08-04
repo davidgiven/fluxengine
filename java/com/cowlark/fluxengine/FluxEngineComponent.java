@@ -6,14 +6,14 @@ import dagger.Component;
 import javax.inject.Singleton;
 
 /**
- * Component that exposes the concrete Fluxengine type.
- * Dagger will generate DaggerFluxengineComponent when annotation processing runs.
+ * Component that exposes the concrete FluxEngine type.
+ * Dagger will generate DaggerFluxEngineComponent when annotation processing runs.
  */
 @Singleton
-@Component(modules = FluxengineModule.class)
-interface FluxengineComponent
+@Component(modules = FluxEngineModule.class)
+interface FluxEngineComponent
 {
-    Fluxengine fluxengine();
+    FluxEngine fluxengine();
 
     @Component.Builder
     interface Builder
@@ -21,12 +21,12 @@ interface FluxengineComponent
         @BindsInstance
         Builder cliParameters(@CliParameters String[] args);
 
-        FluxengineComponent build();
+        FluxEngineComponent build();
     }
 
     // Convenience factory that delegates to the generated implementation
-    static FluxengineComponent create(String[] args)
+    static FluxEngineComponent create(String[] args)
     {
-        return DaggerFluxengineComponent.builder().cliParameters(args).build();
+        return DaggerFluxEngineComponent.builder().cliParameters(args).build();
     }
 }
