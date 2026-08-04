@@ -183,6 +183,22 @@
   },
   "selectedYankedVersions": {},
   "moduleExtensions": {
+    "//:graalvm_extension.bzl%graalvm_ext": {
+      "general": {
+        "bzlTransitiveDigest": "YNdJVd0z2Zz/CwXyMp9xfCg0hQuOo4r6jJkynvrByNk=",
+        "usagesDigest": "iUXd/3jCJaegO0Dllj33xgb8pqISEwNiOB/aoc6/sBQ=",
+        "recordedFileInputs": {},
+        "recordedDirentsInputs": {},
+        "envVariables": {},
+        "generatedRepoSpecs": {
+          "graalvm": {
+            "repoRuleId": "@@//:graalvm_repository.bzl%graalvm_repository",
+            "attributes": {}
+          }
+        },
+        "recordedRepoMappingEntries": []
+      }
+    },
     "@@rules_kotlin+//src/main/starlark/core/repositories:bzlmod_setup.bzl%rules_kotlin_extensions": {
       "general": {
         "bzlTransitiveDigest": "03Qju4tW0vE+0RBuZGuV2A4Hx6AiSkdNahYvworx2aM=",
