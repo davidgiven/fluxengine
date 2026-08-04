@@ -10,7 +10,7 @@ import dagger.Provides;
 /**
  * Simple Greeter service provided via Dagger.
  */
-public class Greeter {
+class Greeter {
     @Inject
     public Greeter() {
     }
@@ -37,7 +37,7 @@ class FluxengineModule {
  * Concrete application class with injected dependencies (Guice-style).
  */
 @Singleton
-public class Fluxengine {
+class Fluxengine {
     private final Greeter greeter;
 
     @Inject

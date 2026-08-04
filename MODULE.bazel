@@ -1,0 +1,24 @@
+bazel_dep(name = "rules_java", version = "9.1.0")
+bazel_dep(name = "rules_graalvm", version = "0.11.1")
+bazel_dep(name = "rules_jvm_external", version = "6.7")
+
+git_override(
+    module_name = "rules_graalvm",
+    remote = "https://github.com/sgammon/rules_graalvm.git",
+    branch = "main",
+)
+
+maven = use_extension("@rules_jvm_external//:extensions.bzl", "maven")
+maven.install(
+    artifacts = [
+        "org.projectlombok:lombok:1.18.30",
+        "com.google.dagger:dagger:2.51.1",
+        "com.google.dagger:dagger-compiler:2.51.1",
+        # Add any other Maven artifacts your plugins or libraries need here
+    ],
+    repositories = [
+        "https://repo1.maven.org/maven2",
+    ],
+)
+use_repo(maven, "maven")
+

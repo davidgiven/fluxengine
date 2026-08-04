@@ -1,3 +1,7 @@
+bazel-fluxengine
+bazel-testlogs
+bazel-out
+bazel-bin
 .obj
 .project
 /.ninja*

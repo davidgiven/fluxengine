@@ -1,3 +1,5 @@
+load("@rules_java//java:defs.bzl", "java_binary", "java_library", "java_plugin")
+
 package(default_visibility = ["//visibility:public"])
 
 # Per-package BUILD for Java sources in com.cowlark.fluxengine
@@ -11,29 +13,35 @@ java_plugin(
 )
 
 java_library(
-    name = "fluxengine_java_lib",
+    name = "dagger",
+    exported_plugins = [":dagger_plugin"],
+)
+
+java_library(
+    name = "fluxengine_lib",
     srcs = glob(["*.java"]),
     deps = [
+        ":dagger",
         "@maven//:com_google_dagger_dagger",
+        "@maven//:javax_inject_javax_inject",
     ],
-    plugins = [":dagger_plugin"],
 )
 
 java_binary(
-    name = "fluxengine_main",
+    name = "fluxengine",
     main_class = "com.cowlark.fluxengine.Main",
-    deps = [":fluxengine_java_lib"],
+    runtime_deps = [":fluxengine_lib"],
 )
 
-load("@rules_graalvm//graal:graal.bzl", "native_image")
-
-native_image(
-    name = "fluxengine_native",
-    deps = [":fluxengine_java_lib"],
-    main_class = "com.cowlark.fluxengine.Main",
-    # executable_name defaults to <target>-bin; override if desired.
-    executable_name = "fluxengine",
-    # If you have internal native archives (cc_library with linkstatic = True),
-    # add them here (or use extra_args) so native-image links them into the
-    # produced binary. We do not force --static linking of system libraries.
-)
+#load("@rules_graalvm//graal:graal.bzl", "native_image")
+#
+#native_image(
+#    name = "fluxengine_native",
+#    deps = [":fluxengine_lib"],
+#    main_class = "com.cowlark.fluxengine.Main",
+#    # executable_name defaults to <target>-bin; override if desired.
+#    executable_name = "fluxengine",
+#    # If you have internal native archives (cc_library with linkstatic = True),
+#    # add them here (or use extra_args) so native-image links them into the
+#    # produced binary. We do not force --static linking of system libraries.
+#)
