@@ -1,1 +1,7 @@
 common --java_language_version=21
+
+# Dev machine toolchain workarounds: the system gcc is wrapped by ccache and
+# the system linker (lld) lives in /opt/bin, outside Bazel's default action PATH.
+build --repo_env=CC=/usr/bin/gcc
+build --repo_env=CXX=/usr/bin/g++
+build --host_linkopt=-B/opt/bin

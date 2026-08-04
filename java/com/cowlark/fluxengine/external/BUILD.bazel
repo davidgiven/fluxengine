@@ -1,0 +1,15 @@
+load("@rules_proto//proto:defs.bzl", "proto_library")
+load("@com_google_protobuf//bazel:java_proto_library.bzl", "java_proto_library")
+
+package(default_visibility = ["//visibility:public"])
+
+proto_library(
+    name = "fl2_proto",
+    srcs = ["fl2.proto"],
+    deps = ["@com_google_protobuf//:descriptor_proto"],
+)
+
+java_proto_library(
+    name = "fl2_java_proto",
+    deps = [":fl2_proto"],
+)
