@@ -1,0 +1,14 @@
+load("@rules_java//java:defs.bzl", "java_library")
+
+package(default_visibility = ["//visibility:public"])
+
+java_library(
+    name = "usb",
+    srcs = glob(["*.java"]),
+    resources = ["//java:javax.usb.properties"],
+    deps = [
+        "@maven//:javax_inject_javax_inject",
+        "@maven//:javax_usb_usb_api",
+        "@maven//:org_usb4java_usb4java_javax",
+    ],
+)

@@ -27,5 +27,9 @@ native_image(
         "--no-fallback",
         "-O2",
     ],
+    jni_config = ["jni-config.json"],
+    reflection_config = ["reflect-config.json"],
+    resource_config = ["resource-config.json"],
+    serialization_config = ["serialization-config.json"],
     jar = ":fluxengine_deploy.jar",
 )

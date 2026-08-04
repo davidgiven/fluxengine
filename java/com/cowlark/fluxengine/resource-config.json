@@ -1,0 +1,11 @@
+{
+  "resources":{
+  "includes":[{
+    "pattern":"\\QMETA-INF/services/java.time.zone.ZoneRulesProvider\\E"
+  }, {
+    "pattern":"\\Qjavax.usb.properties\\E"
+  }, {
+    "pattern":"\\Qorg/usb4java/linux-x86-64/libusb4java.so\\E"
+  }]},
+  "bundles":[]
+}

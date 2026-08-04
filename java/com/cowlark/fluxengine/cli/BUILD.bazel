@@ -13,6 +13,7 @@ java_library(
     srcs = glob(["*.java"]),
     plugins = [":picocli"],
     deps = [
+        "//java/com/cowlark/fluxengine/usb",
         "//java/com/cowlark/fluxengine/wiring",
         "@maven//:com_google_dagger_dagger",
         "@maven//:info_picocli_picocli",
