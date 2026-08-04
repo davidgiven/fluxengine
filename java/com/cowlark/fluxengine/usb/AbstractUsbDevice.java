@@ -1,5 +1,6 @@
 package com.cowlark.fluxengine.usb;
 
+import io.netty.buffer.ByteBuf;
 import javax.inject.Inject;
 
 /**
@@ -20,10 +21,10 @@ public abstract class AbstractUsbDevice
 
     public abstract void testBulkRead();
 
-    public abstract byte[] read(int side, boolean synced, long readTime,
+    public abstract ByteBuf read(int side, boolean synced, long readTime,
         long hardSectorThreshold);
 
-    public abstract void write(int side, byte[] bytes, long hardSectorThreshold);
+    public abstract void write(int side, ByteBuf bytes, long hardSectorThreshold);
 
     public abstract void erase(int side, long hardSectorThreshold);
 

@@ -12,8 +12,40 @@ import io.netty.buffer.Unpooled;
  */
 public final class GreaseweazleUtils
 {
-    private static final int FLUXOP_INDEX = 1;
-    private static final int FLUXOP_SPACE = 2;
+    public static final int CMD_GET_INFO = 0;
+    public static final int CMD_SEEK = 2;
+    public static final int CMD_HEAD = 3;
+    public static final int CMD_MOTOR = 6;
+    public static final int CMD_READ_FLUX = 7;
+    public static final int CMD_WRITE_FLUX = 8;
+    public static final int CMD_GET_FLUX_STATUS = 9;
+    public static final int CMD_SELECT = 12;
+    public static final int CMD_SET_BUS_TYPE = 14;
+    public static final int CMD_SET_PIN = 15;
+    public static final int CMD_ERASE_FLUX = 17;
+    public static final int CMD_SOURCE_BYTES = 18;
+    public static final int CMD_SINK_BYTES = 19;
+
+    public static final int ACK_OKAY = 0;
+    public static final int ACK_BAD_COMMAND = 1;
+    public static final int ACK_NO_INDEX = 2;
+    public static final int ACK_NO_TRK0 = 3;
+    public static final int ACK_FLUX_OVERFLOW = 4;
+    public static final int ACK_FLUX_UNDERFLOW = 5;
+    public static final int ACK_WRPROT = 6;
+    public static final int ACK_NO_UNIT = 7;
+    public static final int ACK_NO_BUS = 8;
+    public static final int ACK_BAD_UNIT = 9;
+    public static final int ACK_BAD_PIN = 10;
+    public static final int ACK_BAD_CYLINDER = 11;
+
+    public static final int GETINFO_FIRMWARE = 0;
+
+    public static final int FLUXOP_INDEX = 1;
+    public static final int FLUXOP_SPACE = 2;
+
+    public static final int BAUD_NORMAL = 9600;
+    public static final int BAUD_CLEAR_COMMS = 10000;
 
     private GreaseweazleUtils()
     {

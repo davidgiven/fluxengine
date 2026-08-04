@@ -1,5 +1,7 @@
 syntax = "proto2";
 
+option java_package = "com.cowlark.fluxengine.config";
+
 import "google/protobuf/descriptor.proto";
 
 extend google.protobuf.FieldOptions
