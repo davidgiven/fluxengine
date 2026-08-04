@@ -13,6 +13,7 @@ maven.install(
         "com.google.dagger:dagger:2.51.1",
         "com.google.dagger:dagger-compiler:2.51.1",
         "info.picocli:picocli:4.7.7",
+        "junit:junit:4.13.2",
         "org.openjfx:javafx-controls:23.0.2",
         "org.openjfx:javafx-fxml:23.0.2",
         "org.openjfx:javafx-graphics:23.0.2",

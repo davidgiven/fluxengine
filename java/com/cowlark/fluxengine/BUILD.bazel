@@ -42,11 +42,3 @@ native_image(
         "-O2"
     ]
 )
-#    deps = [":fluxengine_lib"],
-#    main_class = "com.cowlark.fluxengine.Main",
-#    # executable_name defaults to <target>-bin; override if desired.
-#    executable_name = "fluxengine",
-#    # If you have internal native archives (cc_library with linkstatic = True),
-#    # add them here (or use extra_args) so native-image links them into the
-#    # produced binary. We do not force --static linking of system libraries.
-#)

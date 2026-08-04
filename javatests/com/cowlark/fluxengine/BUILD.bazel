@@ -1,12 +1,11 @@
 package(default_visibility = ["//visibility:public"])
 
-# Per-package BUILD for Java tests in com.cowlark.fluxengine
 java_test(
-    name = "fluxengine_tests",
-    srcs = glob(["*.java"]),
+    name = "EmptyTest",
+    srcs = ["EmptyTest.java"],
+    plugins = ["//java/com/cowlark/fluxengine:dagger_plugin"],
     deps = [
         "//java/com/cowlark/fluxengine:fluxengine_lib",
         "@maven//:junit_junit",
     ],
-    plugins = ["//java/com/cowlark/fluxengine:dagger_plugin"],
 )
