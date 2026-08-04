@@ -23,6 +23,7 @@ java_library(
     srcs = glob(["*.java"]),
     deps = [
         ":dagger",
+        "//java/com/cowlark/fluxengine/wiring",
         "@maven//:com_google_dagger_dagger",
         "@maven//:javax_inject_javax_inject",
     ],

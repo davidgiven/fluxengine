@@ -1,5 +1,7 @@
 package com.cowlark.fluxengine;
 
+import com.cowlark.fluxengine.wiring.CliParameters;
+import dagger.BindsInstance;
 import dagger.Component;
 import javax.inject.Singleton;
 
@@ -13,9 +15,18 @@ interface FluxengineComponent
 {
     Fluxengine fluxengine();
 
-    // Convenience factory that delegates to the generated implementation
-    static FluxengineComponent create()
+    @Component.Builder
+    interface Builder
     {
-        return DaggerFluxengineComponent.create();
+        @BindsInstance
+        Builder cliParameters(@CliParameters String[] args);
+
+        FluxengineComponent build();
+    }
+
+    // Convenience factory that delegates to the generated implementation
+    static FluxengineComponent create(String[] args)
+    {
+        return DaggerFluxengineComponent.builder().cliParameters(args).build();
     }
 }

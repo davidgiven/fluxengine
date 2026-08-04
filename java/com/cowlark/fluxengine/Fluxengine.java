@@ -1,5 +1,6 @@
 package com.cowlark.fluxengine;
 
+import com.cowlark.fluxengine.wiring.CliParameters;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -10,15 +11,18 @@ import javax.inject.Singleton;
 class Fluxengine
 {
     private final Greeter greeter;
+    private final String[] args;
 
     @Inject
-    public Fluxengine(Greeter greeter)
+    public Fluxengine(Greeter greeter, @CliParameters String[] args)
     {
         this.greeter = greeter;
+        this.args = args;
     }
 
     public void start()
     {
         greeter.greet();
+        System.out.println("CLI arguments: " + String.join(" ", args));
     }
 }

@@ -1,0 +1,10 @@
+package(default_visibility = ["//visibility:public"])
+
+# Per-package BUILD for Java sources in com.cowlark.fluxengine.wiring
+java_library(
+    name = "wiring",
+    srcs = glob(["*.java"]),
+    deps = [
+        "@maven//:javax_inject_javax_inject",
+    ],
+)
