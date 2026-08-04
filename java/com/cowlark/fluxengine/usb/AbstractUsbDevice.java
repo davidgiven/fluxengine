@@ -1,7 +1,6 @@
 package com.cowlark.fluxengine.usb;
 
-import io.netty.buffer.ByteBuf;
-import javax.inject.Inject;
+import com.cowlark.fluxengine.core.Bytes;
 
 /**
  * Base class for USB floppy drive devices, ported from lib/usb/usb.h.
@@ -21,10 +20,10 @@ public abstract class AbstractUsbDevice
 
     public abstract void testBulkRead();
 
-    public abstract ByteBuf read(int side, boolean synced, long readTime,
+    public abstract Bytes read(int side, boolean synced, long readTime,
         long hardSectorThreshold);
 
-    public abstract void write(int side, ByteBuf bytes, long hardSectorThreshold);
+    public abstract void write(int side, Bytes bytes, long hardSectorThreshold);
 
     public abstract void erase(int side, long hardSectorThreshold);
 

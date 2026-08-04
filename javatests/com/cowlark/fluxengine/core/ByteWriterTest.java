@@ -2,8 +2,6 @@ package com.cowlark.fluxengine.core;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.junit.Assert.assertThrows;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -89,11 +87,14 @@ public class ByteWriterTest
     }
 
     @Test
-    public void writeToReadOnlySliceThrows()
+    public void writingToASliceDetachesIt()
     {
-        Bytes slice = Bytes.of(1, 2, 3).slice(0, 3);
-        ByteWriter writer = new ByteWriter(slice);
+        Bytes parent = Bytes.of(1, 2, 3);
+        Bytes slice = parent.slice(0, 3);
 
-        assertThrows(UnsupportedOperationException.class, () -> writer.write8(1));
+        new ByteWriter(slice).write8(0xaa);
+
+        assertThat(slice.get(0) & 0xff).isEqualTo(0xaa);
+        assertThat(parent.get(0) & 0xff).isEqualTo(1);
     }
 }

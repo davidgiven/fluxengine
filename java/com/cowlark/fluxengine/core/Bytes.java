@@ -3,25 +3,27 @@ package com.cowlark.fluxengine.core;
 import java.nio.charset.StandardCharsets;
 
 /**
- * A resizable byte container, ported from lib/core/bytes.h. Slices are
- * read-only views over the shared backing storage.
+ * A resizable byte container, ported from lib/core/bytes.h. Slices share the
+ * parent's storage; writes to a shared storage copy it first, so changes to
+ * one window are invisible to the others.
  */
 public final class Bytes
 {
     private static final class Storage
     {
         byte[] data;
+        int refcount;
 
         Storage(int capacity)
         {
             data = new byte[capacity];
+            refcount = 1;
         }
     }
 
     private Storage storage;
     private int low;
     private int high;
-    private boolean readOnly;
 
     public Bytes()
     {
@@ -59,7 +61,7 @@ public final class Bytes
         this.storage = storage;
         this.low = low;
         this.high = high;
-        readOnly = true;
+        storage.refcount++;
     }
 
     public int size()
@@ -80,8 +82,8 @@ public final class Bytes
 
     public void set(int offset, byte value)
     {
-        checkWritable();
         boundsCheck(offset);
+        detach();
         storage.data[low + offset] = value;
     }
 
@@ -94,7 +96,7 @@ public final class Bytes
 
     public void resize(int newSize)
     {
-        checkWritable();
+        detach();
         ensureCapacity(low + newSize);
         high = low + newSize;
     }
@@ -129,6 +131,11 @@ public final class Bytes
         return storage.data;
     }
 
+    int refcount()
+    {
+        return storage.refcount;
+    }
+
     @Override
     public boolean equals(Object o)
     {
@@ -157,14 +164,25 @@ public final class Bytes
     @Override
     public String toString()
     {
-        return String.format("Bytes(hash=%08x, readOnly=%s, size=%d)",
-            System.identityHashCode(this), readOnly, size());
+        return String.format("Bytes(hash=%08x, refcount=%d, size=%d)",
+            System.identityHashCode(this), storage.refcount, size());
     }
 
-    private void checkWritable()
+    /* Copy-on-write: if this window shares its storage with other windows,
+     * detach it into a private copy so mutations don't affect them. */
+    private void detach()
     {
-        if (readOnly)
-            throw new UnsupportedOperationException("slice is read-only");
+        if (storage.refcount > 1)
+        {
+            Storage old = storage;
+            int size = size();
+            Storage fresh = new Storage(size);
+            System.arraycopy(old.data, low, fresh.data, 0, size);
+            storage = fresh;
+            low = 0;
+            high = size;
+            old.refcount--;
+        }
     }
 
     private void boundsCheck(int offset)

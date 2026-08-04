@@ -21,11 +21,11 @@ java_library(
     srcs = glob(["*.java"]),
     resources = ["//java:javax.usb.properties"],
     deps = [
+        "//java/com/cowlark/fluxengine/core",
         "//java/com/cowlark/fluxengine/external",
         ":usb_java_proto",
         "@maven//:com_fazecast_jSerialComm",
         "@maven//:com_google_guava_guava",
-        "@maven//:io_netty_netty_buffer",
         "@maven//:javax_inject_javax_inject",
         "@maven//:javax_usb_usb_api",
         "@maven//:org_usb4java_usb4java_javax",

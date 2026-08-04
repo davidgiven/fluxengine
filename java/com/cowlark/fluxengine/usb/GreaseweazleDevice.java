@@ -31,11 +31,14 @@ import static com.cowlark.fluxengine.external.GreaseweazleUtils.FLUXOP_INDEX;
 import static com.cowlark.fluxengine.external.GreaseweazleUtils.FLUXOP_SPACE;
 import static com.cowlark.fluxengine.external.GreaseweazleUtils.GETINFO_FIRMWARE;
 
+import com.cowlark.fluxengine.core.ByteReader;
+import com.cowlark.fluxengine.core.ByteWriter;
+import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.external.GreaseweazleUtils;
 import com.cowlark.fluxengine.usb.Usb.GreaseweazleProto;
 import com.fazecast.jSerialComm.SerialPort;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
+import com.google.common.util.concurrent.Uninterruptibles;
+import java.time.Duration;
 
 /**
  * Greaseweazle floppy drive device, ported from lib/usb/greaseweazleusb.cc.
@@ -76,7 +79,7 @@ class GreaseweazleDevice extends AbstractUsbDevice
         /* Twiddle the baud rate, which indicates to the Greaseweazle that the
          * data stream has been reset. */
         serial.setBaudRate(BAUD_CLEAR_COMMS);
-        sleep(100);
+        Uninterruptibles.sleepUninterruptibly(Duration.ofMillis(100));
         serial.setBaudRate(BAUD_NORMAL);
 
         /* Configure the hardware. */
@@ -87,22 +90,22 @@ class GreaseweazleDevice extends AbstractUsbDevice
     {
         doCommand(CMD_GET_INFO, GETINFO_FIRMWARE);
 
-        ByteBuf response = Unpooled.wrappedBuffer(readBytes(32));
-        response.readerIndex(4);
-        long freq = response.readUnsignedIntLE();
+        ByteReader response = new ByteReader(readBytes(32));
+        response.seek(4);
+        long freq = response.readLe32() & 0xffffffffL;
         clock = 1000000000L / freq;
 
-        response.readerIndex(0);
-        return response.readUnsignedShort();
+        response.seek(0);
+        return response.readBe16();
     }
 
     private long read28()
     {
-        ByteBuf buffer = Unpooled.wrappedBuffer(readBytes(4));
-        return (long) ((buffer.readUnsignedByte() & 0xfe) >> 1) |
-                (long) (buffer.readUnsignedByte() & 0xfe) << 6 |
-                (long) (buffer.readUnsignedByte() & 0xfe) << 13 |
-                (long) (buffer.readUnsignedByte() & 0xfe) << 20;
+        ByteReader buffer = new ByteReader(readBytes(4));
+        return (long) ((buffer.read8() & 0xfe) >> 1) |
+                (long) (buffer.read8() & 0xfe) << 6 |
+                (long) (buffer.read8() & 0xfe) << 13 |
+                (long) (buffer.read8() & 0xfe) << 20;
     }
 
     private void doCommand(int cmd, int... payload)
@@ -115,27 +118,25 @@ class GreaseweazleDevice extends AbstractUsbDevice
         doCommand(command);
     }
 
-    private void doCommand(ByteBuf command)
+    private void doCommand(Bytes command)
     {
-        byte[] bytes = new byte[command.readableBytes()];
-        command.getBytes(command.readerIndex(), bytes);
-        doCommand(bytes);
+        doCommand(command.toArray());
     }
 
     private void doCommand(byte[] command)
     {
         writeBytes(command);
 
-        byte[] buffer = readBytes(2);
+        Bytes buffer = readBytes(2);
 
-        if ((buffer[0] & 0xff) != (command[0] & 0xff))
+        if ((buffer.get(0) & 0xff) != (command[0] & 0xff))
             throw new RuntimeException(String.format(
                     "command returned garbage (0x%x != 0x%x with status 0x%x)",
-                    buffer[0],
+                    buffer.get(0),
                     command[0],
-                    buffer[1]));
-        if (buffer[1] != 0)
-            throw new RuntimeException("Greaseweazle error: " + gwError(buffer[1] & 0xff));
+                    buffer.get(1)));
+        if (buffer.get(1) != 0)
+            throw new RuntimeException("Greaseweazle error: " + gwError(buffer.get(1) & 0xff));
     }
 
     @Override
@@ -162,11 +163,12 @@ class GreaseweazleDevice extends AbstractUsbDevice
             case V24:
             case V29:
             {
-                ByteBuf cmd = Unpooled.buffer(8);
-                cmd.writeByte(CMD_READ_FLUX);
-                cmd.writeByte(cmd.capacity());
-                cmd.writeIntLE(0);  /* ticks default value (guessed) */
-                cmd.writeShortLE(2); /* revolutions */
+                Bytes cmd = new Bytes(0);
+                ByteWriter bw = new ByteWriter(cmd);
+                bw.write8(CMD_READ_FLUX);
+                bw.write8(8);
+                bw.writeLe32(0);  /* ticks default value (guessed) */
+                bw.writeLe16(2); /* revolutions */
                 doCommand(cmd);
             }
         }
@@ -227,39 +229,35 @@ class GreaseweazleDevice extends AbstractUsbDevice
     {
         System.out.print("Writing data: ");
         final int LEN = 10 * 1024 * 1024;
-        ByteBuf cmd;
+        Bytes cmd = new Bytes(0);
+        ByteWriter bw = new ByteWriter(cmd);
         switch (version)
         {
             case V22:
             case V24:
-            {
-                cmd = Unpooled.buffer(6);
-                cmd.writeByte(CMD_SINK_BYTES);
-                cmd.writeByte(cmd.capacity());
-                cmd.writeIntLE(LEN);
+                bw.write8(CMD_SINK_BYTES);
+                bw.write8(6);
+                bw.writeLe32(LEN);
                 break;
-            }
 
             case V29:
-            {
-                cmd = Unpooled.buffer(10);
-                cmd.writeByte(CMD_SINK_BYTES);
-                cmd.writeByte(cmd.capacity());
-                cmd.writeIntLE(LEN);
-                cmd.writeIntLE(0); /* seed */
+                bw.write8(CMD_SINK_BYTES);
+                bw.write8(10);
+                bw.writeLe32(LEN);
+                bw.writeLe32(0); /* seed */
                 break;
-            }
 
             default:
                 throw new IllegalStateException();
         }
         doCommand(cmd);
 
-        byte[] junk = new byte[LEN];
+        Bytes junk = new Bytes(0);
+        ByteWriter jw = new ByteWriter(junk);
         long seed = 0;
         for (int i = 0; i < LEN; i++)
         {
-            junk[i] = (byte) seed;
+            jw.write8((int) seed);
             seed = ssRandNext(seed);
         }
         double startTime = getCurrentTime();
@@ -279,28 +277,23 @@ class GreaseweazleDevice extends AbstractUsbDevice
     {
         System.out.print("Reading data: ");
         final int LEN = 10 * 1024 * 1024;
-        ByteBuf cmd;
+        Bytes cmd = new Bytes(0);
+        ByteWriter bw = new ByteWriter(cmd);
         switch (version)
         {
             case V22:
             case V24:
-            {
-                cmd = Unpooled.buffer(6);
-                cmd.writeByte(CMD_SOURCE_BYTES);
-                cmd.writeByte(cmd.capacity());
-                cmd.writeIntLE(LEN);
+                bw.write8(CMD_SOURCE_BYTES);
+                bw.write8(6);
+                bw.writeLe32(LEN);
                 break;
-            }
 
             case V29:
-            {
-                cmd = Unpooled.buffer(10);
-                cmd.writeByte(CMD_SOURCE_BYTES);
-                cmd.writeByte(cmd.capacity());
-                cmd.writeIntLE(LEN);
-                cmd.writeIntLE(0); /* seed */
+                bw.write8(CMD_SOURCE_BYTES);
+                bw.write8(10);
+                bw.writeLe32(LEN);
+                bw.writeLe32(0); /* seed */
                 break;
-            }
 
             default:
                 throw new IllegalStateException();
@@ -319,7 +312,7 @@ class GreaseweazleDevice extends AbstractUsbDevice
     }
 
     @Override
-    public ByteBuf read(int side, boolean synced, long readTime, long hardSectorThreshold)
+    public Bytes read(int side, boolean synced, long readTime, long hardSectorThreshold)
     {
         if (hardSectorThreshold != 0)
             throw new RuntimeException("hard sectors are currently unsupported on the " +
@@ -332,10 +325,11 @@ class GreaseweazleDevice extends AbstractUsbDevice
             case V22:
             {
                 long revs = (readTime + revolutions - 1) / revolutions;
-                ByteBuf cmd = Unpooled.buffer(4);
-                cmd.writeByte(CMD_READ_FLUX);
-                cmd.writeByte(cmd.capacity());
-                cmd.writeIntLE((int) (revs + (synced ? 1 : 0)));
+                Bytes cmd = new Bytes(0);
+                ByteWriter bw = new ByteWriter(cmd);
+                bw.write8(CMD_READ_FLUX);
+                bw.write8(4);
+                bw.writeLe32((int) (revs + (synced ? 1 : 0)));
                 doCommand(cmd);
                 break;
             }
@@ -343,34 +337,36 @@ class GreaseweazleDevice extends AbstractUsbDevice
             case V24:
             case V29:
             {
-                ByteBuf cmd = Unpooled.buffer(8);
-                cmd.writeByte(CMD_READ_FLUX);
-                cmd.writeByte(cmd.capacity());
-                cmd.writeIntLE((int) ((readTime + (synced ? revolutions : 0)) / clock));
-                cmd.writeShortLE(0);
+                Bytes cmd = new Bytes(0);
+                ByteWriter bw = new ByteWriter(cmd);
+                bw.write8(CMD_READ_FLUX);
+                bw.write8(8);
+                bw.writeLe32((int) ((readTime + (synced ? revolutions : 0)) / clock));
+                bw.writeLe16(0);
                 doCommand(cmd);
             }
         }
 
-        ByteBuf buffer = Unpooled.buffer();
+        Bytes buffer = new Bytes(0);
+        ByteWriter bw = new ByteWriter(buffer);
         for (; ; )
         {
             int b = readByte();
             if (b == 0)
                 break;
-            buffer.writeByte(b);
+            bw.write8(b);
         }
 
         doCommand(CMD_GET_FLUX_STATUS);
 
-        ByteBuf fldata = GreaseweazleUtils.greaseweazleToFluxEngine(buffer, clock);
+        Bytes fldata = GreaseweazleUtils.greaseweazleToFluxEngine(buffer, clock);
         if (synced)
             fldata = GreaseweazleUtils.stripPartialRotation(fldata);
         return fldata;
     }
 
     @Override
-    public void write(int side, ByteBuf fldata, long hardSectorThreshold)
+    public void write(int side, Bytes fldata, long hardSectorThreshold)
     {
         if (hardSectorThreshold != 0)
             throw new RuntimeException("hard sectors are currently unsupported on the " +
@@ -388,7 +384,7 @@ class GreaseweazleDevice extends AbstractUsbDevice
                 doCommand(CMD_WRITE_FLUX, 1, 1);
                 break;
         }
-        ByteBuf gwdata = GreaseweazleUtils.fluxEngineToGreaseweazle(fldata, clock);
+        Bytes gwdata = GreaseweazleUtils.fluxEngineToGreaseweazle(fldata, clock);
         writeBytes(gwdata);
         readByte(); /* synchronise */
 
@@ -404,10 +400,11 @@ class GreaseweazleDevice extends AbstractUsbDevice
 
         doCommand(CMD_HEAD, side);
 
-        ByteBuf cmd = Unpooled.buffer(6);
-        cmd.writeByte(CMD_ERASE_FLUX);
-        cmd.writeByte(cmd.capacity());
-        cmd.writeIntLE((int) (200e6 / clock));
+        Bytes cmd = new Bytes(0);
+        ByteWriter bw = new ByteWriter(cmd);
+        bw.write8(CMD_ERASE_FLUX);
+        bw.write8(6);
+        bw.writeLe32((int) (200e6 / clock));
         doCommand(cmd);
         readByte(); /* synchronise */
 
@@ -468,21 +465,22 @@ class GreaseweazleDevice extends AbstractUsbDevice
 
     private int readByte()
     {
-        return readBytes(1)[0] & 0xff;
+        return readBytes(1).get(0) & 0xff;
     }
 
-    private byte[] readBytes(int count)
+    private Bytes readBytes(int count)
     {
-        byte[] result = new byte[count];
-        int offset = 0;
-        while (offset < count)
+        Bytes result = new Bytes(0);
+        ByteWriter bw = new ByteWriter(result);
+        byte[] chunk = new byte[4096];
+        while (bw.pos() < count)
         {
-            byte[] chunk = new byte[count - offset];
-            int read = serial.readBytes(chunk, chunk.length);
+            int read = serial.readBytes(chunk,
+                Math.min(chunk.length, count - bw.pos()));
             if (read < 0)
                 throw new RuntimeException("serial read failed");
-            System.arraycopy(chunk, 0, result, offset, read);
-            offset += read;
+            for (int i = 0; i < read; i++)
+                bw.write8(chunk[i] & 0xff);
         }
         return result;
     }
@@ -494,26 +492,13 @@ class GreaseweazleDevice extends AbstractUsbDevice
             throw new RuntimeException("serial write failed");
     }
 
-    private void writeBytes(ByteBuf data)
+    private void writeBytes(Bytes data)
     {
-        byte[] bytes = new byte[data.readableBytes()];
-        data.getBytes(data.readerIndex(), bytes);
-        writeBytes(bytes);
+        writeBytes(data.toArray());
     }
 
     private static double getCurrentTime()
     {
         return System.nanoTime() / 1e9;
-    }
-
-    private static void sleep(long ms)
-    {
-        try
-        {
-            Thread.sleep(ms);
-        } catch (InterruptedException e)
-        {
-            Thread.currentThread().interrupt();
-        }
     }
 }

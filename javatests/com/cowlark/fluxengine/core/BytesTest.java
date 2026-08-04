@@ -47,22 +47,50 @@ public class BytesTest
     }
 
     @Test
-    public void slicesAreReadOnlyViews()
+    public void slicesShareStorage()
     {
         Bytes parent = Bytes.of(10, 20, 30);
         Bytes view = parent.slice(1, 2);
 
-        /* A slice reads the shared data. */
         assertThat(view.size()).isEqualTo(2);
         assertThat(view.get(0) & 0xff).isEqualTo(20);
         assertThat(view.get(1) & 0xff).isEqualTo(30);
+        assertThat(parent.refcount()).isEqualTo(2);
+    }
 
-        /* ...and reflects later writes to the parent. */
-        parent.set(1, (byte) 99);
-        assertThat(view.get(0) & 0xff).isEqualTo(99);
+    @Test
+    public void copyOnWriteOnlyWhenShared()
+    {
+        /* Lone bytes: writes don't detach, so the refcount stays 1. */
+        Bytes lone = Bytes.of(1, 2, 3);
+        lone.set(0, (byte) 9);
+        lone.resize(4);
+        assertThat(lone.refcount()).isEqualTo(1);
+        assertThat(lone.get(0) & 0xff).isEqualTo(9);
 
-        /* But it cannot itself be mutated. */
-        assertThrows(UnsupportedOperationException.class, () -> view.set(0, (byte) 1));
-        assertThrows(UnsupportedOperationException.class, () -> view.resize(4));
+        /* Shared bytes: a write on the parent detaches it, leaving the view
+         * unchanged. */
+        Bytes parent = Bytes.of(1, 2, 3);
+        Bytes view = parent.slice(0, 3);
+        parent.set(0, (byte) 9);
+        assertThat(parent.get(0) & 0xff).isEqualTo(9);
+        assertThat(view.get(0) & 0xff).isEqualTo(1);
+        assertThat(parent.refcount()).isEqualTo(1);
+
+        /* And a write on the view detaches it, leaving the parent unchanged. */
+        Bytes parent2 = Bytes.of(1, 2, 3);
+        Bytes view2 = parent2.slice(0, 3);
+        view2.set(2, (byte) 7);
+        assertThat(view2.get(2) & 0xff).isEqualTo(7);
+        assertThat(parent2.get(2) & 0xff).isEqualTo(3);
+        assertThat(view2.refcount()).isEqualTo(1);
+
+        /* Resizing a shared window detaches it too. */
+        Bytes parent3 = Bytes.of(1, 2, 3);
+        Bytes view3 = parent3.slice(0, 3);
+        parent3.resize(5);
+        assertThat(parent3.size()).isEqualTo(5);
+        assertThat(view3.size()).isEqualTo(3);
+        assertThat(view3.get(0) & 0xff).isEqualTo(1);
     }
 }

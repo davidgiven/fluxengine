@@ -1,12 +1,9 @@
 package com.cowlark.fluxengine.external;
 
-import static com.cowlark.fluxengine.testing.TestHelpers.buf;
 import static com.google.common.truth.Truth.assertThat;
 
-import com.cowlark.fluxengine.testing.TestHelpers;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufUtil;
-import io.netty.buffer.Unpooled;
+import com.cowlark.fluxengine.core.ByteWriter;
+import com.cowlark.fluxengine.core.Bytes;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -16,23 +13,17 @@ public class GreaseweazleUtilsTest
 {
     private static final double CLOCK = 2 * FluxEngine.NS_PER_TICK;
 
-    private static void testConvert(ByteBuf gwBytes, ByteBuf flBytes)
+    private static void testConvert(Bytes gwBytes, Bytes flBytes)
     {
-        byte[] expectedFl = ByteBufUtil.getBytes(flBytes);
-        byte[] expectedGw = ByteBufUtil.getBytes(gwBytes);
-
-        ByteBuf gwToFl = GreaseweazleUtils.greaseweazleToFluxEngine(
-            Unpooled.copiedBuffer(gwBytes), CLOCK);
-        ByteBuf flToGw = GreaseweazleUtils.fluxEngineToGreaseweazle(
-            Unpooled.copiedBuffer(flBytes), CLOCK);
-
-        assertThat(ByteBufUtil.getBytes(gwToFl)).isEqualTo(expectedFl);
-        assertThat(ByteBufUtil.getBytes(flToGw)).isEqualTo(expectedGw);
+        assertThat(GreaseweazleUtils.greaseweazleToFluxEngine(gwBytes, CLOCK))
+            .isEqualTo(flBytes);
+        assertThat(GreaseweazleUtils.fluxEngineToGreaseweazle(flBytes, CLOCK))
+            .isEqualTo(gwBytes);
     }
 
-    private static ByteBuf encode28(int val)
+    private static Bytes encode28(int val)
     {
-        return buf(1 | (val << 1) & 0xff,
+        return Bytes.of(1 | (val << 1) & 0xff,
             1 | (val >> 6) & 0xff,
             1 | (val >> 13) & 0xff,
             1 | (val >> 20) & 0xff);
@@ -42,36 +33,35 @@ public class GreaseweazleUtilsTest
     public void conversions()
     {
         /* Simple one-byte intervals. */
-        testConvert(
-                buf(1, 1, 1, 1, 0),
-            buf(0x82, 0x82, 0x82, 0x82));
+        testConvert(Bytes.of(1, 1, 1, 1, 0),
+            Bytes.of(0x82, 0x82, 0x82, 0x82));
 
         /* Larger one-byte intervals. */
-        testConvert(
-                buf(32, 0),
-            buf(0x3f, 0x81));
-        testConvert(
-                buf(64, 0),
-            buf(0x3f, 0x3f, 0x82));
-        testConvert(
-                buf(128, 0),
-            buf(0x3f, 0x3f, 0x3f, 0x3f, 0x84));
+        testConvert(Bytes.of(32, 0),
+            Bytes.of(0x3f, 0x81));
+        testConvert(Bytes.of(64, 0),
+            Bytes.of(0x3f, 0x3f, 0x82));
+        testConvert(Bytes.of(128, 0),
+            Bytes.of(0x3f, 0x3f, 0x3f, 0x3f, 0x84));
 
         /* Two-byte intervals. */
-        testConvert(
-                buf(250, 1, 0),
-            buf(0x3f, 0x3f, 0x3f, 0x3f, 0x3f, 0x3f, 0x3f, 0xbb));
+        testConvert(Bytes.of(250, 1, 0),
+            Bytes.of(0x3f, 0x3f, 0x3f, 0x3f, 0x3f, 0x3f, 0x3f, 0xbb));
 
         /* Very long intervals. */
-        ByteBuf gw = Unpooled.buffer(8);
-        gw.writeBytes(buf(255, 2)); /* FLUXOP_SPACE */
-        gw.writeBytes(encode28(2048 - 249));
-        gw.writeBytes(buf(249, 0));
+        Bytes gw = new Bytes(0);
+        new ByteWriter(gw)
+            .write8(255)
+            .write8(2) /* FLUXOP_SPACE */
+            .write(encode28(2048 - 249))
+            .write8(249)
+            .write8(0);
 
-        ByteBuf fl = Unpooled.buffer(66);
+        Bytes fl = new Bytes(0);
+        ByteWriter bw = new ByteWriter(fl);
         for (int i = 0; i < 65; i++)
-            fl.writeByte(0x3f);
-        fl.writeByte(0x81);
+            bw.write8(0x3f);
+        bw.write8(0x81);
 
         testConvert(gw, fl);
     }

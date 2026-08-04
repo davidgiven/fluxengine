@@ -6,10 +6,10 @@ java_test(
     name = "GreaseweazleUtilsTest",
     srcs = ["GreaseweazleUtilsTest.java"],
     deps = [
+        "//java/com/cowlark/fluxengine/core",
         "//java/com/cowlark/fluxengine/external",
         "//javatests/com/cowlark/fluxengine/testing",
         "@maven//:com_google_truth_truth",
-        "@maven//:io_netty_netty_buffer",
         "@maven//:junit_junit",
     ],
 )

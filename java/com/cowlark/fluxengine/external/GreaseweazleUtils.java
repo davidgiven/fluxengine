@@ -4,8 +4,9 @@ import static com.cowlark.fluxengine.external.FluxEngine.F_BIT_INDEX;
 import static com.cowlark.fluxengine.external.FluxEngine.F_BIT_PULSE;
 import static com.cowlark.fluxengine.external.FluxEngine.NS_PER_TICK;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
+import com.cowlark.fluxengine.core.ByteReader;
+import com.cowlark.fluxengine.core.ByteWriter;
+import com.cowlark.fluxengine.core.Bytes;
 
 /**
  * Flux stream conversion helpers, ported from lib/external/greaseweazle.cc.
@@ -51,69 +52,73 @@ public final class GreaseweazleUtils
     {
     }
 
-    public static ByteBuf fluxEngineToGreaseweazle(ByteBuf fldata, double clock)
+    public static Bytes fluxEngineToGreaseweazle(Bytes fldata, double clock)
     {
-        ByteBuf out = Unpooled.buffer();
+        Bytes out = new Bytes(0);
+        ByteWriter bw = new ByteWriter(out);
+        ByteReader br = new ByteReader(fldata);
         long ticksFl = 0;
         long ticksGw = 0;
 
-        while (fldata.isReadable())
+        while (!br.eof())
         {
-            int b = fldata.readUnsignedByte();
+            int b = br.read8();
             ticksFl += b & 0x3f;
             if ((b & F_BIT_PULSE) != 0)
             {
                 long newTicksGw = (long) (ticksFl * NS_PER_TICK / clock);
                 long delta = newTicksGw - ticksGw;
                 if (delta < 250)
-                    out.writeByte((int) delta);
+                    bw.write8((int) delta);
                 else
                 {
                     long high = (delta - 250) / 255;
                     if (high < 5)
                     {
-                        out.writeByte((int) (250 + high));
-                        out.writeByte((int) (1 + (delta - 250) % 255));
+                        bw.write8((int) (250 + high));
+                        bw.write8((int) (1 + (delta - 250) % 255));
                     }
                     else
                     {
-                        out.writeByte(255);
-                        out.writeByte(FLUXOP_SPACE);
-                        write28(out, delta - 249);
-                        out.writeByte(249);
+                        bw.write8(255);
+                        bw.write8(FLUXOP_SPACE);
+                        write28(bw, delta - 249);
+                        bw.write8(249);
                     }
                 }
                 ticksGw = newTicksGw;
             }
         }
-        out.writeByte(0); /* end of stream */
+        bw.write8(0); /* end of stream */
         return out;
     }
 
-    public static ByteBuf greaseweazleToFluxEngine(ByteBuf gwdata, double clock)
+    public static Bytes greaseweazleToFluxEngine(Bytes gwdata, double clock)
     {
-        ByteBuf out = Unpooled.buffer();
+        Bytes out = new Bytes(0);
+        ByteWriter bw = new ByteWriter(out);
+        ByteReader br = new ByteReader(gwdata);
         long ticksGw = 0;
         long lastEventFl = 0;
         long indexGw = -1;
 
-        while (gwdata.isReadable())
+        while (!br.eof())
         {
-            int b = gwdata.readUnsignedByte();
+            int b = br.read8();
             if (b == 0)
                 break;
 
             int event = 0;
             if (b == 255)
             {
-                switch (gwdata.readUnsignedByte())
+                switch (br.read8())
                 {
                     case FLUXOP_INDEX:
-                        indexGw = ticksGw + read28(gwdata);
+                        indexGw = ticksGw + read28(br);
                         break;
 
                     case FLUXOP_SPACE:
-                        ticksGw += read28(gwdata);
+                        ticksGw += read28(br);
                         break;
 
                     default:
@@ -126,7 +131,7 @@ public final class GreaseweazleUtils
                     ticksGw += b;
                 else
                 {
-                    long delta = 250 + (b - 250) * 255 + gwdata.readUnsignedByte() - 1;
+                    long delta = 250 + (b - 250) * 255 + br.read8() - 1;
                     ticksGw += delta;
                 }
                 event = F_BIT_PULSE;
@@ -143,10 +148,10 @@ public final class GreaseweazleUtils
                         long deltaFl = indexFl - lastEventFl;
                         while (deltaFl > 0x3f)
                         {
-                            out.writeByte(0x3f);
+                            bw.write8(0x3f);
                             deltaFl -= 0x3f;
                         }
-                        out.writeByte((int) (deltaFl | F_BIT_INDEX));
+                        bw.write8((int) (deltaFl | F_BIT_INDEX));
                         lastEventFl = indexFl;
                         indexGw = -1;
                     }
@@ -157,10 +162,10 @@ public final class GreaseweazleUtils
                 long deltaFl = ticksFl - lastEventFl;
                 while (deltaFl > 0x3f)
                 {
-                    out.writeByte(0x3f);
+                    bw.write8(0x3f);
                     deltaFl -= 0x3f;
                 }
-                out.writeByte((int) (deltaFl | event));
+                bw.write8((int) (deltaFl | event));
                 lastEventFl = ticksFl;
             }
         }
@@ -170,29 +175,29 @@ public final class GreaseweazleUtils
 
     /* Left-truncates at the first index mark, so the resulting data is aligned
      * at the index. */
-    public static ByteBuf stripPartialRotation(ByteBuf fldata)
+    public static Bytes stripPartialRotation(Bytes fldata)
     {
-        for (int i = fldata.readerIndex(); i < fldata.writerIndex(); i++)
+        for (int i = 0; i < fldata.size(); i++)
         {
-            if ((fldata.getByte(i) & F_BIT_INDEX) != 0)
-                return fldata.slice(i, fldata.writerIndex() - i);
+            if ((fldata.get(i) & F_BIT_INDEX) != 0)
+                return fldata.slice(i, fldata.size() - i);
         }
         return fldata;
     }
 
-    private static void write28(ByteBuf out, long val)
+    private static void write28(ByteWriter out, long val)
     {
-        out.writeByte(1 | (int) (val << 1) & 0xff);
-        out.writeByte(1 | (int) (val >> 6) & 0xff);
-        out.writeByte(1 | (int) (val >> 13) & 0xff);
-        out.writeByte(1 | (int) (val >> 20) & 0xff);
+        out.write8(1 | (int) (val << 1) & 0xff);
+        out.write8(1 | (int) (val >> 6) & 0xff);
+        out.write8(1 | (int) (val >> 13) & 0xff);
+        out.write8(1 | (int) (val >> 20) & 0xff);
     }
 
-    private static long read28(ByteBuf in)
+    private static long read28(ByteReader in)
     {
-        return (long) ((in.readUnsignedByte() & 0xfe) >> 1) |
-               (long) (in.readUnsignedByte() & 0xfe) << 6 |
-               (long) (in.readUnsignedByte() & 0xfe) << 13 |
-               (long) (in.readUnsignedByte() & 0xfe) << 20;
+        return (long) ((in.read8() & 0xfe) >> 1) |
+               (long) (in.read8() & 0xfe) << 6 |
+               (long) (in.read8() & 0xfe) << 13 |
+               (long) (in.read8() & 0xfe) << 20;
     }
 }
