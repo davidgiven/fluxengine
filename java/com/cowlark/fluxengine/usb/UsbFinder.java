@@ -18,9 +18,21 @@ public final class UsbFinder
 {
     public enum DeviceType
     {
-        FLUXENGINE,
-        GREASEWEAZLE,
-        APPLESAUCE,
+        FLUXENGINE("FluxEngine"),
+        GREASEWEAZLE("Greaseweazle"),
+        APPLESAUCE("Applesauce");
+
+        private final String deviceName;
+
+        DeviceType(String deviceName)
+        {
+            this.deviceName = deviceName;
+        }
+
+        public String getDeviceName()
+        {
+            return deviceName;
+        }
     }
 
     public static final class CandidateDevice
@@ -42,24 +54,6 @@ public final class UsbFinder
     @Inject
     public UsbFinder()
     {
-    }
-
-    public String getDeviceName(DeviceType type)
-    {
-        switch (type)
-        {
-            case GREASEWEAZLE:
-                return "Greaseweazle";
-
-            case FLUXENGINE:
-                return "FluxEngine";
-
-            case APPLESAUCE:
-                return "Applesauce";
-
-            default:
-                return "unknown";
-        }
     }
 
     private static String getSerialNumber(UsbDevice device)
