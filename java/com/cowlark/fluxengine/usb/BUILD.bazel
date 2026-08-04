@@ -1,6 +1,20 @@
 load("@rules_java//java:defs.bzl", "java_library")
+load("@rules_proto//proto:defs.bzl", "proto_library")
+load("@com_google_protobuf//bazel:java_proto_library.bzl", "java_proto_library")
 
 package(default_visibility = ["//visibility:public"])
+
+proto_library(
+    name = "usb_proto",
+    srcs = ["usb.proto"],
+    strip_import_prefix = "/java/com/cowlark/fluxengine/usb/",
+    deps = ["//java/com/cowlark/fluxengine/config:common_proto"],
+)
+
+java_proto_library(
+    name = "usb_java_proto",
+    deps = [":usb_proto"],
+)
 
 java_library(
     name = "usb",
