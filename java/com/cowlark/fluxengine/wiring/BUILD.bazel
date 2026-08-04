@@ -1,10 +1,22 @@
+load("@rules_java//java:defs.bzl", "java_library", "java_plugin")
+
 package(default_visibility = ["//visibility:public"])
 
-# Per-package BUILD for Java sources in com.cowlark.fluxengine.wiring
+java_plugin(
+    name = "dagger_plugin",
+    processor_class = "dagger.internal.codegen.ComponentProcessor",
+    deps = [
+        "@maven//:com_google_dagger_dagger_compiler",
+    ],
+)
+
+java_library(
+    name = "dagger",
+    exported_plugins = [":dagger_plugin"],
+)
+
 java_library(
     name = "wiring",
-    srcs = glob(["*.java"]),
-    deps = [
-        "@maven//:javax_inject_javax_inject",
-    ],
+    srcs = [],
+    exported_plugins = [":dagger_plugin"],
 )

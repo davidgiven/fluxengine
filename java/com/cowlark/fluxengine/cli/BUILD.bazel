@@ -1,0 +1,21 @@
+load("@rules_java//java:defs.bzl", "java_binary", "java_library")
+
+package(default_visibility = ["//visibility:public"])
+
+java_plugin(
+    name = "picocli",
+    processor_class = "picocli.codegen.aot.graalvm.processor.NativeImageConfigGeneratorProcessor",
+    deps = ["@maven//:info_picocli_picocli_codegen"],
+)
+
+java_library(
+    name = "cli",
+    srcs = glob(["*.java"]),
+    plugins = [":picocli"],
+    deps = [
+        "//java/com/cowlark/fluxengine/wiring",
+        "@maven//:com_google_dagger_dagger",
+        "@maven//:info_picocli_picocli",
+        "@maven//:javax_inject_javax_inject",
+    ],
+)

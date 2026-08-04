@@ -1,30 +1,16 @@
-load("@rules_java//java:defs.bzl", "java_binary", "java_library", "java_plugin")
+load("@rules_java//java:defs.bzl", "java_binary", "java_library")
 load("//:native_image.bzl", "native_image")
 
 package(default_visibility = ["//visibility:public"])
-
-# Per-package BUILD for Java sources in com.cowlark.fluxengine
-# Dagger annotation processor plugin for this Java package
-java_plugin(
-    name = "dagger_plugin",
-    processor_class = "dagger.internal.codegen.ComponentProcessor",
-    deps = [
-        "@maven//:com_google_dagger_dagger_compiler",
-    ],
-)
-
-java_library(
-    name = "dagger",
-    exported_plugins = [":dagger_plugin"],
-)
 
 java_library(
     name = "fluxengine_lib",
     srcs = glob(["*.java"]),
     deps = [
-        ":dagger",
+        "//java/com/cowlark/fluxengine/cli",
         "//java/com/cowlark/fluxengine/wiring",
         "@maven//:com_google_dagger_dagger",
+        "@maven//:info_picocli_picocli",
         "@maven//:javax_inject_javax_inject",
     ],
 )
@@ -37,9 +23,9 @@ java_binary(
 
 native_image(
     name = "fluxengine_native",
-    jar = ":fluxengine_deploy.jar",
     extra_args = [
         "--no-fallback",
-        "-O2"
-    ]
+        "-O2",
+    ],
+    jar = ":fluxengine_deploy.jar",
 )

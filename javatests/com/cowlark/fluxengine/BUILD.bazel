@@ -3,7 +3,7 @@ package(default_visibility = ["//visibility:public"])
 java_test(
     name = "EmptyTest",
     srcs = ["EmptyTest.java"],
-    plugins = ["//java/com/cowlark/fluxengine:dagger_plugin"],
+    plugins = ["//java/com/cowlark/fluxengine/wiring:dagger_plugin"],
     deps = [
         "//java/com/cowlark/fluxengine:fluxengine_lib",
         "@maven//:junit_junit",

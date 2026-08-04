@@ -1,7 +1,11 @@
 package com.cowlark.fluxengine;
 
-public class Main {
-    public static void main(String[] args) {
-        FluxEngineComponent.create(args).fluxengine().start();
+import picocli.CommandLine;
+
+public class Main
+{
+    public static void main(String[] args)
+    {
+        new CommandLine(FluxEngineComponent.create().mainCommand()).execute(args);
     }
 }
