@@ -3,10 +3,10 @@ package(default_visibility = ["//visibility:public"])
 # Root aliases for running/building the application
 alias(
     name = "fluxengine",
-    actual = "//java/src/main/java/com/cowlark/fluxengine",
+    actual = "//java/com/cowlark/fluxengine",
 )
 
 alias(
     name = "fluxengine_native",
-    actual = "//java/src/main/java/com/cowlark/fluxengine:fluxengine_native",
+    actual = "//java/com/cowlark/fluxengine:fluxengine_native",
 )

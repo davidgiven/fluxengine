@@ -4,6 +4,7 @@ bazel-out
 bazel-bin
 .obj
 .project
+.idea/
 /.ninja*
 /brother120tool
 /brother120tool-*
