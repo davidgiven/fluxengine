@@ -1,11 +1,24 @@
 bazel_dep(name = "rules_java", version = "9.1.0")
-bazel_dep(name = "rules_graalvm", version = "0.11.1")
 bazel_dep(name = "rules_jvm_external", version = "6.7")
 
-git_override(
-    module_name = "rules_graalvm",
-    remote = "https://github.com/sgammon/rules_graalvm.git",
-    branch = "main",
+http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+http_archive(
+    name = "graalvm",
+    build_file_content = """
+package(default_visibility = ["//visibility:public"])
+exports_files(glob(["**/*"]))
+
+filegroup(
+    name = "java_home",
+    srcs = glob(["**/*"]),
+)
+""",
+    # Update URLs / SHA256 per platform as needed, or register via local_jdk
+    strip_prefix = "graalvm-jdk-21+35.1",
+    urls = [
+        "https://download.oracle.com/graalvm/21/archive/graalvm-jdk-21_linux-x64_bin.tar.gz",
+    ],
 )
 
 maven = use_extension("@rules_jvm_external//:extensions.bzl", "maven")
