@@ -25,7 +25,6 @@ def _graalvm_repository_impl(ctx):
     os_name = ctx.os.name.lower()
     arch = ctx.os.arch.lower()
 
-    # Normalize OS name
     if "mac" in os_name or "darwin" in os_name:
         os_key = "macos"
     elif "win" in os_name:
@@ -33,7 +32,6 @@ def _graalvm_repository_impl(ctx):
     else:
         os_key = "linux"
 
-    # Normalize architecture
     if arch in ["aarch64", "arm64"]:
         arch_key = "aarch64"
     else:
@@ -45,24 +43,30 @@ def _graalvm_repository_impl(ctx):
 
     info = _GRAALVM_URLS[key]
 
-    # Download and extract the platform archive
     ctx.download_and_extract(
         url = info["url"],
         stripPrefix = info["strip_prefix"],
     )
 
-    # Expose binary files and executables to Bazel
+    # Alias target points to .cmd on Windows, standard executable on Linux/macOS
+    launcher = "bin/native-image.cmd" if os_key == "windows" else "bin/native-image"
+
     ctx.file(
         "BUILD.bazel",
         """
 package(default_visibility = ["//visibility:public"])
 exports_files(glob(["**/*"]))
 
+alias(
+    name = "native_image_tool",
+    actual = "%s",
+)
+
 filegroup(
     name = "java_home",
     srcs = glob(["**/*"]),
 )
-""",
+""" % launcher,
     )
 
 graalvm_repository = repository_rule(
