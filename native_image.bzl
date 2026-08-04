@@ -1,13 +1,25 @@
 def _native_image_impl(ctx):
     is_windows = ctx.configuration.host_path_separator == ";"
-    out_name = ctx.label.name + (".exe" if is_windows else "")
+    
+    # 1. Ensure out_name ends with .exe on Windows (without duplicating it)
+    base_name = ctx.label.name
+    if is_windows and not base_name.lower().endswith(".exe"):
+        out_name = base_name + ".exe"
+    else:
+        out_name = base_name
+
     out_binary = ctx.actions.declare_file(out_name)
+
+    # 2. Strip .exe for -H:Name on Windows because native-image auto-appends .exe on Windows
+    h_name_path = out_binary.path
+    if is_windows and h_name_path.lower().endswith(".exe"):
+        h_name_path = h_name_path[:-4]
 
     jar_file = ctx.file.jar
 
     args = ctx.actions.args()
     args.add("-jar", jar_file.path)
-    args.add("-H:Name=" + out_binary.path)
+    args.add("-H:Name=" + h_name_path)
 
     for extra_arg in ctx.attr.extra_args:
         args.add(extra_arg)
