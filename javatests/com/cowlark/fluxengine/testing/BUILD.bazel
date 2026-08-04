@@ -1,0 +1,11 @@
+load("@rules_java//java:defs.bzl", "java_library")
+
+package(default_visibility = ["//visibility:public"])
+
+java_library(
+    name = "testing",
+    srcs = ["TestHelpers.java"],
+    deps = [
+        "@maven//:io_netty_netty_buffer",
+    ],
+)

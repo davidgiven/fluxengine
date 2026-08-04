@@ -5,6 +5,7 @@ bazel-bin
 .obj
 .project
 .idea/
+.ijwb/
 /.ninja*
 /brother120tool
 /brother120tool-*
