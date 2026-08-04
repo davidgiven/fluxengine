@@ -28,3 +28,18 @@ java_proto_library(
     name = "layout_java_proto",
     deps = [":layout_proto"],
 )
+
+proto_library(
+    name = "drive_proto",
+    srcs = ["drive.proto"],
+    strip_import_prefix = "/java/com/cowlark/fluxengine/config/",
+    deps = [
+        ":common_proto",
+        "//java/com/cowlark/fluxengine/external:fl2_proto",
+    ],
+)
+
+java_proto_library(
+    name = "drive_java_proto",
+    deps = [":drive_proto"],
+)
