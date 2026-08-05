@@ -31,3 +31,23 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "BitWriterTest",
+    srcs = ["BitWriterTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/core",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "BitReaderTest",
+    srcs = ["BitReaderTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/core",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
