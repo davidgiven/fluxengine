@@ -1,6 +1,8 @@
 syntax = "proto2";
 
-import "lib/config/common.proto";
+option java_package = "com.cowlark.fluxengine.imagereader";
+
+import "com/cowlark/fluxengine/config/common.proto";
 
 message ImgInputOutputProto {
     optional bool filesystem_sector_order = 1 [

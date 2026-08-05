@@ -1,0 +1,19 @@
+load("@rules_proto//proto:defs.bzl", "proto_library")
+load("@com_google_protobuf//bazel:java_proto_library.bzl", "java_proto_library")
+
+package(default_visibility = ["//visibility:public"])
+
+proto_library(
+    name = "imagewriter_proto",
+    srcs = ["imagewriter.proto"],
+    strip_import_prefix = "/java/",
+    deps = [
+        "//java/com/cowlark/fluxengine/config:common_proto",
+        "//java/com/cowlark/fluxengine/imagereader:imagereader_proto",
+    ],
+)
+
+java_proto_library(
+    name = "imagewriter_java_proto",
+    deps = [":imagewriter_proto"],
+)

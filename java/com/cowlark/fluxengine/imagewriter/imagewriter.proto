@@ -1,7 +1,9 @@
 syntax = "proto2";
 
-import "lib/imagereader/imagereader.proto";
-import "lib/config/common.proto";
+option java_package = "com.cowlark.fluxengine.imagewriter";
+
+import "com/cowlark/fluxengine/imagereader/imagereader.proto";
+import "com/cowlark/fluxengine/config/common.proto";
 
 message D64OutputProto {}
 

@@ -1,13 +1,15 @@
 syntax = "proto2";
 
-import "lib/decoders/decoders.proto";
-import "lib/encoders/encoders.proto";
-import "lib/imagereader/imagereader.proto";
-import "lib/imagewriter/imagewriter.proto";
-import "lib/fluxsource/fluxsource.proto";
-import "lib/fluxsink/fluxsink.proto";
+option java_package = "com.cowlark.fluxengine.config";
+
+import "com/cowlark/fluxengine/decoders/decoders.proto";
+import "com/cowlark/fluxengine/encoders/encoders.proto";
+import "com/cowlark/fluxengine/imagereader/imagereader.proto";
+import "com/cowlark/fluxengine/imagewriter/imagewriter.proto";
+import "com/cowlark/fluxengine/fluxsource/fluxsource.proto";
+import "com/cowlark/fluxengine/fluxsink/fluxsink.proto";
 import "com/cowlark/fluxengine/usb/usb.proto";
-import "lib/vfs/vfs.proto";
+import "com/cowlark/fluxengine/vfs/vfs.proto";
 import "com/cowlark/fluxengine/config/drive.proto";
 import "com/cowlark/fluxengine/config/common.proto";
 import "com/cowlark/fluxengine/config/layout.proto";

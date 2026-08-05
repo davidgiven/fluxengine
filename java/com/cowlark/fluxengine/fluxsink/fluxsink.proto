@@ -1,6 +1,8 @@
 syntax = "proto2";
 
-import "lib/config/common.proto";
+option java_package = "com.cowlark.fluxengine.fluxsink";
+
+import "com/cowlark/fluxengine/config/common.proto";
 
 message HardwareFluxSinkProto {}
 
