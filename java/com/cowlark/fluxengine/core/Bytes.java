@@ -213,6 +213,26 @@ public final class Bytes implements List<Byte>
         return output;
     }
 
+    /* Extracts the bytes as bits, MSB-first within each byte. */
+    public Bits toBits()
+    {
+        Bits bits = new Bits(size() * 8);
+        int bit = 0;
+        for (int i = 0; i < size(); i++)
+        {
+            int b = getByte(i) & 0xff;
+            bits.setBit(bit++, (b & 0x80) != 0);
+            bits.setBit(bit++, (b & 0x40) != 0);
+            bits.setBit(bit++, (b & 0x20) != 0);
+            bits.setBit(bit++, (b & 0x10) != 0);
+            bits.setBit(bit++, (b & 0x08) != 0);
+            bits.setBit(bit++, (b & 0x04) != 0);
+            bits.setBit(bit++, (b & 0x02) != 0);
+            bits.setBit(bit++, (b & 0x01) != 0);
+        }
+        return bits;
+    }
+
     /* Produces zlib-format (RFC 1950) data, compatible with the C++ zlib
      * compress(). */
     public Bytes compress()

@@ -33,6 +33,15 @@ public final class BitReader implements Iterator<Boolean>
         return bitcount == 0 && reader.eof();
     }
 
+    /* Reads `count` bits into a fresh Bits. */
+    public Bits get(int count)
+    {
+        Bits bits = new Bits(count);
+        for (int i = 0; i < count; i++)
+            bits.setBit(i, get());
+        return bits;
+    }
+
     @Override
     public boolean hasNext()
     {

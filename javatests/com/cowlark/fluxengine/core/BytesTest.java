@@ -79,6 +79,22 @@ public class BytesTest
     }
 
     @Test
+    public void toBits()
+    {
+        Bits bits = Bytes.of(0xd6).toBits();
+
+        assertThat(bits.size()).isEqualTo(8);
+        assertThat(bits.get(0)).isTrue();
+        assertThat(bits.get(1)).isTrue();
+        assertThat(bits.get(2)).isFalse();
+        assertThat(bits.get(3)).isTrue();
+        assertThat(bits.get(4)).isFalse();
+        assertThat(bits.get(5)).isTrue();
+        assertThat(bits.get(6)).isTrue();
+        assertThat(bits.get(7)).isFalse();
+    }
+
+    @Test
     public void compressAndDecompress()
     {
         Bytes data = new Bytes(0);

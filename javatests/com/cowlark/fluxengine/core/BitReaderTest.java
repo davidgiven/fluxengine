@@ -69,4 +69,18 @@ public class BitReaderTest
         assertThat(iterator.hasNext()).isFalse();
         assertThrows(java.util.NoSuchElementException.class, iterator::next);
     }
+
+    @Test
+    public void get()
+    {
+        BitReader reader = new BitReader(new ByteReader(Bytes.of(0xd6)));
+
+        Bits bits = reader.get(5);
+        assertThat(bits.size()).isEqualTo(5);
+        assertThat(bits.get(0)).isTrue();
+        assertThat(bits.get(1)).isTrue();
+        assertThat(bits.get(2)).isFalse();
+        assertThat(bits.get(3)).isTrue();
+        assertThat(bits.get(4)).isFalse();
+    }
 }
