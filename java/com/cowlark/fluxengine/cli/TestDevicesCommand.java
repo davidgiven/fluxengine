@@ -2,11 +2,10 @@ package com.cowlark.fluxengine.cli;
 
 import static com.google.common.base.Strings.nullToEmpty;
 
-import com.cowlark.fluxengine.config.Config;
 import com.cowlark.fluxengine.usb.UsbFactory;
-import com.google.common.collect.ImmutableList;
-import java.util.List;
+import com.cowlark.fluxengine.usb.UsbFactory.CandidateDevice;
 import picocli.CommandLine.Command;
+import java.util.List;
 
 @Command(name = "devices", description = "List attached USB devices")
 public class TestDevicesCommand extends CommandWithConfig implements Runnable
@@ -14,9 +13,7 @@ public class TestDevicesCommand extends CommandWithConfig implements Runnable
     @Override
     public void run()
     {
-        UsbFactory usbFactory = new UsbFactory(new Config(ImmutableList.copyOf(unmatchedArguments())));
-
-        List<UsbFactory.CandidateDevice> candidates = usbFactory.findUsbDevices();
+        List<CandidateDevice> candidates = UsbFactory.findUsbDevices();
         switch (candidates.size())
         {
             case 0:
@@ -28,19 +25,23 @@ public class TestDevicesCommand extends CommandWithConfig implements Runnable
                 break;
 
             default:
-                System.out.println(String.format("Detected %d devices:", candidates.size()));
+                System.out.printf("Detected %d devices:\n", candidates.size());
         }
 
         if (!candidates.isEmpty())
         {
-            System.out.println(String.format("%-15s %-30s %s",
-                "Type", "Serial number", "Port (if any)"));
-            for (UsbFactory.CandidateDevice candidate : candidates)
+            System.out.printf(
+                    "%-15s %-30s %s\n",
+                    "Type",
+                    "Serial number",
+                    "Port (if any)");
+            for (CandidateDevice candidate : candidates)
             {
-                System.out.println(String.format("%-15s %-30s %s",
-                    candidate.type.getDeviceName(),
-                    candidate.serial,
-                    nullToEmpty(candidate.serialPort)));
+                System.out.printf(
+                        "%-15s %-30s %s\n",
+                        candidate.type.getDeviceName(),
+                        candidate.serial,
+                        nullToEmpty(candidate.serialPort));
             }
         }
     }

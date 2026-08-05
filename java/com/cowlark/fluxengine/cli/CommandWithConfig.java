@@ -1,6 +1,7 @@
 package com.cowlark.fluxengine.cli;
 
 import java.util.List;
+import com.google.common.collect.ImmutableList;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Unmatched;
 
@@ -14,13 +15,8 @@ public abstract class CommandWithConfig
     @Unmatched
     private List<String> unmatched;
 
-    protected List<String> unmatchedArguments()
+    protected ImmutableList<String> unmatchedArguments()
     {
-        return unmatched == null ? List.of() : unmatched;
-    }
-
-    /* TODO: process the dotted --arguments. */
-    protected void processConfigArguments()
-    {
+        return unmatched == null ? ImmutableList.of() : ImmutableList.copyOf(unmatched);
     }
 }

@@ -48,11 +48,8 @@ public final class UsbFactory
     private static final Set<Integer> VALID_DEVICES =
             Set.of(GREASEWEAZLE_ID, FLUXENGINE_ID, APPLESAUCE_ID);
 
-    private final Config config;
-
-    public UsbFactory(Config config)
+    private UsbFactory()
     {
-        this.config = config;
     }
 
     private static String getSerialNumber(javax.usb.UsbDevice device)
@@ -66,7 +63,7 @@ public final class UsbFactory
         }
     }
 
-    public ImmutableList<CandidateDevice> findUsbDevices()
+    public static ImmutableList<CandidateDevice> findUsbDevices()
     {
         ImmutableList.Builder<CandidateDevice> candidates = ImmutableList.builder();
         try
@@ -81,12 +78,12 @@ public final class UsbFactory
         return candidates.build();
     }
 
-    public UsbDevice connect(CandidateDevice device)
+    public static UsbDevice connect(CandidateDevice device)
     {
         return null;
     }
 
-    public UsbDevice connect()
+    public static UsbDevice connect(Config config)
     {
         return null;
     }

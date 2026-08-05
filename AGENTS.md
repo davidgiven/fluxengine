@@ -79,6 +79,7 @@ Useful commands:
 - Explicit types, no `var`.
 - Prefer Guava utilities over hand-rolled checks: `Strings.nullToEmpty(...)` instead of
   explicit null checks; use `ImmutableList` for returned collections.
+- Prefer `System.out.printf(...)` over `System.out.println(String.format(...))`.
 - Tests use JUnit 4 (`@RunWith(JUnit4.class)`, `org.junit.Test`).
 - Follow existing patterns in the package you are editing; keep new functionality
   localized to the relevant package.

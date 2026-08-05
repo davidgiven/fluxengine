@@ -265,11 +265,11 @@ class GreaseweazleUsbDevice extends UsbDevice
         readBytes(1);
         double elapsedTime = getCurrentTime() - startTime;
 
-        System.out.println(String.format(
-                "transferred %d bytes from PC -> device in %d ms (%d kb/s)",
+        System.out.printf(
+                "transferred %d bytes from PC -> device in %d ms (%d kb/s)\n",
                 LEN,
                 (int) (elapsedTime * 1000.0),
-                (int) ((LEN / 1024.0) / elapsedTime)));
+                (int) ((LEN / 1024.0) / elapsedTime));
     }
 
     @Override
@@ -304,11 +304,11 @@ class GreaseweazleUsbDevice extends UsbDevice
         readBytes(LEN);
         double elapsedTime = getCurrentTime() - startTime;
 
-        System.out.println(String.format(
-                "transferred %d bytes from device -> PC in %d ms (%d kb/s)",
+        System.out.printf(
+                "transferred %d bytes from device -> PC in %d ms (%d kb/s)\n",
                 LEN,
                 (int) (elapsedTime * 1000.0),
-                (int) ((LEN / 1024.0) / elapsedTime)));
+                (int) ((LEN / 1024.0) / elapsedTime));
     }
 
     @Override
