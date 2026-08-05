@@ -15,7 +15,7 @@ public interface FluxEngineComponent
     static FluxEngineComponent create(List<String> args)
     {
         return DaggerFluxEngineComponent.builder()
-            .unmatchArgs(ImmutableList.copyOf(args))
+            .unmatchedArgs(ImmutableList.copyOf(args))
             .build();
     }
 
@@ -23,7 +23,7 @@ public interface FluxEngineComponent
     interface Builder
     {
         @BindsInstance
-        Builder unmatchArgs(@UnmatchArgs ImmutableList<String> args);
+        Builder unmatchedArgs(@UnmatchedArgs ImmutableList<String> args);
 
         FluxEngineComponent build();
     }

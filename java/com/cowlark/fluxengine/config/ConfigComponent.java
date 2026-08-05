@@ -12,8 +12,6 @@ public interface ConfigComponent
 {
     Config config();
 
-    ConfigFactory configFactory();
-
     @Subcomponent.Factory
     interface Factory
     {

@@ -19,7 +19,7 @@ java_library(
     name = "wiring",
     srcs = [
         "Scoped.java",
-        "UnmatchArgs.java",
+        "UnmatchedArgs.java",
     ],
     exported_plugins = [":dagger_plugin"],
     deps = [
