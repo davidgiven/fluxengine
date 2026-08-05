@@ -9,12 +9,24 @@ import com.google.common.collect.ImmutableList;
  */
 public class ConfigParser
 {
-    private ConfigParser()
+    private ConfigProto proto = ConfigProto.getDefaultInstance();
+
+    public ConfigParser()
     {
     }
 
-    public static ConfigProto parse(ImmutableList<String> args)
+    public ConfigParser parse(ImmutableList<String> args)
     {
-        return ConfigProto.getDefaultInstance();
+        return this;
     }
+
+    public ConfigParser set(String key, String value){
+        return this;
+    }
+
+    public ConfigProto build()
+    {
+        return proto;
+    }
+
 }

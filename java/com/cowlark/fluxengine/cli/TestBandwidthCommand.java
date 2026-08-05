@@ -1,6 +1,5 @@
 package com.cowlark.fluxengine.cli;
 
-import com.cowlark.fluxengine.config.ConfigFile.ConfigProto;
 import com.cowlark.fluxengine.config.ConfigParser;
 import com.cowlark.fluxengine.usb.UsbDevice;
 import com.cowlark.fluxengine.usb.UsbFactory;
@@ -15,8 +14,9 @@ public class TestBandwidthCommand extends CommandWithConfig implements Runnable
     @Override
     public void run()
     {
-        ConfigProto config = ConfigParser.parse(unmatchedArguments());
-        UsbDevice device = UsbFactory.connect(config);
+        ConfigParser config = new ConfigParser();
+        config.parse(unmatchedArguments());
+        UsbDevice device = UsbFactory.connect(config.build());
         device.testBulkWrite();
         device.testBulkRead();
     }

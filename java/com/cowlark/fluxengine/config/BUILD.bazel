@@ -1,6 +1,6 @@
+load("@com_google_protobuf//bazel:java_proto_library.bzl", "java_proto_library")
 load("@rules_java//java:defs.bzl", "java_library")
 load("@rules_proto//proto:defs.bzl", "proto_library")
-load("@com_google_protobuf//bazel:java_proto_library.bzl", "java_proto_library")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -76,5 +76,6 @@ java_library(
     deps = [
         ":config_java_proto",
         "@maven//:com_google_guava_guava",
+        "@maven//:com_jayway_jsonpath_json_path",
     ],
 )
