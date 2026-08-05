@@ -1,7 +1,11 @@
 package com.cowlark.fluxengine.core;
 
 import com.google.common.collect.ImmutableList;
+import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.zip.DataFormatException;
+import java.util.zip.Deflater;
+import java.util.zip.Inflater;
 
 /**
  * A resizable byte container, ported from lib/core/bytes.h. Slices share the
@@ -161,6 +165,57 @@ public final class Bytes implements Iterable<Byte>
             bw.write8(a);
         }
         return output;
+    }
+
+    /* Produces zlib-format (RFC 1950) data, compatible with the C++ zlib
+     * compress(). */
+    public Bytes compress()
+    {
+        Deflater deflater = new Deflater();
+        deflater.setInput(storage.data, low, size());
+        deflater.finish();
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        byte[] buffer = new byte[4096];
+        while (!deflater.finished())
+        {
+            int n = deflater.deflate(buffer);
+            out.write(buffer, 0, n);
+        }
+        deflater.end();
+        return new Bytes(out.toByteArray());
+    }
+
+    /* Consumes zlib-format (RFC 1950) data, compatible with the C++ zlib
+     * uncompress(). */
+    public Bytes decompress()
+    {
+        Inflater inflater = new Inflater();
+        inflater.setInput(storage.data, low, size());
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        byte[] buffer = new byte[4096];
+        try
+        {
+            while (true)
+            {
+                int n = inflater.inflate(buffer);
+                if (n > 0)
+                    out.write(buffer, 0, n);
+                if (inflater.finished())
+                    break;
+                if (n == 0)
+                    throw new RuntimeException("failed to decompress data");
+            }
+        }
+        catch (DataFormatException e)
+        {
+            throw new RuntimeException(
+                "failed to decompress data: " + e.getMessage());
+        }
+        finally
+        {
+            inflater.end();
+        }
+        return new Bytes(out.toByteArray());
     }
 
     public Bytes concat(Bytes other)

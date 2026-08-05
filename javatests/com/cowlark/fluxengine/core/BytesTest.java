@@ -78,6 +78,30 @@ public class BytesTest
     }
 
     @Test
+    public void compressAndDecompress()
+    {
+        Bytes data = new Bytes(0);
+        ByteWriter bw = new ByteWriter(data);
+        for (int i = 0; i < 10000; i++)
+            bw.write8(i & 0xff);
+
+        Bytes compressed = data.compress();
+
+        /* zlib format: first byte is the CMF header (0x78 for deflate). */
+        assertThat(compressed.get(0) & 0xff).isEqualTo(0x78);
+        assertThat(compressed.size()).isLessThan(data.size());
+
+        assertThat(compressed.decompress()).isEqualTo(data);
+    }
+
+    @Test
+    public void compressAndDecompressEmpty()
+    {
+        Bytes data = new Bytes(0);
+        assertThat(data.compress().decompress()).isEqualTo(data);
+    }
+
+    @Test
     public void resizing()
     {
         Bytes bytes = Bytes.of(1, 2, 3);
