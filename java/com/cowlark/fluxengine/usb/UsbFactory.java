@@ -2,10 +2,12 @@ package com.cowlark.fluxengine.usb;
 
 import static com.google.common.base.Strings.nullToEmpty;
 
-import com.cowlark.fluxengine.config.Config;
+import com.cowlark.fluxengine.config.ConfigFile.ConfigProto;
 import com.cowlark.fluxengine.core.FluxEngineException;
 import com.fazecast.jSerialComm.SerialPort;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import org.usb4java.javax.Services;
 import javax.usb.UsbDeviceDescriptor;
 import javax.usb.UsbException;
@@ -86,23 +88,22 @@ public final class UsbFactory
         return null;
     }
 
-    public static UsbDevice connect(Config config)
+    public static UsbDevice connect(ConfigProto config)
     {
         return connect(selectDevice(config));
     }
 
     /* Selects a device to use, based on the configuration, ported from
      * lib/usb/usb.cc. */
-    public static CandidateDevice selectDevice(Config config)
+    public static CandidateDevice selectDevice(ConfigProto config)
     {
         ImmutableList<CandidateDevice> candidates = findUsbDevices();
         if (candidates.isEmpty())
-            throw new FluxEngineException(
-                    "no devices found (is one plugged in? Do you have the " +
-                            "appropriate permissions?");
+            throw new FluxEngineException("no devices found (is one plugged in? Do you have the " +
+                    "appropriate permissions?");
 
-        String wantedSerial = config.get("usb.serial");
-        if (wantedSerial != null)
+        String wantedSerial = config.getUsb().getSerial();
+        if (Strings.isNullOrEmpty(wantedSerial))
         {
             for (CandidateDevice candidate : candidates)
             {
@@ -110,16 +111,14 @@ public final class UsbFactory
                     return candidate;
             }
             throw new FluxEngineException(
-                    "serial number not found (try without one to list or " +
-                            "autodetect devices)");
+                    "serial number not found (try without one to list or autodetect devices)");
         }
 
         if (candidates.size() == 1)
-            return candidates.get(0);
+            return Iterables.getOnlyElement(candidates);
 
         System.err.println(
-                "More than one device detected; use --usb.serial=<serial> to " +
-                        "select one:");
+                "More than one device detected; use --usb.serial=<serial> to " + "select one:");
         for (CandidateDevice candidate : candidates)
         {
             System.err.print("    ");
@@ -130,13 +129,15 @@ public final class UsbFactory
                     break;
 
                 case GREASEWEAZLE:
-                    System.err.printf("Greaseweazle: %s on %s\n",
+                    System.err.printf(
+                            "Greaseweazle: %s on %s\n",
                             candidate.serial,
                             nullToEmpty(candidate.serialPort));
                     break;
 
                 case APPLESAUCE:
-                    System.err.printf("Applesauce: %s on %s\n",
+                    System.err.printf(
+                            "Applesauce: %s on %s\n",
                             candidate.serial,
                             nullToEmpty(candidate.serialPort));
                     break;

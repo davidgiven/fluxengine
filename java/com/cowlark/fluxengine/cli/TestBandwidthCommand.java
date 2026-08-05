@@ -1,6 +1,7 @@
 package com.cowlark.fluxengine.cli;
 
-import com.cowlark.fluxengine.config.Config;
+import com.cowlark.fluxengine.config.ConfigFile.ConfigProto;
+import com.cowlark.fluxengine.config.ConfigParser;
 import com.cowlark.fluxengine.usb.UsbDevice;
 import com.cowlark.fluxengine.usb.UsbFactory;
 import picocli.CommandLine.Command;
@@ -14,7 +15,7 @@ public class TestBandwidthCommand extends CommandWithConfig implements Runnable
     @Override
     public void run()
     {
-        Config config = new Config(unmatchedArguments());
+        ConfigProto config = ConfigParser.parse(unmatchedArguments());
         UsbDevice device = UsbFactory.connect(config);
         device.testBulkWrite();
         device.testBulkRead();

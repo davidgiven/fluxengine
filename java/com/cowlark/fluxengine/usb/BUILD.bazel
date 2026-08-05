@@ -23,6 +23,7 @@ java_library(
     deps = [
         ":usb_java_proto",
         "//java/com/cowlark/fluxengine/config",
+        "//java/com/cowlark/fluxengine/config:config_java_proto",
         "//java/com/cowlark/fluxengine/core",
         "//java/com/cowlark/fluxengine/external",
         "@maven//:com_fazecast_jSerialComm",
