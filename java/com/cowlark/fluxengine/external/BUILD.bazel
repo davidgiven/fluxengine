@@ -7,7 +7,7 @@ package(default_visibility = ["//visibility:public"])
 proto_library(
     name = "fl2_proto",
     srcs = ["fl2.proto"],
-    strip_import_prefix = "/java/com/cowlark/fluxengine/external/",
+    strip_import_prefix = "/java/",
     deps = ["@com_google_protobuf//:descriptor_proto"],
 )
 

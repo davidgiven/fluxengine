@@ -6,11 +6,11 @@ import "lib/imagereader/imagereader.proto";
 import "lib/imagewriter/imagewriter.proto";
 import "lib/fluxsource/fluxsource.proto";
 import "lib/fluxsink/fluxsink.proto";
-import "lib/usb/usb.proto";
+import "com/cowlark/fluxengine/usb/usb.proto";
 import "lib/vfs/vfs.proto";
-import "lib/config/drive.proto";
-import "lib/config/common.proto";
-import "lib/config/layout.proto";
+import "com/cowlark/fluxengine/config/drive.proto";
+import "com/cowlark/fluxengine/config/common.proto";
+import "com/cowlark/fluxengine/config/layout.proto";
 
 enum SupportStatus
 {

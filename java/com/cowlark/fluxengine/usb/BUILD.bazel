@@ -7,7 +7,7 @@ package(default_visibility = ["//visibility:public"])
 proto_library(
     name = "usb_proto",
     srcs = ["usb.proto"],
-    strip_import_prefix = "/java/com/cowlark/fluxengine/usb/",
+    strip_import_prefix = "/java/",
     deps = ["//java/com/cowlark/fluxengine/config:common_proto"],
 )
 

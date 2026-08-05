@@ -2,7 +2,7 @@ syntax = "proto2";
 
 option java_package = "com.cowlark.fluxengine.usb";
 
-import "common.proto";
+import "com/cowlark/fluxengine/config/common.proto";
 
 message GreaseweazleProto {
 	enum BusType { /* note that these must match CMD_SET_BUS codes */
