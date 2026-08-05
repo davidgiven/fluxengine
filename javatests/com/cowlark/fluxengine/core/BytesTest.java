@@ -5,6 +5,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
 import com.google.common.collect.ImmutableList;
+import java.util.ListIterator;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -30,10 +31,10 @@ public class BytesTest
     {
         Bytes bytes = Bytes.of(1, 2, 3);
 
-        assertThat(bytes.slice(1, 3).toArray()).isEqualTo(new byte[] {2, 3, 0});
-        assertThat(bytes.slice(5, 2).toArray()).isEqualTo(new byte[] {0, 0});
-        assertThat(bytes.slice(3, 2).toArray()).isEqualTo(new byte[] {0, 0});
-        assertThat(bytes.slice(2).toArray()).isEqualTo(new byte[] {3});
+        assertThat(bytes.slice(1, 3).toByteArray()).isEqualTo(new byte[] {2, 3, 0});
+        assertThat(bytes.slice(5, 2).toByteArray()).isEqualTo(new byte[] {0, 0});
+        assertThat(bytes.slice(3, 2).toByteArray()).isEqualTo(new byte[] {0, 0});
+        assertThat(bytes.slice(2).toByteArray()).isEqualTo(new byte[] {3});
         assertThat(bytes.slice(5).isEmpty()).isTrue();
     }
 
@@ -53,15 +54,15 @@ public class BytesTest
         ImmutableList<Bytes> pieces = bytes.split(0);
 
         assertThat(pieces).hasSize(3);
-        assertThat(pieces.get(0).toArray()).isEqualTo(new byte[] {1, 2});
-        assertThat(pieces.get(1).toArray()).isEqualTo(new byte[] {3, 4});
-        assertThat(pieces.get(2).toArray()).isEqualTo(new byte[] {5});
+        assertThat(pieces.get(0).toByteArray()).isEqualTo(new byte[] {1, 2});
+        assertThat(pieces.get(1).toByteArray()).isEqualTo(new byte[] {3, 4});
+        assertThat(pieces.get(2).toByteArray()).isEqualTo(new byte[] {5});
 
         /* Consecutive separators and a trailing separator yield empty pieces. */
         ImmutableList<Bytes> empties = Bytes.of(0, 1, 0, 0).split(0);
         assertThat(empties).hasSize(4);
         assertThat(empties.get(0).isEmpty()).isTrue();
-        assertThat(empties.get(1).toArray()).isEqualTo(new byte[] {1});
+        assertThat(empties.get(1).toByteArray()).isEqualTo(new byte[] {1});
         assertThat(empties.get(2).isEmpty()).isTrue();
         assertThat(empties.get(3).isEmpty()).isTrue();
     }
@@ -69,11 +70,11 @@ public class BytesTest
     @Test
     public void swab()
     {
-        assertThat(Bytes.of(1, 2, 3, 4).swab().toArray())
+        assertThat(Bytes.of(1, 2, 3, 4).swab().toByteArray())
             .isEqualTo(new byte[] {2, 1, 4, 3});
 
         /* Odd length pads the trailing byte with a zero. */
-        assertThat(Bytes.of(1, 2, 3).swab().toArray())
+        assertThat(Bytes.of(1, 2, 3).swab().toByteArray())
             .isEqualTo(new byte[] {2, 1, 0, 3});
     }
 
@@ -95,10 +96,48 @@ public class BytesTest
     }
 
     @Test
-    public void compressAndDecompressEmpty()
+    public void compressAndUncompressEmpty()
     {
         Bytes data = new Bytes(0);
         assertThat(data.compress().decompress()).isEqualTo(data);
+    }
+
+    @Test
+    public void listOperations()
+    {
+        Bytes bytes = Bytes.of(1, 2, 3);
+
+        assertThat(bytes.contains(Byte.valueOf((byte) 2))).isTrue();
+        assertThat(bytes.indexOf(Byte.valueOf((byte) 2))).isEqualTo(1);
+        assertThat(bytes.lastIndexOf(Byte.valueOf((byte) 2))).isEqualTo(1);
+        assertThat(bytes.indexOf(Byte.valueOf((byte) 9))).isEqualTo(-1);
+
+        bytes.add(Byte.valueOf((byte) 4));
+        assertThat(bytes.toByteArray()).isEqualTo(new byte[] {1, 2, 3, 4});
+
+        bytes.add(1, Byte.valueOf((byte) 9));
+        assertThat(bytes.toByteArray()).isEqualTo(new byte[] {1, 9, 2, 3, 4});
+
+        assertThat(bytes.remove(0)).isEqualTo((byte) 1);
+        assertThat(bytes.toByteArray()).isEqualTo(new byte[] {9, 2, 3, 4});
+
+        assertThat(bytes.remove(Byte.valueOf((byte) 3))).isTrue();
+        assertThat(bytes.toByteArray()).isEqualTo(new byte[] {9, 2, 4});
+
+        ListIterator<Byte> it = bytes.listIterator();
+        assertThat(it.next()).isEqualTo((byte) 9);
+        assertThat(it.next()).isEqualTo((byte) 2);
+        assertThat(it.previous()).isEqualTo((byte) 2);
+    }
+
+    @Test
+    public void listEquality()
+    {
+        Bytes bytes = Bytes.of(1, 2, 3);
+        java.util.List<Byte> other = java.util.Arrays.asList((byte) 1, (byte) 2, (byte) 3);
+
+        assertThat(bytes.equals(other)).isTrue();
+        assertThat(other.equals(bytes)).isTrue();
     }
 
     @Test

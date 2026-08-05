@@ -40,113 +40,113 @@ public final class ByteWriter
     public ByteWriter write8(int value)
     {
         ensureWritable(1);
-        bytes.set(pos++, (byte) value);
+        bytes.setByte(pos++, (byte) value);
         return this;
     }
 
     public ByteWriter writeBe16(int value)
     {
         ensureWritable(2);
-        bytes.set(pos++, (byte) (value >> 8));
-        bytes.set(pos++, (byte) value);
+        bytes.setByte(pos++, (byte) (value >> 8));
+        bytes.setByte(pos++, (byte) value);
         return this;
     }
 
     public ByteWriter writeLe16(int value)
     {
         ensureWritable(2);
-        bytes.set(pos++, (byte) value);
-        bytes.set(pos++, (byte) (value >> 8));
+        bytes.setByte(pos++, (byte) value);
+        bytes.setByte(pos++, (byte) (value >> 8));
         return this;
     }
 
     public ByteWriter writeBe24(int value)
     {
         ensureWritable(3);
-        bytes.set(pos++, (byte) (value >> 16));
-        bytes.set(pos++, (byte) (value >> 8));
-        bytes.set(pos++, (byte) value);
+        bytes.setByte(pos++, (byte) (value >> 16));
+        bytes.setByte(pos++, (byte) (value >> 8));
+        bytes.setByte(pos++, (byte) value);
         return this;
     }
 
     public ByteWriter writeLe24(int value)
     {
         ensureWritable(3);
-        bytes.set(pos++, (byte) value);
-        bytes.set(pos++, (byte) (value >> 8));
-        bytes.set(pos++, (byte) (value >> 16));
+        bytes.setByte(pos++, (byte) value);
+        bytes.setByte(pos++, (byte) (value >> 8));
+        bytes.setByte(pos++, (byte) (value >> 16));
         return this;
     }
 
     public ByteWriter writeBe32(int value)
     {
         ensureWritable(4);
-        bytes.set(pos++, (byte) (value >> 24));
-        bytes.set(pos++, (byte) (value >> 16));
-        bytes.set(pos++, (byte) (value >> 8));
-        bytes.set(pos++, (byte) value);
+        bytes.setByte(pos++, (byte) (value >> 24));
+        bytes.setByte(pos++, (byte) (value >> 16));
+        bytes.setByte(pos++, (byte) (value >> 8));
+        bytes.setByte(pos++, (byte) value);
         return this;
     }
 
     public ByteWriter writeLe32(int value)
     {
         ensureWritable(4);
-        bytes.set(pos++, (byte) value);
-        bytes.set(pos++, (byte) (value >> 8));
-        bytes.set(pos++, (byte) (value >> 16));
-        bytes.set(pos++, (byte) (value >> 24));
+        bytes.setByte(pos++, (byte) value);
+        bytes.setByte(pos++, (byte) (value >> 8));
+        bytes.setByte(pos++, (byte) (value >> 16));
+        bytes.setByte(pos++, (byte) (value >> 24));
         return this;
     }
 
     public ByteWriter writeBe48(long value)
     {
         ensureWritable(6);
-        bytes.set(pos++, (byte) (value >> 40));
-        bytes.set(pos++, (byte) (value >> 32));
-        bytes.set(pos++, (byte) (value >> 24));
-        bytes.set(pos++, (byte) (value >> 16));
-        bytes.set(pos++, (byte) (value >> 8));
-        bytes.set(pos++, (byte) value);
+        bytes.setByte(pos++, (byte) (value >> 40));
+        bytes.setByte(pos++, (byte) (value >> 32));
+        bytes.setByte(pos++, (byte) (value >> 24));
+        bytes.setByte(pos++, (byte) (value >> 16));
+        bytes.setByte(pos++, (byte) (value >> 8));
+        bytes.setByte(pos++, (byte) value);
         return this;
     }
 
     public ByteWriter writeLe48(long value)
     {
         ensureWritable(6);
-        bytes.set(pos++, (byte) value);
-        bytes.set(pos++, (byte) (value >> 8));
-        bytes.set(pos++, (byte) (value >> 16));
-        bytes.set(pos++, (byte) (value >> 24));
-        bytes.set(pos++, (byte) (value >> 32));
-        bytes.set(pos++, (byte) (value >> 40));
+        bytes.setByte(pos++, (byte) value);
+        bytes.setByte(pos++, (byte) (value >> 8));
+        bytes.setByte(pos++, (byte) (value >> 16));
+        bytes.setByte(pos++, (byte) (value >> 24));
+        bytes.setByte(pos++, (byte) (value >> 32));
+        bytes.setByte(pos++, (byte) (value >> 40));
         return this;
     }
 
     public ByteWriter writeBe64(long value)
     {
         ensureWritable(8);
-        bytes.set(pos++, (byte) (value >> 56));
-        bytes.set(pos++, (byte) (value >> 48));
-        bytes.set(pos++, (byte) (value >> 40));
-        bytes.set(pos++, (byte) (value >> 32));
-        bytes.set(pos++, (byte) (value >> 24));
-        bytes.set(pos++, (byte) (value >> 16));
-        bytes.set(pos++, (byte) (value >> 8));
-        bytes.set(pos++, (byte) value);
+        bytes.setByte(pos++, (byte) (value >> 56));
+        bytes.setByte(pos++, (byte) (value >> 48));
+        bytes.setByte(pos++, (byte) (value >> 40));
+        bytes.setByte(pos++, (byte) (value >> 32));
+        bytes.setByte(pos++, (byte) (value >> 24));
+        bytes.setByte(pos++, (byte) (value >> 16));
+        bytes.setByte(pos++, (byte) (value >> 8));
+        bytes.setByte(pos++, (byte) value);
         return this;
     }
 
     public ByteWriter writeLe64(long value)
     {
         ensureWritable(8);
-        bytes.set(pos++, (byte) value);
-        bytes.set(pos++, (byte) (value >> 8));
-        bytes.set(pos++, (byte) (value >> 16));
-        bytes.set(pos++, (byte) (value >> 24));
-        bytes.set(pos++, (byte) (value >> 32));
-        bytes.set(pos++, (byte) (value >> 40));
-        bytes.set(pos++, (byte) (value >> 48));
-        bytes.set(pos++, (byte) (value >> 56));
+        bytes.setByte(pos++, (byte) value);
+        bytes.setByte(pos++, (byte) (value >> 8));
+        bytes.setByte(pos++, (byte) (value >> 16));
+        bytes.setByte(pos++, (byte) (value >> 24));
+        bytes.setByte(pos++, (byte) (value >> 32));
+        bytes.setByte(pos++, (byte) (value >> 40));
+        bytes.setByte(pos++, (byte) (value >> 48));
+        bytes.setByte(pos++, (byte) (value >> 56));
         return this;
     }
 
@@ -154,7 +154,7 @@ public final class ByteWriter
     {
         ensureWritable(data.size());
         for (int i = 0; i < data.size(); i++)
-            bytes.set(pos++, data.get(i));
+            bytes.setByte(pos++, data.get(i));
         return this;
     }
 
@@ -162,7 +162,7 @@ public final class ByteWriter
     {
         ensureWritable(data.length);
         for (byte b : data)
-            bytes.set(pos++, b);
+            bytes.setByte(pos++, b);
         return this;
     }
 
@@ -175,7 +175,7 @@ public final class ByteWriter
     {
         ensureWritable(count);
         for (int i = 0; i < count; i++)
-            bytes.set(pos++, (byte) value);
+            bytes.setByte(pos++, (byte) value);
         return this;
     }
 

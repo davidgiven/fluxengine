@@ -3,6 +3,11 @@ package com.cowlark.fluxengine.core;
 import com.google.common.collect.ImmutableList;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.NoSuchElementException;
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
@@ -12,7 +17,7 @@ import java.util.zip.Inflater;
  * parent's storage; writes to a shared storage copy it first, so changes to
  * one window are invisible to the others.
  */
-public final class Bytes implements Iterable<Byte>
+public final class Bytes implements List<Byte>
 {
     private static final class Storage
     {
@@ -79,24 +84,65 @@ public final class Bytes implements Iterable<Byte>
         return high == low;
     }
 
-    public byte get(int offset)
+    @Override
+    public Byte get(int offset)
+    {
+        return getByte(offset);
+    }
+
+    /* Fast, allocation-free byte access for hot paths (avoids Byte boxing). */
+    public byte getByte(int offset)
     {
         boundsCheck(offset);
         return storage.data[low + offset];
     }
 
-    public void set(int offset, byte value)
+    @Override
+    public Byte set(int offset, Byte value)
+    {
+        boundsCheck(offset);
+        detach();
+        byte old = storage.data[low + offset];
+        storage.data[low + offset] = value;
+        return old;
+    }
+
+    /* Fast, allocation-free byte write for hot paths (avoids Byte boxing). */
+    public void setByte(int offset, byte value)
     {
         boundsCheck(offset);
         detach();
         storage.data[low + offset] = value;
     }
 
-    public byte[] toArray()
+    public byte[] toByteArray()
     {
         byte[] result = new byte[size()];
         System.arraycopy(storage.data, low, result, 0, result.length);
         return result;
+    }
+
+    @Override
+    public Object[] toArray()
+    {
+        Object[] result = new Object[size()];
+        for (int i = 0; i < size(); i++)
+            result[i] = getByte(i);
+        return result;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> T[] toArray(T[] a)
+    {
+        int n = size();
+        if (a.length < n)
+            a = (T[]) Arrays.copyOf(a, n, a.getClass());
+        for (int i = 0; i < n; i++)
+            a[i] = (T) Byte.valueOf(getByte(i));
+        if (a.length > n)
+            a[n] = null;
+        return a;
     }
 
     public void resize(int newSize)
@@ -142,7 +188,7 @@ public final class Bytes implements Iterable<Byte>
         int lastEnd = 0;
         for (int i = 0; i < size(); i++)
         {
-            if ((get(i) & 0xff) == separator)
+            if ((getByte(i) & 0xff) == separator)
             {
                 pieces.add(slice(lastEnd, i - lastEnd));
                 lastEnd = i + 1;
@@ -253,19 +299,243 @@ public final class Bytes implements Iterable<Byte>
     }
 
     @Override
-    public boolean equals(Object o)
+    public boolean add(Byte value)
     {
-        if (!(o instanceof Bytes))
+        detach();
+        ensureCapacity(high + 1);
+        storage.data[high] = value;
+        high++;
+        return true;
+    }
+
+    @Override
+    public void add(int index, Byte value)
+    {
+        if (index < 0 || index > size())
+            throw new IndexOutOfBoundsException(String.valueOf(index));
+        detach();
+        ensureCapacity(high + 1);
+        System.arraycopy(storage.data, low + index, storage.data, low + index + 1,
+            size() - index);
+        storage.data[low + index] = value;
+        high++;
+    }
+
+    @Override
+    public Byte remove(int index)
+    {
+        if (index < 0 || index >= size())
+            throw new IndexOutOfBoundsException(String.valueOf(index));
+        detach();
+        byte old = storage.data[low + index];
+        System.arraycopy(storage.data, low + index + 1, storage.data,
+            low + index, size() - index - 1);
+        high--;
+        return old;
+    }
+
+    @Override
+    public boolean remove(Object o)
+    {
+        int index = indexOf(o);
+        if (index < 0)
             return false;
-        Bytes other = (Bytes) o;
-        if (size() != other.size())
-            return false;
+        remove(index);
+        return true;
+    }
+
+    @Override
+    public int indexOf(Object o)
+    {
+        if (!(o instanceof Byte))
+            return -1;
+        byte target = (Byte) o;
         for (int i = 0; i < size(); i++)
         {
-            if (storage.data[low + i] != other.storage.data[other.low + i])
+            if (storage.data[low + i] == target)
+                return i;
+        }
+        return -1;
+    }
+
+    @Override
+    public int lastIndexOf(Object o)
+    {
+        if (!(o instanceof Byte))
+            return -1;
+        byte target = (Byte) o;
+        for (int i = size() - 1; i >= 0; i--)
+        {
+            if (storage.data[low + i] == target)
+                return i;
+        }
+        return -1;
+    }
+
+    @Override
+    public ListIterator<Byte> listIterator()
+    {
+        return listIterator(0);
+    }
+
+    @Override
+    public ListIterator<Byte> listIterator(final int index)
+    {
+        if (index < 0 || index > size())
+            throw new IndexOutOfBoundsException(String.valueOf(index));
+        return new ListIterator<Byte>()
+        {
+            private int cursor = index;
+
+            @Override
+            public boolean hasNext()
+            {
+                return cursor < size();
+            }
+
+            @Override
+            public Byte next()
+            {
+                if (!hasNext())
+                    throw new NoSuchElementException();
+                return get(cursor++);
+            }
+
+            @Override
+            public boolean hasPrevious()
+            {
+                return cursor > 0;
+            }
+
+            @Override
+            public Byte previous()
+            {
+                if (!hasPrevious())
+                    throw new NoSuchElementException();
+                return get(--cursor);
+            }
+
+            @Override
+            public int nextIndex()
+            {
+                return cursor;
+            }
+
+            @Override
+            public int previousIndex()
+            {
+                return cursor - 1;
+            }
+
+            @Override
+            public void remove()
+            {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public void set(Byte value)
+            {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public void add(Byte value)
+            {
+                throw new UnsupportedOperationException();
+            }
+        };
+    }
+
+    @Override
+    public List<Byte> subList(int fromIndex, int toIndex)
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean contains(Object o)
+    {
+        return indexOf(o) >= 0;
+    }
+
+    @Override
+    public boolean containsAll(Collection<?> c)
+    {
+        for (Object o : c)
+        {
+            if (!contains(o))
                 return false;
         }
         return true;
+    }
+
+    @Override
+    public boolean addAll(Collection<? extends Byte> c)
+    {
+        for (Byte b : c)
+            add(b);
+        return !c.isEmpty();
+    }
+
+    @Override
+    public boolean addAll(int index, Collection<? extends Byte> c)
+    {
+        if (c.isEmpty())
+            return false;
+        for (Byte b : c)
+            add(index++, b);
+        return true;
+    }
+
+    @Override
+    public boolean removeAll(Collection<?> c)
+    {
+        boolean changed = false;
+        for (int i = size() - 1; i >= 0; i--)
+        {
+            if (c.contains(getByte(i)))
+            {
+                remove(i);
+                changed = true;
+            }
+        }
+        return changed;
+    }
+
+    @Override
+    public boolean retainAll(Collection<?> c)
+    {
+        boolean changed = false;
+        for (int i = size() - 1; i >= 0; i--)
+        {
+            if (!c.contains(getByte(i)))
+            {
+                remove(i);
+                changed = true;
+            }
+        }
+        return changed;
+    }
+
+    @Override
+    public boolean equals(Object o)
+    {
+        if (o instanceof Bytes)
+        {
+            Bytes other = (Bytes) o;
+            if (size() != other.size())
+                return false;
+            for (int i = 0; i < size(); i++)
+            {
+                if (storage.data[low + i] != other.storage.data[other.low + i])
+                    return false;
+            }
+            return true;
+        }
+        if (o instanceof List)
+            return o.equals(this);
+        return false;
     }
 
     @Override

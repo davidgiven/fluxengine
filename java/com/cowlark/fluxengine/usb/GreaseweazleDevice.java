@@ -120,7 +120,7 @@ class GreaseweazleDevice extends AbstractUsbDevice
 
     private void doCommand(Bytes command)
     {
-        doCommand(command.toArray());
+        doCommand(command.toByteArray());
     }
 
     private void doCommand(byte[] command)
@@ -129,14 +129,14 @@ class GreaseweazleDevice extends AbstractUsbDevice
 
         Bytes buffer = readBytes(2);
 
-        if ((buffer.get(0) & 0xff) != (command[0] & 0xff))
+        if ((buffer.getByte(0) & 0xff) != (command[0] & 0xff))
             throw new RuntimeException(String.format(
                     "command returned garbage (0x%x != 0x%x with status 0x%x)",
-                    buffer.get(0),
+                    buffer.getByte(0),
                     command[0],
-                    buffer.get(1)));
-        if (buffer.get(1) != 0)
-            throw new RuntimeException("Greaseweazle error: " + gwError(buffer.get(1) & 0xff));
+                    buffer.getByte(1)));
+        if (buffer.getByte(1) != 0)
+            throw new RuntimeException("Greaseweazle error: " + gwError(buffer.getByte(1) & 0xff));
     }
 
     @Override
@@ -494,7 +494,7 @@ class GreaseweazleDevice extends AbstractUsbDevice
 
     private void writeBytes(Bytes data)
     {
-        writeBytes(data.toArray());
+        writeBytes(data.toByteArray());
     }
 
     private static double getCurrentTime()

@@ -179,7 +179,7 @@ public final class GreaseweazleUtils
     {
         for (int i = 0; i < fldata.size(); i++)
         {
-            if ((fldata.get(i) & F_BIT_INDEX) != 0)
+            if ((fldata.getByte(i) & F_BIT_INDEX) != 0)
                 return fldata.slice(i, fldata.size() - i);
         }
         return fldata;

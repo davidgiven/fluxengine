@@ -19,7 +19,7 @@ public class ByteWriterTest
             .writeLe16(0x0504)
             .write8(0x06);
 
-        assertThat(bytes.toArray()).isEqualTo(new byte[] {1, 2, 3, 4, 5, 6});
+        assertThat(bytes.toByteArray()).isEqualTo(new byte[] {1, 2, 3, 4, 5, 6});
     }
 
     @Test
@@ -32,7 +32,7 @@ public class ByteWriterTest
             .writeBe32(0x0708090a)
             .writeLe32(0x0e0d0c0b);
 
-        assertThat(bytes.toArray()).isEqualTo(new byte[] {
+        assertThat(bytes.toByteArray()).isEqualTo(new byte[] {
             1, 2, 3,
             4, 5, 6,
             7, 8, 9, 10,
@@ -49,7 +49,7 @@ public class ByteWriterTest
             .writeBe64(0x0102030405060708L)
             .writeLe64(0x100f0e0d0c0b0a09L);
 
-        assertThat(bytes.toArray()).isEqualTo(new byte[] {
+        assertThat(bytes.toByteArray()).isEqualTo(new byte[] {
             1, 2, 3, 4, 5, 6,
             7, 8, 9, 10, 11, 12,
             1, 2, 3, 4, 5, 6, 7, 8,
@@ -66,7 +66,7 @@ public class ByteWriterTest
             .pad(2, 0xff)
             .pad(1);
 
-        assertThat(bytes.toArray()).isEqualTo(new byte[] {
+        assertThat(bytes.toByteArray()).isEqualTo(new byte[] {
             1, 2, 3, 4, (byte) 0xff, (byte) 0xff, 0});
     }
 
