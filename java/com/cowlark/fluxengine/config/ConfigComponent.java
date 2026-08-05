@@ -10,6 +10,8 @@ import com.cowlark.fluxengine.wiring.Scoped;
 @Subcomponent
 public interface ConfigComponent
 {
+    Config config();
+
     ConfigFactory configFactory();
 
     @Subcomponent.Factory

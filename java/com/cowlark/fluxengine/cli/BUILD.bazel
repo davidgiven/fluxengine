@@ -1,4 +1,4 @@
-load("@rules_java//java:defs.bzl", "java_binary", "java_library", "java_plugin")
+load("@rules_java//java:defs.bzl", "java_library", "java_plugin")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -14,10 +14,8 @@ java_library(
     plugins = [":picocli"],
     deps = [
         "//java/com/cowlark/fluxengine/usb",
-        "//java/com/cowlark/fluxengine/wiring",
-        "@maven//:com_google_dagger_dagger",
+        "//java/com/cowlark/fluxengine/wiring:component",
         "@maven//:com_google_guava_guava",
         "@maven//:info_picocli_picocli",
-        "@maven//:javax_inject_javax_inject",
     ],
 )

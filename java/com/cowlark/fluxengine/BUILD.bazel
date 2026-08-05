@@ -1,26 +1,12 @@
-load("@rules_java//java:defs.bzl", "java_binary", "java_library")
+load("@rules_java//java:defs.bzl", "java_binary")
 load("//:native_image.bzl", "native_image")
 
 package(default_visibility = ["//visibility:public"])
 
-java_library(
-    name = "fluxengine_lib",
-    srcs = glob(["*.java"]),
-    deps = [
-        "//java/com/cowlark/fluxengine/cli",
-        "//java/com/cowlark/fluxengine/config",
-        "//java/com/cowlark/fluxengine/usb",
-        "//java/com/cowlark/fluxengine/wiring",
-        "@maven//:com_google_dagger_dagger",
-        "@maven//:info_picocli_picocli",
-        "@maven//:javax_inject_javax_inject",
-    ],
-)
-
 java_binary(
     name = "fluxengine",
-    main_class = "com.cowlark.fluxengine.Main",
-    runtime_deps = [":fluxengine_lib"],
+    main_class = "com.cowlark.fluxengine.cli.Main",
+    runtime_deps = ["//java/com/cowlark/fluxengine/cli"],
 )
 
 native_image(

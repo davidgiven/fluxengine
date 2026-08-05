@@ -1,6 +1,6 @@
 package com.cowlark.fluxengine.usb;
 
-import com.cowlark.fluxengine.config.ConfigFactory;
+import com.cowlark.fluxengine.config.Config;
 import com.fazecast.jSerialComm.SerialPort;
 import com.google.common.collect.ImmutableList;
 import org.usb4java.javax.Services;
@@ -49,12 +49,12 @@ public final class UsbFactory
     private static final Set<Integer> VALID_DEVICES =
             Set.of(GREASEWEAZLE_ID, FLUXENGINE_ID, APPLESAUCE_ID);
 
-    private final ConfigFactory configFactory;
+    private final Config config;
 
     @Inject
-    public UsbFactory(ConfigFactory configFactory)
+    public UsbFactory(Config config)
     {
-        this.configFactory = configFactory;
+        this.config = config;
     }
 
     private static String getSerialNumber(javax.usb.UsbDevice device)

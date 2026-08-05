@@ -3,24 +3,19 @@ package com.cowlark.fluxengine.cli;
 import static com.google.common.base.Strings.nullToEmpty;
 
 import com.cowlark.fluxengine.usb.UsbFactory;
-import picocli.CommandLine.Command;
-import javax.inject.Inject;
+import com.cowlark.fluxengine.wiring.FluxEngineComponent;
 import java.util.List;
+import picocli.CommandLine.Command;
 
 @Command(name = "devices", description = "List attached USB devices")
-public class TestDevicesCommand implements Runnable
+public class TestDevicesCommand extends CommandWithConfig implements Runnable
 {
-    private final UsbFactory usbFactory;
-
-    @Inject
-    TestDevicesCommand(UsbFactory usbFactory)
-    {
-        this.usbFactory = usbFactory;
-    }
-
     @Override
     public void run()
     {
+        FluxEngineComponent component = FluxEngineComponent.create(unmatchedArguments());
+        UsbFactory usbFactory = component.usbComponentFactory().create().usbFactory();
+
         List<UsbFactory.CandidateDevice> candidates = usbFactory.findUsbDevices();
         switch (candidates.size())
         {

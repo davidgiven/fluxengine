@@ -1,17 +1,11 @@
 package com.cowlark.fluxengine.cli;
 
 import picocli.CommandLine.Command;
-import javax.inject.Inject;
 
 @Command(name = "fluxengine", mixinStandardHelpOptions = true, subcommands = {TestCommand.class},
         description = "FluxEngine CLI")
 public class MainCommand implements Runnable
 {
-    @Inject
-    MainCommand()
-    {
-    }
-
     @Override
     public void run()
     {

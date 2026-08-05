@@ -17,9 +17,26 @@ java_library(
 
 java_library(
     name = "wiring",
-    srcs = glob(["*.java"]),
+    srcs = [
+        "Scoped.java",
+        "UnmatchArgs.java",
+    ],
     exported_plugins = [":dagger_plugin"],
     deps = [
+        ":dagger",
+        "@maven//:javax_inject_javax_inject",
+    ],
+)
+
+java_library(
+    name = "component",
+    srcs = ["FluxEngineComponent.java"],
+    deps = [
+        ":wiring",
+        "//java/com/cowlark/fluxengine/config",
+        "//java/com/cowlark/fluxengine/usb",
+        "@maven//:com_google_dagger_dagger",
+        "@maven//:com_google_guava_guava",
         "@maven//:javax_inject_javax_inject",
     ],
 )
