@@ -1,27 +1,24 @@
 package com.cowlark.fluxengine.usb;
 
+import com.cowlark.fluxengine.config.ConfigFactory;
 import com.fazecast.jSerialComm.SerialPort;
 import com.google.common.collect.ImmutableList;
-import java.util.List;
-import java.util.Set;
+import org.usb4java.javax.Services;
 import javax.inject.Inject;
-import javax.usb.UsbDevice;
 import javax.usb.UsbDeviceDescriptor;
 import javax.usb.UsbException;
 import javax.usb.UsbHub;
 import javax.usb.UsbServices;
-import org.usb4java.javax.Services;
+import java.util.Set;
 
 /**
  * USB device finder, ported from lib/usb/usbfinder.cc.
  */
-public final class UsbFinder
+public final class UsbFactory
 {
     public enum DeviceType
     {
-        FLUXENGINE("FluxEngine"),
-        GREASEWEAZLE("Greaseweazle"),
-        APPLESAUCE("Applesauce");
+        FLUXENGINE("FluxEngine"), GREASEWEAZLE("Greaseweazle"), APPLESAUCE("Applesauce");
 
         private final String deviceName;
 
@@ -39,7 +36,7 @@ public final class UsbFinder
     public static final class CandidateDevice
     {
         public DeviceType type;
-        public UsbDevice device;
+        public javax.usb.UsbDevice device;
         public int id;
         public String serial;
         public String serialPort;
@@ -50,20 +47,22 @@ public final class UsbFinder
     private static final int APPLESAUCE_ID = 0x16c00483;
 
     private static final Set<Integer> VALID_DEVICES =
-        Set.of(GREASEWEAZLE_ID, FLUXENGINE_ID, APPLESAUCE_ID);
+            Set.of(GREASEWEAZLE_ID, FLUXENGINE_ID, APPLESAUCE_ID);
+
+    private final ConfigFactory configFactory;
 
     @Inject
-    public UsbFinder()
+    public UsbFactory(ConfigFactory configFactory)
     {
+        this.configFactory = configFactory;
     }
 
-    private static String getSerialNumber(UsbDevice device)
+    private static String getSerialNumber(javax.usb.UsbDevice device)
     {
         try
         {
             return device.getSerialNumberString();
-        }
-        catch (UsbException | java.io.UnsupportedEncodingException e)
+        } catch (UsbException | java.io.UnsupportedEncodingException e)
         {
             return "n/a";
         }
@@ -77,25 +76,33 @@ public final class UsbFinder
             UsbServices services = new Services();
             UsbHub rootHub = services.getRootUsbHub();
             walkHub(rootHub, candidates);
-        }
-        catch (UsbException e)
+        } catch (UsbException e)
         {
             System.err.println("USB error: " + e.getMessage());
         }
         return candidates.build();
     }
 
+    public UsbDevice connect(CandidateDevice device)
+    {
+        return null;
+    }
+
+    public UsbDevice connect()
+    {
+        return null;
+    }
+
     private static void walkHub(UsbHub hub, ImmutableList.Builder<CandidateDevice> candidates)
     {
         for (Object o : hub.getAttachedUsbDevices())
         {
-            UsbDevice usbDevice = (UsbDevice) o;
+            javax.usb.UsbDevice usbDevice = (javax.usb.UsbDevice) o;
             if (usbDevice.isUsbHub())
                 walkHub((UsbHub) usbDevice, candidates);
 
             UsbDeviceDescriptor descriptor = usbDevice.getUsbDeviceDescriptor();
-            int id = ((descriptor.idVendor() & 0xffff) << 16) |
-                     (descriptor.idProduct() & 0xffff);
+            int id = ((descriptor.idVendor() & 0xffff) << 16) | (descriptor.idProduct() & 0xffff);
             if (!VALID_DEVICES.contains(id))
                 continue;
 
@@ -128,7 +135,7 @@ public final class UsbFinder
             {
                 String portSerial = port.getSerialNumber();
                 if (serial == null || serial.isEmpty() || portSerial == null ||
-                    serial.equals(portSerial))
+                        serial.equals(portSerial))
                 {
                     return port.getSystemPortName();
                 }

@@ -2,27 +2,26 @@ package com.cowlark.fluxengine.cli;
 
 import static com.google.common.base.Strings.nullToEmpty;
 
-import com.cowlark.fluxengine.usb.UsbFinder;
-import com.google.common.base.Strings;
-import java.util.List;
+import com.cowlark.fluxengine.usb.UsbFactory;
 import picocli.CommandLine.Command;
 import javax.inject.Inject;
+import java.util.List;
 
 @Command(name = "devices", description = "List attached USB devices")
 public class TestDevicesCommand implements Runnable
 {
-    private final UsbFinder usbFinder;
+    private final UsbFactory usbFactory;
 
     @Inject
-    TestDevicesCommand(UsbFinder usbFinder)
+    TestDevicesCommand(UsbFactory usbFactory)
     {
-        this.usbFinder = usbFinder;
+        this.usbFactory = usbFactory;
     }
 
     @Override
     public void run()
     {
-        List<UsbFinder.CandidateDevice> candidates = usbFinder.findUsbDevices();
+        List<UsbFactory.CandidateDevice> candidates = usbFactory.findUsbDevices();
         switch (candidates.size())
         {
             case 0:
@@ -41,7 +40,7 @@ public class TestDevicesCommand implements Runnable
         {
             System.out.println(String.format("%-15s %-30s %s",
                 "Type", "Serial number", "Port (if any)"));
-            for (UsbFinder.CandidateDevice candidate : candidates)
+            for (UsbFactory.CandidateDevice candidate : candidates)
             {
                 System.out.println(String.format("%-15s %-30s %s",
                     candidate.type.getDeviceName(),

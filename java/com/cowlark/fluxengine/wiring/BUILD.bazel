@@ -17,6 +17,9 @@ java_library(
 
 java_library(
     name = "wiring",
-    srcs = [],
+    srcs = glob(["*.java"]),
     exported_plugins = [":dagger_plugin"],
+    deps = [
+        "@maven//:javax_inject_javax_inject",
+    ],
 )

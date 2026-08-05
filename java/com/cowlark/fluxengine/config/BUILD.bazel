@@ -1,3 +1,4 @@
+load("@rules_java//java:defs.bzl", "java_library")
 load("@rules_proto//proto:defs.bzl", "proto_library")
 load("@com_google_protobuf//bazel:java_proto_library.bzl", "java_proto_library")
 
@@ -67,4 +68,15 @@ proto_library(
 java_proto_library(
     name = "config_java_proto",
     deps = [":config_proto"],
+)
+
+java_library(
+    name = "config",
+    srcs = glob(["*.java"]),
+    deps = [
+        ":config_java_proto",
+        "//java/com/cowlark/fluxengine/wiring",
+        "@maven//:com_google_dagger_dagger",
+        "@maven//:javax_inject_javax_inject",
+    ],
 )

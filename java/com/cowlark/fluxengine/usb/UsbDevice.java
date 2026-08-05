@@ -5,7 +5,7 @@ import com.cowlark.fluxengine.core.Bytes;
 /**
  * Base class for USB floppy drive devices, ported from lib/usb/usb.h.
  */
-public abstract class AbstractUsbDevice
+public abstract class UsbDevice
 {
     public void recalibrate()
     {

@@ -8,6 +8,8 @@ java_library(
     srcs = glob(["*.java"]),
     deps = [
         "//java/com/cowlark/fluxengine/cli",
+        "//java/com/cowlark/fluxengine/config",
+        "//java/com/cowlark/fluxengine/usb",
         "//java/com/cowlark/fluxengine/wiring",
         "@maven//:com_google_dagger_dagger",
         "@maven//:info_picocli_picocli",

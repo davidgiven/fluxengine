@@ -43,7 +43,7 @@ import java.time.Duration;
 /**
  * Greaseweazle floppy drive device, ported from lib/usb/greaseweazleusb.cc.
  */
-class GreaseweazleDevice extends AbstractUsbDevice
+class GreaseweazleUsbDevice extends UsbDevice
 {
     private enum Version
     {V22, V24, V29}
@@ -54,7 +54,7 @@ class GreaseweazleDevice extends AbstractUsbDevice
     private long clock;
     private long revolutions;
 
-    GreaseweazleDevice(String port, GreaseweazleProto config)
+    GreaseweazleUsbDevice(String port, GreaseweazleProto config)
     {
         this.config = config;
         this.serial = SerialPort.getCommPort(port);
