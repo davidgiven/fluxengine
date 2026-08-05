@@ -75,9 +75,6 @@ java_library(
     srcs = glob(["*.java"]),
     deps = [
         ":config_java_proto",
-        "//java/com/cowlark/fluxengine/wiring",
-        "@maven//:com_google_dagger_dagger",
         "@maven//:com_google_guava_guava",
-        "@maven//:javax_inject_javax_inject",
     ],
 )

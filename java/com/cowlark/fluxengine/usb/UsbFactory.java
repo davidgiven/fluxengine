@@ -4,7 +4,6 @@ import com.cowlark.fluxengine.config.Config;
 import com.fazecast.jSerialComm.SerialPort;
 import com.google.common.collect.ImmutableList;
 import org.usb4java.javax.Services;
-import javax.inject.Inject;
 import javax.usb.UsbDeviceDescriptor;
 import javax.usb.UsbException;
 import javax.usb.UsbHub;
@@ -51,7 +50,6 @@ public final class UsbFactory
 
     private final Config config;
 
-    @Inject
     public UsbFactory(Config config)
     {
         this.config = config;
