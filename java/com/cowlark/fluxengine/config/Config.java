@@ -15,4 +15,16 @@ public class Config
         this.args = args;
         /* TODO: process the unmatched arguments. */
     }
+
+    /* Looks up a --name=value argument; returns null if not present. */
+    public String get(String name)
+    {
+        String prefix = "--" + name + "=";
+        for (String arg : args)
+        {
+            if (arg.startsWith(prefix))
+                return arg.substring(prefix.length());
+        }
+        return null;
+    }
 }

@@ -269,12 +269,12 @@ public final class Bytes implements List<Byte>
                 if (inflater.finished())
                     break;
                 if (n == 0)
-                    throw new RuntimeException("failed to decompress data");
+                    throw new FluxEngineException("failed to decompress data");
             }
         }
         catch (DataFormatException e)
         {
-            throw new RuntimeException(
+            throw new FluxEngineException(
                 "failed to decompress data: " + e.getMessage());
         }
         finally

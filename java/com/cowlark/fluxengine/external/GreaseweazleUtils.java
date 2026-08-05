@@ -7,6 +7,7 @@ import static com.cowlark.fluxengine.external.FluxEngine.NS_PER_TICK;
 import com.cowlark.fluxengine.core.ByteReader;
 import com.cowlark.fluxengine.core.ByteWriter;
 import com.cowlark.fluxengine.core.Bytes;
+import com.cowlark.fluxengine.core.FluxEngineException;
 
 /**
  * Flux stream conversion helpers, ported from lib/external/greaseweazle.cc.
@@ -122,7 +123,7 @@ public final class GreaseweazleUtils
                         break;
 
                     default:
-                        throw new RuntimeException("bad opcode in Greaseweazle stream");
+                        throw new FluxEngineException("bad opcode in Greaseweazle stream");
                 }
             }
             else

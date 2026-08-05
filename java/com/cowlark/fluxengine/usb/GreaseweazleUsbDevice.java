@@ -34,6 +34,7 @@ import static com.cowlark.fluxengine.external.GreaseweazleUtils.GETINFO_FIRMWARE
 import com.cowlark.fluxengine.core.ByteReader;
 import com.cowlark.fluxengine.core.ByteWriter;
 import com.cowlark.fluxengine.core.Bytes;
+import com.cowlark.fluxengine.core.FluxEngineException;
 import com.cowlark.fluxengine.external.GreaseweazleUtils;
 import com.cowlark.fluxengine.usb.Usb.GreaseweazleProto;
 import com.fazecast.jSerialComm.SerialPort;
@@ -61,7 +62,7 @@ class GreaseweazleUsbDevice extends UsbDevice
         serial.setBaudRate(BAUD_NORMAL);
         serial.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 0, 0);
         if (!serial.openPort())
-            throw new RuntimeException("Unable to open serial port " + port);
+            throw new FluxEngineException("Unable to open serial port " + port);
 
         int version = getVersion();
         if (version >= 29)
@@ -71,7 +72,7 @@ class GreaseweazleUsbDevice extends UsbDevice
         else if (version == 22)
             this.version = Version.V22;
         else
-            throw new RuntimeException(String.format(
+            throw new FluxEngineException(String.format(
                     "only Greaseweazle firmware versions 22 and 24 or above are currently " +
                             "supported, but you have version %d. Please file a bug.",
                     version));
@@ -130,13 +131,13 @@ class GreaseweazleUsbDevice extends UsbDevice
         Bytes buffer = readBytes(2);
 
         if ((buffer.getByte(0) & 0xff) != (command[0] & 0xff))
-            throw new RuntimeException(String.format(
+            throw new FluxEngineException(String.format(
                     "command returned garbage (0x%x != 0x%x with status 0x%x)",
                     buffer.getByte(0),
                     command[0],
                     buffer.getByte(1)));
         if (buffer.getByte(1) != 0)
-            throw new RuntimeException("Greaseweazle error: " + gwError(buffer.getByte(1) & 0xff));
+            throw new FluxEngineException("Greaseweazle error: " + gwError(buffer.getByte(1) & 0xff));
     }
 
     @Override
@@ -149,7 +150,7 @@ class GreaseweazleUsbDevice extends UsbDevice
     public long getRotationalPeriod(int hardSectorCount)
     {
         if (hardSectorCount != 0)
-            throw new RuntimeException("hard sectors are currently unsupported on the " +
+            throw new FluxEngineException("hard sectors are currently unsupported on the " +
                     "Greaseweazle");
 
         /* The Greaseweazle doesn't have a command to fetch the period directly,
@@ -201,7 +202,7 @@ class GreaseweazleUsbDevice extends UsbDevice
                         break;
 
                     default:
-                        throw new RuntimeException("bad opcode in Greaseweazle stream");
+                        throw new FluxEngineException("bad opcode in Greaseweazle stream");
                 }
             } else
             {
@@ -216,7 +217,7 @@ class GreaseweazleUsbDevice extends UsbDevice
         }
 
         if (secondIndex == -1)
-            throw new RuntimeException(
+            throw new FluxEngineException(
                     "unable to determine disk rotational period (is a disk in the drive?)");
         doCommand(CMD_GET_FLUX_STATUS);
 
@@ -315,7 +316,7 @@ class GreaseweazleUsbDevice extends UsbDevice
     public Bytes read(int side, boolean synced, long readTime, long hardSectorThreshold)
     {
         if (hardSectorThreshold != 0)
-            throw new RuntimeException("hard sectors are currently unsupported on the " +
+            throw new FluxEngineException("hard sectors are currently unsupported on the " +
                     "Greaseweazle");
 
         doCommand(CMD_HEAD, side);
@@ -369,7 +370,7 @@ class GreaseweazleUsbDevice extends UsbDevice
     public void write(int side, Bytes fldata, long hardSectorThreshold)
     {
         if (hardSectorThreshold != 0)
-            throw new RuntimeException("hard sectors are currently unsupported on the " +
+            throw new FluxEngineException("hard sectors are currently unsupported on the " +
                     "Greaseweazle");
 
         doCommand(CMD_HEAD, side);
@@ -395,7 +396,7 @@ class GreaseweazleUsbDevice extends UsbDevice
     public void erase(int side, long hardSectorThreshold)
     {
         if (hardSectorThreshold != 0)
-            throw new RuntimeException("hard sectors are currently unsupported on the " +
+            throw new FluxEngineException("hard sectors are currently unsupported on the " +
                     "Greaseweazle");
 
         doCommand(CMD_HEAD, side);
@@ -422,7 +423,7 @@ class GreaseweazleUsbDevice extends UsbDevice
     @Override
     public void measureVoltages(Voltages[] voltages)
     {
-        throw new RuntimeException("unsupported operation on the Greaseweazle");
+        throw new FluxEngineException("unsupported operation on the Greaseweazle");
     }
 
     private static String gwError(int e)
@@ -478,7 +479,7 @@ class GreaseweazleUsbDevice extends UsbDevice
             int read = serial.readBytes(chunk,
                 Math.min(chunk.length, count - bw.pos()));
             if (read < 0)
-                throw new RuntimeException("serial read failed");
+                throw new FluxEngineException("serial read failed");
             for (int i = 0; i < read; i++)
                 bw.write8(chunk[i] & 0xff);
         }
@@ -489,7 +490,7 @@ class GreaseweazleUsbDevice extends UsbDevice
     {
         int written = serial.writeBytes(data, data.length);
         if (written != data.length)
-            throw new RuntimeException("serial write failed");
+            throw new FluxEngineException("serial write failed");
     }
 
     private void writeBytes(Bytes data)

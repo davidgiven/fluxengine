@@ -1,6 +1,9 @@
 package com.cowlark.fluxengine.usb;
 
+import static com.google.common.base.Strings.nullToEmpty;
+
 import com.cowlark.fluxengine.config.Config;
+import com.cowlark.fluxengine.core.FluxEngineException;
 import com.fazecast.jSerialComm.SerialPort;
 import com.google.common.collect.ImmutableList;
 import org.usb4java.javax.Services;
@@ -85,7 +88,62 @@ public final class UsbFactory
 
     public static UsbDevice connect(Config config)
     {
-        return null;
+        return connect(selectDevice(config));
+    }
+
+    /* Selects a device to use, based on the configuration, ported from
+     * lib/usb/usb.cc. */
+    public static CandidateDevice selectDevice(Config config)
+    {
+        ImmutableList<CandidateDevice> candidates = findUsbDevices();
+        if (candidates.isEmpty())
+            throw new FluxEngineException(
+                    "no devices found (is one plugged in? Do you have the " +
+                            "appropriate permissions?");
+
+        String wantedSerial = config.get("usb.serial");
+        if (wantedSerial != null)
+        {
+            for (CandidateDevice candidate : candidates)
+            {
+                if (candidate.serial.equals(wantedSerial))
+                    return candidate;
+            }
+            throw new FluxEngineException(
+                    "serial number not found (try without one to list or " +
+                            "autodetect devices)");
+        }
+
+        if (candidates.size() == 1)
+            return candidates.get(0);
+
+        System.err.println(
+                "More than one device detected; use --usb.serial=<serial> to " +
+                        "select one:");
+        for (CandidateDevice candidate : candidates)
+        {
+            System.err.print("    ");
+            switch (candidate.type)
+            {
+                case FLUXENGINE:
+                    System.err.printf("FluxEngine: %s\n", candidate.serial);
+                    break;
+
+                case GREASEWEAZLE:
+                    System.err.printf("Greaseweazle: %s on %s\n",
+                            candidate.serial,
+                            nullToEmpty(candidate.serialPort));
+                    break;
+
+                case APPLESAUCE:
+                    System.err.printf("Applesauce: %s on %s\n",
+                            candidate.serial,
+                            nullToEmpty(candidate.serialPort));
+                    break;
+            }
+        }
+        System.exit(1);
+        return null; /* unreachable */
     }
 
     private static void walkHub(UsbHub hub, ImmutableList.Builder<CandidateDevice> candidates)
