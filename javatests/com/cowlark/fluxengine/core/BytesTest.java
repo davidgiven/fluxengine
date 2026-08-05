@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertThrows;
 
+import com.google.common.collect.ImmutableList;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -22,7 +23,58 @@ public class BytesTest
         assertThrows(IndexOutOfBoundsException.class, () -> bytes.set(3, (byte) 0));
         assertThrows(IndexOutOfBoundsException.class, () -> bytes.slice(-1, 1));
         assertThrows(IndexOutOfBoundsException.class, () -> bytes.slice(0, -1));
-        assertThrows(IndexOutOfBoundsException.class, () -> bytes.slice(1, 3));
+    }
+
+    @Test
+    public void sliceZeroPads()
+    {
+        Bytes bytes = Bytes.of(1, 2, 3);
+
+        assertThat(bytes.slice(1, 3).toArray()).isEqualTo(new byte[] {2, 3, 0});
+        assertThat(bytes.slice(5, 2).toArray()).isEqualTo(new byte[] {0, 0});
+        assertThat(bytes.slice(3, 2).toArray()).isEqualTo(new byte[] {0, 0});
+        assertThat(bytes.slice(2).toArray()).isEqualTo(new byte[] {3});
+        assertThat(bytes.slice(5).isEmpty()).isTrue();
+    }
+
+    @Test
+    public void clear()
+    {
+        Bytes bytes = Bytes.of(1, 2, 3);
+        bytes.clear();
+        assertThat(bytes.size()).isEqualTo(0);
+        assertThat(bytes.isEmpty()).isTrue();
+    }
+
+    @Test
+    public void split()
+    {
+        Bytes bytes = Bytes.of(1, 2, 0, 3, 4, 0, 5);
+        ImmutableList<Bytes> pieces = bytes.split(0);
+
+        assertThat(pieces).hasSize(3);
+        assertThat(pieces.get(0).toArray()).isEqualTo(new byte[] {1, 2});
+        assertThat(pieces.get(1).toArray()).isEqualTo(new byte[] {3, 4});
+        assertThat(pieces.get(2).toArray()).isEqualTo(new byte[] {5});
+
+        /* Consecutive separators and a trailing separator yield empty pieces. */
+        ImmutableList<Bytes> empties = Bytes.of(0, 1, 0, 0).split(0);
+        assertThat(empties).hasSize(4);
+        assertThat(empties.get(0).isEmpty()).isTrue();
+        assertThat(empties.get(1).toArray()).isEqualTo(new byte[] {1});
+        assertThat(empties.get(2).isEmpty()).isTrue();
+        assertThat(empties.get(3).isEmpty()).isTrue();
+    }
+
+    @Test
+    public void swab()
+    {
+        assertThat(Bytes.of(1, 2, 3, 4).swab().toArray())
+            .isEqualTo(new byte[] {2, 1, 4, 3});
+
+        /* Odd length pads the trailing byte with a zero. */
+        assertThat(Bytes.of(1, 2, 3).swab().toArray())
+            .isEqualTo(new byte[] {2, 1, 0, 3});
     }
 
     @Test

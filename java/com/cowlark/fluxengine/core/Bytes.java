@@ -1,5 +1,6 @@
 package com.cowlark.fluxengine.core;
 
+import com.google.common.collect.ImmutableList;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -103,9 +104,63 @@ public final class Bytes implements Iterable<Byte>
 
     public Bytes slice(int start, int len)
     {
-        if (start < 0 || len < 0 || start + len > size())
+        if (start < 0 || len < 0)
             throw new IndexOutOfBoundsException();
+        if (start >= size())
+            return new Bytes(len);
+        int available = Math.min(len, size() - start);
+        if (available < len)
+        {
+            Bytes result = new Bytes(len);
+            System.arraycopy(storage.data, low + start, result.storage.data, 0,
+                available);
+            return result;
+        }
         return new Bytes(storage, low + start, low + start + len);
+    }
+
+    public Bytes slice(int start)
+    {
+        int len = 0;
+        if (start < size())
+            len = size() - start;
+        return slice(start, len);
+    }
+
+    public void clear()
+    {
+        resize(0);
+    }
+
+    public ImmutableList<Bytes> split(int separator)
+    {
+        ImmutableList.Builder<Bytes> pieces = ImmutableList.builder();
+        int lastEnd = 0;
+        for (int i = 0; i < size(); i++)
+        {
+            if ((get(i) & 0xff) == separator)
+            {
+                pieces.add(slice(lastEnd, i - lastEnd));
+                lastEnd = i + 1;
+            }
+        }
+        pieces.add(slice(lastEnd));
+        return pieces.build();
+    }
+
+    public Bytes swab()
+    {
+        Bytes output = new Bytes(0);
+        ByteWriter bw = new ByteWriter(output);
+        ByteReader br = new ByteReader(this);
+        while (!br.eof())
+        {
+            int a = br.read8();
+            int b = br.eof() ? 0 : br.read8();
+            bw.write8(b);
+            bw.write8(a);
+        }
+        return output;
     }
 
     public Bytes concat(Bytes other)
