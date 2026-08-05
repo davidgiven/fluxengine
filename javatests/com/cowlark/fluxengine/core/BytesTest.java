@@ -61,7 +61,6 @@ public class BytesTest
     @Test
     public void copyOnWriteOnlyWhenShared()
     {
-        /* Lone bytes: writes don't detach, so the refcount stays 1. */
         Bytes lone = Bytes.of(1, 2, 3);
         lone.set(0, (byte) 9);
         lone.resize(4);
@@ -92,5 +91,17 @@ public class BytesTest
         assertThat(parent3.size()).isEqualTo(5);
         assertThat(view3.size()).isEqualTo(3);
         assertThat(view3.get(0) & 0xff).isEqualTo(1);
+    }
+
+    @Test
+    public void iteration()
+    {
+        Bytes bytes = Bytes.of(1, 2, 3);
+        int expected = 1;
+        for (Byte b : bytes)
+        {
+            assertThat(b.intValue()).isEqualTo(expected++);
+        }
+        assertThat(expected).isEqualTo(4);
     }
 }

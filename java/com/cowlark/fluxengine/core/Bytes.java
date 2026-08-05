@@ -7,7 +7,7 @@ import java.nio.charset.StandardCharsets;
  * parent's storage; writes to a shared storage copy it first, so changes to
  * one window are invisible to the others.
  */
-public final class Bytes
+public final class Bytes implements Iterable<Byte>
 {
     private static final class Storage
     {
@@ -134,6 +134,12 @@ public final class Bytes
     int refcount()
     {
         return storage.refcount;
+    }
+
+    @Override
+    public ByteReader iterator()
+    {
+        return new ByteReader(this);
     }
 
     @Override

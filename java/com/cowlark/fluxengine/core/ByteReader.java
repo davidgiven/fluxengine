@@ -1,9 +1,12 @@
 package com.cowlark.fluxengine.core;
 
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
 /**
  * A cursor which reads values from a Bytes, ported from lib/core/bytes.h.
  */
-public final class ByteReader
+public final class ByteReader implements Iterator<Byte>
 {
     private final Bytes bytes;
     private int pos;
@@ -39,6 +42,20 @@ public final class ByteReader
     public int remaining()
     {
         return bytes.size() - pos;
+    }
+
+    @Override
+    public boolean hasNext()
+    {
+        return !eof();
+    }
+
+    @Override
+    public Byte next()
+    {
+        if (!hasNext())
+            throw new NoSuchElementException();
+        return (byte) read8();
     }
 
     public Bytes read(int len)

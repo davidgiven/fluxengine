@@ -1,9 +1,12 @@
 package com.cowlark.fluxengine.core;
 
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
 /**
  * A cursor which reads bits from a ByteReader.
  */
-public final class BitReader
+public final class BitReader implements Iterator<Boolean>
 {
     private final ByteReader reader;
     private int fifo;
@@ -28,5 +31,19 @@ public final class BitReader
     public boolean eof()
     {
         return bitcount == 0 && reader.eof();
+    }
+
+    @Override
+    public boolean hasNext()
+    {
+        return !eof();
+    }
+
+    @Override
+    public Boolean next()
+    {
+        if (!hasNext())
+            throw new NoSuchElementException();
+        return get();
     }
 }

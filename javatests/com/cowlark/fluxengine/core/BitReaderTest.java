@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertThrows;
 
+import java.util.Iterator;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -52,5 +53,20 @@ public class BitReaderTest
             reader.get();
 
         assertThrows(IndexOutOfBoundsException.class, reader::get);
+    }
+
+    @Test
+    public void iteration()
+    {
+        Iterator<Boolean> iterator = new BitReader(new ByteReader(Bytes.of(0xd6)));
+        boolean[] expected = {
+            true, true, false, true, false, true, true, false};
+        for (boolean bit : expected)
+        {
+            assertThat(iterator.hasNext()).isTrue();
+            assertThat(iterator.next()).isEqualTo(bit);
+        }
+        assertThat(iterator.hasNext()).isFalse();
+        assertThrows(java.util.NoSuchElementException.class, iterator::next);
     }
 }
