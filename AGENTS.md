@@ -44,6 +44,26 @@ Useful commands:
   or targeting a new platform.
 - The native binary must remain a single standalone executable (no runtime files shipped).
 
+## Lombok builders
+
+- The `Flags` classes (`java/com/cowlark/fluxengine/core/Flags.java`) use Lombok builders.
+  Construct flag instances with
+  `XxxFlag.builder().setGroup(g).setNames(names).setHelpText(h).build()`
+  rather than constructors. `@Builder(setterPrefix = "set")` on the private all-args
+  constructor generates the `setX` methods (the ctor param is named `helpText` for
+  `setHelpText`). The `core` BUILD defines a `lombok_plugin` (`generates_api = True`,
+  wired via `plugins`); lombok is also a compile-time `dep` so the `import lombok.Builder;`
+  resolves.
+- Lombok doesn't run under Turbine, and generated classes don't reach the header jar, so
+  `.bazelrc` sets `--experimental_java_header_compilation=false`.
+- Pattern: put `@Builder` on a private all-args constructor. `@Builder.Default` can't supply
+  custom defaults on parameters (illegal `= value` syntax, and defaults to 0/null/false),
+  so normalize defaults in the constructor body (e.g. `defaultValue != null ? defaultValue :
+  ""`). `FlagGroup.addFlag(this)` happens in the base `Flag` constructor, so `build()`
+  registers the flag.
+- `HexIntFlag` extends `ValueFlag<Integer>` directly (not `IntFlag`): two `@Builder`s would
+  both generate a static `builder()` and clash via hiding.
+
 ## Dependency injection (Dagger)
 
 - The Dagger annotation processor lives in the `wiring` package

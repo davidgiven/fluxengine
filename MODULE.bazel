@@ -11,7 +11,7 @@ use_repo(graalvm_ext, "graalvm")
 maven = use_extension("@rules_jvm_external//:extensions.bzl", "maven")
 maven.install(
     artifacts = [
-        "org.projectlombok:lombok:1.18.30",
+        "org.projectlombok:lombok:1.18.46",
         "com.fazecast:jSerialComm:2.11.4",
         "com.google.guava:guava:33.6.0-jre",
         "com.google.truth:truth:1.4.5",

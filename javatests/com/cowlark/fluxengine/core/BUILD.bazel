@@ -14,6 +14,16 @@ java_test(
 )
 
 java_test(
+    name = "FlagsTest",
+    srcs = ["FlagsTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/core",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
     name = "ByteReaderTest",
     srcs = ["ByteReaderTest.java"],
     deps = [
