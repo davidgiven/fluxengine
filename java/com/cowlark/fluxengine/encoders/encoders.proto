@@ -2,18 +2,18 @@ syntax = "proto2";
 
 option java_package = "com.cowlark.fluxengine.encoders";
 
-import "arch/agat/agat.proto";
-import "arch/amiga/amiga.proto";
-import "arch/apple2/apple2.proto";
-import "arch/brother/brother.proto";
-import "arch/c64/c64.proto";
-import "arch/ibm/ibm.proto";
-import "arch/macintosh/macintosh.proto";
-import "arch/micropolis/micropolis.proto";
-import "arch/northstar/northstar.proto";
-import "arch/tartu/tartu.proto";
-import "arch/tids990/tids990.proto";
-import "arch/victor9k/victor9k.proto";
+import "com/cowlark/fluxengine/arch/agat/agat.proto";
+import "com/cowlark/fluxengine/arch/amiga/amiga.proto";
+import "com/cowlark/fluxengine/arch/apple2/apple2.proto";
+import "com/cowlark/fluxengine/arch/brother/brother.proto";
+import "com/cowlark/fluxengine/arch/c64/c64.proto";
+import "com/cowlark/fluxengine/arch/ibm/ibm.proto";
+import "com/cowlark/fluxengine/arch/macintosh/macintosh.proto";
+import "com/cowlark/fluxengine/arch/micropolis/micropolis.proto";
+import "com/cowlark/fluxengine/arch/northstar/northstar.proto";
+import "com/cowlark/fluxengine/arch/tartu/tartu.proto";
+import "com/cowlark/fluxengine/arch/tids990/tids990.proto";
+import "com/cowlark/fluxengine/arch/victor9k/victor9k.proto";
 
 message EncoderProto
 {

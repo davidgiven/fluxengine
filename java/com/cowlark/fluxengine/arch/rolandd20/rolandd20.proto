@@ -1,0 +1,7 @@
+syntax = "proto2";
+
+option java_package = "com.cowlark.fluxengine.rolandd20";
+
+message RolandD20DecoderProto {}
+
+

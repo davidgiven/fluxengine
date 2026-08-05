@@ -1,0 +1,6 @@
+syntax = "proto2";
+
+option java_package = "com.cowlark.fluxengine.fb100";
+
+message Fb100DecoderProto {}
+

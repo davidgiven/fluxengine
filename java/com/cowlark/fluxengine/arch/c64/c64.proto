@@ -1,0 +1,13 @@
+syntax = "proto2";
+
+option java_package = "com.cowlark.fluxengine.c64";
+
+import "com/cowlark/fluxengine/config/common.proto";
+
+message Commodore64DecoderProto {}
+
+message Commodore64EncoderProto {
+	optional double post_index_gap_us = 1 [default=0.0,
+		(help) = "post-index gap before first sector header."];
+}
+

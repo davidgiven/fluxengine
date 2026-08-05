@@ -44,3 +44,27 @@ java_proto_library(
     name = "drive_java_proto",
     deps = [":drive_proto"],
 )
+
+proto_library(
+    name = "config_proto",
+    srcs = ["config.proto"],
+    strip_import_prefix = "/java/",
+    deps = [
+        ":common_proto",
+        ":drive_proto",
+        ":layout_proto",
+        "//java/com/cowlark/fluxengine/decoders:decoders_proto",
+        "//java/com/cowlark/fluxengine/encoders:encoders_proto",
+        "//java/com/cowlark/fluxengine/fluxsink:fluxsink_proto",
+        "//java/com/cowlark/fluxengine/fluxsource:fluxsource_proto",
+        "//java/com/cowlark/fluxengine/imagereader:imagereader_proto",
+        "//java/com/cowlark/fluxengine/imagewriter:imagewriter_proto",
+        "//java/com/cowlark/fluxengine/usb:usb_proto",
+        "//java/com/cowlark/fluxengine/vfs:vfs_proto",
+    ],
+)
+
+java_proto_library(
+    name = "config_java_proto",
+    deps = [":config_proto"],
+)
