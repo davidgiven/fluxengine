@@ -2,7 +2,7 @@ package com.cowlark.fluxengine.usb;
 
 import static com.google.common.base.Strings.nullToEmpty;
 
-import com.cowlark.fluxengine.config.ConfigFile.ConfigProto;
+import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.core.FluxEngineException;
 import com.fazecast.jSerialComm.SerialPort;
 import com.google.common.base.Strings;

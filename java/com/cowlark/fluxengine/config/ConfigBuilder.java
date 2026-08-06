@@ -1,21 +1,21 @@
 package com.cowlark.fluxengine.config;
 
-import com.cowlark.fluxengine.config.ConfigFile.ConfigProto;
+import com.cowlark.fluxengine.config.ConfigProto;
 import com.google.common.collect.ImmutableList;
 
 /**
  * The assembled configuration, built from the unmatched command-line
  * arguments.
  */
-public class ConfigParser
+public class ConfigBuilder
 {
     private ConfigProto proto = ConfigProto.getDefaultInstance();
 
-    public ConfigParser()
+    public ConfigBuilder()
     {
     }
 
-    public ConfigParser parse(ImmutableList<String> args)
+    public ConfigBuilder parse(ImmutableList<String> args)
     {
         int i = 0;
         while (i < args.size())
@@ -53,7 +53,7 @@ public class ConfigParser
         return this;
     }
 
-    public ConfigParser set(String key, String value)
+    public ConfigBuilder set(String key, String value)
     {
         return this;
     }
