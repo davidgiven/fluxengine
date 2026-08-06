@@ -18,11 +18,11 @@ public class FlagsTest
     {
         FlagGroup group = new FlagGroup();
         StringFlag config = StringFlag.builder()
-            .setGroup(group).setNames(List.of("--config", "-c")).setHelpText("config file").build();
+            .setGroup(group).setName("--config").setName("-c").setHelpText("config file").build();
         IntFlag count = IntFlag.builder()
-            .setGroup(group).setNames(List.of("--count")).setHelpText("count").build();
+            .setGroup(group).setName("--count").setHelpText("count").build();
         BoolFlag verbose = BoolFlag.builder()
-            .setGroup(group).setNames(List.of("--verbose")).setHelpText("verbose").build();
+            .setGroup(group).setName("--verbose").setHelpText("verbose").build();
 
         Flags.parse(new String[] {
             "--config=foo", "-c", "bar", "--count", "7", "--verbose=true"}, group);
@@ -37,10 +37,10 @@ public class FlagsTest
     {
         FlagGroup common = new FlagGroup();
         StringFlag serial = StringFlag.builder()
-            .setGroup(common).setNames(List.of("--serial")).setHelpText("serial").build();
+            .setGroup(common).setName("--serial").setHelpText("serial").build();
         FlagGroup group = new FlagGroup(common);
         StringFlag thing = StringFlag.builder()
-            .setGroup(group).setNames(List.of("--thing")).setHelpText("thing").build();
+            .setGroup(group).setName("--thing").setHelpText("thing").build();
 
         Flags.parse(new String[] {"--serial=abc", "--thing=xyz"}, group);
 
@@ -54,7 +54,7 @@ public class FlagsTest
         FlagGroup first = new FlagGroup();
         FlagGroup second = new FlagGroup();
         StringFlag thing = StringFlag.builder()
-            .setGroup(second).setNames(List.of("--thing")).setHelpText("thing").build();
+            .setGroup(second).setName("--thing").setHelpText("thing").build();
 
         Flags.parse(new String[] {"--thing=xyz"}, first, second);
 
@@ -65,8 +65,8 @@ public class FlagsTest
     public void duplicateNamesThrow()
     {
         FlagGroup group = new FlagGroup();
-        StringFlag.builder().setGroup(group).setNames(List.of("--foo")).setHelpText("one").build();
-        StringFlag.builder().setGroup(group).setNames(List.of("--foo")).setHelpText("two").build();
+        StringFlag.builder().setGroup(group).setName("--foo").setHelpText("one").build();
+        StringFlag.builder().setGroup(group).setName("--foo").setHelpText("two").build();
 
         assertThrows(IllegalStateException.class,
             () -> Flags.parse(new String[] {"--foo=x"}, group));
@@ -95,7 +95,7 @@ public class FlagsTest
     {
         FlagGroup group = new FlagGroup();
         StringFlag flag = StringFlag.builder()
-            .setGroup(group).setNames(List.of("--foo")).setHelpText("foo").build();
+            .setGroup(group).setName("--foo").setHelpText("foo").build();
 
         assertThrows(IllegalStateException.class, flag::get);
     }
@@ -105,7 +105,7 @@ public class FlagsTest
     {
         FlagGroup group = new FlagGroup();
         StringFlag foo = StringFlag.builder()
-            .setGroup(group).setNames(List.of("--foo", "-f")).setHelpText("foo").build();
+            .setGroup(group).setName("--foo").setName("-f").setHelpText("foo").build();
 
         assertThat(group.findFlag("--foo")).isSameInstanceAs(foo);
         assertThat(group.findFlag("-f")).isSameInstanceAs(foo);
@@ -113,11 +113,32 @@ public class FlagsTest
     }
 
     @Test
+    public void setNameAddsEachName()
+    {
+        FlagGroup group = new FlagGroup();
+        StringFlag flag = StringFlag.builder()
+            .setGroup(group).setName("--long").setName("-l").setName("-long")
+            .setHelpText("flag").build();
+
+        assertThat(flag.names()).containsExactly("--long", "-l", "-long");
+    }
+
+    @Test
+    public void setNamesTakesACollection()
+    {
+        FlagGroup group = new FlagGroup();
+        StringFlag flag = StringFlag.builder()
+            .setGroup(group).setNames(List.of("--long", "-l")).setHelpText("flag").build();
+
+        assertThat(flag.names()).containsExactly("--long", "-l");
+    }
+
+    @Test
     public void findFlagRecursesToParents()
     {
         FlagGroup common = new FlagGroup();
         StringFlag serial = StringFlag.builder()
-            .setGroup(common).setNames(List.of("--serial")).setHelpText("serial").build();
+            .setGroup(common).setName("--serial").setHelpText("serial").build();
         FlagGroup group = new FlagGroup(common);
 
         assertThat(group.findFlag("--serial")).isSameInstanceAs(serial);
@@ -128,7 +149,7 @@ public class FlagsTest
     {
         FlagGroup group = new FlagGroup();
         SettableFlag flag = SettableFlag.builder()
-            .setGroup(group).setNames(List.of("--read-only")).setHelpText("read only").build();
+            .setGroup(group).setName("--read-only").setHelpText("read only").build();
 
         List<String> filenames = Flags.parseWithFilenames(
             new String[] {"--read-only", "image.dsk"}, unused -> false, group);

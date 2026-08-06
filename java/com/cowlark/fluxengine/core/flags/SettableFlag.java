@@ -1,14 +1,15 @@
 package com.cowlark.fluxengine.core.flags;
 
-import lombok.Builder;
 import java.util.List;
+import lombok.Builder;
+import lombok.Singular;
 
 public class SettableFlag extends Flag
 {
     private boolean value;
 
     @Builder(setterPrefix = "set")
-    private SettableFlag(FlagGroup group, List<String> names, String helpText)
+    private SettableFlag(FlagGroup group, @Singular List<String> names, String helpText)
     {
         super(group, names, helpText);
     }

@@ -4,11 +4,12 @@ import com.cowlark.fluxengine.core.FluxEngineException;
 import java.util.List;
 import java.util.function.Consumer;
 import lombok.Builder;
+import lombok.Singular;
 
 public class BoolFlag extends ValueFlag<Boolean>
 {
     @Builder(setterPrefix = "set")
-    private BoolFlag(FlagGroup group, List<String> names, String helpText,
+    private BoolFlag(FlagGroup group, @Singular List<String> names, String helpText,
         boolean defaultValue, Consumer<Boolean> callback)
     {
         super(group, names, helpText, defaultValue,

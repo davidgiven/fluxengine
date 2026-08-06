@@ -3,11 +3,12 @@ package com.cowlark.fluxengine.core.flags;
 import java.util.List;
 import java.util.function.Consumer;
 import lombok.Builder;
+import lombok.Singular;
 
 public class IntFlag extends ValueFlag<Integer>
 {
     @Builder(setterPrefix = "set")
-    private IntFlag(FlagGroup group, List<String> names, String helpText,
+    private IntFlag(FlagGroup group, @Singular List<String> names, String helpText,
         int defaultValue, Consumer<Integer> callback)
     {
         super(group, names, helpText, defaultValue,

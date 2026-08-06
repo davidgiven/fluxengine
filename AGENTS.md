@@ -62,6 +62,10 @@ Useful commands:
   so normalize defaults in the constructor body (e.g. `defaultValue != null ? defaultValue :
   ""`). `FlagGroup.addFlag(this)` happens in the base `Flag` constructor, so `build()`
   registers the flag.
+- The `names` parameter is annotated `@Singular`, so builders offer `setName("--foo")`
+  (one name at a time), `setNames(collection)`, and `clearNames()` — Lombok can't generate a
+  varargs setter, and `@SuperBuilder` is unusable here because its auto-generated constructor
+  can't run the `addFlag` side-effect, so `@Singular` avoids hand-writing a builder per class.
 - `HexIntFlag` extends `ValueFlag<Integer>` directly (not `IntFlag`): two `@Builder`s would
   both generate a static `builder()` and clash via hiding.
 

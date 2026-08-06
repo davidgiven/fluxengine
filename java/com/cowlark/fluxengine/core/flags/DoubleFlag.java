@@ -3,11 +3,12 @@ package com.cowlark.fluxengine.core.flags;
 import java.util.List;
 import java.util.function.Consumer;
 import lombok.Builder;
+import lombok.Singular;
 
 public class DoubleFlag extends ValueFlag<Double>
 {
     @Builder(setterPrefix = "set")
-    private DoubleFlag(FlagGroup group, List<String> names, String helpText,
+    private DoubleFlag(FlagGroup group, @Singular List<String> names, String helpText,
         Double defaultValue, Consumer<Double> callback)
     {
         super(group, names, helpText,
