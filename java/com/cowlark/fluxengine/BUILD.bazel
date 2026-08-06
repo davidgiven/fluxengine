@@ -5,6 +5,7 @@ package(default_visibility = ["//visibility:public"])
 
 java_binary(
     name = "fluxengine",
+    jvm_flags = ["--enable-native-access=ALL-UNNAMED"],
     main_class = "com.cowlark.fluxengine.cli.Main",
     runtime_deps = ["//java/com/cowlark/fluxengine/cli"],
 )
@@ -16,9 +17,9 @@ native_image(
         "-O2",
         "-H:IncludeResources=(javax.usb.properties|org/usb4java/.*/libusb4java\\..*|.*/libjSerialComm.*|.*/jSerialComm.dll)",
     ],
+    jar = ":fluxengine_deploy.jar",
     jni_config = ["jni-config.json"],
     reflection_config = ["reflect-config.json"],
     resource_config = ["resource-config.json"],
     serialization_config = ["serialization-config.json"],
-    jar = ":fluxengine_deploy.jar",
 )
