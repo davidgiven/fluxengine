@@ -4,6 +4,8 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertThrows;
 
+import com.cowlark.fluxengine.core.flags.FlagGroup;
+import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -58,5 +60,30 @@ public class ConfigBuilderTest
 
         assertThrows(ConfigException.class,
             () -> new ConfigBuilder().loadConfigFile(file.toString()));
+    }
+
+    @Test
+    public void setMergesWithLoadedConfig() throws IOException
+    {
+        Path file = Files.createTempFile("config", ".textproto");
+        Files.writeString(file, "shortname: \"myconfig\"\n");
+
+        ConfigProto proto = new ConfigBuilder()
+                .loadConfigFile(file.toString())
+                .set("tracks", "c=0:2")
+                .build();
+
+        assertThat(proto.getShortname()).isEqualTo("myconfig");
+        assertThat(proto.getTracks()).isEqualTo("c=0:2");
+    }
+
+    @Test
+    public void fromFlagsSetsDottedConfig()
+    {
+        ConfigProto proto = new ConfigBuilder()
+                .fromFlags(ImmutableList.of("--drive.drive=1"), new FlagGroup())
+                .build();
+
+        assertThat(proto.getDrive().getDrive()).isEqualTo(1);
     }
 }

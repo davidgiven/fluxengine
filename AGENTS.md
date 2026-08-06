@@ -82,6 +82,13 @@ Useful commands:
   intercept/absorb flags (e.g. a config group) before they fall through to its parents.
 - `parseWithFilenames` returns `ImmutableList` (Guava). Duplicate flag names throw
   `IllegalStateException`; unknown flags throw `FluxEngineException`.
+- `ConfigFlagGroup` (config package) overrides `findFlag` to intercept dotted `--key.subkey=value`
+  arguments: it strips the leading `--` and routes them to `ConfigBuilder.set(path, value)`,
+  which delegates to `ProtoPath.set(builder, path, value)`. `ProtoPath` resolves the dotted
+  path (with optional `field[4]` indices) against the `ConfigProto` builder via
+  `com.google.protobuf` reflection, creating intermediate messages and coercing the string
+  value (int/uint/long/float/double/bool/enum) as needed. Unknown paths and bad values throw
+  `ConfigException`.
 
 ## Dependency injection (Dagger)
 

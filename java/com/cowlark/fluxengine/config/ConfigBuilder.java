@@ -62,6 +62,7 @@ public class ConfigBuilder
 
     public ConfigBuilder set(String key, String value)
     {
+        ProtoPath.set(proto, key, value);
         return this;
     }
 

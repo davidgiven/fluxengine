@@ -30,8 +30,14 @@ public class ConfigFlagGroup extends FlagGroup
     @Override
     public Flag findFlag(String key)
     {
-        if (key.contains("."))
-            return ActionFlag.builder().build();
-        return null;
+        if (key.startsWith("--") && key.contains("."))
+        {
+            String path = key.substring(2);
+            return ActionFlag.builder()
+                    .setGroup(this)
+                    .setValueCallback(value -> builder.set(path, value))
+                    .build();
+        }
+        return super.findFlag(key);
     }
 }
