@@ -1,0 +1,21 @@
+load("@rules_java//java:defs.bzl", "java_library", "java_plugin")
+
+package(default_visibility = ["//visibility:public"])
+
+java_plugin(
+    name = "lombok_plugin",
+    processor_class = "lombok.launch.AnnotationProcessorHider$AnnotationProcessor",
+    generates_api = True,
+    deps = ["@maven//:org_projectlombok_lombok"],
+)
+
+java_library(
+    name = "flags",
+    srcs = glob(["*.java"]),
+    plugins = [":lombok_plugin"],
+    deps = [
+        "//java/com/cowlark/fluxengine/core",
+        "@maven//:com_google_guava_guava",
+        "@maven//:org_projectlombok_lombok",
+    ],
+)

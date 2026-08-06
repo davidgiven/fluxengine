@@ -14,7 +14,8 @@ GraalVM extension/rule).
 - Java sources: `java/` (standard Bazel layout, `com` is a direct child of `java`)
 - Java tests: `javatests/`
 - Packages (Java): `com.cowlark.fluxengine` (Main, FluxEngineComponent),
-  `com.cowlark.fluxengine.cli`, `com.cowlark.fluxengine.usb`, `com.cowlark.fluxengine.wiring`
+  `com.cowlark.fluxengine.cli`, `com.cowlark.fluxengine.core`, `com.cowlark.fluxengine.core.flags`,
+  `com.cowlark.fluxengine.usb`, `com.cowlark.fluxengine.wiring`
 - Each package directory has its own `BUILD.bazel`.
 
 Useful commands:
@@ -46,14 +47,14 @@ Useful commands:
 
 ## Lombok builders
 
-- The `Flags` classes (`java/com/cowlark/fluxengine/core/Flags.java`) use Lombok builders.
-  Construct flag instances with
-  `XxxFlag.builder().setGroup(g).setNames(names).setHelpText(h).build()`
-  rather than constructors. `@Builder(setterPrefix = "set")` on the private all-args
-  constructor generates the `setX` methods (the ctor param is named `helpText` for
-  `setHelpText`). The `core` BUILD defines a `lombok_plugin` (`generates_api = True`,
-  wired via `plugins`); lombok is also a compile-time `dep` so the `import lombok.Builder;`
-  resolves.
+- The flag classes live in `com.cowlark.fluxengine.core.flags` (one class per file: `Flag`,
+  `FlagGroup`, `Flags`, `ActionFlag`, `SettableFlag`, `ValueFlag`, `StringFlag`, `IntFlag`,
+  `HexIntFlag`, `DoubleFlag`, `BoolFlag`). Construct flag instances with
+  `XxxFlag.builder().setGroup(g).setNames(names).setHelpText(h).build()` rather than
+  constructors. `@Builder(setterPrefix = "set")` on the private all-args constructor
+  generates the `setX` methods (the ctor param is named `helpText` for `setHelpText`). The
+  `core/flags` BUILD defines a `lombok_plugin` (`generates_api = True`, wired via
+  `plugins`); lombok is also a compile-time `dep` so the `import lombok.Builder;` resolves.
 - Lombok doesn't run under Turbine, and generated classes don't reach the header jar, so
   `.bazelrc` sets `--experimental_java_header_compilation=false`.
 - Pattern: put `@Builder` on a private all-args constructor. `@Builder.Default` can't supply
@@ -63,6 +64,19 @@ Useful commands:
   registers the flag.
 - `HexIntFlag` extends `ValueFlag<Integer>` directly (not `IntFlag`): two `@Builder`s would
   both generate a static `builder()` and clash via hiding.
+
+## Flags parsing
+
+- Parsing is done by the static `Flags.parse(String[] argv, FlagGroup... groups)` /
+  `Flags.parseWithFilenames(String[] argv, Predicate<String> callback, FlagGroup... groups)`.
+  It first runs `FlagGroup.initialise` over every root group (recursive duplicate-name check
+  into a shared `Set`, marking groups initialised), then walks argv and resolves each flag via
+  `FlagGroup.findFlag(key)`, which scans the group's own flags then recurses into its parents.
+  `Flags.parse` calls `flag.set(value)` and only consumes a space-separated value when
+  `useThat && flag.hasArgument()`. `findFlag` is public and overridable so a group can
+  intercept/absorb flags (e.g. a config group) before they fall through to its parents.
+- `parseWithFilenames` returns `ImmutableList` (Guava). Duplicate flag names throw
+  `IllegalStateException`; unknown flags throw `FluxEngineException`.
 
 ## Dependency injection (Dagger)
 

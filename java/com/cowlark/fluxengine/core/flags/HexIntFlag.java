@@ -1,19 +1,16 @@
 package com.cowlark.fluxengine.core.flags;
 
-import lombok.Builder;
 import java.util.List;
+import lombok.Builder;
 
 public class HexIntFlag extends ValueFlag<Integer>
 {
     @Builder(setterPrefix = "set")
-    private HexIntFlag(FlagGroup group,
-                       List<String> names,
-                       String helpText,
-                       Integer defaultValue)
+    private HexIntFlag(FlagGroup group, List<String> names, String helpText,
+        Integer defaultValue)
     {
-        super(
-                group, names, helpText, defaultValue != null ? defaultValue : 0, unused -> {
-                });
+        super(group, names, helpText,
+            defaultValue != null ? defaultValue : 0, unused -> {});
     }
 
     @Override

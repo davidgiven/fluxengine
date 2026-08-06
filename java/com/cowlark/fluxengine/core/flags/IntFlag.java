@@ -1,21 +1,17 @@
 package com.cowlark.fluxengine.core.flags;
 
-import lombok.Builder;
 import java.util.List;
 import java.util.function.Consumer;
+import lombok.Builder;
 
 public class IntFlag extends ValueFlag<Integer>
 {
     @Builder(setterPrefix = "set")
-    private IntFlag(FlagGroup group,
-                    List<String> names,
-                    String helpText,
-                    int defaultValue,
-                    Consumer<Integer> callback)
+    private IntFlag(FlagGroup group, List<String> names, String helpText,
+        int defaultValue, Consumer<Integer> callback)
     {
-        super(
-                group, names, helpText, defaultValue, callback != null ? callback : unused -> {
-                });
+        super(group, names, helpText, defaultValue,
+            callback != null ? callback : unused -> {});
     }
 
     @Override
