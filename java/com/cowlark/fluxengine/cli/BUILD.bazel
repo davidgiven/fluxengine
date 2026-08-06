@@ -1,22 +1,15 @@
-load("@rules_java//java:defs.bzl", "java_library", "java_plugin")
+load("@rules_java//java:defs.bzl", "java_library")
 
 package(default_visibility = ["//visibility:public"])
-
-java_plugin(
-    name = "picocli",
-    processor_class = "picocli.codegen.aot.graalvm.processor.NativeImageConfigGeneratorProcessor",
-    deps = ["@maven//:info_picocli_picocli_codegen"],
-)
 
 java_library(
     name = "cli",
     srcs = glob(["*.java"]),
-    plugins = [":picocli"],
     deps = [
         "//java/com/cowlark/fluxengine/config",
         "//java/com/cowlark/fluxengine/config:config_java_proto",
+        "//java/com/cowlark/fluxengine/core/flags",
         "//java/com/cowlark/fluxengine/usb",
         "@maven//:com_google_guava_guava",
-        "@maven//:info_picocli_picocli",
     ],
 )

@@ -1,22 +1,40 @@
 package com.cowlark.fluxengine.cli;
 
-import picocli.CommandLine;
+import java.util.Map;
+import java.util.function.Supplier;
 
+/**
+ * Command-line entry point, ported from src/fluxengine.cc. The command and
+ * subcommand tables live here; main() consumes arguments until it reaches a
+ * real command, instantiates it, and runs it with the tail of the argv array.
+ */
 public class Main
 {
+
     public static void main(String[] args)
     {
-        CommandLine commandLine = new CommandLine(new MainCommand());
-        allowUnmatchedArguments(commandLine);
-        commandLine.execute(args);
+        if (args.length == 0 || args[0].equals("--help"))
+        {
+            help(Command.COMMANDS, "<command> [<flags>...]");
+            return;
+        }
+
+        if (!Command.dispatch(Command.COMMANDS, args))
+        {
+            System.err.println("fluxengine: unrecognised command (try --help)");
+            System.exit(1);
+        }
     }
 
-    /* The dotted --config.flag=value arguments don't match any declared
-     * option, so allow them to be collected as unmatched arguments. */
-    private static void allowUnmatchedArguments(CommandLine commandLine)
+    static void help(Map<String, Supplier<? extends Command>> commands, String syntax)
     {
-        commandLine.setUnmatchedArgumentsAllowed(true);
-        for (CommandLine sub : commandLine.getSubcommands().values())
-            allowUnmatchedArguments(sub);
+        System.out.printf("fluxengine: syntax: fluxengine %s\n", syntax);
+        System.out.println("Try one of these commands:");
+        for (Map.Entry<String, Supplier<? extends Command>> entry : commands.entrySet())
+            System.out.printf("  %s: %s\n", entry.getKey(), entry.getValue().get().getHelp());
+    }
+
+    private Main()
+    {
     }
 }

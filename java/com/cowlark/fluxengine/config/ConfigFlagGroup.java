@@ -8,13 +8,17 @@ public class ConfigFlagGroup extends FlagGroup
 {
     public ConfigFlagGroup()
     {
-        addFlag(ActionFlag.builder()
+        ActionFlag.builder()
+                .setGroup(this)
                 .setName("-c")
                 .setName("--config")
-                .build());
-        addFlag(ActionFlag.builder()
+                .setHelpText("Reads an internal or external configuration file.")
+                .build();
+        ActionFlag.builder()
+                .setGroup(this)
                 .setName("--show-config")
-                .build());
+                .setHelpText("Shows the currently set configuration and halts.")
+                .build();
     }
 
     @Override

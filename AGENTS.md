@@ -93,14 +93,23 @@ Useful commands:
   commands. Classes are injectable via `@Inject` constructors; there are no module
   bindings for own classes unless needed.
 
-## CLI (picocli)
+## CLI
 
-- Commands live in `com.cowlark.fluxengine.cli`: `MainCommand` (root, `@Command(name =
-  "fluxengine")`), `TestCommand` (`test`), `TestDevicesCommand` (`test devices`).
-- Subcommands are declared with `subcommands = {FooCommand.class}` on the parent and are
-  constructed by Dagger via a `CommandLine.IFactory` in `Main` that delegates to the
-  Dagger component. Keep this factory updated when adding subcommands.
-- Picocli commands have package-private `@Inject` constructors.
+- Commands live in `com.cowlark.fluxengine.cli` and implement the `Command` interface
+  (`String getHelp()`, `void run(String[] args)`), receiving the tail of the argv array after
+  the command name (modelled on `src/fluxengine.cc`'s `command_cb`).
+- `Main.main` holds the command/subcommand tables as `ImmutableMap<String,
+  Supplier<? extends Command>>`: `COMMANDS` (top level), `ANALYSABLES`, `FLUXFILEABLES`,
+  `TESTABLES`. The tables mirror `src/fluxengine.cc`; unported commands map to
+  `StubCommand(name, help)`, which prints "not implemented yet".
+- Each command carries its own help text, returned by `getHelp()`; `Main.help` prints the
+  table by instantiating each command and calling `getHelp()`.
+- `Main.dispatch(commands, args)` consumes arguments until it reaches a real command,
+  instantiates it via the supplier (`TestDevicesCommand::new`, not reflection, so GraalVM
+  needs no extra reachability config), and calls `run()` with the tail. Group commands
+  (`analyse`, `fluxfile`, `test`) are `CommandGroup(subcommands, help)` instances, which
+  dispatch again on their sub-table and print extended help if nothing matches. Add new
+  commands by updating the relevant table.
 
 ## USB
 

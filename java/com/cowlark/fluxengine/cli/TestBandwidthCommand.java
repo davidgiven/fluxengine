@@ -6,20 +6,24 @@ import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.usb.UsbDevice;
 import com.cowlark.fluxengine.usb.UsbFactory;
 import com.google.common.collect.ImmutableList;
-import picocli.CommandLine.Command;
 
 /**
  * Test USB bulk transfer bandwidth, modelled after src/fe-testbandwidth.cc.
  */
-@Command(name = "bandwidth", description = "Test USB bulk transfer bandwidth")
-public class TestBandwidthCommand extends CommandWithConfig implements Runnable
+public class TestBandwidthCommand implements Command
 {
     @Override
-    public void run()
+    public String getHelp()
     {
-        var configGroup = new ConfigFlagGroup();
+        return "Measures your USB bandwidth.";
+    }
+
+    @Override
+    public void run(String[] args)
+    {
+        ConfigFlagGroup configGroup = new ConfigFlagGroup();
         ConfigProto config = new ConfigBuilder()
-                .fromFlags(ImmutableList.of(), configGroup)
+                .fromFlags(ImmutableList.copyOf(args), configGroup)
                 .build();
 
         UsbDevice device = UsbFactory.connect(config);

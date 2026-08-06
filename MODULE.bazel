@@ -16,8 +16,6 @@ maven.install(
         "com.google.guava:guava:33.6.0-jre",
         "com.google.truth:truth:1.4.5",
         "com.jayway.jsonpath:json-path:3.0.0",
-        "info.picocli:picocli:4.7.7",
-        "info.picocli:picocli-codegen:4.7.7",
         "javax.usb:usb-api:1.0.2",
         "junit:junit:4.13.2",
         "org.openjfx:javafx-controls:23.0.2",

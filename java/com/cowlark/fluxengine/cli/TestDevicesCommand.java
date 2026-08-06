@@ -2,16 +2,23 @@ package com.cowlark.fluxengine.cli;
 
 import static com.google.common.base.Strings.nullToEmpty;
 
+import com.cowlark.fluxengine.core.flags.FlagGroup;
 import com.cowlark.fluxengine.usb.UsbFactory;
 import com.cowlark.fluxengine.usb.UsbFactory.CandidateDevice;
-import picocli.CommandLine.Command;
 import java.util.List;
 
-@Command(name = "devices", description = "List attached USB devices")
-public class TestDevicesCommand extends CommandWithConfig implements Runnable
+public class TestDevicesCommand implements Command
 {
+    private static final FlagGroup EMPTY = new FlagGroup();
+
     @Override
-    public void run()
+    public String getHelp()
+    {
+        return "Displays all detected devices.";
+    }
+
+    @Override
+    public void run(String[] args)
     {
         List<CandidateDevice> candidates = UsbFactory.findUsbDevices();
         switch (candidates.size())

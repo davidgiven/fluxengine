@@ -1,15 +1,5 @@
 [
 {
-  "name":"com.cowlark.fluxengine.cli.MainCommand",
-  "allDeclaredFields":true,
-  "queryAllDeclaredMethods":true
-},
-{
-  "name":"com.cowlark.fluxengine.cli.TestCommand",
-  "allDeclaredFields":true,
-  "queryAllDeclaredMethods":true
-},
-{
   "name":"com.cowlark.fluxengine.cli.TestDevicesCommand",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true
@@ -112,11 +102,6 @@
 {
   "name":"org.usb4java.javax.Services",
   "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"picocli.CommandLine$AutoHelpMixin",
-  "allDeclaredFields":true,
-  "queryAllDeclaredMethods":true
 },
 {
   "name":"sun.security.provider.NativePRNG",
