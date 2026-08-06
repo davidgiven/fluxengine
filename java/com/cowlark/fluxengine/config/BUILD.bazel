@@ -75,7 +75,9 @@ java_library(
     srcs = glob(["*.java"]),
     deps = [
         ":config_java_proto",
+        "//java/com/cowlark/fluxengine/core",
         "//java/com/cowlark/fluxengine/core/flags",
+        "@com_google_protobuf//java/core:core",
         "@maven//:com_google_guava_guava",
         "@maven//:com_jayway_jsonpath_json_path",
     ],

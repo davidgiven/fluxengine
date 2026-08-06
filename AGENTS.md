@@ -71,9 +71,10 @@ Useful commands:
 
 ## Flags parsing
 
-- Parsing is done by the static `Flags.parse(String[] argv, FlagGroup... groups)` /
-  `Flags.parseWithFilenames(String[] argv, Predicate<String> callback, FlagGroup... groups)`.
-  It first runs `FlagGroup.initialise` over every root group (recursive duplicate-name check
+- Parsing is done by the static `Flags.parse(ImmutableList<String> argv, FlagGroup... groups)` /
+  `Flags.parseWithFilenames(ImmutableList<String> argv, Predicate<String> callback,
+  FlagGroup... groups)` (both also accept `ImmutableList<FlagGroup>`). It first runs
+  `FlagGroup.initialise` over every root group (recursive duplicate-name check
   into a shared `Set`, marking groups initialised), then walks argv and resolves each flag via
   `FlagGroup.findFlag(key)`, which scans the group's own flags then recurses into its parents.
   `Flags.parse` calls `flag.set(value)` and only consumes a space-separated value when

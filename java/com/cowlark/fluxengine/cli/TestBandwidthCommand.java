@@ -21,9 +21,8 @@ public class TestBandwidthCommand implements Command
     @Override
     public void run(String[] args)
     {
-        ConfigFlagGroup configGroup = new ConfigFlagGroup();
         ConfigProto config = new ConfigBuilder()
-                .fromFlags(ImmutableList.copyOf(args), configGroup)
+                .fromFlags(ImmutableList.copyOf(args))
                 .build();
 
         UsbDevice device = UsbFactory.connect(config);

@@ -6,18 +6,24 @@ import com.cowlark.fluxengine.core.flags.FlagGroup;
 
 public class ConfigFlagGroup extends FlagGroup
 {
-    public ConfigFlagGroup()
+    private final ConfigBuilder builder;
+
+    public ConfigFlagGroup(ConfigBuilder builder)
     {
+        this.builder = builder;
+
         ActionFlag.builder()
                 .setGroup(this)
                 .setName("-c")
                 .setName("--config")
                 .setHelpText("Reads an internal or external configuration file.")
+                .setValueCallback(builder::loadConfigFile)
                 .build();
         ActionFlag.builder()
                 .setGroup(this)
                 .setName("--show-config")
                 .setHelpText("Shows the currently set configuration and halts.")
+                .setVoidCallback(builder::showCurrentConfig)
                 .build();
     }
 
