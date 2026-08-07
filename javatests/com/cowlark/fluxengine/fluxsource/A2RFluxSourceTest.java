@@ -15,22 +15,21 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
-public class A2rFluxSourceTest
+public class A2RFluxSourceTest
 {
     @Test
     public void readsTracks() throws IOException
     {
         Path path = writeTempFile();
 
-        A2rFluxSource source = new A2rFluxSource(A2rFluxSourceProto.newBuilder()
+        A2RFluxSource source = new A2RFluxSource(A2rFluxSourceProto.newBuilder()
                 .setFilename(path.toString())
                 .build());
 
         FluxSourceIterator iterator = source.readFlux(0, 0);
         assertThat(iterator.hasNext()).isTrue();
         Bytes expected = Bytes.of(0x40, 0xad, 0xad, 0xad);
-        assertThat(iterator.next().rawBytes().toByteArray())
-                .isEqualTo(expected.toByteArray());
+        assertThat(iterator.next().rawBytes().toByteArray()).isEqualTo(expected.toByteArray());
         assertThat(iterator.hasNext()).isFalse();
         assertThat(source.readFlux(1, 0)).isInstanceOf(EmptyFluxSourceIterator.class);
 
@@ -38,8 +37,7 @@ public class A2rFluxSourceTest
         source.adjustConfig(configBuilder);
         ConfigProto config = configBuilder.build();
         assertThat(config.getDrive().getTracks()).isEqualTo("c0h0");
-        assertThat(config.getDrive().getDriveType())
-                .isEqualTo(DriveType.DRIVETYPE_80TRACK);
+        assertThat(config.getDrive().getDriveType()).isEqualTo(DriveType.DRIVETYPE_80TRACK);
     }
 
     /* Builds an A2R file containing a single track 0/0, encoded as a 3.5"

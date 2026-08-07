@@ -3,8 +3,8 @@ load("@rules_java//java:defs.bzl", "java_test")
 package(default_visibility = ["//visibility:public"])
 
 java_test(
-    name = "A2rFluxSourceTest",
-    srcs = ["A2rFluxSourceTest.java"],
+    name = "A2RFluxSourceTest",
+    srcs = ["A2RFluxSourceTest.java"],
     deps = [
         "//java/com/cowlark/fluxengine/config",
         "//java/com/cowlark/fluxengine/config:config_java_proto",
