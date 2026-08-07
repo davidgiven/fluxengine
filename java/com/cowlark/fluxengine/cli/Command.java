@@ -70,8 +70,8 @@ public interface Command
 
     /* Consume arguments until we reach a real command, instantiate it, and
      * run it with the tail of the argv array. */
-    static boolean dispatch(
-        Map<String, Supplier<? extends Command>> commands, ImmutableList<String> args)
+    static boolean dispatch(Map<String, Supplier<? extends Command>> commands,
+                            ImmutableList<String> args)
     {
         for (int index = 0; index < args.size(); index++)
         {

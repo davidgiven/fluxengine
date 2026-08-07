@@ -28,7 +28,7 @@ public abstract class UsbDevice
 
     public abstract void setDrive(int drive, boolean highDensity, int indexMode);
 
-    public abstract void measureVoltages(Voltages[] voltages);
+    public abstract VoltageMeasurements measureVoltages();
 
     protected String usbError(int error)
     {

@@ -459,7 +459,7 @@ class GreaseweazleUsbDevice extends UsbDevice
     }
 
     @Override
-    public void measureVoltages(Voltages[] voltages)
+    public VoltageMeasurements measureVoltages()
     {
         throw new FluxEngineException("unsupported operation on the Greaseweazle");
     }
