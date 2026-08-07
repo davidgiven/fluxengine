@@ -1,8 +1,12 @@
 package com.cowlark.fluxengine.data;
 
-import com.cowlark.fluxengine.core.Bytes;
+import static com.cowlark.fluxengine.external.FluxEngine.F_BIT_INDEX;
+import static com.cowlark.fluxengine.external.FluxEngine.F_BIT_PULSE;
+import static com.cowlark.fluxengine.external.FluxEngine.F_DESYNC;
+import static com.cowlark.fluxengine.external.FluxEngine.NS_PER_TICK;
+
 import com.cowlark.fluxengine.core.ByteWriter;
-import com.cowlark.fluxengine.external.FluxEngine;
+import com.cowlark.fluxengine.core.Bytes;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 
@@ -11,19 +15,6 @@ import java.util.List;
  */
 public class Fluxmap
 {
-    public record Position(int bytes, int ticks, int zeroes)
-    {
-        public long ns()
-        {
-            return (long) (ticks * FluxEngine.NS_PER_TICK);
-        }
-
-        @Override
-        public String toString()
-        {
-            return String.format("[b:%d, t:%d, z:%d]", bytes, ticks, zeroes);
-        }
-    }
 
     private long duration;
     private int ticks;
@@ -82,7 +73,7 @@ public class Fluxmap
     {
         ensureLastByte();
         int index = bytes.size() - 1;
-        bytes.setByte(index, (byte) (bytes.getByte(index) | FluxEngine.F_BIT_PULSE));
+        bytes.setByte(index, (byte) (bytes.getByte(index) | F_BIT_PULSE));
         return this;
     }
 
@@ -91,13 +82,13 @@ public class Fluxmap
         flushIndexMarks();
         ensureLastByte();
         int index = bytes.size() - 1;
-        bytes.setByte(index, (byte) (bytes.getByte(index) | FluxEngine.F_BIT_INDEX));
+        bytes.setByte(index, (byte) (bytes.getByte(index) | F_BIT_INDEX));
         return this;
     }
 
     public Fluxmap appendDesync()
     {
-        appendByte(FluxEngine.F_DESYNC);
+        appendByte(F_DESYNC);
         return this;
     }
 
@@ -117,7 +108,7 @@ public class Fluxmap
             bw.write8(b);
         }
 
-        duration = (long) (ticks * FluxEngine.NS_PER_TICK);
+        duration = (long) (ticks * NS_PER_TICK);
         return this;
     }
 
@@ -134,12 +125,12 @@ public class Fluxmap
             now += clock;
             if (bit)
             {
-                int delta = (int) ((now - duration) / FluxEngine.NS_PER_TICK);
+                int delta = (int) ((now - duration) / NS_PER_TICK);
                 appendInterval(delta);
                 appendPulse();
             }
         }
-        int delta = (int) ((now - duration) / FluxEngine.NS_PER_TICK);
+        int delta = (int) ((now - duration) / NS_PER_TICK);
         if (delta != 0)
             appendInterval(delta);
         return this;
@@ -148,7 +139,7 @@ public class Fluxmap
     public ImmutableList<Fluxmap> split()
     {
         ImmutableList.Builder<Fluxmap> maps = ImmutableList.builder();
-        for (Bytes piece : bytes.split(FluxEngine.F_DESYNC))
+        for (Bytes piece : bytes.split(F_DESYNC))
         {
             if (!piece.isEmpty())
                 maps.add(new Fluxmap(piece));
@@ -167,9 +158,9 @@ public class Fluxmap
             {
                 int b = bytes.getByte(i) & 0xff;
                 totalTicks += b & 0x3f;
-                if ((b & FluxEngine.F_BIT_INDEX) != 0)
+                if ((b & F_BIT_INDEX) != 0)
                 {
-                    long t = (long) (totalTicks * FluxEngine.NS_PER_TICK);
+                    long t = (long) (totalTicks * NS_PER_TICK);
                     if (t != oldt)
                         marks.add(t);
                     oldt = t;
