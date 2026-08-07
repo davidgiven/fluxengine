@@ -1,7 +1,19 @@
 load("@com_google_protobuf//bazel:java_proto_library.bzl", "java_proto_library")
+load("@rules_java//java:defs.bzl", "java_library")
 load("@rules_proto//proto:defs.bzl", "proto_library")
 
 package(default_visibility = ["//visibility:public"])
+
+java_library(
+    name = "decoders",
+    srcs = glob(["*.java"]),
+    deps = [
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/data",
+        "//java/com/cowlark/fluxengine/external",
+        ":decoders_java_proto",
+    ],
+)
 
 proto_library(
     name = "decoders_proto",
