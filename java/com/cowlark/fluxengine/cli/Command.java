@@ -25,7 +25,7 @@ public interface Command
     ImmutableMap<String, Supplier<? extends Command>> TESTABLES =
             ImmutableMap.<String, Supplier<? extends Command>>builder()
                     .put("bandwidth", TestBandwidthCommand::new)
-                    .put("voltages", stub("voltages", "Measures the FDD bus voltages."))
+                    .put("voltages", TestVoltagesCommand::new)
                     .build();
 
     ImmutableMap<String, Supplier<? extends Command>> COMMANDS =
