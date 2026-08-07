@@ -3,7 +3,6 @@ package com.cowlark.fluxengine.data;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.cowlark.fluxengine.core.Bytes;
-import com.cowlark.fluxengine.external.FluxEngine;
 import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,7 +20,6 @@ public class FluxmapTest
 
         assertThat(map.rawBytes()).isEqualTo(Bytes.of(0x30 | 0x80));
         assertThat(map.ticks()).isEqualTo(0x30);
-        assertThat(map.duration()).isEqualTo((long) (0x30 * FluxEngine.NS_PER_TICK));
     }
 
     @Test
@@ -81,9 +79,7 @@ public class FluxmapTest
 
         List<Long> marks = map.getIndexMarks();
 
-        assertThat(marks).containsExactly(
-            (long) (100 * FluxEngine.NS_PER_TICK),
-            (long) (150 * FluxEngine.NS_PER_TICK));
+        assertThat(marks).containsExactly(100L, 150L);
     }
 
     @Test

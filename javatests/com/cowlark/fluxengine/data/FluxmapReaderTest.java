@@ -113,6 +113,6 @@ public class FluxmapReaderTest
         FluxmapReader r = new FluxmapReader(map, DECODER);
         FluxmapReader.ClockData data = r.guessClock();
 
-        assertThat(data.median).isEqualTo((long) (0x30 * FluxEngine.NS_PER_TICK));
+        assertThat(data.medianTicks).isEqualTo(0x30L);
     }
 }

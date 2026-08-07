@@ -7,6 +7,7 @@ import static com.cowlark.fluxengine.external.FluxEngine.NS_PER_TICK;
 
 import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.decoders.Decoders.DecoderProto;
+import java.time.Duration;
 
 /**
  * A cursor over a Fluxmap's raw bytes.
@@ -23,11 +24,11 @@ public class FluxmapReader
 
     public static class ClockData
     {
-        public long median;
+        public long medianTicks;
         public int noiseFloor;
         public int signalLevel;
-        public long peakStart;
-        public long peakEnd;
+        public long peakStartTicks;
+        public long peakEndTicks;
         public int[] buckets = new int[256];
     }
 
@@ -72,9 +73,9 @@ public class FluxmapReader
         posZeroes = pos.zeroes();
     }
 
-    public int getDuration()
+    public Duration getDuration()
     {
-        return (int) fluxmap.duration();
+        return Duration.ofNanos((long) (fluxmap.ticks() * NS_PER_TICK));
     }
 
     public int getCurrentEvent()
@@ -121,9 +122,9 @@ public class FluxmapReader
         return new EventResult(false, ticks);
     }
 
-    public long readInterval(long clock)
+    public long readInterval(long clockTicks)
     {
-        long thresholdTicks = (long) ((clock * decoder.getPulseDebounceThreshold()) / NS_PER_TICK);
+        long thresholdTicks = (long) (clockTicks * decoder.getPulseDebounceThreshold());
         long ticks = 0;
         while (ticks <= thresholdTicks)
         {
@@ -135,9 +136,8 @@ public class FluxmapReader
         return ticks;
     }
 
-    public void seek(long ns)
+    public void seek(long ticks)
     {
-        int ticks = (int) (ns / NS_PER_TICK);
         if (ticks < posTicks)
         {
             posTicks = 0;
@@ -176,10 +176,10 @@ public class FluxmapReader
         ClockData data = new ClockData();
         while (!eof())
         {
-            long interval = findEvent(F_BIT_PULSE).ticks();
-            if (interval > 0xff)
+            long intervalTicks = findEvent(F_BIT_PULSE).ticks();
+            if (intervalTicks > 0xff)
                 continue;
-            data.buckets[(int) interval]++;
+            data.buckets[(int) intervalTicks]++;
         }
 
         int max = Integer.MIN_VALUE;
@@ -192,49 +192,49 @@ public class FluxmapReader
         data.noiseFloor = (int) (min + (max - min) * noiseFloorFactor);
         data.signalLevel = (int) (min + (max - min) * signalLevelFactor);
 
-        int pulseindex = 0;
-        while (pulseindex < 256)
+        int pulseindexTicks = 0;
+        while (pulseindexTicks < 256)
         {
-            if (data.buckets[pulseindex] > data.signalLevel)
+            if (data.buckets[pulseindexTicks] > data.signalLevel)
                 break;
-            pulseindex++;
+            pulseindexTicks++;
         }
-        if (pulseindex == 256)
+        if (pulseindexTicks == 256)
             return data;
 
-        int peaklo = pulseindex;
-        while (peaklo > 0)
+        int peakloTicks = pulseindexTicks;
+        while (peakloTicks > 0)
         {
-            if (data.buckets[peaklo] < data.noiseFloor)
+            if (data.buckets[peakloTicks] < data.noiseFloor)
                 break;
-            peaklo--;
+            peakloTicks--;
         }
 
-        int peakhi = pulseindex;
-        while (peakhi < 255)
+        int peakhiTicks = pulseindexTicks;
+        while (peakhiTicks < 255)
         {
-            if (data.buckets[peakhi] < data.noiseFloor)
+            if (data.buckets[peakhiTicks] < data.noiseFloor)
                 break;
-            peakhi++;
+            peakhiTicks++;
         }
 
         int totalSize = 0;
-        for (int i = peaklo; i < peakhi; i++)
+        for (int i = peakloTicks; i < peakhiTicks; i++)
             totalSize += data.buckets[i];
 
         int count = 0;
-        int median = peaklo;
-        while (median < peakhi)
+        int medianTicks = peakloTicks;
+        while (medianTicks < peakhiTicks)
         {
-            count += data.buckets[median];
+            count += data.buckets[medianTicks];
             if (count > totalSize / 2)
                 break;
-            median++;
+            medianTicks++;
         }
 
-        data.peakStart = (long) (peaklo * NS_PER_TICK);
-        data.peakEnd = (long) (peakhi * NS_PER_TICK);
-        data.median = (long) (median * NS_PER_TICK);
+        data.peakStartTicks = peakloTicks;
+        data.peakEndTicks = peakhiTicks;
+        data.medianTicks = medianTicks;
         return data;
     }
 }

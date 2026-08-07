@@ -3,7 +3,6 @@ package com.cowlark.fluxengine.data;
 import static com.cowlark.fluxengine.external.FluxEngine.F_BIT_INDEX;
 import static com.cowlark.fluxengine.external.FluxEngine.F_BIT_PULSE;
 import static com.cowlark.fluxengine.external.FluxEngine.F_DESYNC;
-import static com.cowlark.fluxengine.external.FluxEngine.NS_PER_TICK;
 
 import com.cowlark.fluxengine.core.ByteWriter;
 import com.cowlark.fluxengine.core.Bytes;
@@ -16,7 +15,6 @@ import java.util.List;
 public class Fluxmap
 {
 
-    private long duration;
     private int ticks;
     private Bytes bytes;
     private ImmutableList<Long> indexMarks;
@@ -36,11 +34,6 @@ public class Fluxmap
     {
         this();
         appendBytes(bytes);
-    }
-
-    public long duration()
-    {
-        return duration;
     }
 
     public int ticks()
@@ -108,7 +101,6 @@ public class Fluxmap
             bw.write8(b);
         }
 
-        duration = (long) (ticks * NS_PER_TICK);
         return this;
     }
 
@@ -117,22 +109,22 @@ public class Fluxmap
         return appendBytes(Bytes.of(b));
     }
 
-    public Fluxmap appendBits(List<Boolean> bits, long clock)
+    public Fluxmap appendBits(List<Boolean> bits, long clockTicks)
     {
-        long now = duration;
+        long nowTicks = ticks;
         for (boolean bit : bits)
         {
-            now += clock;
+            nowTicks += clockTicks;
             if (bit)
             {
-                int delta = (int) ((now - duration) / NS_PER_TICK);
-                appendInterval(delta);
+                int deltaTicks = (int) (nowTicks - ticks);
+                appendInterval(deltaTicks);
                 appendPulse();
             }
         }
-        int delta = (int) ((now - duration) / NS_PER_TICK);
-        if (delta != 0)
-            appendInterval(delta);
+        int deltaTicks = (int) (nowTicks - ticks);
+        if (deltaTicks != 0)
+            appendInterval(deltaTicks);
         return this;
     }
 
@@ -153,17 +145,16 @@ public class Fluxmap
         {
             ImmutableList.Builder<Long> marks = ImmutableList.builder();
             long totalTicks = 0;
-            long oldt = -1;
+            long oldTicks = -1;
             for (int i = 0; i < bytes.size(); i++)
             {
                 int b = bytes.getByte(i) & 0xff;
                 totalTicks += b & 0x3f;
                 if ((b & F_BIT_INDEX) != 0)
                 {
-                    long t = (long) (totalTicks * NS_PER_TICK);
-                    if (t != oldt)
-                        marks.add(t);
-                    oldt = t;
+                    if (totalTicks != oldTicks)
+                        marks.add(totalTicks);
+                    oldTicks = totalTicks;
                 }
             }
             indexMarks = marks.build();

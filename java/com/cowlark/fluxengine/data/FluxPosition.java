@@ -2,11 +2,13 @@ package com.cowlark.fluxengine.data;
 
 import static com.cowlark.fluxengine.external.FluxEngine.NS_PER_TICK;
 
+import java.time.Duration;
+
 public record FluxPosition(int bytes, int ticks, int zeroes)
 {
-    public long ns()
+    public Duration getDuration()
     {
-        return (long) (ticks * NS_PER_TICK);
+        return Duration.ofNanos((long) (ticks * NS_PER_TICK));
     }
 
     @Override
