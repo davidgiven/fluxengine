@@ -15,7 +15,7 @@ GraalVM extension/rule).
 - Java tests: `javatests/`
 - Packages (Java): `com.cowlark.fluxengine` (Main, FluxEngineComponent),
   `com.cowlark.fluxengine.cli`, `com.cowlark.fluxengine.core`, `com.cowlark.fluxengine.core.flags`,
-  `com.cowlark.fluxengine.usb`, `com.cowlark.fluxengine.wiring`
+  `com.cowlark.fluxengine.data`, `com.cowlark.fluxengine.usb`, `com.cowlark.fluxengine.wiring`
 - Each package directory has its own `BUILD.bazel`.
 
 Useful commands:
