@@ -1,7 +1,7 @@
 package com.cowlark.fluxengine.cli;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -70,14 +70,15 @@ public interface Command
 
     /* Consume arguments until we reach a real command, instantiate it, and
      * run it with the tail of the argv array. */
-    static boolean dispatch(Map<String, Supplier<? extends Command>> commands, String[] args)
+    static boolean dispatch(
+        Map<String, Supplier<? extends Command>> commands, ImmutableList<String> args)
     {
-        for (int index = 0; index < args.length; index++)
+        for (int index = 0; index < args.size(); index++)
         {
-            Supplier<? extends Command> supplier = commands.get(args[index]);
+            Supplier<? extends Command> supplier = commands.get(args.get(index));
             if (supplier != null)
             {
-                supplier.get().run(Arrays.copyOfRange(args, index + 1, args.length));
+                supplier.get().run(ImmutableList.copyOf(args.subList(index + 1, args.size())));
                 return true;
             }
         }
@@ -92,6 +93,6 @@ public interface Command
 
     String getHelp();
 
-    void run(String[] args);
+    void run(ImmutableList<String> args);
 
 }

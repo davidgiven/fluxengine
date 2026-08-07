@@ -5,6 +5,7 @@ import static com.google.common.base.Strings.nullToEmpty;
 import com.cowlark.fluxengine.config.UsbFinder;
 import com.cowlark.fluxengine.config.UsbFinder.CandidateDevice;
 import com.cowlark.fluxengine.core.flags.FlagGroup;
+import com.google.common.collect.ImmutableList;
 import java.util.List;
 
 public class DevicesCommand implements Command
@@ -18,7 +19,7 @@ public class DevicesCommand implements Command
     }
 
     @Override
-    public void run(String[] args)
+    public void run(ImmutableList<String> args)
     {
         List<CandidateDevice> candidates = UsbFinder.findUsbDevices();
         switch (candidates.size())

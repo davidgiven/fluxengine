@@ -104,7 +104,8 @@ Useful commands:
 ## CLI
 
 - Commands live in `com.cowlark.fluxengine.cli` and implement the `Command` interface
-  (`String getHelp()`, `void run(String[] args)`), receiving the tail of the argv array after
+  (`String getHelp()`, `void run(ImmutableList<String> args)`), receiving the tail of the argv
+  array after
   the command name (modelled on `src/fluxengine.cc`'s `command_cb`).
 - `Main.main` holds the command/subcommand tables as `ImmutableMap<String,
   Supplier<? extends Command>>`: `COMMANDS` (top level), `ANALYSABLES`, `FLUXFILEABLES`,

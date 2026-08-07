@@ -18,9 +18,9 @@ public class TestBandwidthCommand implements Command
     }
 
     @Override
-    public void run(String[] args)
+    public void run(ImmutableList<String> args)
     {
-        ConfigProto config = new ConfigBuilder().fromFlags(ImmutableList.copyOf(args)).build();
+        ConfigProto config = new ConfigBuilder().fromFlags(args).build();
 
         UsbDevice device = UsbFactory.connect(config);
         device.testBulkWrite();

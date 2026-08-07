@@ -1,5 +1,6 @@
 package com.cowlark.fluxengine.cli;
 
+import com.google.common.collect.ImmutableList;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -23,7 +24,7 @@ public class Main
             return;
         }
 
-        if (!Command.dispatch(Command.COMMANDS, args))
+        if (!Command.dispatch(Command.COMMANDS, ImmutableList.copyOf(args)))
         {
             System.err.println("fluxengine: unrecognised command (try --help)");
             System.exit(1);

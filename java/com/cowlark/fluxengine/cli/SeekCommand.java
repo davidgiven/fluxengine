@@ -31,10 +31,10 @@ public class SeekCommand implements Command
     }
 
     @Override
-    public void run(String[] args)
+    public void run(ImmutableList<String> args)
     {
         ConfigProto config =
-                new ConfigBuilder().fromFlags(ImmutableList.copyOf(args), flags).build();
+                new ConfigBuilder().fromFlags(args, flags).build();
 
         if (config.getFluxSource().getType() != FLUXTYPE_DRIVE)
             throw new FluxEngineException("this only makes sense with a real disk drive");

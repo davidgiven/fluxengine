@@ -1,5 +1,6 @@
 package com.cowlark.fluxengine.cli;
 
+import com.google.common.collect.ImmutableList;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -25,7 +26,7 @@ public class CommandGroup implements Command
     }
 
     @Override
-    public void run(String[] args)
+    public void run(ImmutableList<String> args)
     {
         if (!Command.dispatch(subcommands, args))
             Main.help(subcommands, "<command> <format> [<flags>...]");

@@ -1,5 +1,7 @@
 package com.cowlark.fluxengine.cli;
 
+import com.google.common.collect.ImmutableList;
+
 public class StubCommand implements Command
 {
     private final String name;
@@ -18,7 +20,7 @@ public class StubCommand implements Command
     }
 
     @Override
-    public void run(String[] args)
+    public void run(ImmutableList<String> args)
     {
         System.err.printf("fluxengine: '%s' is not implemented yet.\n", name);
     }
