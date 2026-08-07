@@ -23,7 +23,7 @@ public abstract class FluxSource
             case FLUXTYPE_ERASE:
                 return new EraseFluxSource(config.getErase());
             case FLUXTYPE_KRYOFLUX:
-                return notImplemented("kryoflux");
+                return new KryofluxFluxSource(config.getKryoflux());
             case FLUXTYPE_TEST_PATTERN:
                 return notImplemented("test pattern");
             case FLUXTYPE_SCP:
