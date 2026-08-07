@@ -16,14 +16,20 @@ public final class UsbFactory
 
     public static UsbDevice connect(ConfigProto config)
     {
-        var device = UsbFinder.selectDevice(config);
-        return switch (device.type)
+        var candidateDevice = UsbFinder.selectDevice(config);
+        var device = switch (candidateDevice.type)
         {
-            case GREASEWEAZLE ->
-                    new GreaseweazleUsbDevice(device.serialPort, config.getUsb().getGreaseweazle());
+            case GREASEWEAZLE -> new GreaseweazleUsbDevice(
+                    candidateDevice.serialPort,
+                    config.getUsb().getGreaseweazle());
             default -> throw new FluxEngineException("unsupported hardware device");
 
         };
+        device.setDrive(
+                config.getDrive().getDrive(),
+                config.getDrive().getHighDensity(),
+                config.getDrive().getIndexMode().getNumber());
+        return device;
     }
 
 }

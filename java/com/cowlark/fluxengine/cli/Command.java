@@ -62,7 +62,7 @@ public interface Command
                             stub("getfileinfo", "Read file metadata off a disk (or image)."))
                     .put("putfile", stub("putfile", "Write a file to disk (or image)."))
                     .put("mkdir", stub("mkdir", "Create a directory on disk (or image)."))
-                    .put("rpm", stub("rpm", "Measures the disk rotational speed."))
+                    .put("rpm", RpmCommand::new)
                     .put("seek", stub("seek", "Moves the disk head."))
                     .put("devices", DevicesCommand::new)
                     .put("test", () -> new CommandGroup(TESTABLES, "Various testing commands."))

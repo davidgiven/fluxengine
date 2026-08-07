@@ -16,13 +16,20 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class ConfigBuilderTest
 {
+    /* ConfigBuilder defaults to a drive flux source, which makes build()
+     * select a USB device; stub the serial so no hardware is needed. */
+    private static ConfigBuilder builder()
+    {
+        return new ConfigBuilder().set("usb.serial", "test-serial");
+    }
+
     @Test
     public void loadConfigFileMergesTextproto() throws IOException
     {
         Path file = Files.createTempFile("config", ".textproto");
         Files.writeString(file, "shortname: \"myconfig\"\ntracks: \"c=0:2\"\n");
 
-        ConfigProto proto = new ConfigBuilder().loadConfigFile(file.toString()).build();
+        ConfigProto proto = builder().loadConfigFile(file.toString()).build();
 
         assertThat(proto.getShortname()).isEqualTo("myconfig");
         assertThat(proto.getTracks()).isEqualTo("c=0:2");
@@ -36,7 +43,7 @@ public class ConfigBuilderTest
         Files.writeString(first, "shortname: \"first\"\n");
         Files.writeString(second, "tracks: \"c=0:2\"\n");
 
-        ConfigProto proto = new ConfigBuilder()
+        ConfigProto proto = builder()
                 .loadConfigFile(first.toString())
                 .loadConfigFile(second.toString())
                 .build();
@@ -68,7 +75,7 @@ public class ConfigBuilderTest
         Path file = Files.createTempFile("config", ".textproto");
         Files.writeString(file, "shortname: \"myconfig\"\n");
 
-        ConfigProto proto = new ConfigBuilder()
+        ConfigProto proto = builder()
                 .loadConfigFile(file.toString())
                 .set("tracks", "c=0:2")
                 .build();
@@ -80,7 +87,7 @@ public class ConfigBuilderTest
     @Test
     public void fromFlagsSetsDottedConfig()
     {
-        ConfigProto proto = new ConfigBuilder()
+        ConfigProto proto = builder()
                 .fromFlags(ImmutableList.of("--drive.drive=1"), new FlagGroup())
                 .build();
 
