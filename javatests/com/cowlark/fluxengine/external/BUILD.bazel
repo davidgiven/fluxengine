@@ -3,6 +3,17 @@ load("@rules_java//java:defs.bzl", "java_test")
 package(default_visibility = ["//visibility:public"])
 
 java_test(
+    name = "FmMfmTest",
+    srcs = ["FmMfmTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/external",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
     name = "GreaseweazleUtilsTest",
     srcs = ["GreaseweazleUtilsTest.java"],
     deps = [
