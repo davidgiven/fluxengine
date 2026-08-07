@@ -51,6 +51,7 @@ class GreaseweazleUsbDevice extends UsbDevice
     private Version version;
     private long clock;
     private long revolutions;
+
     GreaseweazleUsbDevice(String port, GreaseweazleProto config)
     {
         this.config = config;

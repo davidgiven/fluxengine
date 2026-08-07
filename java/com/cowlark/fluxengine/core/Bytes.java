@@ -22,6 +22,7 @@ public final class Bytes implements List<Byte>
     private Storage storage;
     private int low;
     private int high;
+
     public Bytes()
     {
         this(0);
