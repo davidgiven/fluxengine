@@ -29,7 +29,7 @@ public abstract class FluxSource
             case FLUXTYPE_SCP:
                 return notImplemented("scp");
             case FLUXTYPE_A2R:
-                return notImplemented("a2r");
+                return new A2RFluxSource(config.getA2R());
             case FLUXTYPE_CWF:
                 return notImplemented("cwf");
             case FLUXTYPE_DMK:
