@@ -94,8 +94,9 @@ public class FlagsTest
     public void unknownFlagThrows()
     {
         FlagGroup group = new FlagGroup();
-        assertThrows(FluxEngineException.class,
-            () -> Flags.parse(ImmutableList.of("--nope=x"), group));
+        assertThrows(
+                FluxEngineException.class,
+                () -> Flags.parse(ImmutableList.of("--nope=x"), group));
     }
 
     @Test
@@ -188,10 +189,11 @@ public class FlagsTest
                 .setHelpText("read only")
                 .build();
 
-        List<String> filenames = Flags.parseWithFilenames(
-                ImmutableList.of("--read-only", "image.dsk"),
-                unused -> false,
-                group);
+        List<String> filenames =
+                Flags.parseWithFilenames(
+                        ImmutableList.of("--read-only", "image.dsk"),
+                        unused -> false,
+                        group);
 
         assertThat(flag.get()).isTrue();
         assertThat(filenames).containsExactly("image.dsk");

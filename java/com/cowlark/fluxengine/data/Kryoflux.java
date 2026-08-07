@@ -20,9 +20,8 @@ public final class Kryoflux
 {
     private static final double MCLK_HZ = ((18432000.0 * 73.0) / 14.0) / 2.0;
     private static final double SCLK_HZ = MCLK_HZ / 2;
-    private static final double ICLK_HZ = MCLK_HZ / 16;
-
     private static final double TICKS_PER_SCLK = TICK_FREQUENCY / SCLK_HZ;
+    private static final double ICLK_HZ = MCLK_HZ / 16;
 
     private Kryoflux()
     {
@@ -64,8 +63,10 @@ public final class Kryoflux
             return readStream(new Bytes(Files.readAllBytes(Path.of(filename))));
         } catch (IOException e)
         {
-            throw new FluxEngineException(
-                String.format("cannot open input file '%s': %s", filename, e.getMessage()));
+            throw new FluxEngineException(String.format(
+                    "cannot open input file '%s': %s",
+                    filename,
+                    e.getMessage()));
         }
     }
 
@@ -77,7 +78,8 @@ public final class Kryoflux
 
         TreeSet<Integer> indexmarks = new TreeSet<>();
         br.seek(0);
-        pass1: while (!br.eof())
+        pass1:
+        while (!br.eof())
         {
             int b = br.read8();
             int len = 0;
@@ -112,14 +114,16 @@ public final class Kryoflux
                         len = 2; /* Nop3: skip two bytes */
                     else if (b == 0x0b)
                         len = 0; /* Ovl16: the next block is 0x10000 sclks
-                                  * longer than normal. */
+                         * longer than normal. */
                     else if (b == 0x0c)
                         len = 2; /* Flux3: triple byte value */
                     else if ((b >= 0x0e) && (b <= 0xff))
                         len = 0; /* Flux1: single byte value */
                     else
-                        error("unknown stream block byte 0x%01x at 0x%08x", b,
-                            (long) br.pos() - 1);
+                        error(
+                                "unknown stream block byte 0x%01x at 0x%08x",
+                                b,
+                                (long) br.pos() - 1);
                 }
             }
             br.skip(len);
@@ -131,7 +135,8 @@ public final class Kryoflux
         long extrasclks = 0;
         int streamdelta = 0;
         br.seek(0);
-        pass2: while (!br.eof())
+        pass2:
+        while (!br.eof())
         {
             int b = br.read8();
             switch (b)
@@ -166,43 +171,38 @@ public final class Kryoflux
                         b = (b << 8) | br.read8();
                         writeFlux(fluxmap, indexmarks, br, streamdelta, extrasclks + b);
                         extrasclks = 0;
-                    }
-                    else if (b == 0x08)
+                    } else if (b == 0x08)
                     {
                         /* Nop1: do nothing */
-                    }
-                    else if (b == 0x09)
+                    } else if (b == 0x09)
                     {
                         /* Nop2: skip one byte */
                         br.skip(1);
-                    }
-                    else if (b == 0x0a)
+                    } else if (b == 0x0a)
                     {
                         /* Nop3: skip two bytes */
                         br.skip(2);
-                    }
-                    else if (b == 0x0b)
+                    } else if (b == 0x0b)
                     {
                         /* Ovl16: the next flux value is 0x10000 sclks longer
                          * than normal. */
                         extrasclks += 0x10000;
-                    }
-                    else if (b == 0x0c)
+                    } else if (b == 0x0c)
                     {
                         /* Flux3: triple byte value */
                         int ticks = br.readBe16(); /* yes, really big-endian */
                         writeFlux(fluxmap, indexmarks, br, streamdelta, extrasclks + ticks);
                         extrasclks = 0;
-                    }
-                    else if ((b >= 0x0e) && (b <= 0xff))
+                    } else if ((b >= 0x0e) && (b <= 0xff))
                     {
                         /* Flux1: single byte value */
                         writeFlux(fluxmap, indexmarks, br, streamdelta, extrasclks + b);
                         extrasclks = 0;
-                    }
-                    else
-                        error("unknown stream block byte 0x%02x at 0x%08x", b,
-                            (long) br.pos() - 1);
+                    } else
+                        error(
+                                "unknown stream block byte 0x%02x at 0x%08x",
+                                b,
+                                (long) br.pos() - 1);
                 }
             }
         }
@@ -212,8 +212,11 @@ public final class Kryoflux
         return fluxmap;
     }
 
-    private static void writeFlux(Fluxmap fluxmap, TreeSet<Integer> indexmarks,
-        ByteReader br, int streamdelta, long sclk)
+    private static void writeFlux(Fluxmap fluxmap,
+                                  TreeSet<Integer> indexmarks,
+                                  ByteReader br,
+                                  int streamdelta,
+                                  long sclk)
     {
         if (!indexmarks.isEmpty())
         {

@@ -3,8 +3,8 @@ package com.cowlark.fluxengine.data;
 /**
  * A cylinder/head/sector location, ported from lib/data/locations.h.
  */
-public record CylinderHeadSector(int cylinder, int head, int sector)
-        implements Comparable<CylinderHeadSector>
+public record CylinderHeadSector(int cylinder, int head, int sector) implements
+        Comparable<CylinderHeadSector>
 {
     @Override
     public int compareTo(CylinderHeadSector other)

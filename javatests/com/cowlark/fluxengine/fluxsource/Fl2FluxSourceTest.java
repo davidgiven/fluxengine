@@ -8,16 +8,23 @@ import com.cowlark.fluxengine.external.FluxFileProto;
 import com.cowlark.fluxengine.external.FluxFileVersion;
 import com.cowlark.fluxengine.external.TrackFluxProto;
 import com.google.protobuf.ByteString;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 @RunWith(JUnit4.class)
 public class Fl2FluxSourceTest
 {
+    private static Path writeTemp(FluxFileProto file) throws IOException
+    {
+        Path path = Files.createTempFile("flux", ".fl2");
+        Files.write(path, file.toByteArray());
+        return path;
+    }
+
     @Test
     public void readsTracks() throws IOException
     {
@@ -74,12 +81,5 @@ public class Fl2FluxSourceTest
         assertThat(iterator.hasNext()).isTrue();
         iterator.next();
         assertThat(iterator.hasNext()).isFalse();
-    }
-
-    private static Path writeTemp(FluxFileProto file) throws IOException
-    {
-        Path path = Files.createTempFile("flux", ".fl2");
-        Files.write(path, file.toByteArray());
-        return path;
     }
 }

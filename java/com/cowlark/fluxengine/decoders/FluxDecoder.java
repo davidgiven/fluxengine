@@ -20,10 +20,10 @@ public class FluxDecoder
     private final double pllPhase;
     private final double pllAdjust;
     private final double fluxScale;
-    private double clockNs;
     private final double clockCentreNs;
     private final double clockMinNs;
     private final double clockMaxNs;
+    private double clockNs;
     private double fluxNs = 0.0;
     private int clockedZeroes = 0;
     private int goodbits = 0;
@@ -45,14 +45,22 @@ public class FluxDecoder
         leadingZeroes = fmr.tell().zeroes();
     }
 
+    private static double clampClock(double min, double value, double max)
+    {
+        if (value > max)
+            return max;
+        if (value < min)
+            return min;
+        return value;
+    }
+
     public boolean readBit()
     {
         if (leadingZeroes > 0)
         {
             leadingZeroes--;
             return false;
-        }
-        else if (leadingZeroes == 0)
+        } else if (leadingZeroes == 0)
         {
             leadingZeroes--;
             return true;
@@ -79,8 +87,7 @@ public class FluxDecoder
             /* In sync: adjust base clock */
 
             clockNs += fluxNs * pllAdjust;
-        }
-        else
+        } else
         {
             /* Out of sync: adjust the base clock back towards the centre */
 
@@ -133,14 +140,5 @@ public class FluxDecoder
     {
         long ticks = fmr.readInterval((long) (clockCentreNs / NS_PER_TICK));
         return ticks * NS_PER_TICK;
-    }
-
-    private static double clampClock(double min, double value, double max)
-    {
-        if (value > max)
-            return max;
-        if (value < min)
-            return min;
-        return value;
     }
 }

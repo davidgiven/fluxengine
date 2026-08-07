@@ -3,9 +3,9 @@ package com.cowlark.fluxengine.external;
 import com.cowlark.fluxengine.core.BitReader;
 import com.cowlark.fluxengine.core.BitWriter;
 import com.cowlark.fluxengine.core.Bits;
-import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.core.ByteReader;
 import com.cowlark.fluxengine.core.ByteWriter;
+import com.cowlark.fluxengine.core.Bytes;
 
 /**
  * FM and MFM encode/decode helpers, ported from lib/decoders/fmmfm.cc.
@@ -91,8 +91,7 @@ public final class FmMfm
         }
     }
 
-    public static void encodeMfm(
-        Bits bits, int[] cursor, Bytes data, boolean[] lastBit)
+    public static void encodeMfm(Bits bits, int[] cursor, Bytes data, boolean[] lastBit)
     {
         if (bits.size() == 0)
             return;

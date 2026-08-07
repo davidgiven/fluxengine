@@ -13,61 +13,88 @@ public class ByteWriterTest
     public void writes8And16()
     {
         Bytes bytes = new Bytes(0);
-        new ByteWriter(bytes)
-            .write8(0x01)
-            .writeBe16(0x0203)
-            .writeLe16(0x0504)
-            .write8(0x06);
+        new ByteWriter(bytes).write8(0x01).writeBe16(0x0203).writeLe16(0x0504).write8(0x06);
 
-        assertThat(bytes.toByteArray()).isEqualTo(new byte[] {1, 2, 3, 4, 5, 6});
+        assertThat(bytes.toByteArray()).isEqualTo(new byte[]{1, 2, 3, 4, 5, 6});
     }
 
     @Test
     public void writes24And32()
     {
         Bytes bytes = new Bytes(0);
-        new ByteWriter(bytes)
-            .writeBe24(0x010203)
-            .writeLe24(0x060504)
-            .writeBe32(0x0708090a)
-            .writeLe32(0x0e0d0c0b);
+        new ByteWriter(bytes).writeBe24(0x010203)
+                .writeLe24(0x060504)
+                .writeBe32(0x0708090a)
+                .writeLe32(0x0e0d0c0b);
 
-        assertThat(bytes.toByteArray()).isEqualTo(new byte[] {
-            1, 2, 3,
-            4, 5, 6,
-            7, 8, 9, 10,
-            11, 12, 13, 14});
+        assertThat(bytes.toByteArray()).isEqualTo(new byte[]{1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14});
     }
 
     @Test
     public void writes48And64()
     {
         Bytes bytes = new Bytes(0);
-        new ByteWriter(bytes)
-            .writeBe48(0x010203040506L)
-            .writeLe48(0x0c0b0a090807L)
-            .writeBe64(0x0102030405060708L)
-            .writeLe64(0x100f0e0d0c0b0a09L);
+        new ByteWriter(bytes).writeBe48(0x010203040506L)
+                .writeLe48(0x0c0b0a090807L)
+                .writeBe64(0x0102030405060708L)
+                .writeLe64(0x100f0e0d0c0b0a09L);
 
-        assertThat(bytes.toByteArray()).isEqualTo(new byte[] {
-            1, 2, 3, 4, 5, 6,
-            7, 8, 9, 10, 11, 12,
-            1, 2, 3, 4, 5, 6, 7, 8,
-            9, 10, 11, 12, 13, 14, 15, 16});
+        assertThat(bytes.toByteArray()).isEqualTo(new byte[]{1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                15,
+                16});
     }
 
     @Test
     public void writesBytesAndPads()
     {
         Bytes bytes = new Bytes(0);
-        new ByteWriter(bytes)
-            .write(Bytes.of(1, 2))
-            .write(new byte[] {3, 4})
-            .pad(2, 0xff)
-            .pad(1);
+        new ByteWriter(bytes).write(Bytes.of(1, 2)).write(new byte[]{3, 4}).pad(2, 0xff).pad(1);
 
-        assertThat(bytes.toByteArray()).isEqualTo(new byte[] {
-            1, 2, 3, 4, (byte) 0xff, (byte) 0xff, 0});
+        assertThat(bytes.toByteArray()).isEqualTo(new byte[]{1,
+                2,
+                3,
+                4,
+                (byte) 0xff,
+                (byte) 0xff,
+                0});
     }
 
     @Test

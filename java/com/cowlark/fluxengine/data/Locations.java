@@ -12,6 +12,10 @@ import java.util.List;
  */
 public class Locations
 {
+    private Locations()
+    {
+    }
+
     public static ImmutableList<CylinderHead> parseCylinderHeadsString(String s)
     {
         List<CylinderHead> result = new ArrayList<>();
@@ -24,8 +28,7 @@ public class Locations
         }
 
         if (result.isEmpty())
-            throw new FluxEngineException(
-                "track descriptor parse error: no locations specified");
+            throw new FluxEngineException("track descriptor parse error: no locations specified");
 
         Collections.sort(result);
         return ImmutableList.copyOf(result);
@@ -133,8 +136,7 @@ public class Locations
             try
             {
                 return Integer.parseInt(s.substring(start, pos));
-            }
-            catch (NumberFormatException e)
+            } catch (NumberFormatException e)
             {
                 throw error("number out of range at '" + start + "'");
             }
@@ -156,9 +158,5 @@ public class Locations
         {
             return new FluxEngineException("track descriptor parse error: " + message);
         }
-    }
-
-    private Locations()
-    {
     }
 }

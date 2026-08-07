@@ -11,6 +11,13 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class ProtoPathTest
 {
+    private static ConfigProto set(String path, String value)
+    {
+        ConfigProto.Builder builder = ConfigProto.newBuilder();
+        ProtoPath.set(builder, path, value);
+        return builder.build();
+    }
+
     @Test
     public void setTopLevelString()
     {
@@ -32,22 +39,24 @@ public class ProtoPathTest
     @Test
     public void setNestedEnum()
     {
-        assertThat(set("drive.drive_type", "DRIVETYPE_80TRACK")
-            .getDrive().getDriveType().name()).isEqualTo("DRIVETYPE_80TRACK");
+        assertThat(set("drive.drive_type", "DRIVETYPE_80TRACK").getDrive()
+                .getDriveType()
+                .name()).isEqualTo("DRIVETYPE_80TRACK");
     }
 
     @Test
     public void setRepeatedStringWithIndex()
     {
-        assertThat(set("documentation[2]", "hello").getDocumentationList())
-            .containsExactly("", "", "hello");
+        assertThat(set("documentation[2]", "hello").getDocumentationList()).containsExactly(
+                "",
+                "",
+                "hello");
     }
 
     @Test
     public void setRepeatedMessageField()
     {
-        assertThat(set("option[0].comment", "hello").getOption(0).getComment())
-            .isEqualTo("hello");
+        assertThat(set("option[0].comment", "hello").getOption(0).getComment()).isEqualTo("hello");
     }
 
     @Test
@@ -118,12 +127,5 @@ public class ProtoPathTest
     public void setIndexOnScalarThrows()
     {
         assertThrows(ConfigException.class, () -> set("tracks[0]", "x"));
-    }
-
-    private static ConfigProto set(String path, String value)
-    {
-        ConfigProto.Builder builder = ConfigProto.newBuilder();
-        ProtoPath.set(builder, path, value);
-        return builder.build();
     }
 }

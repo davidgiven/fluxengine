@@ -18,7 +18,8 @@ import java.util.regex.Pattern;
  */
 public class KryofluxFluxSource extends TrivialFluxSource
 {
-    private static final Pattern FILENAME_REGEX = Pattern.compile(".*[^0-9]([0-9]+)\\.([0-9]+)\\.raw");
+    private static final Pattern FILENAME_REGEX =
+            Pattern.compile(".*[^0-9]([0-9]+)\\.([0-9]+)\\.raw");
 
     private final String path;
     protected ConfigProto extraConfig;
@@ -36,7 +37,8 @@ public class KryofluxFluxSource extends TrivialFluxSource
                 Matcher m = FILENAME_REGEX.matcher(f.getName());
                 if (m.matches())
                     chs.add(new CylinderHead(
-                        Integer.parseInt(m.group(1)), Integer.parseInt(m.group(2))));
+                            Integer.parseInt(m.group(1)),
+                            Integer.parseInt(m.group(2))));
             }
         }
 

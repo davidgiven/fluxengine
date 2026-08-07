@@ -24,14 +24,8 @@ public class A2RFluxSource extends FluxSource
     private final TreeMap<CylinderHead, A2Rv2Flux> v2data = new TreeMap<>();
     private final A2rFluxSourceProto config;
     private final Bytes data;
-    private int version;
     protected ConfigProto extraConfig;
-
-    static class A2Rv2Flux
-    {
-        List<Bytes> flux = new ArrayList<>();
-        double index;
-    }
+    private int version;
 
     public A2RFluxSource(A2rFluxSourceProto config)
     {
@@ -96,6 +90,23 @@ public class A2RFluxSource extends FluxSource
         }
     }
 
+    private static Bytes readFile(String filename)
+    {
+        try
+        {
+            return new Bytes(Files.readAllBytes(Path.of(filename)));
+        } catch (IOException e)
+        {
+            throw new FluxEngineException(
+                    "cannot open input file '" + filename + "': " + e.getMessage());
+        }
+    }
+
+    private static void error(String message)
+    {
+        throw new FluxEngineException(message);
+    }
+
     @Override
     public void adjustConfig(ConfigBuilder configBuilder)
     {
@@ -147,20 +158,9 @@ public class A2RFluxSource extends FluxSource
         return null;
     }
 
-    private static Bytes readFile(String filename)
+    static class A2Rv2Flux
     {
-        try
-        {
-            return new Bytes(Files.readAllBytes(Path.of(filename)));
-        } catch (IOException e)
-        {
-            throw new FluxEngineException(
-                    "cannot open input file '" + filename + "': " + e.getMessage());
-        }
-    }
-
-    private static void error(String message)
-    {
-        throw new FluxEngineException(message);
+        List<Bytes> flux = new ArrayList<>();
+        double index;
     }
 }

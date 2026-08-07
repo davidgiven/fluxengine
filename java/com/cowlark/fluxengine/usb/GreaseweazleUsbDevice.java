@@ -36,7 +36,6 @@ import com.cowlark.fluxengine.core.ByteWriter;
 import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.core.FluxEngineException;
 import com.cowlark.fluxengine.external.GreaseweazleUtils;
-import com.cowlark.fluxengine.usb.GreaseweazleProto;
 import com.fazecast.jSerialComm.SerialPort;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.time.Duration;
@@ -380,8 +379,7 @@ class GreaseweazleUsbDevice extends UsbDevice
                 ByteWriter bw = new ByteWriter(cmd);
                 bw.write8(CMD_READ_FLUX);
                 bw.write8(8);
-                bw.writeLe32(
-                        (int) ((readTime.toNanos() + (synced ? revolutions : 0)) / clock));
+                bw.writeLe32((int) ((readTime.toNanos() + (synced ? revolutions : 0)) / clock));
                 bw.writeLe16(0);
                 doCommand(cmd);
             }

@@ -14,24 +14,6 @@ import java.time.Duration;
  */
 public class FluxmapReader
 {
-    public record Event(int event, long ticks)
-    {
-    }
-
-    public record EventResult(boolean found, long ticks)
-    {
-    }
-
-    public static class ClockData
-    {
-        public long medianTicks;
-        public int noiseFloor;
-        public int signalLevel;
-        public long peakStartTicks;
-        public long peakEndTicks;
-        public int[] buckets = new int[256];
-    }
-
     private final Fluxmap fluxmap;
     private final Bytes bytes;
     private final int size;
@@ -236,5 +218,23 @@ public class FluxmapReader
         data.peakEndTicks = peakhiTicks;
         data.medianTicks = medianTicks;
         return data;
+    }
+
+    public record Event(int event, long ticks)
+    {
+    }
+
+    public record EventResult(boolean found, long ticks)
+    {
+    }
+
+    public static class ClockData
+    {
+        public long medianTicks;
+        public int noiseFloor;
+        public int signalLevel;
+        public long peakStartTicks;
+        public long peakEndTicks;
+        public int[] buckets = new int[256];
     }
 }

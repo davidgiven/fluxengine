@@ -8,10 +8,10 @@ java_library(
     name = "decoders",
     srcs = glob(["*.java"]),
     deps = [
+        ":decoders_java_proto",
         "//java/com/cowlark/fluxengine/core",
         "//java/com/cowlark/fluxengine/data",
         "//java/com/cowlark/fluxengine/external",
-        ":decoders_java_proto",
     ],
 )
 

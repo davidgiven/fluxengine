@@ -43,6 +43,11 @@ public abstract class FluxSource
         }
     }
 
+    private static FluxSource notImplemented(String name)
+    {
+        throw new FluxEngineException(name + " flux source is not implemented yet");
+    }
+
     /* Adjusts the current configuration based on the contents of this flux source. */
     public void adjustConfig(ConfigBuilder configBuilder)
     {
@@ -67,10 +72,5 @@ public abstract class FluxSource
     public boolean isHardware()
     {
         return false;
-    }
-
-    private static FluxSource notImplemented(String name)
-    {
-        throw new FluxEngineException(name + " flux source is not implemented yet");
     }
 }

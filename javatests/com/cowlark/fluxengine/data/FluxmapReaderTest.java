@@ -18,22 +18,22 @@ public class FluxmapReaderTest
     public void readsEvents()
     {
         Fluxmap map = new Fluxmap(Bytes.of(
-            FluxEngine.F_DESYNC,
-            FluxEngine.F_BIT_PULSE | 0x30,
-            FluxEngine.F_BIT_INDEX | 0x30,
-            FluxEngine.F_BIT_PULSE | FluxEngine.F_BIT_INDEX | 0x30,
-            FluxEngine.F_DESYNC,
-            FluxEngine.F_BIT_PULSE | 0x30,
-            FluxEngine.F_DESYNC,
-            FluxEngine.F_BIT_PULSE | 0x30));
+                FluxEngine.F_DESYNC,
+                FluxEngine.F_BIT_PULSE | 0x30,
+                FluxEngine.F_BIT_INDEX | 0x30,
+                FluxEngine.F_BIT_PULSE | FluxEngine.F_BIT_INDEX | 0x30,
+                FluxEngine.F_DESYNC,
+                FluxEngine.F_BIT_PULSE | 0x30,
+                FluxEngine.F_DESYNC,
+                FluxEngine.F_BIT_PULSE | 0x30));
 
         FluxmapReader r = new FluxmapReader(map, DECODER);
 
         assertThat(r.getNextEvent().event()).isEqualTo(FluxEngine.F_DESYNC);
         assertThat(r.getNextEvent().event()).isEqualTo(FluxEngine.F_BIT_PULSE);
         assertThat(r.getNextEvent().event()).isEqualTo(FluxEngine.F_BIT_INDEX);
-        assertThat(r.getNextEvent().event())
-            .isEqualTo(FluxEngine.F_BIT_PULSE | FluxEngine.F_BIT_INDEX);
+        assertThat(r.getNextEvent().event()).isEqualTo(
+                FluxEngine.F_BIT_PULSE | FluxEngine.F_BIT_INDEX);
         assertThat(r.getNextEvent().event()).isEqualTo(FluxEngine.F_DESYNC);
         assertThat(r.getNextEvent().event()).isEqualTo(FluxEngine.F_BIT_PULSE);
         assertThat(r.getNextEvent().event()).isEqualTo(FluxEngine.F_DESYNC);
@@ -45,9 +45,8 @@ public class FluxmapReaderTest
     @Test
     public void ticksAccumulate()
     {
-        Fluxmap map = new Fluxmap(Bytes.of(
-            FluxEngine.F_BIT_PULSE | 0x30,
-            FluxEngine.F_BIT_PULSE | 0x30));
+        Fluxmap map =
+                new Fluxmap(Bytes.of(FluxEngine.F_BIT_PULSE | 0x30, FluxEngine.F_BIT_PULSE | 0x30));
 
         FluxmapReader r = new FluxmapReader(map, DECODER);
 
@@ -59,9 +58,8 @@ public class FluxmapReaderTest
     @Test
     public void findEvent()
     {
-        Fluxmap map = new Fluxmap(Bytes.of(
-            FluxEngine.F_BIT_PULSE | 0x30,
-            FluxEngine.F_BIT_INDEX | 0x30));
+        Fluxmap map =
+                new Fluxmap(Bytes.of(FluxEngine.F_BIT_PULSE | 0x30, FluxEngine.F_BIT_INDEX | 0x30));
 
         FluxmapReader r = new FluxmapReader(map, DECODER);
 
@@ -74,9 +72,8 @@ public class FluxmapReaderTest
     @Test
     public void findEventNotFound()
     {
-        Fluxmap map = new Fluxmap(Bytes.of(
-            FluxEngine.F_BIT_PULSE | 0x30,
-            FluxEngine.F_BIT_PULSE | 0x30));
+        Fluxmap map =
+                new Fluxmap(Bytes.of(FluxEngine.F_BIT_PULSE | 0x30, FluxEngine.F_BIT_PULSE | 0x30));
 
         FluxmapReader r = new FluxmapReader(map, DECODER);
 

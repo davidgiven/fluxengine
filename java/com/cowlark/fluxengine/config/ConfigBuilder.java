@@ -47,6 +47,42 @@ public class ConfigBuilder
     {
     }
 
+    private static ImageReaderWriterType imageType(String filename)
+    {
+        if (filename.endsWith(".adf") || filename.endsWith(".d81") || filename.endsWith(".dsk") ||
+                filename.endsWith(".img") || filename.endsWith(".st") ||
+                filename.endsWith(".vgi") || filename.endsWith(".xdf"))
+            return IMAGETYPE_IMG;
+        else if (filename.endsWith(".d64"))
+            return IMAGETYPE_D64;
+        else if (filename.endsWith(".d88"))
+            return IMAGETYPE_D88;
+        else if (filename.endsWith(".dim"))
+            return IMAGETYPE_DIM;
+        else if (filename.endsWith(".diskcopy"))
+            return IMAGETYPE_DISKCOPY;
+        else if (filename.endsWith(".fdi"))
+            return IMAGETYPE_FDI;
+        else if (filename.endsWith(".imd"))
+            return IMAGETYPE_IMD;
+        else if (filename.endsWith(".jv3"))
+            return IMAGETYPE_JV3;
+        else if (filename.endsWith(".nfd"))
+            return IMAGETYPE_NFD;
+        else if (filename.endsWith(".nsi"))
+            return IMAGETYPE_NSI;
+        else if (filename.endsWith(".td0"))
+            return IMAGETYPE_TD0;
+        else
+            return null;
+    }
+
+    private static boolean isReadOnlyImage(String filename)
+    {
+        return filename.endsWith(".dim") || filename.endsWith(".fdi") ||
+                filename.endsWith(".jv3") || filename.endsWith(".nfd") || filename.endsWith(".td0");
+    }
+
     public ConfigBuilder fromFlags(ImmutableList<String> args, FlagGroup... group)
     {
         ImmutableList<FlagGroup> allGroups = ImmutableList.<FlagGroup>builder()
@@ -190,42 +226,6 @@ public class ConfigBuilder
             throw new ConfigException("unrecognised image filename '" + filename + "'");
         proto.getImageReaderBuilder().setType(type).setFilename(filename);
         return this;
-    }
-
-    private static ImageReaderWriterType imageType(String filename)
-    {
-        if (filename.endsWith(".adf") || filename.endsWith(".d81") || filename.endsWith(".dsk") ||
-                filename.endsWith(".img") || filename.endsWith(".st") ||
-                filename.endsWith(".vgi") || filename.endsWith(".xdf"))
-            return IMAGETYPE_IMG;
-        else if (filename.endsWith(".d64"))
-            return IMAGETYPE_D64;
-        else if (filename.endsWith(".d88"))
-            return IMAGETYPE_D88;
-        else if (filename.endsWith(".dim"))
-            return IMAGETYPE_DIM;
-        else if (filename.endsWith(".diskcopy"))
-            return IMAGETYPE_DISKCOPY;
-        else if (filename.endsWith(".fdi"))
-            return IMAGETYPE_FDI;
-        else if (filename.endsWith(".imd"))
-            return IMAGETYPE_IMD;
-        else if (filename.endsWith(".jv3"))
-            return IMAGETYPE_JV3;
-        else if (filename.endsWith(".nfd"))
-            return IMAGETYPE_NFD;
-        else if (filename.endsWith(".nsi"))
-            return IMAGETYPE_NSI;
-        else if (filename.endsWith(".td0"))
-            return IMAGETYPE_TD0;
-        else
-            return null;
-    }
-
-    private static boolean isReadOnlyImage(String filename)
-    {
-        return filename.endsWith(".dim") || filename.endsWith(".fdi") ||
-                filename.endsWith(".jv3") || filename.endsWith(".nfd") || filename.endsWith(".td0");
     }
 
     public ConfigBuilder showCurrentConfig()

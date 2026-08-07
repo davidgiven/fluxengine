@@ -35,8 +35,8 @@ public class ByteReaderTest
     @Test
     public void reads32()
     {
-        ByteReader reader = new ByteReader(Bytes.of(
-            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08));
+        ByteReader reader =
+                new ByteReader(Bytes.of(0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08));
 
         assertThat(reader.readBe32()).isEqualTo(0x01020304);
         assertThat(reader.readLe32()).isEqualTo(0x08070605);
@@ -46,8 +46,18 @@ public class ByteReaderTest
     public void reads48()
     {
         ByteReader reader = new ByteReader(Bytes.of(
-            0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
-            0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f));
+                0x01,
+                0x02,
+                0x03,
+                0x04,
+                0x05,
+                0x06,
+                0x0a,
+                0x0b,
+                0x0c,
+                0x0d,
+                0x0e,
+                0x0f));
 
         assertThat(reader.readBe48()).isEqualTo(0x010203040506L);
         assertThat(reader.readLe48()).isEqualTo(0x0f0e0d0c0b0aL);
@@ -57,8 +67,22 @@ public class ByteReaderTest
     public void reads64()
     {
         ByteReader reader = new ByteReader(Bytes.of(
-            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-            0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10));
+                0x01,
+                0x02,
+                0x03,
+                0x04,
+                0x05,
+                0x06,
+                0x07,
+                0x08,
+                0x09,
+                0x0a,
+                0x0b,
+                0x0c,
+                0x0d,
+                0x0e,
+                0x0f,
+                0x10));
 
         assertThat(reader.readBe64()).isEqualTo(0x0102030405060708L);
         assertThat(reader.readLe64()).isEqualTo(0x100f0e0d0c0b0a09L);

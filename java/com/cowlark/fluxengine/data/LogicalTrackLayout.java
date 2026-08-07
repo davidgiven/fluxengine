@@ -44,13 +44,18 @@ public class LogicalTrackLayout
     /* Mapping of sector ID to natural ordering. */
     public final ImmutableMap<Integer, Integer> sectorIdToNaturalOrdering;
 
-    public LogicalTrackLayout(
-        int physicalCylinder, int physicalHead, int groupSize,
-        int logicalCylinder, int logicalHead, int numSectors, int sectorSize,
-        ImmutableList<Integer> naturalSectorOrder, ImmutableList<Integer> diskSectorOrder,
-        ImmutableList<Integer> filesystemSectorOrder,
-        ImmutableMap<Integer, Integer> sectorIdToFilesystemOrdering,
-        ImmutableMap<Integer, Integer> sectorIdToNaturalOrdering)
+    public LogicalTrackLayout(int physicalCylinder,
+                              int physicalHead,
+                              int groupSize,
+                              int logicalCylinder,
+                              int logicalHead,
+                              int numSectors,
+                              int sectorSize,
+                              ImmutableList<Integer> naturalSectorOrder,
+                              ImmutableList<Integer> diskSectorOrder,
+                              ImmutableList<Integer> filesystemSectorOrder,
+                              ImmutableMap<Integer, Integer> sectorIdToFilesystemOrdering,
+                              ImmutableMap<Integer, Integer> sectorIdToNaturalOrdering)
     {
         this.physicalCylinder = physicalCylinder;
         this.physicalHead = physicalHead;

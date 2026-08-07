@@ -45,29 +45,6 @@ public class Fl2FluxSource extends FluxSource
         extraConfig = builder.build();
     }
 
-    @Override
-    public void adjustConfig(ConfigBuilder configBuilder)
-    {
-        configBuilder.mergeConfig(extraConfig);
-    }
-
-    @Override
-    public FluxSourceIterator readFlux(int track, int head)
-    {
-        for (TrackFluxProto trackFlux : proto.getTrackList())
-        {
-            if (trackFlux.getTrack() == track && trackFlux.getHead() == head)
-                return new Fl2FluxSourceIterator(trackFlux);
-        }
-
-        return new EmptyFluxSourceIterator();
-    }
-
-    @Override
-    public void recalibrate()
-    {
-    }
-
     private static FluxFileProto loadFl2File(String filename)
     {
         Bytes data;
@@ -128,5 +105,28 @@ public class Fl2FluxSource extends FluxSource
                     " flux file, but this build of the client can only handle up to version " +
                     FluxFileVersion.VERSION_2.getNumber() + " --- please upgrade");
         return proto;
+    }
+
+    @Override
+    public void adjustConfig(ConfigBuilder configBuilder)
+    {
+        configBuilder.mergeConfig(extraConfig);
+    }
+
+    @Override
+    public FluxSourceIterator readFlux(int track, int head)
+    {
+        for (TrackFluxProto trackFlux : proto.getTrackList())
+        {
+            if (trackFlux.getTrack() == track && trackFlux.getHead() == head)
+                return new Fl2FluxSourceIterator(trackFlux);
+        }
+
+        return new EmptyFluxSourceIterator();
+    }
+
+    @Override
+    public void recalibrate()
+    {
     }
 }

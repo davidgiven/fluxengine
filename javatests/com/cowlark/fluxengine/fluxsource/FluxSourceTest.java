@@ -18,9 +18,8 @@ public class FluxSourceTest
     @Test
     public void createUnknownTypeReturnsNull()
     {
-        FluxSourceProto config = FluxSourceProto.newBuilder()
-                .setType(FluxSourceSinkType.FLUXTYPE_NOT_SET)
-                .build();
+        FluxSourceProto config =
+                FluxSourceProto.newBuilder().setType(FluxSourceSinkType.FLUXTYPE_NOT_SET).build();
 
         assertThat(FluxSource.create(config)).isNull();
     }
@@ -28,9 +27,8 @@ public class FluxSourceTest
     @Test
     public void createUnportedTypeThrows()
     {
-        FluxSourceProto config = FluxSourceProto.newBuilder()
-                .setType(FluxSourceSinkType.FLUXTYPE_DRIVE)
-                .build();
+        FluxSourceProto config =
+                FluxSourceProto.newBuilder().setType(FluxSourceSinkType.FLUXTYPE_DRIVE).build();
 
         assertThrows(FluxEngineException.class, () -> FluxSource.create(config));
     }
@@ -38,9 +36,8 @@ public class FluxSourceTest
     @Test
     public void createEraseFluxSource()
     {
-        FluxSourceProto config = FluxSourceProto.newBuilder()
-                .setType(FluxSourceSinkType.FLUXTYPE_ERASE)
-                .build();
+        FluxSourceProto config =
+                FluxSourceProto.newBuilder().setType(FluxSourceSinkType.FLUXTYPE_ERASE).build();
 
         FluxSource source = FluxSource.create(config);
 

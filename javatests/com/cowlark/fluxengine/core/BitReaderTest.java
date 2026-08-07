@@ -1,13 +1,12 @@
 package com.cowlark.fluxengine.core;
 
 import static com.google.common.truth.Truth.assertThat;
-
 import static org.junit.Assert.assertThrows;
 
-import java.util.Iterator;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import java.util.Iterator;
 
 @RunWith(JUnit4.class)
 public class BitReaderTest
@@ -18,9 +17,22 @@ public class BitReaderTest
         Bytes bytes = Bytes.of(0xd6, 0xa0); /* 11010110 10100000 */
         BitReader reader = new BitReader(new ByteReader(bytes));
 
-        boolean[] expected = {
-            true, true, false, true, false, true, true, false,
-            true, false, true, false, false, false, false, false};
+        boolean[] expected = {true,
+                true,
+                false,
+                true,
+                false,
+                true,
+                true,
+                false,
+                true,
+                false,
+                true,
+                false,
+                false,
+                false,
+                false,
+                false};
         for (boolean bit : expected)
             assertThat(reader.get()).isEqualTo(bit);
         assertThat(reader.eof()).isTrue();
@@ -30,15 +42,25 @@ public class BitReaderTest
     public void roundTrip()
     {
         Bytes bytes = new Bytes(0);
-        new BitWriter(new ByteWriter(bytes))
-            .push(0b11010110, 8)
-            .push(0b10101100, 8)
-            .flush();
+        new BitWriter(new ByteWriter(bytes)).push(0b11010110, 8).push(0b10101100, 8).flush();
 
         BitReader reader = new BitReader(new ByteReader(bytes));
-        boolean[] expected = {
-            true, true, false, true, false, true, true, false,
-            true, false, true, false, true, true, false, false};
+        boolean[] expected = {true,
+                true,
+                false,
+                true,
+                false,
+                true,
+                true,
+                false,
+                true,
+                false,
+                true,
+                false,
+                true,
+                true,
+                false,
+                false};
         for (boolean bit : expected)
             assertThat(reader.get()).isEqualTo(bit);
         assertThat(reader.eof()).isTrue();
@@ -59,8 +81,7 @@ public class BitReaderTest
     public void iteration()
     {
         Iterator<Boolean> iterator = new BitReader(new ByteReader(Bytes.of(0xd6)));
-        boolean[] expected = {
-            true, true, false, true, false, true, true, false};
+        boolean[] expected = {true, true, false, true, false, true, true, false};
         for (boolean bit : expected)
         {
             assertThat(iterator.hasNext()).isTrue();

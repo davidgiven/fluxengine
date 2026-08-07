@@ -7,18 +7,17 @@ import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.data.Fluxmap;
 import com.cowlark.fluxengine.data.FluxmapReader;
 import com.cowlark.fluxengine.external.FmMfm;
-import java.time.Duration;
-import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import java.time.Duration;
 
 @RunWith(JUnit4.class)
 public class FluxDecoderTest
 {
     private static final int CLOCK_TICKS = 1000;
     private static final Duration CLOCK =
-        Duration.ofNanos((long) (CLOCK_TICKS * 1000000000.0 / 12000000.0));
+            Duration.ofNanos((long) (CLOCK_TICKS * 1000000000.0 / 12000000.0));
 
     private static Bytes roundTrip(Bytes data)
     {
@@ -28,10 +27,8 @@ public class FluxDecoderTest
         /* ...write it out as flux... */
         Fluxmap map = new Fluxmap();
         map.appendBits(encoded, CLOCK_TICKS);
-        FluxmapReader reader = new FluxmapReader(
-            map, DecoderProto.getDefaultInstance());
-        FluxDecoder decoder = new FluxDecoder(
-            reader, CLOCK, DecoderProto.getDefaultInstance());
+        FluxmapReader reader = new FluxmapReader(map, DecoderProto.getDefaultInstance());
+        FluxDecoder decoder = new FluxDecoder(reader, CLOCK, DecoderProto.getDefaultInstance());
 
         /* ...and read the raw bits back, skipping the PLL init pulse. */
         Bits decoded = new Bits();
@@ -55,12 +52,11 @@ public class FluxDecoderTest
         /* A pulse at every cell boundary reads back as an unbroken run of
          * trues. */
         Fluxmap map = new Fluxmap();
-        map.appendBits(java.util.Arrays.asList(
-            true, true, true, true, true, true, true, true), CLOCK_TICKS);
-        FluxmapReader reader = new FluxmapReader(
-            map, DecoderProto.getDefaultInstance());
-        FluxDecoder decoder = new FluxDecoder(
-            reader, CLOCK, DecoderProto.getDefaultInstance());
+        map.appendBits(
+                java.util.Arrays.asList(true, true, true, true, true, true, true, true),
+                CLOCK_TICKS);
+        FluxmapReader reader = new FluxmapReader(map, DecoderProto.getDefaultInstance());
+        FluxDecoder decoder = new FluxDecoder(reader, CLOCK, DecoderProto.getDefaultInstance());
 
         Bits bits = new Bits();
         while (!reader.eof())
@@ -78,10 +74,8 @@ public class FluxDecoderTest
          * first readBit return true. */
         Fluxmap map = new Fluxmap();
         map.appendBits(java.util.Arrays.asList(true), CLOCK_TICKS);
-        FluxmapReader reader = new FluxmapReader(
-            map, DecoderProto.getDefaultInstance());
-        FluxDecoder decoder = new FluxDecoder(
-            reader, CLOCK, DecoderProto.getDefaultInstance());
+        FluxmapReader reader = new FluxmapReader(map, DecoderProto.getDefaultInstance());
+        FluxDecoder decoder = new FluxDecoder(reader, CLOCK, DecoderProto.getDefaultInstance());
 
         assertThat(decoder.readBit()).isTrue();
     }

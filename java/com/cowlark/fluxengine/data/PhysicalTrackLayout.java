@@ -17,9 +17,10 @@ public class PhysicalTrackLayout
     /* The logical track that this track is part of. */
     public final LogicalTrackLayout logicalTrackLayout;
 
-    public PhysicalTrackLayout(
-        int physicalCylinder, int physicalHead, int groupOffset,
-        LogicalTrackLayout logicalTrackLayout)
+    public PhysicalTrackLayout(int physicalCylinder,
+                               int physicalHead,
+                               int groupOffset,
+                               LogicalTrackLayout logicalTrackLayout)
     {
         this.physicalCylinder = physicalCylinder;
         this.physicalHead = physicalHead;

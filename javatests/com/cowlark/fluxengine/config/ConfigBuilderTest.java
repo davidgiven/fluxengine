@@ -1,17 +1,16 @@
 package com.cowlark.fluxengine.config;
 
 import static com.google.common.truth.Truth.assertThat;
-
 import static org.junit.Assert.assertThrows;
 
 import com.cowlark.fluxengine.core.flags.FlagGroup;
 import com.google.common.collect.ImmutableList;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 @RunWith(JUnit4.class)
 public class ConfigBuilderTest
@@ -43,8 +42,7 @@ public class ConfigBuilderTest
         Files.writeString(first, "shortname: \"first\"\n");
         Files.writeString(second, "tracks: \"c=0:2\"\n");
 
-        ConfigProto proto = builder()
-                .loadConfigFile(first.toString())
+        ConfigProto proto = builder().loadConfigFile(first.toString())
                 .loadConfigFile(second.toString())
                 .build();
 
@@ -55,8 +53,9 @@ public class ConfigBuilderTest
     @Test
     public void loadConfigFileMissingFileThrows()
     {
-        assertThrows(ConfigException.class,
-            () -> new ConfigBuilder().loadConfigFile("/nonexistent/config"));
+        assertThrows(
+                ConfigException.class,
+                () -> new ConfigBuilder().loadConfigFile("/nonexistent/config"));
     }
 
     @Test
@@ -65,8 +64,9 @@ public class ConfigBuilderTest
         Path file = Files.createTempFile("config", ".textproto");
         Files.writeString(file, "this is not a valid textproto\n");
 
-        assertThrows(ConfigException.class,
-            () -> new ConfigBuilder().loadConfigFile(file.toString()));
+        assertThrows(
+                ConfigException.class,
+                () -> new ConfigBuilder().loadConfigFile(file.toString()));
     }
 
     @Test
@@ -75,10 +75,8 @@ public class ConfigBuilderTest
         Path file = Files.createTempFile("config", ".textproto");
         Files.writeString(file, "shortname: \"myconfig\"\n");
 
-        ConfigProto proto = builder()
-                .loadConfigFile(file.toString())
-                .set("tracks", "c=0:2")
-                .build();
+        ConfigProto proto =
+                builder().loadConfigFile(file.toString()).set("tracks", "c=0:2").build();
 
         assertThat(proto.getShortname()).isEqualTo("myconfig");
         assertThat(proto.getTracks()).isEqualTo("c=0:2");
@@ -87,9 +85,8 @@ public class ConfigBuilderTest
     @Test
     public void fromFlagsSetsDottedConfig()
     {
-        ConfigProto proto = builder()
-                .fromFlags(ImmutableList.of("--drive.drive=1"), new FlagGroup())
-                .build();
+        ConfigProto proto =
+                builder().fromFlags(ImmutableList.of("--drive.drive=1"), new FlagGroup()).build();
 
         assertThat(proto.getDrive().getDrive()).isEqualTo(1);
     }
@@ -99,8 +96,7 @@ public class ConfigBuilderTest
     {
         ConfigProto proto = builder().withFluxSource("foo.flux").build();
 
-        assertThat(proto.getFluxSource().getType())
-            .isEqualTo(FluxSourceSinkType.FLUXTYPE_FLUX);
+        assertThat(proto.getFluxSource().getType()).isEqualTo(FluxSourceSinkType.FLUXTYPE_FLUX);
         assertThat(proto.getFluxSource().getFl2().getFilename()).isEqualTo("foo.flux");
     }
 
@@ -109,8 +105,7 @@ public class ConfigBuilderTest
     {
         ConfigProto proto = builder().withFluxSource("drive:1").build();
 
-        assertThat(proto.getFluxSource().getType())
-            .isEqualTo(FluxSourceSinkType.FLUXTYPE_DRIVE);
+        assertThat(proto.getFluxSource().getType()).isEqualTo(FluxSourceSinkType.FLUXTYPE_DRIVE);
         assertThat(proto.getDrive().getDrive()).isEqualTo(1);
     }
 
@@ -119,8 +114,7 @@ public class ConfigBuilderTest
     {
         ConfigProto proto = builder().withImageWriter("out.dsk").build();
 
-        assertThat(proto.getImageWriter().getType())
-            .isEqualTo(ImageReaderWriterType.IMAGETYPE_IMG);
+        assertThat(proto.getImageWriter().getType()).isEqualTo(ImageReaderWriterType.IMAGETYPE_IMG);
         assertThat(proto.getImageWriter().getFilename()).isEqualTo("out.dsk");
     }
 
@@ -129,8 +123,9 @@ public class ConfigBuilderTest
     {
         ConfigProto proto = builder().withCopyFluxTo("copy.scp").build();
 
-        assertThat(proto.getDecoder().getCopyFluxTo().getType())
-            .isEqualTo(FluxSourceSinkType.FLUXTYPE_SCP);
+        assertThat(proto.getDecoder()
+                .getCopyFluxTo()
+                .getType()).isEqualTo(FluxSourceSinkType.FLUXTYPE_SCP);
         assertThat(proto.getDecoder().getCopyFluxTo().getScp().getFilename()).isEqualTo("copy.scp");
     }
 
@@ -139,8 +134,7 @@ public class ConfigBuilderTest
     {
         ConfigProto proto = builder().withFluxSink("vcd:vcdfiles").build();
 
-        assertThat(proto.getFluxSink().getType())
-            .isEqualTo(FluxSourceSinkType.FLUXTYPE_VCD);
+        assertThat(proto.getFluxSink().getType()).isEqualTo(FluxSourceSinkType.FLUXTYPE_VCD);
         assertThat(proto.getFluxSink().getVcd().getDirectory()).isEqualTo("vcdfiles");
     }
 
@@ -149,29 +143,25 @@ public class ConfigBuilderTest
     {
         ConfigProto proto = builder().withImageReader("in.dim").build();
 
-        assertThat(proto.getImageReader().getType())
-            .isEqualTo(ImageReaderWriterType.IMAGETYPE_DIM);
+        assertThat(proto.getImageReader().getType()).isEqualTo(ImageReaderWriterType.IMAGETYPE_DIM);
         assertThat(proto.getImageReader().getFilename()).isEqualTo("in.dim");
     }
 
     @Test
     public void withImageWriterReadOnlyThrows()
     {
-        assertThrows(ConfigException.class,
-            () -> builder().withImageWriter("out.dim"));
+        assertThrows(ConfigException.class, () -> builder().withImageWriter("out.dim"));
     }
 
     @Test
     public void withImageReaderUnrecognisedThrows()
     {
-        assertThrows(ConfigException.class,
-            () -> builder().withImageReader("bogus"));
+        assertThrows(ConfigException.class, () -> builder().withImageReader("bogus"));
     }
 
     @Test
     public void withFluxSourceUnrecognisedThrows()
     {
-        assertThrows(ConfigException.class,
-            () -> builder().withFluxSource("bogus"));
+        assertThrows(ConfigException.class, () -> builder().withFluxSource("bogus"));
     }
 }

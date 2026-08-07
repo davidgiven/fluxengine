@@ -16,7 +16,7 @@ public class BitWriterTest
         ByteWriter bw = new ByteWriter(bytes);
         new BitWriter(bw).push(0b11010110, 8).flush();
 
-        assertThat(bytes.toByteArray()).isEqualTo(new byte[] {(byte) 0xd6});
+        assertThat(bytes.toByteArray()).isEqualTo(new byte[]{(byte) 0xd6});
     }
 
     @Test
@@ -26,7 +26,7 @@ public class BitWriterTest
         ByteWriter bw = new ByteWriter(bytes);
         new BitWriter(bw).push(0b11010110, 8).push(0b101, 3).flush();
 
-        assertThat(bytes.toByteArray()).isEqualTo(new byte[] {(byte) 0xd6, 0x05});
+        assertThat(bytes.toByteArray()).isEqualTo(new byte[]{(byte) 0xd6, 0x05});
     }
 
     @Test
@@ -36,6 +36,6 @@ public class BitWriterTest
         ByteWriter bw = new ByteWriter(bytes);
         new BitWriter(bw).push(0b101, 3).flush();
 
-        assertThat(bytes.toByteArray()).isEqualTo(new byte[] {0x05});
+        assertThat(bytes.toByteArray()).isEqualTo(new byte[]{0x05});
     }
 }

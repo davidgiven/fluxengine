@@ -4,42 +4,19 @@ import static com.google.common.truth.Truth.assertThat;
 
 import com.cowlark.fluxengine.config.ConfigBuilder;
 import com.cowlark.fluxengine.config.ConfigProto;
-import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.core.ByteWriter;
+import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.external.DriveType;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 @RunWith(JUnit4.class)
 public class A2RFluxSourceTest
 {
-    @Test
-    public void readsTracks() throws IOException
-    {
-        Path path = writeTempFile();
-
-        A2RFluxSource source = new A2RFluxSource(A2rFluxSourceProto.newBuilder()
-                .setFilename(path.toString())
-                .build());
-
-        FluxSourceIterator iterator = source.readFlux(0, 0);
-        assertThat(iterator.hasNext()).isTrue();
-        Bytes expected = Bytes.of(0x40, 0xad, 0xad, 0xad);
-        assertThat(iterator.next().rawBytes().toByteArray()).isEqualTo(expected.toByteArray());
-        assertThat(iterator.hasNext()).isFalse();
-        assertThat(source.readFlux(1, 0)).isInstanceOf(EmptyFluxSourceIterator.class);
-
-        ConfigBuilder configBuilder = new ConfigBuilder().set("usb.serial", "test-serial");
-        source.adjustConfig(configBuilder);
-        ConfigProto config = configBuilder.build();
-        assertThat(config.getDrive().getTracks()).isEqualTo("c0h0");
-        assertThat(config.getDrive().getDriveType()).isEqualTo(DriveType.DRIVETYPE_80TRACK);
-    }
-
     /* Builds an A2R file containing a single track 0/0, encoded as a 3.5"
      * disk with two short intervals. */
     private static Path writeTempFile() throws IOException
@@ -94,5 +71,28 @@ public class A2RFluxSourceTest
     {
         for (int i = 0; i < 4; i++)
             bw.write8(id.charAt(i));
+    }
+
+    @Test
+    public void readsTracks() throws IOException
+    {
+        Path path = writeTempFile();
+
+        A2RFluxSource source = new A2RFluxSource(A2rFluxSourceProto.newBuilder()
+                .setFilename(path.toString())
+                .build());
+
+        FluxSourceIterator iterator = source.readFlux(0, 0);
+        assertThat(iterator.hasNext()).isTrue();
+        Bytes expected = Bytes.of(0x40, 0xad, 0xad, 0xad);
+        assertThat(iterator.next().rawBytes().toByteArray()).isEqualTo(expected.toByteArray());
+        assertThat(iterator.hasNext()).isFalse();
+        assertThat(source.readFlux(1, 0)).isInstanceOf(EmptyFluxSourceIterator.class);
+
+        ConfigBuilder configBuilder = new ConfigBuilder().set("usb.serial", "test-serial");
+        source.adjustConfig(configBuilder);
+        ConfigProto config = configBuilder.build();
+        assertThat(config.getDrive().getTracks()).isEqualTo("c0h0");
+        assertThat(config.getDrive().getDriveType()).isEqualTo(DriveType.DRIVETYPE_80TRACK);
     }
 }

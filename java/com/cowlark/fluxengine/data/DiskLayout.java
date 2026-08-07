@@ -21,14 +21,9 @@ import java.util.Set;
  */
 public class DiskLayout
 {
-    public record LayoutBounds(int minCylinder, int maxCylinder, int minHead, int maxHead)
-    {
-    }
-
     /* Logical size. */
     public final int numLogicalCylinders;
     public final int numLogicalHeads;
-
     /* Physical size and properties. */
     public final int minPhysicalCylinder;
     public final int maxPhysicalCylinder;
@@ -39,21 +34,17 @@ public class DiskLayout
     public final int headWidth;
     public final boolean swapSides;
     public final long totalBytes;
-
     /* Physical and logical layouts by location. */
     public final ImmutableMap<CylinderHead, PhysicalTrackLayout> layoutByPhysicalLocation;
     public final ImmutableMap<CylinderHead, LogicalTrackLayout> layoutByLogicalLocation;
-
     /* Ordered lists of physical and logical locations. */
     public final ImmutableList<CylinderHead> logicalLocations;
     public final ImmutableList<CylinderHead> logicalLocationsInFilesystemOrder;
     public final ImmutableList<CylinderHead> physicalLocations;
-
     /* Ordered lists of sector locations, plus the reverse mapping. */
     public final ImmutableList<LogicalLocation> logicalSectorLocationsInFilesystemOrder;
     public final ImmutableMap<LogicalLocation, Integer> blockIdByLogicalSectorLocation;
     public final ImmutableList<CylinderHeadSector> physicalSectorLocationsInFilesystemOrder;
-
     /* Mapping from logical location to sector offset and back again. */
     public final ImmutableMap<Long, LogicalLocation> logicalSectorLocationBySectorOffset;
     public final ImmutableMap<LogicalLocation, Long> sectorOffsetByLogicalSectorLocation;
@@ -86,22 +77,20 @@ public class DiskLayout
         Map<CylinderHead, LogicalTrackLayout> logicalLayout = new LinkedHashMap<>();
         List<CylinderHead> logicalLocationsLocal = new ArrayList<>();
 
-        for (int logicalCylinder = 0; logicalCylinder < numLogicalCylinders;
-            logicalCylinder++)
-            for (int logicalHead = 0; logicalHead < numLogicalHeads;
-                logicalHead++)
+        for (int logicalCylinder = 0; logicalCylinder < numLogicalCylinders; logicalCylinder++)
+            for (int logicalHead = 0; logicalHead < numLogicalHeads; logicalHead++)
             {
                 int physicalCylinder = remapCylinderLogicalToPhysical(logicalCylinder);
                 int physicalHead = remapHeadLogicalToPhysical(logicalHead);
 
                 minPhysicalCylinderLocal = Math.min(minPhysicalCylinderLocal, physicalCylinder);
                 maxPhysicalCylinderLocal =
-                    Math.max(maxPhysicalCylinderLocal, physicalCylinder + groupSize - 1);
+                        Math.max(maxPhysicalCylinderLocal, physicalCylinder + groupSize - 1);
                 minPhysicalHeadLocal = Math.min(minPhysicalHeadLocal, physicalHead);
                 maxPhysicalHeadLocal = Math.max(maxPhysicalHeadLocal, physicalHead);
 
                 LayoutProto.LayoutdataProto layoutdata =
-                    getLayoutData(logicalCylinder, logicalHead, config);
+                        getLayoutData(logicalCylinder, logicalHead, config);
                 int sectorSize = layoutdata.getSectorSize();
                 List<Integer> diskSectorOrder = expandSectorList(layoutdata.getPhysical());
                 List<Integer> naturalSectorOrder = new ArrayList<>(diskSectorOrder);
@@ -114,9 +103,9 @@ public class DiskLayout
                     filesystemSectorOrder = expandSectorList(layoutdata.getFilesystem());
                     if (filesystemSectorOrder.size() != numSectors)
                         throw new FluxEngineException(
-                            "filesystem sector order list doesn't contain the right number of sectors");
-                }
-                else
+                                "filesystem sector order list doesn't contain the right number of" +
+                                        " sectors");
+                } else
                     filesystemSectorOrder = new ArrayList<>(naturalSectorOrder);
 
                 Map<Integer, Integer> sectorIdToNaturalOrdering = new LinkedHashMap<>();
@@ -129,13 +118,18 @@ public class DiskLayout
                 }
 
                 LogicalTrackLayout ltl = new LogicalTrackLayout(
-                    physicalCylinder, physicalHead, groupSize,
-                    logicalCylinder, logicalHead, numSectors, sectorSize,
-                    ImmutableList.copyOf(naturalSectorOrder),
-                    ImmutableList.copyOf(diskSectorOrder),
-                    ImmutableList.copyOf(filesystemSectorOrder),
-                    ImmutableMap.copyOf(sectorIdToFilesystemOrdering),
-                    ImmutableMap.copyOf(sectorIdToNaturalOrdering));
+                        physicalCylinder,
+                        physicalHead,
+                        groupSize,
+                        logicalCylinder,
+                        logicalHead,
+                        numSectors,
+                        sectorSize,
+                        ImmutableList.copyOf(naturalSectorOrder),
+                        ImmutableList.copyOf(diskSectorOrder),
+                        ImmutableList.copyOf(filesystemSectorOrder),
+                        ImmutableMap.copyOf(sectorIdToFilesystemOrdering),
+                        ImmutableMap.copyOf(sectorIdToNaturalOrdering));
                 logicalLayout.put(new CylinderHead(logicalCylinder, logicalHead), ltl);
                 logicalLocationsLocal.add(new CylinderHead(logicalCylinder, logicalHead));
             }
@@ -148,18 +142,19 @@ public class DiskLayout
         Map<CylinderHead, PhysicalTrackLayout> physicalLayout = new LinkedHashMap<>();
         List<CylinderHead> physicalLocationsLocal = new ArrayList<>();
 
-        for (int physicalCylinder = minPhysicalCylinder;
-            physicalCylinder <= maxPhysicalCylinder; physicalCylinder++)
-            for (int physicalHead = minPhysicalHead;
-                physicalHead <= maxPhysicalHead; physicalHead++)
+        for (int physicalCylinder = minPhysicalCylinder; physicalCylinder <= maxPhysicalCylinder;
+             physicalCylinder++)
+            for (int physicalHead = minPhysicalHead; physicalHead <= maxPhysicalHead;
+                 physicalHead++)
             {
                 CylinderHead ch = new CylinderHead(physicalCylinder, physicalHead);
                 PhysicalTrackLayout ptl = new PhysicalTrackLayout(
-                    physicalCylinder, physicalHead,
-                    (physicalCylinder - headBias) % groupSize,
-                    logicalLayout.get(new CylinderHead(
-                        remapCylinderPhysicalToLogical(physicalCylinder),
-                        remapHeadPhysicalToLogical(physicalHead))));
+                        physicalCylinder,
+                        physicalHead,
+                        (physicalCylinder - headBias) % groupSize,
+                        logicalLayout.get(new CylinderHead(
+                                remapCylinderPhysicalToLogical(physicalCylinder),
+                                remapHeadPhysicalToLogical(physicalHead))));
                 physicalLayout.put(ch, ptl);
                 physicalLocationsLocal.add(ch);
             }
@@ -178,7 +173,9 @@ public class DiskLayout
         Map<LogicalLocation, Integer> blockIdByLocationLocal = new LinkedHashMap<>();
 
         for (CylinderHead ch : getTrackOrdering(
-            config.getLayout().getFilesystemTrackOrder(), numLogicalCylinders, numLogicalHeads))
+                config.getLayout().getFilesystemTrackOrder(),
+                numLogicalCylinders,
+                numLogicalHeads))
         {
             LogicalTrackLayout ltl = logicalLayout.get(ch);
             logicalLocationsFilesystemLocal.add(ch);
@@ -186,7 +183,7 @@ public class DiskLayout
             for (int lid : ltl.filesystemSectorOrder)
             {
                 LogicalLocation logicalLocation =
-                    new LogicalLocation(ch.cylinder(), ch.head(), lid);
+                        new LogicalLocation(ch.cylinder(), ch.head(), lid);
                 logicalSectorOffsetLocal.put(sectorOffset, logicalLocation);
                 sectorOffsetByLocationLocal.put(logicalLocation, sectorOffset);
                 logicalSectorLocationsLocal.add(logicalLocation);
@@ -197,14 +194,10 @@ public class DiskLayout
             }
         }
 
-        logicalLocationsInFilesystemOrder =
-            ImmutableList.copyOf(logicalLocationsFilesystemLocal);
-        logicalSectorLocationsInFilesystemOrder =
-            ImmutableList.copyOf(logicalSectorLocationsLocal);
-        logicalSectorLocationBySectorOffset =
-            ImmutableMap.copyOf(logicalSectorOffsetLocal);
-        sectorOffsetByLogicalSectorLocation =
-            ImmutableMap.copyOf(sectorOffsetByLocationLocal);
+        logicalLocationsInFilesystemOrder = ImmutableList.copyOf(logicalLocationsFilesystemLocal);
+        logicalSectorLocationsInFilesystemOrder = ImmutableList.copyOf(logicalSectorLocationsLocal);
+        logicalSectorLocationBySectorOffset = ImmutableMap.copyOf(logicalSectorOffsetLocal);
+        sectorOffsetByLogicalSectorLocation = ImmutableMap.copyOf(sectorOffsetByLocationLocal);
         blockIdByLogicalSectorLocation = ImmutableMap.copyOf(blockIdByLocationLocal);
         physicalSectorLocationsInFilesystemOrder = ImmutableList.of();
 
@@ -219,16 +212,6 @@ public class DiskLayout
     public static DiskLayout createDiskLayout(ConfigProto config)
     {
         return new DiskLayout(config);
-    }
-
-    public LayoutBounds getPhysicalBounds()
-    {
-        return getBounds(layoutByPhysicalLocation.keySet());
-    }
-
-    public LayoutBounds getLogicalBounds()
-    {
-        return getBounds(layoutByLogicalLocation.keySet());
     }
 
     public static LayoutBounds getBounds(Iterable<CylinderHead> keys)
@@ -247,26 +230,6 @@ public class DiskLayout
         }
 
         return new LayoutBounds(minCylinder, maxCylinder, minHead, maxHead);
-    }
-
-    public int remapCylinderPhysicalToLogical(int physicalCylinder)
-    {
-        return (physicalCylinder - headBias) / groupSize;
-    }
-
-    public int remapCylinderLogicalToPhysical(int logicalCylinder)
-    {
-        return headBias + logicalCylinder * groupSize;
-    }
-
-    public int remapHeadPhysicalToLogical(int physicalHead)
-    {
-        return physicalHead ^ (swapSides ? 1 : 0);
-    }
-
-    public int remapHeadLogicalToPhysical(int logicalHead)
-    {
-        return logicalHead ^ (swapSides ? 1 : 0);
     }
 
     private static int getTrackStep(ConfigProto config)
@@ -299,14 +262,14 @@ public class DiskLayout
                 {
                     case DRIVETYPE_40TRACK:
                         throw new FluxEngineException(
-                            "you can't read/write an 80 track image from/to a 40 track drive");
+                                "you can't read/write an 80 track image from/to a 40 track drive");
 
                     case DRIVETYPE_80TRACK:
                         return 1;
 
                     case DRIVETYPE_APPLE2:
                         throw new FluxEngineException(
-                            "you can't read/write an 80 track image from/to an Apple II drive");
+                                "you can't read/write an 80 track image from/to an Apple II drive");
 
                     default:
                         break;
@@ -320,8 +283,9 @@ public class DiskLayout
         return 1;
     }
 
-    private static List<CylinderHead> getTrackOrdering(
-        LayoutProto.Order ordering, int tracks, int sides)
+    private static List<CylinderHead> getTrackOrdering(LayoutProto.Order ordering,
+                                                       int tracks,
+                                                       int sides)
     {
         List<CylinderHead> trackList = new ArrayList<>();
         switch (ordering)
@@ -365,7 +329,7 @@ public class DiskLayout
         {
             if (sectorsProto.getSectorCount() != 0)
                 throw new FluxEngineException(
-                    "LAYOUT: if you use a sector count, you can't use an explicit sector list");
+                        "LAYOUT: if you use a sector count, you can't use an explicit sector list");
 
             Set<Integer> sectorset = new HashSet<>();
             int id = sectorsProto.getStartSector();
@@ -385,27 +349,25 @@ public class DiskLayout
                 if (id >= (sectorsProto.getStartSector() + sectorsProto.getCount()))
                     id -= sectorsProto.getCount();
             }
-        }
-        else if (sectorsProto.getSectorCount() > 0)
+        } else if (sectorsProto.getSectorCount() > 0)
         {
             for (int i = 0; i < sectorsProto.getSectorCount(); i++)
                 sectors.add(sectorsProto.getSector(i));
-        }
-        else
+        } else
             throw new FluxEngineException("LAYOUT: no sectors in sector definition!");
 
         return sectors;
     }
 
-    private static LayoutProto.LayoutdataProto getLayoutData(
-        int logicalCylinder, int logicalHead, ConfigProto config)
+    private static LayoutProto.LayoutdataProto getLayoutData(int logicalCylinder,
+                                                             int logicalHead,
+                                                             ConfigProto config)
     {
-        LayoutProto.LayoutdataProto.Builder layoutData =
-            LayoutProto.LayoutdataProto.newBuilder();
+        LayoutProto.LayoutdataProto.Builder layoutData = LayoutProto.LayoutdataProto.newBuilder();
         for (LayoutProto.LayoutdataProto f : config.getLayout().getLayoutdataList())
         {
             if (f.hasTrack() && f.hasUpToTrack() &&
-                ((logicalCylinder < f.getTrack()) || (logicalCylinder > f.getUpToTrack())))
+                    ((logicalCylinder < f.getTrack()) || (logicalCylinder > f.getUpToTrack())))
                 continue;
             if (f.hasTrack() && !f.hasUpToTrack() && (logicalCylinder != f.getTrack()))
                 continue;
@@ -417,8 +379,10 @@ public class DiskLayout
         return layoutData.build();
     }
 
-    private static ConfigProto createTestConfig(int numCylinders, int numHeads,
-        int numSectors, int sectorSize)
+    private static ConfigProto createTestConfig(int numCylinders,
+                                                int numHeads,
+                                                int numSectors,
+                                                int sectorSize)
     {
         ConfigProto.Builder config = ConfigProto.newBuilder();
         LayoutProto.Builder layout = config.getLayoutBuilder();
@@ -429,5 +393,39 @@ public class DiskLayout
         layoutData.getPhysicalBuilder().setCount(numSectors);
 
         return config.build();
+    }
+
+    public LayoutBounds getPhysicalBounds()
+    {
+        return getBounds(layoutByPhysicalLocation.keySet());
+    }
+
+    public LayoutBounds getLogicalBounds()
+    {
+        return getBounds(layoutByLogicalLocation.keySet());
+    }
+
+    public int remapCylinderPhysicalToLogical(int physicalCylinder)
+    {
+        return (physicalCylinder - headBias) / groupSize;
+    }
+
+    public int remapCylinderLogicalToPhysical(int logicalCylinder)
+    {
+        return headBias + logicalCylinder * groupSize;
+    }
+
+    public int remapHeadPhysicalToLogical(int physicalHead)
+    {
+        return physicalHead ^ (swapSides ? 1 : 0);
+    }
+
+    public int remapHeadLogicalToPhysical(int logicalHead)
+    {
+        return logicalHead ^ (swapSides ? 1 : 0);
+    }
+
+    public record LayoutBounds(int minCylinder, int maxCylinder, int minHead, int maxHead)
+    {
     }
 }
