@@ -34,7 +34,7 @@ public interface Command
                     .put(
                             "analyse",
                             () -> new CommandGroup(ANALYSABLES, "Disk and drive analysis tools."))
-                    .put("read", stub("read", "Reads a disk, producing a sector image."))
+                    .put("read", ReadCommand::new)
                     .put("write", stub("write", "Writes a sector image to a disk."))
                     .put(
                             "fluxfile",
