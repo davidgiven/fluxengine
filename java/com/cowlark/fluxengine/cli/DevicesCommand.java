@@ -2,12 +2,12 @@ package com.cowlark.fluxengine.cli;
 
 import static com.google.common.base.Strings.nullToEmpty;
 
+import com.cowlark.fluxengine.config.UsbFinder;
 import com.cowlark.fluxengine.core.flags.FlagGroup;
-import com.cowlark.fluxengine.usb.UsbFactory;
-import com.cowlark.fluxengine.usb.UsbFactory.CandidateDevice;
+import com.cowlark.fluxengine.config.UsbFinder.CandidateDevice;
 import java.util.List;
 
-public class TestDevicesCommand implements Command
+public class DevicesCommand implements Command
 {
     private static final FlagGroup EMPTY = new FlagGroup();
 
@@ -20,7 +20,7 @@ public class TestDevicesCommand implements Command
     @Override
     public void run(String[] args)
     {
-        List<CandidateDevice> candidates = UsbFactory.findUsbDevices();
+        List<CandidateDevice> candidates = UsbFinder.findUsbDevices();
         switch (candidates.size())
         {
             case 0:

@@ -28,7 +28,6 @@ public interface Command
     ImmutableMap<String, Supplier<? extends Command>> TESTABLES =
             ImmutableMap.<String, Supplier<? extends Command>>builder()
                     .put("bandwidth", TestBandwidthCommand::new)
-                    .put("devices", TestDevicesCommand::new)
                     .put("voltages", stub("voltages", "Measures the FDD bus voltages."))
                     .build();
 
@@ -68,6 +67,7 @@ public interface Command
                     .put("mkdir", stub("mkdir", "Create a directory on disk (or image)."))
                     .put("rpm", stub("rpm", "Measures the disk rotational speed."))
                     .put("seek", stub("seek", "Moves the disk head."))
+                    .put("devices", DevicesCommand::new)
                     .put("test", () -> new CommandGroup(TESTABLES, "Various testing commands."))
                     .build();
 

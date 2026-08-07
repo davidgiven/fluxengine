@@ -74,11 +74,16 @@ java_library(
     name = "config",
     srcs = glob(["*.java"]),
     deps = [
+        ":common_java_proto",
         ":config_java_proto",
         "//java/com/cowlark/fluxengine/core",
         "//java/com/cowlark/fluxengine/core/flags",
-        "@com_google_protobuf//java/core:core",
+        "//java/com/cowlark/fluxengine/fluxsource:fluxsource_java_proto",
+        "@com_google_protobuf//java/core",
+        "@maven//:com_fazecast_jSerialComm",
         "@maven//:com_google_guava_guava",
         "@maven//:com_jayway_jsonpath_json_path",
+        "@maven//:javax_usb_usb_api",
+        "@maven//:org_usb4java_usb4java_javax",
     ],
 )

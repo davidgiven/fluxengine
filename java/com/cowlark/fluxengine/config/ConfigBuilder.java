@@ -1,7 +1,10 @@
 package com.cowlark.fluxengine.config;
 
+import static com.cowlark.fluxengine.config.Common.FluxSourceSinkType.FLUXTYPE_DRIVE;
+
 import com.cowlark.fluxengine.core.flags.FlagGroup;
 import com.cowlark.fluxengine.core.flags.Flags;
+import com.cowlark.fluxengine.fluxsource.Fluxsource;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.TextFormat;
 import java.io.IOException;
@@ -14,7 +17,8 @@ import java.nio.file.Path;
  */
 public class ConfigBuilder
 {
-    private ConfigProto.Builder proto = ConfigProto.newBuilder();
+    private ConfigProto.Builder proto = ConfigProto.newBuilder()
+            .setFluxSource(Fluxsource.FluxSourceProto.newBuilder().setType(FLUXTYPE_DRIVE).build());
 
     public ConfigBuilder()
     {
@@ -37,8 +41,7 @@ public class ConfigBuilder
         try
         {
             contents = Files.readString(Path.of(name));
-        }
-        catch (IOException e)
+        } catch (IOException e)
         {
             throw new ConfigException("Cannot open '" + name + "': " + e.getMessage());
         }
@@ -46,8 +49,7 @@ public class ConfigBuilder
         try
         {
             TextFormat.merge(contents, proto);
-        }
-        catch (TextFormat.ParseException e)
+        } catch (TextFormat.ParseException e)
         {
             throw new ConfigException("couldn't load external config proto");
         }
@@ -68,7 +70,20 @@ public class ConfigBuilder
 
     public ConfigProto build()
     {
+        validate();
         return proto.build();
     }
 
+    private void validate()
+    {
+        if ((proto.getFluxSource().getType() == FLUXTYPE_DRIVE) ||
+                (proto.getFluxSink().getType() == FLUXTYPE_DRIVE))
+            validateUsb();
+    }
+
+    private void validateUsb()
+    {
+        if (!proto.getUsb().hasSerial())
+            proto.getUsbBuilder().setSerial(UsbFinder.selectDevice(proto).serial);
+    }
 }
