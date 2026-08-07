@@ -4,7 +4,9 @@ import com.cowlark.fluxengine.config.ConfigBuilder;
 import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.core.FluxEngineException;
+import com.cowlark.fluxengine.data.CylinderHead;
 import com.cowlark.fluxengine.data.Fluxmap;
+import com.cowlark.fluxengine.data.Locations;
 import com.cowlark.fluxengine.external.FluxFileProto;
 import com.cowlark.fluxengine.external.FluxFileVersion;
 import com.cowlark.fluxengine.external.TrackFluxProto;
@@ -35,10 +37,10 @@ public class Fl2FluxSource extends FluxSource
         if (proto.hasDriveType())
             builder.getDriveBuilder().setDriveType(proto.getDriveType());
 
-        List<String> tracks = new ArrayList<>();
+        List<CylinderHead> chs = new ArrayList<>();
         for (TrackFluxProto trackFlux : proto.getTrackList())
-            tracks.add(String.format("c%dh%d", trackFlux.getTrack(), trackFlux.getHead()));
-        builder.getDriveBuilder().setTracks(String.join(" ", tracks));
+            chs.add(new CylinderHead(trackFlux.getTrack(), trackFlux.getHead()));
+        builder.getDriveBuilder().setTracks(Locations.convertCylinderHeadsToString(chs));
 
         extraConfig = builder.build();
     }

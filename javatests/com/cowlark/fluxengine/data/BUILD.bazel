@@ -26,3 +26,14 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "LocationsTest",
+    srcs = ["LocationsTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/data",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
