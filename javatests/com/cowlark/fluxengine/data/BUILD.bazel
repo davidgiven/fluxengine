@@ -37,3 +37,18 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "DiskLayoutTest",
+    srcs = ["DiskLayoutTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/config:config_java_proto",
+        "//java/com/cowlark/fluxengine/config:drive_java_proto",
+        "//java/com/cowlark/fluxengine/config:layout_java_proto",
+        "//java/com/cowlark/fluxengine/data",
+        "//java/com/cowlark/fluxengine/external:fl2_java_proto",
+        "@maven//:com_google_guava_guava",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)

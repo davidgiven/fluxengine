@@ -8,6 +8,8 @@ import com.cowlark.fluxengine.core.FluxEngineException;
 import com.cowlark.fluxengine.core.flags.FlagGroup;
 import com.cowlark.fluxengine.core.flags.StringFlag;
 import com.cowlark.fluxengine.core.flags.ValueFlag;
+import com.cowlark.fluxengine.data.DiskLayout;
+import com.cowlark.fluxengine.fluxsource.FluxSource;
 import com.google.common.collect.ImmutableList;
 
 /**
@@ -56,8 +58,8 @@ public class ReadCommand implements Command
             throw new FluxEngineException("you cannot copy flux to a hardware device");
 
         // Unsupported:
-        // var diskLayout = createDiskLayout(config);
-        // var fluxSource = FluxSource.create(config);
+        DiskLayout diskLayout = new DiskLayout(config);
+        FluxSource fluxSource = FluxSource.create(config);
         // var decoder = Arch.createDecoder(config);
         // var writer = ImageWriter.create(config);
         // readDiskCommand(diskLayout, fluxSource, decoder, writer);
