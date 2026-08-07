@@ -80,6 +80,12 @@ public class ConfigBuilder
         return this;
     }
 
+    public ConfigBuilder mergeConfig(ConfigProto other)
+    {
+        proto.mergeFrom(other);
+        return this;
+    }
+
     public ConfigBuilder withFluxSource(String filename)
     {
         FluxSourceProto.Builder fluxSource = proto.getFluxSourceBuilder();
@@ -188,9 +194,9 @@ public class ConfigBuilder
 
     private static ImageReaderWriterType imageType(String filename)
     {
-        if (filename.endsWith(".adf") || filename.endsWith(".d81") || filename.endsWith(".dsk")
-                || filename.endsWith(".img") || filename.endsWith(".st") || filename.endsWith(".vgi")
-                || filename.endsWith(".xdf"))
+        if (filename.endsWith(".adf") || filename.endsWith(".d81") || filename.endsWith(".dsk") ||
+                filename.endsWith(".img") || filename.endsWith(".st") ||
+                filename.endsWith(".vgi") || filename.endsWith(".xdf"))
             return IMAGETYPE_IMG;
         else if (filename.endsWith(".d64"))
             return IMAGETYPE_D64;
@@ -218,8 +224,8 @@ public class ConfigBuilder
 
     private static boolean isReadOnlyImage(String filename)
     {
-        return filename.endsWith(".dim") || filename.endsWith(".fdi") || filename.endsWith(".jv3")
-                || filename.endsWith(".nfd") || filename.endsWith(".td0");
+        return filename.endsWith(".dim") || filename.endsWith(".fdi") ||
+                filename.endsWith(".jv3") || filename.endsWith(".nfd") || filename.endsWith(".td0");
     }
 
     public ConfigBuilder showCurrentConfig()

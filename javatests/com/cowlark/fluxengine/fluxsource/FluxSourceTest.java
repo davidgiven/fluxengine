@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertThrows;
 
+import com.cowlark.fluxengine.config.ConfigBuilder;
 import com.cowlark.fluxengine.config.FluxSourceSinkType;
 import com.cowlark.fluxengine.core.FluxEngineException;
 import com.cowlark.fluxengine.data.Fluxmap;
@@ -45,7 +46,10 @@ public class FluxSourceTest
 
         assertThat(source).isInstanceOf(EraseFluxSource.class);
         assertThat(source.readFlux(0, 0).next()).isNull();
-        assertThat(source.getExtraConfig().getDrive().getTracks()).isEqualTo("c0-255h0-1");
+
+        ConfigBuilder configBuilder = new ConfigBuilder().set("usb.serial", "test-serial");
+        source.adjustConfig(configBuilder);
+        assertThat(configBuilder.build().getDrive().getTracks()).isEqualTo("c0-255h0-1");
     }
 
     @Test

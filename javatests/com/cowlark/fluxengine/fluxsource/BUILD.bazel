@@ -6,12 +6,31 @@ java_test(
     name = "FluxSourceTest",
     srcs = ["FluxSourceTest.java"],
     deps = [
+        "//java/com/cowlark/fluxengine/config",
         "//java/com/cowlark/fluxengine/config:common_java_proto",
         "//java/com/cowlark/fluxengine/config:config_java_proto",
         "//java/com/cowlark/fluxengine/core",
         "//java/com/cowlark/fluxengine/data",
         "//java/com/cowlark/fluxengine/fluxsource",
         "//java/com/cowlark/fluxengine/fluxsource:fluxsource_java_proto",
+        "@com_google_protobuf//java/core",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "Fl2FluxSourceTest",
+    srcs = ["Fl2FluxSourceTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/config",
+        "//java/com/cowlark/fluxengine/config:config_java_proto",
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/data",
+        "//java/com/cowlark/fluxengine/external:fl2_java_proto",
+        "//java/com/cowlark/fluxengine/fluxsource",
+        "//java/com/cowlark/fluxengine/fluxsource:fluxsource_java_proto",
+        "@com_google_protobuf//java/core",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],
