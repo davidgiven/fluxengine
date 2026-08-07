@@ -46,15 +46,11 @@ import java.time.Duration;
  */
 class GreaseweazleUsbDevice extends UsbDevice
 {
-    private enum Version
-    {V22, V24, V29}
-
     private final SerialPort serial;
     private final GreaseweazleProto config;
     private Version version;
     private long clock;
     private long revolutions;
-
     GreaseweazleUsbDevice(String port, GreaseweazleProto config)
     {
         this.config = config;
@@ -74,8 +70,7 @@ class GreaseweazleUsbDevice extends UsbDevice
         else
             throw new FluxEngineException(String.format(
                     "only Greaseweazle firmware versions 22 and 24 or above are currently " +
-                            "supported, but you have version %d. Please file a bug.",
-                    version));
+                            "supported, but you have version %d. Please file a bug.", version));
 
         /* Twiddle the baud rate, which indicates to the Greaseweazle that the
          * data stream has been reset. */
@@ -85,6 +80,49 @@ class GreaseweazleUsbDevice extends UsbDevice
 
         /* Configure the hardware. */
         doCommand(CMD_SET_BUS_TYPE, config.getBusType().getNumber());
+    }
+
+    private static String gwError(int e)
+    {
+        switch (e)
+        {
+            case ACK_OKAY:
+                return "OK";
+            case ACK_BAD_COMMAND:
+                return "Bad command";
+            case ACK_NO_INDEX:
+                return "No index";
+            case ACK_NO_TRK0:
+                return "No track 0";
+            case ACK_FLUX_OVERFLOW:
+                return "Overflow";
+            case ACK_FLUX_UNDERFLOW:
+                return "Underflow";
+            case ACK_WRPROT:
+                return "Write protected";
+            case ACK_NO_UNIT:
+                return "No unit";
+            case ACK_NO_BUS:
+                return "No bus";
+            case ACK_BAD_UNIT:
+                return "Invalid unit";
+            case ACK_BAD_PIN:
+                return "Invalid pin";
+            case ACK_BAD_CYLINDER:
+                return "Invalid track";
+            default:
+                return "Unknown error";
+        }
+    }
+
+    private static long ssRandNext(long x)
+    {
+        return (x & 1) != 0 ? (x >> 1) ^ 0x80000062L : x >> 1;
+    }
+
+    private static double getCurrentTime()
+    {
+        return System.nanoTime() / 1e9;
     }
 
     private int getVersion()
@@ -103,10 +141,8 @@ class GreaseweazleUsbDevice extends UsbDevice
     private long read28()
     {
         ByteReader buffer = new ByteReader(readBytes(4));
-        return (long) ((buffer.read8() & 0xfe) >> 1) |
-                (long) (buffer.read8() & 0xfe) << 6 |
-                (long) (buffer.read8() & 0xfe) << 13 |
-                (long) (buffer.read8() & 0xfe) << 20;
+        return (long) ((buffer.read8() & 0xfe) >> 1) | (long) (buffer.read8() & 0xfe) << 6 |
+                (long) (buffer.read8() & 0xfe) << 13 | (long) (buffer.read8() & 0xfe) << 20;
     }
 
     private void doCommand(int cmd, int... payload)
@@ -137,7 +173,8 @@ class GreaseweazleUsbDevice extends UsbDevice
                     command[0],
                     buffer.getByte(1)));
         if (buffer.getByte(1) != 0)
-            throw new FluxEngineException("Greaseweazle error: " + gwError(buffer.getByte(1) & 0xff));
+            throw new FluxEngineException(
+                    "Greaseweazle error: " + gwError(buffer.getByte(1) & 0xff));
     }
 
     @Override
@@ -150,8 +187,8 @@ class GreaseweazleUsbDevice extends UsbDevice
     public long getRotationalPeriod(int hardSectorCount)
     {
         if (hardSectorCount != 0)
-            throw new FluxEngineException("hard sectors are currently unsupported on the " +
-                    "Greaseweazle");
+            throw new FluxEngineException(
+                    "hard sectors are currently unsupported on the " + "Greaseweazle");
 
         /* The Greaseweazle doesn't have a command to fetch the period directly,
          * so we have to do a flux read. */
@@ -316,8 +353,8 @@ class GreaseweazleUsbDevice extends UsbDevice
     public Bytes read(int side, boolean synced, long readTime, long hardSectorThreshold)
     {
         if (hardSectorThreshold != 0)
-            throw new FluxEngineException("hard sectors are currently unsupported on the " +
-                    "Greaseweazle");
+            throw new FluxEngineException(
+                    "hard sectors are currently unsupported on the " + "Greaseweazle");
 
         doCommand(CMD_HEAD, side);
 
@@ -370,8 +407,8 @@ class GreaseweazleUsbDevice extends UsbDevice
     public void write(int side, Bytes fldata, long hardSectorThreshold)
     {
         if (hardSectorThreshold != 0)
-            throw new FluxEngineException("hard sectors are currently unsupported on the " +
-                    "Greaseweazle");
+            throw new FluxEngineException(
+                    "hard sectors are currently unsupported on the " + "Greaseweazle");
 
         doCommand(CMD_HEAD, side);
         switch (version)
@@ -396,8 +433,8 @@ class GreaseweazleUsbDevice extends UsbDevice
     public void erase(int side, long hardSectorThreshold)
     {
         if (hardSectorThreshold != 0)
-            throw new FluxEngineException("hard sectors are currently unsupported on the " +
-                    "Greaseweazle");
+            throw new FluxEngineException(
+                    "hard sectors are currently unsupported on the " + "Greaseweazle");
 
         doCommand(CMD_HEAD, side);
 
@@ -426,44 +463,6 @@ class GreaseweazleUsbDevice extends UsbDevice
         throw new FluxEngineException("unsupported operation on the Greaseweazle");
     }
 
-    private static String gwError(int e)
-    {
-        switch (e)
-        {
-            case ACK_OKAY:
-                return "OK";
-            case ACK_BAD_COMMAND:
-                return "Bad command";
-            case ACK_NO_INDEX:
-                return "No index";
-            case ACK_NO_TRK0:
-                return "No track 0";
-            case ACK_FLUX_OVERFLOW:
-                return "Overflow";
-            case ACK_FLUX_UNDERFLOW:
-                return "Underflow";
-            case ACK_WRPROT:
-                return "Write protected";
-            case ACK_NO_UNIT:
-                return "No unit";
-            case ACK_NO_BUS:
-                return "No bus";
-            case ACK_BAD_UNIT:
-                return "Invalid unit";
-            case ACK_BAD_PIN:
-                return "Invalid pin";
-            case ACK_BAD_CYLINDER:
-                return "Invalid track";
-            default:
-                return "Unknown error";
-        }
-    }
-
-    private static long ssRandNext(long x)
-    {
-        return (x & 1) != 0 ? (x >> 1) ^ 0x80000062L : x >> 1;
-    }
-
     private int readByte()
     {
         return readBytes(1).get(0) & 0xff;
@@ -476,8 +475,7 @@ class GreaseweazleUsbDevice extends UsbDevice
         byte[] chunk = new byte[4096];
         while (bw.pos() < count)
         {
-            int read = serial.readBytes(chunk,
-                Math.min(chunk.length, count - bw.pos()));
+            int read = serial.readBytes(chunk, Math.min(chunk.length, count - bw.pos()));
             if (read < 0)
                 throw new FluxEngineException("serial read failed");
             for (int i = 0; i < read; i++)
@@ -498,8 +496,6 @@ class GreaseweazleUsbDevice extends UsbDevice
         writeBytes(data.toByteArray());
     }
 
-    private static double getCurrentTime()
-    {
-        return System.nanoTime() / 1e9;
-    }
+    private enum Version
+    {V22, V24, V29}
 }

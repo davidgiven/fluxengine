@@ -78,8 +78,7 @@ public final class GreaseweazleUtils
                     {
                         bw.write8((int) (250 + high));
                         bw.write8((int) (1 + (delta - 250) % 255));
-                    }
-                    else
+                    } else
                     {
                         bw.write8(255);
                         bw.write8(FLUXOP_SPACE);
@@ -125,8 +124,7 @@ public final class GreaseweazleUtils
                     default:
                         throw new FluxEngineException("bad opcode in Greaseweazle stream");
                 }
-            }
-            else
+            } else
             {
                 if (b < 250)
                     ticksGw += b;
@@ -155,8 +153,7 @@ public final class GreaseweazleUtils
                         bw.write8((int) (deltaFl | F_BIT_INDEX));
                         lastEventFl = indexFl;
                         indexGw = -1;
-                    }
-                    else if (indexFl == ticksFl)
+                    } else if (indexFl == ticksFl)
                         event |= F_BIT_INDEX;
                 }
 
@@ -196,9 +193,7 @@ public final class GreaseweazleUtils
 
     private static long read28(ByteReader in)
     {
-        return (long) ((in.read8() & 0xfe) >> 1) |
-               (long) (in.read8() & 0xfe) << 6 |
-               (long) (in.read8() & 0xfe) << 13 |
-               (long) (in.read8() & 0xfe) << 20;
+        return (long) ((in.read8() & 0xfe) >> 1) | (long) (in.read8() & 0xfe) << 6 |
+                (long) (in.read8() & 0xfe) << 13 | (long) (in.read8() & 0xfe) << 20;
     }
 }

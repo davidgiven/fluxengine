@@ -34,11 +34,8 @@ public final class FluxEngine
     public static final int FRAME_SIZE = 64;
     public static final int TICK_FREQUENCY = 12000000;
     public static final int TICKS_PER_US = TICK_FREQUENCY / 1000000;
+    public static final int PRECOMPENSATION_THRESHOLD_TICKS = (int) (2.25 * TICKS_PER_US);
     public static final int TICKS_PER_MS = TICK_FREQUENCY / 1000;
-
-    public static final int PRECOMPENSATION_THRESHOLD_TICKS =
-        (int) (2.25 * TICKS_PER_US);
-
     public static final double NS_PER_TICK = 1000000000.0 / TICK_FREQUENCY;
     public static final double US_PER_TICK = 1000000.0 / TICK_FREQUENCY;
     public static final double MS_PER_TICK = 1000.0 / TICK_FREQUENCY;
@@ -82,6 +79,10 @@ public final class FluxEngine
     public static final int F_BIT_INDEX = 0x40;
     public static final int F_DESYNC = 0x00; /* obsolete */
     public static final int F_EOF = 0x100; /* synthetic, only produced by library */
+
+    private FluxEngine()
+    {
+    }
 
     public static class FrameHeader
     {
@@ -181,9 +182,5 @@ public final class FluxEngine
         public Voltages inputDrive1Selected = new Voltages();
         public Voltages inputDrive0Running = new Voltages();
         public Voltages inputDrive1Running = new Voltages();
-    }
-
-    private FluxEngine()
-    {
     }
 }

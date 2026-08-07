@@ -1,9 +1,9 @@
 package com.cowlark.fluxengine.core.flags;
 
-import java.util.List;
-import java.util.function.Consumer;
 import lombok.Builder;
 import lombok.Singular;
+import java.util.List;
+import java.util.function.Consumer;
 
 public class ActionFlag extends Flag
 {
@@ -12,8 +12,11 @@ public class ActionFlag extends Flag
     private final boolean hasArgument;
 
     @Builder(setterPrefix = "set")
-    private ActionFlag(FlagGroup group, @Singular List<String> names, String helpText,
-        Runnable voidCallback, Consumer<String> valueCallback)
+    private ActionFlag(FlagGroup group,
+                       @Singular List<String> names,
+                       String helpText,
+                       Runnable voidCallback,
+                       Consumer<String> valueCallback)
     {
         super(group, names, helpText);
         this.voidCallback = voidCallback;

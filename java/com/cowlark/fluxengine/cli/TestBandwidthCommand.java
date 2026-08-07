@@ -1,7 +1,6 @@
 package com.cowlark.fluxengine.cli;
 
 import com.cowlark.fluxengine.config.ConfigBuilder;
-import com.cowlark.fluxengine.config.ConfigFlagGroup;
 import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.usb.UsbDevice;
 import com.cowlark.fluxengine.usb.UsbFactory;
@@ -21,9 +20,7 @@ public class TestBandwidthCommand implements Command
     @Override
     public void run(String[] args)
     {
-        ConfigProto config = new ConfigBuilder()
-                .fromFlags(ImmutableList.copyOf(args))
-                .build();
+        ConfigProto config = new ConfigBuilder().fromFlags(ImmutableList.copyOf(args)).build();
 
         UsbDevice device = UsbFactory.connect(config);
         device.testBulkWrite();

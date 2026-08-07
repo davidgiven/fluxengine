@@ -5,10 +5,10 @@ option java_package = "com.cowlark.fluxengine.imagereader";
 import "com/cowlark/fluxengine/config/common.proto";
 
 message ImgInputOutputProto {
-    optional bool filesystem_sector_order = 1 [
-        (help) = "read/write sector image in filesystem order",
-        default = false
-    ];
+  optional bool filesystem_sector_order = 1 [
+    (help) = "read/write sector image in filesystem order",
+    default = false
+  ];
 }
 
 message DiskCopyInputProto {}
@@ -25,20 +25,20 @@ message NfdInputProto {}
 // NEXT_TAG: 14
 message ImageReaderProto
 {
-    optional string filename = 1 [ (help) = "filename of input sector image" ];
+  optional string filename = 1 [(help) = "filename of input sector image"];
 
-	optional ImageReaderWriterType type = 13
-		[default = IMAGETYPE_NOT_SET, (help) = "input image type"];
+  optional ImageReaderWriterType type = 13
+  [default = IMAGETYPE_NOT_SET, (help) = "input image type"];
 
-	optional ImgInputOutputProto img = 2;
-	optional DiskCopyInputProto diskcopy = 3;
-	optional ImdInputProto imd = 4;
-	optional Jv3InputProto jv3 = 5;
-	optional D64InputProto d64 = 6;
-	optional NsiInputProto nsi = 7;
-	optional Td0InputProto td0 = 8;
-	optional DimInputProto dim = 9;
-	optional FdiInputProto fdi = 10;
-	optional D88InputProto d88 = 11;
-	optional NfdInputProto nfd = 12;
+  optional ImgInputOutputProto img = 2;
+  optional DiskCopyInputProto diskcopy = 3;
+  optional ImdInputProto imd = 4;
+  optional Jv3InputProto jv3 = 5;
+  optional D64InputProto d64 = 6;
+  optional NsiInputProto nsi = 7;
+  optional Td0InputProto td0 = 8;
+  optional DimInputProto dim = 9;
+  optional FdiInputProto fdi = 10;
+  optional D88InputProto d88 = 11;
+  optional NfdInputProto nfd = 12;
 }

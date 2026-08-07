@@ -1,8 +1,9 @@
+import sys
+from glob import glob
+from os.path import *
+
 from build.c import cxxlibrary
 from build.protobuf import proto, protocc, protolib
-from os.path import *
-from glob import glob
-import sys
 
 archs = {basename(dirname(f)) for f in glob("arch/*/*.proto")}
 
@@ -57,5 +58,5 @@ cxxlibrary(
         "arch/arch.h": "./arch.h",
     },
     deps=cls
-    + ["lib/core", "lib/data", "lib/config", "lib/encoders", "lib/decoders"],
+         + ["lib/core", "lib/data", "lib/config", "lib/encoders", "lib/decoders"],
 )

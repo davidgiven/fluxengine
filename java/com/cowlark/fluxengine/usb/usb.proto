@@ -5,30 +5,30 @@ option java_package = "com.cowlark.fluxengine.usb";
 import "com/cowlark/fluxengine/config/common.proto";
 
 message GreaseweazleProto {
-	enum BusType { /* note that these must match CMD_SET_BUS codes */
-		BUSTYPE_INVALID = 0;
-		IBMPC = 1;
-		SHUGART = 2;
-        APPLE2 = 3;
-	};
+  enum BusType {/* note that these must match CMD_SET_BUS codes */
+    BUSTYPE_INVALID = 0;
+    IBMPC = 1;
+    SHUGART = 2;
+    APPLE2 = 3;
+  };
 
-	optional string port = 1
-		[(help) = "Greaseweazle serial port to use"];
-	optional BusType bus_type = 2
-		[(help) = "which FDD bus type is in use", default = IBMPC];
+  optional string port = 1
+  [(help) = "Greaseweazle serial port to use"];
+  optional BusType bus_type = 2
+  [(help) = "which FDD bus type is in use", default = IBMPC];
 }
 
 message ApplesauceProto {
-	optional string port = 1
-		[(help) = "Applesauce serial port to use"];
-	optional bool verbose = 2
-		[(help) = "Enable verbose protocol logging", default = false];
+  optional string port = 1
+  [(help) = "Applesauce serial port to use"];
+  optional bool verbose = 2
+  [(help) = "Enable verbose protocol logging", default = false];
 }
 
 message UsbProto {
-	optional string serial = 1
-		[(help) = "serial number of FluxEngine or Greaseweazle device to use"];
+  optional string serial = 1
+  [(help) = "serial number of FluxEngine or Greaseweazle device to use"];
 
-	optional GreaseweazleProto greaseweazle = 2 [(help) = "Greaseweazle-specific options"];
-	optional ApplesauceProto applesauce = 3 [(help) = "Applesauce-specific options"];
+  optional GreaseweazleProto greaseweazle = 2 [(help) = "Greaseweazle-specific options"];
+  optional ApplesauceProto applesauce = 3 [(help) = "Applesauce-specific options"];
 }

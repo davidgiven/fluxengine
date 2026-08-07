@@ -19,22 +19,9 @@ import java.util.zip.Inflater;
  */
 public final class Bytes implements List<Byte>
 {
-    private static final class Storage
-    {
-        byte[] data;
-        int refcount;
-
-        Storage(int capacity)
-        {
-            data = new byte[capacity];
-            refcount = 1;
-        }
-    }
-
     private Storage storage;
     private int low;
     private int high;
-
     public Bytes()
     {
         this(0);
@@ -58,20 +45,20 @@ public final class Bytes implements List<Byte>
         this(data.getBytes(StandardCharsets.UTF_8));
     }
 
-    public static Bytes of(int... values)
-    {
-        byte[] data = new byte[values.length];
-        for (int i = 0; i < values.length; i++)
-            data[i] = (byte) values[i];
-        return new Bytes(data);
-    }
-
     private Bytes(Storage storage, int low, int high)
     {
         this.storage = storage;
         this.low = low;
         this.high = high;
         storage.refcount++;
+    }
+
+    public static Bytes of(int... values)
+    {
+        byte[] data = new byte[values.length];
+        for (int i = 0; i < values.length; i++)
+            data[i] = (byte) values[i];
+        return new Bytes(data);
     }
 
     public int size()
@@ -162,8 +149,7 @@ public final class Bytes implements List<Byte>
         if (available < len)
         {
             Bytes result = new Bytes(len);
-            System.arraycopy(storage.data, low + start, result.storage.data, 0,
-                available);
+            System.arraycopy(storage.data, low + start, result.storage.data, 0, available);
             return result;
         }
         return new Bytes(storage, low + start, low + start + len);
@@ -271,13 +257,10 @@ public final class Bytes implements List<Byte>
                 if (n == 0)
                     throw new FluxEngineException("failed to decompress data");
             }
-        }
-        catch (DataFormatException e)
+        } catch (DataFormatException e)
         {
-            throw new FluxEngineException(
-                "failed to decompress data: " + e.getMessage());
-        }
-        finally
+            throw new FluxEngineException("failed to decompress data: " + e.getMessage());
+        } finally
         {
             inflater.end();
         }
@@ -288,8 +271,7 @@ public final class Bytes implements List<Byte>
     {
         Bytes result = new Bytes(size() + other.size());
         System.arraycopy(storage.data, low, result.storage.data, 0, size());
-        System.arraycopy(other.storage.data, other.low, result.storage.data,
-            size(), other.size());
+        System.arraycopy(other.storage.data, other.low, result.storage.data, size(), other.size());
         return result;
     }
 
@@ -297,8 +279,7 @@ public final class Bytes implements List<Byte>
     {
         Bytes result = new Bytes(size() * count);
         for (int i = 0; i < count; i++)
-            System.arraycopy(storage.data, low, result.storage.data, i * size(),
-                size());
+            System.arraycopy(storage.data, low, result.storage.data, i * size(), size());
         return result;
     }
 
@@ -335,8 +316,7 @@ public final class Bytes implements List<Byte>
             throw new IndexOutOfBoundsException(String.valueOf(index));
         detach();
         ensureCapacity(high + 1);
-        System.arraycopy(storage.data, low + index, storage.data, low + index + 1,
-            size() - index);
+        System.arraycopy(storage.data, low + index, storage.data, low + index + 1, size() - index);
         storage.data[low + index] = value;
         high++;
     }
@@ -348,8 +328,12 @@ public final class Bytes implements List<Byte>
             throw new IndexOutOfBoundsException(String.valueOf(index));
         detach();
         byte old = storage.data[low + index];
-        System.arraycopy(storage.data, low + index + 1, storage.data,
-            low + index, size() - index - 1);
+        System.arraycopy(
+                storage.data,
+                low + index + 1,
+                storage.data,
+                low + index,
+                size() - index - 1);
         high--;
         return old;
     }
@@ -570,8 +554,11 @@ public final class Bytes implements List<Byte>
     @Override
     public String toString()
     {
-        return String.format("Bytes(hash=%08x, refcount=%d, size=%d)",
-            System.identityHashCode(this), storage.refcount, size());
+        return String.format(
+                "Bytes(hash=%08x, refcount=%d, size=%d)",
+                System.identityHashCode(this),
+                storage.refcount,
+                size());
     }
 
     /* Copy-on-write: if this window shares its storage with other windows,
@@ -605,5 +592,17 @@ public final class Bytes implements List<Byte>
         byte[] newData = new byte[newCapacity];
         System.arraycopy(storage.data, 0, newData, 0, storage.data.length);
         storage.data = newData;
+    }
+
+    private static final class Storage
+    {
+        byte[] data;
+        int refcount;
+
+        Storage(int capacity)
+        {
+            data = new byte[capacity];
+            refcount = 1;
+        }
     }
 }

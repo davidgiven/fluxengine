@@ -15,17 +15,16 @@ import java.util.regex.Pattern;
  */
 public class ProtoPath
 {
-    private static final Pattern PATH_COMPONENT =
-        Pattern.compile("^(\\w+)(?:\\[(\\d+)\\])?$");
+    private static final Pattern PATH_COMPONENT = Pattern.compile("^(\\w+)(?:\\[(\\d+)\\])?$");
+
+    private ProtoPath()
+    {
+    }
 
     public static void set(Message.Builder builder, String path, String value)
     {
         List<PathComponent> components = parsePath(path);
         setRecursive(builder, components, 0, value, path);
-    }
-
-    private record PathComponent(String name, int index)
-    {
     }
 
     private static List<PathComponent> parsePath(String path)
@@ -37,14 +36,18 @@ public class ProtoPath
             if (!matcher.matches())
                 throw new ConfigException("invalid config path '" + path + "'");
             String index = matcher.group(2);
-            components.add(new PathComponent(matcher.group(1),
-                index == null ? -1 : Integer.parseInt(index)));
+            components.add(new PathComponent(
+                    matcher.group(1),
+                    index == null ? -1 : Integer.parseInt(index)));
         }
         return components;
     }
 
-    private static void setRecursive(Message.Builder builder, List<PathComponent> path,
-        int pos, String value, String originalPath)
+    private static void setRecursive(Message.Builder builder,
+                                     List<PathComponent> path,
+                                     int pos,
+                                     String value,
+                                     String originalPath)
     {
         PathComponent component = path.get(pos);
         FieldDescriptor field = findField(builder, component, originalPath);
@@ -56,8 +59,9 @@ public class ProtoPath
         }
 
         if (field.getJavaType() != FieldDescriptor.JavaType.MESSAGE)
-            throw new ConfigException("config field '" + component.name() + "' in '"
-                + originalPath + "' is not a message");
+            throw new ConfigException(
+                    "config field '" + component.name() + "' in '" + originalPath +
+                            "' is not a message");
 
         if (field.isRepeated())
         {
@@ -67,12 +71,11 @@ public class ProtoPath
             Message.Builder elementBuilder = element.toBuilder();
             setRecursive(elementBuilder, path, pos + 1, value, originalPath);
             builder.setRepeatedField(field, index, elementBuilder.build());
-        }
-        else
+        } else
         {
             if (component.index() >= 0)
-                throw new ConfigException("config field '" + component.name()
-                    + "' is not repeated but an index is provided");
+                throw new ConfigException("config field '" + component.name() +
+                        "' is not repeated but an index is provided");
             Message.Builder elementBuilder;
             if (builder.hasField(field))
                 elementBuilder = ((Message) builder.getField(field)).toBuilder();
@@ -83,12 +86,14 @@ public class ProtoPath
         }
     }
 
-    private static void setLeaf(Message.Builder builder, PathComponent component,
-        FieldDescriptor field, String value)
+    private static void setLeaf(Message.Builder builder,
+                                PathComponent component,
+                                FieldDescriptor field,
+                                String value)
     {
         if (field.getJavaType() == FieldDescriptor.JavaType.MESSAGE)
-            throw new ConfigException("config field '" + component.name()
-                + "' is a message and can't be directly set");
+            throw new ConfigException("config field '" + component.name() +
+                    "' is a message and can't be directly set");
 
         Object coerced = coerce(field, value);
 
@@ -97,31 +102,31 @@ public class ProtoPath
             int index = requireIndex(component, field);
             extendScalarTo(builder, field, index);
             builder.setRepeatedField(field, index, coerced);
-        }
-        else
+        } else
         {
             if (component.index() >= 0)
-                throw new ConfigException("config field '" + component.name()
-                    + "' is not repeated but an index is provided");
+                throw new ConfigException("config field '" + component.name() +
+                        "' is not repeated but an index is provided");
             builder.setField(field, coerced);
         }
     }
 
     private static FieldDescriptor findField(Message.Builder builder,
-        PathComponent component, String path)
+                                             PathComponent component,
+                                             String path)
     {
         FieldDescriptor field = builder.getDescriptorForType().findFieldByName(component.name());
         if (field == null)
             throw new ConfigException(
-                "no such config field '" + component.name() + "' in '" + path + "'");
+                    "no such config field '" + component.name() + "' in '" + path + "'");
         return field;
     }
 
     private static int requireIndex(PathComponent component, FieldDescriptor field)
     {
         if (component.index() < 0)
-            throw new ConfigException("config field '" + component.name()
-                + "' is repeated and must be indexed");
+            throw new ConfigException(
+                    "config field '" + component.name() + "' is repeated and must be indexed");
         return component.index();
     }
 
@@ -142,22 +147,30 @@ public class ProtoPath
     {
         switch (field.getType())
         {
-            case FLOAT: return 0.0f;
-            case DOUBLE: return 0.0;
+            case FLOAT:
+                return 0.0f;
+            case DOUBLE:
+                return 0.0;
             case INT32:
             case SINT32:
             case SFIXED32:
             case UINT32:
-            case FIXED32: return 0;
+            case FIXED32:
+                return 0;
             case INT64:
             case SINT64:
             case SFIXED64:
             case UINT64:
-            case FIXED64: return 0L;
-            case STRING: return "";
-            case BOOL: return false;
-            case ENUM: return field.getEnumType().getValues().get(0);
-            default: throw new ConfigException("can't set this config value type");
+            case FIXED64:
+                return 0L;
+            case STRING:
+                return "";
+            case BOOL:
+                return false;
+            case ENUM:
+                return field.getEnumType().getValues().get(0);
+            default:
+                throw new ConfigException("can't set this config value type");
         }
     }
 
@@ -167,29 +180,37 @@ public class ProtoPath
         {
             switch (field.getType())
             {
-                case FLOAT: return Float.parseFloat(value);
-                case DOUBLE: return Double.parseDouble(value);
+                case FLOAT:
+                    return Float.parseFloat(value);
+                case DOUBLE:
+                    return Double.parseDouble(value);
                 case INT32:
                 case SINT32:
-                case SFIXED32: return Integer.parseInt(value);
+                case SFIXED32:
+                    return Integer.parseInt(value);
                 case UINT32:
-                case FIXED32: return Integer.parseUnsignedInt(value);
+                case FIXED32:
+                    return Integer.parseUnsignedInt(value);
                 case INT64:
                 case SINT64:
-                case SFIXED64: return Long.parseLong(value);
+                case SFIXED64:
+                    return Long.parseLong(value);
                 case UINT64:
-                case FIXED64: return Long.parseUnsignedLong(value);
-                case STRING: return value;
-                case BOOL: return parseBoolean(value);
+                case FIXED64:
+                    return Long.parseUnsignedLong(value);
+                case STRING:
+                    return value;
+                case BOOL:
+                    return parseBoolean(value);
                 case ENUM:
                     EnumValueDescriptor enumValue = field.getEnumType().findValueByName(value);
                     if (enumValue == null)
                         throw new ConfigException("unrecognised enum value '" + value + "'");
                     return enumValue;
-                default: throw new ConfigException("can't set this config value type");
+                default:
+                    throw new ConfigException("can't set this config value type");
             }
-        }
-        catch (NumberFormatException e)
+        } catch (NumberFormatException e)
         {
             throw new ConfigException("invalid number '" + value + "'");
         }
@@ -216,7 +237,7 @@ public class ProtoPath
         }
     }
 
-    private ProtoPath()
+    private record PathComponent(String name, int index)
     {
     }
 }

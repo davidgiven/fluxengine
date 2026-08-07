@@ -11,6 +11,10 @@ import java.util.function.Predicate;
  */
 public class Flags
 {
+    private Flags()
+    {
+    }
+
     public static void parse(ImmutableList<String> argv, FlagGroup... groups)
     {
         parse(argv, ImmutableList.copyOf(groups));
@@ -114,9 +118,5 @@ public class Flags
         }
 
         return filenames.build();
-    }
-
-    private Flags()
-    {
     }
 }

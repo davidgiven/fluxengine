@@ -1,19 +1,26 @@
 package com.cowlark.fluxengine.core.flags;
 
-import java.util.List;
-import java.util.function.Consumer;
 import lombok.Builder;
 import lombok.Singular;
+import java.util.List;
+import java.util.function.Consumer;
 
 public class DoubleFlag extends ValueFlag<Double>
 {
     @Builder(setterPrefix = "set")
-    private DoubleFlag(FlagGroup group, @Singular List<String> names, String helpText,
-        Double defaultValue, Consumer<Double> callback)
+    private DoubleFlag(FlagGroup group,
+                       @Singular List<String> names,
+                       String helpText,
+                       Double defaultValue,
+                       Consumer<Double> callback)
     {
-        super(group, names, helpText,
-            defaultValue != null ? defaultValue : 1.0,
-            callback != null ? callback : unused -> {});
+        super(
+                group,
+                names,
+                helpText,
+                defaultValue != null ? defaultValue : 1.0,
+                callback != null ? callback : unused -> {
+                });
     }
 
     @Override

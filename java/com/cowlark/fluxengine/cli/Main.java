@@ -11,6 +11,10 @@ import java.util.function.Supplier;
 public class Main
 {
 
+    private Main()
+    {
+    }
+
     public static void main(String[] args)
     {
         if (args.length == 0 || args[0].equals("--help"))
@@ -32,9 +36,5 @@ public class Main
         System.out.println("Try one of these commands:");
         for (Map.Entry<String, Supplier<? extends Command>> entry : commands.entrySet())
             System.out.printf("  %s: %s\n", entry.getKey(), entry.getValue().get().getHelp());
-    }
-
-    private Main()
-    {
     }
 }

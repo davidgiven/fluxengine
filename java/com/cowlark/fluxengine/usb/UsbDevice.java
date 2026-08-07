@@ -20,8 +20,7 @@ public abstract class UsbDevice
 
     public abstract void testBulkRead();
 
-    public abstract Bytes read(int side, boolean synced, long readTime,
-        long hardSectorThreshold);
+    public abstract Bytes read(int side, boolean synced, long readTime, long hardSectorThreshold);
 
     public abstract void write(int side, Bytes bytes, long hardSectorThreshold);
 

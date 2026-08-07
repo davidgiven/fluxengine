@@ -3,8 +3,8 @@ package com.cowlark.fluxengine.cli;
 import static com.google.common.base.Strings.nullToEmpty;
 
 import com.cowlark.fluxengine.config.UsbFinder;
-import com.cowlark.fluxengine.core.flags.FlagGroup;
 import com.cowlark.fluxengine.config.UsbFinder.CandidateDevice;
+import com.cowlark.fluxengine.core.flags.FlagGroup;
 import java.util.List;
 
 public class DevicesCommand implements Command
@@ -37,11 +37,7 @@ public class DevicesCommand implements Command
 
         if (!candidates.isEmpty())
         {
-            System.out.printf(
-                    "%-15s %-30s %s\n",
-                    "Type",
-                    "Serial number",
-                    "Port (if any)");
+            System.out.printf("%-15s %-30s %s\n", "Type", "Serial number", "Port (if any)");
             for (CandidateDevice candidate : candidates)
             {
                 System.out.printf(

@@ -1,19 +1,23 @@
 package com.cowlark.fluxengine.core.flags;
 
 import com.cowlark.fluxengine.core.FluxEngineException;
-import java.util.List;
-import java.util.function.Consumer;
 import lombok.Builder;
 import lombok.Singular;
+import java.util.List;
+import java.util.function.Consumer;
 
 public class BoolFlag extends ValueFlag<Boolean>
 {
     @Builder(setterPrefix = "set")
-    private BoolFlag(FlagGroup group, @Singular List<String> names, String helpText,
-        boolean defaultValue, Consumer<Boolean> callback)
+    private BoolFlag(FlagGroup group,
+                     @Singular List<String> names,
+                     String helpText,
+                     boolean defaultValue,
+                     Consumer<Boolean> callback)
     {
-        super(group, names, helpText, defaultValue,
-            callback != null ? callback : unused -> {});
+        super(
+                group, names, helpText, defaultValue, callback != null ? callback : unused -> {
+                });
     }
 
     @Override
@@ -36,7 +40,6 @@ public class BoolFlag extends ValueFlag<Boolean>
         else if (value.equals("false") || value.equals("n"))
             setValue(false);
         else
-            throw new FluxEngineException(
-                "can't parse '" + value + "'; try 'true' or 'false'");
+            throw new FluxEngineException("can't parse '" + value + "'; try 'true' or 'false'");
     }
 }
