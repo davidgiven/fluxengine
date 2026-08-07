@@ -1,5 +1,6 @@
 package com.cowlark.fluxengine.fluxsource;
 
+import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.config.FluxSourceSinkType;
 import com.cowlark.fluxengine.core.FluxEngineException;
 
@@ -8,12 +9,14 @@ import com.cowlark.fluxengine.core.FluxEngineException;
  */
 public abstract class FluxSource
 {
+    protected ConfigProto extraConfig = ConfigProto.getDefaultInstance();
+
     public static FluxSource create(FluxSourceProto config)
     {
         switch (config.getType())
         {
             case FLUXTYPE_DRIVE: return notImplemented("drive");
-            case FLUXTYPE_ERASE: return notImplemented("erase");
+            case FLUXTYPE_ERASE: return new EraseFluxSource(config.getErase());
             case FLUXTYPE_KRYOFLUX: return notImplemented("kryoflux");
             case FLUXTYPE_TEST_PATTERN: return notImplemented("test pattern");
             case FLUXTYPE_SCP: return notImplemented("scp");
@@ -24,6 +27,13 @@ public abstract class FluxSource
             case FLUXTYPE_FLX: return notImplemented("flx");
             default: return null;
         }
+    }
+
+    /* Returns any configuration this flux source might be carrying (e.g. tpi
+     * of the drive which made the capture). */
+    public ConfigProto getExtraConfig()
+    {
+        return extraConfig;
     }
 
     /* Read flux from a given cylinder and head. */

@@ -35,6 +35,20 @@ public class FluxSourceTest
     }
 
     @Test
+    public void createEraseFluxSource()
+    {
+        FluxSourceProto config = FluxSourceProto.newBuilder()
+                .setType(FluxSourceSinkType.FLUXTYPE_ERASE)
+                .build();
+
+        FluxSource source = FluxSource.create(config);
+
+        assertThat(source).isInstanceOf(EraseFluxSource.class);
+        assertThat(source.readFlux(0, 0).next()).isNull();
+        assertThat(source.getExtraConfig().getDrive().getTracks()).isEqualTo("c0-255h0-1");
+    }
+
+    @Test
     public void trivialFluxSourceIteratorYieldsOneMap()
     {
         TrivialFluxSource source = new TrivialFluxSource()

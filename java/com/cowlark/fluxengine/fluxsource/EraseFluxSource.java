@@ -1,0 +1,29 @@
+package com.cowlark.fluxengine.fluxsource;
+
+import com.cowlark.fluxengine.config.ConfigProto;
+import com.cowlark.fluxengine.data.Fluxmap;
+
+/**
+ * A flux source which produces no flux, ported from
+ * lib/fluxsource/erasefluxsource.cc.
+ */
+public class EraseFluxSource extends TrivialFluxSource
+{
+    public EraseFluxSource(EraseFluxSourceProto config)
+    {
+        ConfigProto.Builder builder = ConfigProto.newBuilder();
+        builder.getDriveBuilder().setTracks("c0-255h0-1");
+        extraConfig = builder.build();
+    }
+
+    @Override
+    public Fluxmap readSingleFlux(int cylinder, int head)
+    {
+        return null;
+    }
+
+    @Override
+    public void recalibrate()
+    {
+    }
+}
