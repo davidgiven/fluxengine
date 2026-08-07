@@ -1,6 +1,7 @@
 syntax = "proto2";
 
 option java_package = "com.cowlark.fluxengine.f85";
+option java_multiple_files = true;
 
 message F85DecoderProto {}
 

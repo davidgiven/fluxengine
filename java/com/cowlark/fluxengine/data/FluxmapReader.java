@@ -6,7 +6,7 @@ import static com.cowlark.fluxengine.external.FluxEngine.F_EOF;
 import static com.cowlark.fluxengine.external.FluxEngine.NS_PER_TICK;
 
 import com.cowlark.fluxengine.core.Bytes;
-import com.cowlark.fluxengine.decoders.Decoders.DecoderProto;
+import com.cowlark.fluxengine.decoders.DecoderProto;
 import java.time.Duration;
 
 /**

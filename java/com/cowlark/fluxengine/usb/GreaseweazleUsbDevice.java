@@ -36,7 +36,7 @@ import com.cowlark.fluxengine.core.ByteWriter;
 import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.core.FluxEngineException;
 import com.cowlark.fluxengine.external.GreaseweazleUtils;
-import com.cowlark.fluxengine.usb.Usb.GreaseweazleProto;
+import com.cowlark.fluxengine.usb.GreaseweazleProto;
 import com.fazecast.jSerialComm.SerialPort;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.time.Duration;

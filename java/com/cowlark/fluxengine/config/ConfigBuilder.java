@@ -1,33 +1,33 @@
 package com.cowlark.fluxengine.config;
 
-import static com.cowlark.fluxengine.config.Common.FluxSourceSinkType.FLUXTYPE_A2R;
-import static com.cowlark.fluxengine.config.Common.FluxSourceSinkType.FLUXTYPE_AU;
-import static com.cowlark.fluxengine.config.Common.FluxSourceSinkType.FLUXTYPE_CWF;
-import static com.cowlark.fluxengine.config.Common.FluxSourceSinkType.FLUXTYPE_DMK;
-import static com.cowlark.fluxengine.config.Common.FluxSourceSinkType.FLUXTYPE_DRIVE;
-import static com.cowlark.fluxengine.config.Common.FluxSourceSinkType.FLUXTYPE_ERASE;
-import static com.cowlark.fluxengine.config.Common.FluxSourceSinkType.FLUXTYPE_FLUX;
-import static com.cowlark.fluxengine.config.Common.FluxSourceSinkType.FLUXTYPE_FLX;
-import static com.cowlark.fluxengine.config.Common.FluxSourceSinkType.FLUXTYPE_KRYOFLUX;
-import static com.cowlark.fluxengine.config.Common.FluxSourceSinkType.FLUXTYPE_SCP;
-import static com.cowlark.fluxengine.config.Common.FluxSourceSinkType.FLUXTYPE_TEST_PATTERN;
-import static com.cowlark.fluxengine.config.Common.FluxSourceSinkType.FLUXTYPE_VCD;
-import static com.cowlark.fluxengine.config.Common.ImageReaderWriterType.IMAGETYPE_D64;
-import static com.cowlark.fluxengine.config.Common.ImageReaderWriterType.IMAGETYPE_D88;
-import static com.cowlark.fluxengine.config.Common.ImageReaderWriterType.IMAGETYPE_DIM;
-import static com.cowlark.fluxengine.config.Common.ImageReaderWriterType.IMAGETYPE_DISKCOPY;
-import static com.cowlark.fluxengine.config.Common.ImageReaderWriterType.IMAGETYPE_FDI;
-import static com.cowlark.fluxengine.config.Common.ImageReaderWriterType.IMAGETYPE_IMD;
-import static com.cowlark.fluxengine.config.Common.ImageReaderWriterType.IMAGETYPE_IMG;
-import static com.cowlark.fluxengine.config.Common.ImageReaderWriterType.IMAGETYPE_JV3;
-import static com.cowlark.fluxengine.config.Common.ImageReaderWriterType.IMAGETYPE_NFD;
-import static com.cowlark.fluxengine.config.Common.ImageReaderWriterType.IMAGETYPE_NSI;
-import static com.cowlark.fluxengine.config.Common.ImageReaderWriterType.IMAGETYPE_TD0;
+import static com.cowlark.fluxengine.config.FluxSourceSinkType.FLUXTYPE_A2R;
+import static com.cowlark.fluxengine.config.FluxSourceSinkType.FLUXTYPE_AU;
+import static com.cowlark.fluxengine.config.FluxSourceSinkType.FLUXTYPE_CWF;
+import static com.cowlark.fluxengine.config.FluxSourceSinkType.FLUXTYPE_DMK;
+import static com.cowlark.fluxengine.config.FluxSourceSinkType.FLUXTYPE_DRIVE;
+import static com.cowlark.fluxengine.config.FluxSourceSinkType.FLUXTYPE_ERASE;
+import static com.cowlark.fluxengine.config.FluxSourceSinkType.FLUXTYPE_FLUX;
+import static com.cowlark.fluxengine.config.FluxSourceSinkType.FLUXTYPE_FLX;
+import static com.cowlark.fluxengine.config.FluxSourceSinkType.FLUXTYPE_KRYOFLUX;
+import static com.cowlark.fluxengine.config.FluxSourceSinkType.FLUXTYPE_SCP;
+import static com.cowlark.fluxengine.config.FluxSourceSinkType.FLUXTYPE_TEST_PATTERN;
+import static com.cowlark.fluxengine.config.FluxSourceSinkType.FLUXTYPE_VCD;
+import static com.cowlark.fluxengine.config.ImageReaderWriterType.IMAGETYPE_D64;
+import static com.cowlark.fluxengine.config.ImageReaderWriterType.IMAGETYPE_D88;
+import static com.cowlark.fluxengine.config.ImageReaderWriterType.IMAGETYPE_DIM;
+import static com.cowlark.fluxengine.config.ImageReaderWriterType.IMAGETYPE_DISKCOPY;
+import static com.cowlark.fluxengine.config.ImageReaderWriterType.IMAGETYPE_FDI;
+import static com.cowlark.fluxengine.config.ImageReaderWriterType.IMAGETYPE_IMD;
+import static com.cowlark.fluxengine.config.ImageReaderWriterType.IMAGETYPE_IMG;
+import static com.cowlark.fluxengine.config.ImageReaderWriterType.IMAGETYPE_JV3;
+import static com.cowlark.fluxengine.config.ImageReaderWriterType.IMAGETYPE_NFD;
+import static com.cowlark.fluxengine.config.ImageReaderWriterType.IMAGETYPE_NSI;
+import static com.cowlark.fluxengine.config.ImageReaderWriterType.IMAGETYPE_TD0;
 
 import com.cowlark.fluxengine.core.flags.FlagGroup;
 import com.cowlark.fluxengine.core.flags.Flags;
-import com.cowlark.fluxengine.fluxsink.Fluxsink;
-import com.cowlark.fluxengine.fluxsource.Fluxsource;
+import com.cowlark.fluxengine.fluxsink.FluxSinkProto;
+import com.cowlark.fluxengine.fluxsource.FluxSourceProto;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.TextFormat;
 import java.io.IOException;
@@ -41,7 +41,7 @@ import java.nio.file.Path;
 public class ConfigBuilder
 {
     private ConfigProto.Builder proto = ConfigProto.newBuilder()
-            .setFluxSource(Fluxsource.FluxSourceProto.newBuilder().setType(FLUXTYPE_DRIVE).build());
+            .setFluxSource(FluxSourceProto.newBuilder().setType(FLUXTYPE_DRIVE).build());
 
     public ConfigBuilder()
     {
@@ -82,7 +82,7 @@ public class ConfigBuilder
 
     public ConfigBuilder withFluxSource(String filename)
     {
-        Fluxsource.FluxSourceProto.Builder fluxSource = proto.getFluxSourceBuilder();
+        FluxSourceProto.Builder fluxSource = proto.getFluxSourceBuilder();
         if (filename.endsWith(".flux"))
         {
             fluxSource.setType(FLUXTYPE_FLUX);
@@ -138,7 +138,7 @@ public class ConfigBuilder
         return this;
     }
 
-    private void setFluxSink(Fluxsink.FluxSinkProto.Builder fluxSink, String filename)
+    private void setFluxSink(FluxSinkProto.Builder fluxSink, String filename)
     {
         if (filename.endsWith(".flux"))
         {
@@ -170,7 +170,7 @@ public class ConfigBuilder
 
     public ConfigBuilder withImageWriter(String filename)
     {
-        Common.ImageReaderWriterType type = imageType(filename);
+        ImageReaderWriterType type = imageType(filename);
         if (type == null || isReadOnlyImage(filename))
             throw new ConfigException("unrecognised image filename '" + filename + "'");
         proto.getImageWriterBuilder().setType(type).setFilename(filename);
@@ -179,14 +179,14 @@ public class ConfigBuilder
 
     public ConfigBuilder withImageReader(String filename)
     {
-        Common.ImageReaderWriterType type = imageType(filename);
+        ImageReaderWriterType type = imageType(filename);
         if (type == null)
             throw new ConfigException("unrecognised image filename '" + filename + "'");
         proto.getImageReaderBuilder().setType(type).setFilename(filename);
         return this;
     }
 
-    private static Common.ImageReaderWriterType imageType(String filename)
+    private static ImageReaderWriterType imageType(String filename)
     {
         if (filename.endsWith(".adf") || filename.endsWith(".d81") || filename.endsWith(".dsk")
                 || filename.endsWith(".img") || filename.endsWith(".st") || filename.endsWith(".vgi")

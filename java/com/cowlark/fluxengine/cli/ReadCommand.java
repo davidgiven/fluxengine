@@ -1,6 +1,6 @@
 package com.cowlark.fluxengine.cli;
 
-import static com.cowlark.fluxengine.config.Common.FluxSourceSinkType.FLUXTYPE_DRIVE;
+import static com.cowlark.fluxengine.config.FluxSourceSinkType.FLUXTYPE_DRIVE;
 
 import com.cowlark.fluxengine.config.ConfigBuilder;
 import com.cowlark.fluxengine.config.ConfigProto;

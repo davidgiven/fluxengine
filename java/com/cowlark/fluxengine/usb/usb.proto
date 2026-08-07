@@ -1,6 +1,7 @@
 syntax = "proto2";
 
 option java_package = "com.cowlark.fluxengine.usb";
+option java_multiple_files = true;
 
 import "com/cowlark/fluxengine/config/common.proto";
 

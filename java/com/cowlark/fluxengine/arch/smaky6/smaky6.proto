@@ -1,6 +1,7 @@
 syntax = "proto2";
 
 option java_package = "com.cowlark.fluxengine.smaky6";
+option java_multiple_files = true;
 
 message Smaky6DecoderProto {}
 

@@ -100,7 +100,7 @@ public class ConfigBuilderTest
         ConfigProto proto = builder().withFluxSource("foo.flux").build();
 
         assertThat(proto.getFluxSource().getType())
-            .isEqualTo(Common.FluxSourceSinkType.FLUXTYPE_FLUX);
+            .isEqualTo(FluxSourceSinkType.FLUXTYPE_FLUX);
         assertThat(proto.getFluxSource().getFl2().getFilename()).isEqualTo("foo.flux");
     }
 
@@ -110,7 +110,7 @@ public class ConfigBuilderTest
         ConfigProto proto = builder().withFluxSource("drive:1").build();
 
         assertThat(proto.getFluxSource().getType())
-            .isEqualTo(Common.FluxSourceSinkType.FLUXTYPE_DRIVE);
+            .isEqualTo(FluxSourceSinkType.FLUXTYPE_DRIVE);
         assertThat(proto.getDrive().getDrive()).isEqualTo(1);
     }
 
@@ -120,7 +120,7 @@ public class ConfigBuilderTest
         ConfigProto proto = builder().withImageWriter("out.dsk").build();
 
         assertThat(proto.getImageWriter().getType())
-            .isEqualTo(Common.ImageReaderWriterType.IMAGETYPE_IMG);
+            .isEqualTo(ImageReaderWriterType.IMAGETYPE_IMG);
         assertThat(proto.getImageWriter().getFilename()).isEqualTo("out.dsk");
     }
 
@@ -130,7 +130,7 @@ public class ConfigBuilderTest
         ConfigProto proto = builder().withCopyFluxTo("copy.scp").build();
 
         assertThat(proto.getDecoder().getCopyFluxTo().getType())
-            .isEqualTo(Common.FluxSourceSinkType.FLUXTYPE_SCP);
+            .isEqualTo(FluxSourceSinkType.FLUXTYPE_SCP);
         assertThat(proto.getDecoder().getCopyFluxTo().getScp().getFilename()).isEqualTo("copy.scp");
     }
 
@@ -140,7 +140,7 @@ public class ConfigBuilderTest
         ConfigProto proto = builder().withFluxSink("vcd:vcdfiles").build();
 
         assertThat(proto.getFluxSink().getType())
-            .isEqualTo(Common.FluxSourceSinkType.FLUXTYPE_VCD);
+            .isEqualTo(FluxSourceSinkType.FLUXTYPE_VCD);
         assertThat(proto.getFluxSink().getVcd().getDirectory()).isEqualTo("vcdfiles");
     }
 
@@ -150,7 +150,7 @@ public class ConfigBuilderTest
         ConfigProto proto = builder().withImageReader("in.dim").build();
 
         assertThat(proto.getImageReader().getType())
-            .isEqualTo(Common.ImageReaderWriterType.IMAGETYPE_DIM);
+            .isEqualTo(ImageReaderWriterType.IMAGETYPE_DIM);
         assertThat(proto.getImageReader().getFilename()).isEqualTo("in.dim");
     }
 

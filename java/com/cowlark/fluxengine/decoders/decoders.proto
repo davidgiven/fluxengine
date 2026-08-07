@@ -1,6 +1,7 @@
 syntax = "proto2";
 
 option java_package = "com.cowlark.fluxengine.decoders";
+option java_multiple_files = true;
 
 import "com/cowlark/fluxengine/arch/agat/agat.proto";
 import "com/cowlark/fluxengine/arch/aeslanier/aeslanier.proto";
