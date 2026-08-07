@@ -1,0 +1,17 @@
+load("@rules_java//java:defs.bzl", "java_test")
+
+package(default_visibility = ["//visibility:public"])
+
+java_test(
+    name = "FluxSourceTest",
+    srcs = ["FluxSourceTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/config:common_java_proto",
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/data",
+        "//java/com/cowlark/fluxengine/fluxsource",
+        "//java/com/cowlark/fluxengine/fluxsource:fluxsource_java_proto",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
