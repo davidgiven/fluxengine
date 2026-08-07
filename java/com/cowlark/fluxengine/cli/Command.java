@@ -63,7 +63,7 @@ public interface Command
                     .put("putfile", stub("putfile", "Write a file to disk (or image)."))
                     .put("mkdir", stub("mkdir", "Create a directory on disk (or image)."))
                     .put("rpm", RpmCommand::new)
-                    .put("seek", stub("seek", "Moves the disk head."))
+                    .put("seek", SeekCommand::new)
                     .put("devices", DevicesCommand::new)
                     .put("test", () -> new CommandGroup(TESTABLES, "Various testing commands."))
                     .build();
