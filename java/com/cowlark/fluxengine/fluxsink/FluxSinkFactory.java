@@ -13,33 +13,47 @@ public abstract class FluxSinkFactory
     {
         if (!config.hasFluxSink())
             throw new FluxEngineException("no flux sink configured");
-        return create(config.getFluxSink());
+        return create(config, config.getFluxSink());
     }
 
-    public static FluxSinkFactory create(FluxSinkProto config)
+    public static FluxSinkFactory create(
+            ConfigProto config, FluxSinkProto sinkConfig)
     {
-        switch (config.getType())
+        switch (sinkConfig.getType())
         {
             case FLUXTYPE_DRIVE:
-                return notImplemented("hardware");
+                return new HardwareFluxSinkFactory(config);
             case FLUXTYPE_A2R:
-                return notImplemented("a2r");
+                return new A2RFluxSinkFactory(sinkConfig.getA2R().getFilename(), config);
             case FLUXTYPE_AU:
-                return notImplemented("au");
+                return new AuFluxSinkFactory(
+                        sinkConfig.getAu().getDirectory(),
+                        sinkConfig.getAu().getIndexMarkers());
             case FLUXTYPE_VCD:
-                return notImplemented("vcd");
+                return new VcdFluxSinkFactory(sinkConfig.getVcd().getDirectory());
             case FLUXTYPE_SCP:
-                return notImplemented("scp");
+                return new ScpFluxSinkFactory(
+                        sinkConfig.getScp().getFilename(),
+                        sinkConfig.getScp().getTypeByte(),
+                        sinkConfig.getScp().getAlignWithIndex(),
+                        config);
             case FLUXTYPE_FLUX:
-                return notImplemented("fl2");
+                return createFl2FluxSinkFactory(sinkConfig.getFl2(), config);
             default:
                 throw new FluxEngineException("no flux sink specified");
         }
     }
 
-    private static FluxSinkFactory notImplemented(String name)
+    public static Fl2FluxSinkFactory createFl2FluxSinkFactory(
+            Fl2FluxSinkProto config, ConfigProto fullConfig)
     {
-        throw new FluxEngineException(name + " flux sink is not implemented yet");
+        return new Fl2FluxSinkFactory(config.getFilename(), fullConfig);
+    }
+
+    public static Fl2FluxSinkFactory createFl2FluxSinkFactory(
+            String filename, ConfigProto fullConfig)
+    {
+        return new Fl2FluxSinkFactory(filename, fullConfig);
     }
 
     /* Creates a writer object. */

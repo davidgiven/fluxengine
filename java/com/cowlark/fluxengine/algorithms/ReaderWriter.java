@@ -65,7 +65,7 @@ public final class ReaderWriter
         FluxSinkFactory outputFluxSinkFactory = null;
         if (config.getDecoder().hasCopyFluxTo())
             outputFluxSinkFactory = FluxSinkFactory.create(
-                    config.getDecoder().getCopyFluxTo());
+                    config, config.getDecoder().getCopyFluxTo());
 
         Map<CylinderHead, List<Track>> tracksByLogicalLocation =
                 new HashMap<>();
@@ -86,10 +86,9 @@ public final class ReaderWriter
         else
             disk.rotationalPeriod = getRotationalPeriodFromConfig(config);
 
+        try (FluxSink outputFluxSink =
+                outputFluxSinkFactory != null ? outputFluxSinkFactory.create() : null)
         {
-            FluxSink outputFluxSink = null;
-            if (outputFluxSinkFactory != null)
-                outputFluxSink = outputFluxSinkFactory.create();
             int index = 0;
             for (Map.Entry<CylinderHead, LogicalTrackLayout> entry :
                     diskLayout.layoutByLogicalLocation.entrySet())
