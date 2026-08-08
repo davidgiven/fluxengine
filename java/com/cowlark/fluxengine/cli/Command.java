@@ -28,29 +28,9 @@ public interface Command
                     .put("voltages", TestVoltagesCommand::new)
                     .build();
 
-    ImmutableMap<String, Supplier<? extends Command>> COMMANDS =
+
+    ImmutableMap<String, Supplier<? extends Command>> VFSABLES =
             ImmutableMap.<String, Supplier<? extends Command>>builder()
-                    .put("inspect", stub("inspect", "Low-level analysis and inspection of a disk."))
-                    .put(
-                            "analyse",
-                            () -> new CommandGroup(ANALYSABLES, "Disk and drive analysis tools."))
-                    .put("read", ReadCommand::new)
-                    .put("write", WriteCommand::new)
-                    .put(
-                            "fluxfile",
-                            () -> new CommandGroup(
-                                    FLUXFILEABLES,
-                                    "Flux file manipulation operations."))
-                    .put("format", stub("format", "Format a disk and make a file system on it."))
-                    .put(
-                            "rawwrite",
-                            RawwriteCommand::new)
-                    .put(
-                            "convert",
-                            stub("convert", "Converts a flux file from one format to another."))
-                    .put(
-                            "getdiskinfo",
-                            stub("getdiskinfo", "Read volume metadata off a disk (or image)."))
                     .put("ls", stub("ls", "Show files on disk (or image)."))
                     .put("mv", stub("mv", "Rename a file on a disk (or image)."))
                     .put("rm", stub("rm", "Deletes a file (or directory) off a disk (or image)."))
@@ -60,10 +40,36 @@ public interface Command
                             stub("getfileinfo", "Read file metadata off a disk (or image)."))
                     .put("putfile", stub("putfile", "Write a file to disk (or image)."))
                     .put("mkdir", stub("mkdir", "Create a directory on disk (or image)."))
+                    .put(
+                            "getdiskinfo",
+                            stub("getdiskinfo", "Read volume metadata off a disk (or image)."))
+                    .put("format", stub("format", "Format a disk and make a file system on it."))
+                    .build();
+
+    ImmutableMap<String, Supplier<? extends Command>> COMMANDS =
+            ImmutableMap.<String, Supplier<? extends Command>>builder()
+                    .put(
+                            "analyse",
+                            () -> new CommandGroup(ANALYSABLES, "Disk and drive analysis tools."))
+                    .put("test", () -> new CommandGroup(TESTABLES, "Various testing commands."))
+                    .put(
+                            "fluxfile",
+                            () -> new CommandGroup(
+                                    FLUXFILEABLES,
+                                    "Flux file manipulation operations."))
+                    .put(
+                            "vfs",
+                            () -> new CommandGroup(VFSABLES, "File system manipulation commands."))
+                    .put("read", ReadCommand::new)
+                    .put("write", WriteCommand::new)
+                    .put("rawwrite", RawwriteCommand::new)
+                    .put(
+                            "convert",
+                            stub("convert", "Converts a flux file from one format to another."))
                     .put("rpm", RpmCommand::new)
                     .put("seek", SeekCommand::new)
                     .put("devices", DevicesCommand::new)
-                    .put("test", () -> new CommandGroup(TESTABLES, "Various testing commands."))
+                    .put("inspect", stub("inspect", "Low-level analysis and inspection of a disk."))
                     .build();
 
     /* Consume arguments until we reach a real command, instantiate it, and
