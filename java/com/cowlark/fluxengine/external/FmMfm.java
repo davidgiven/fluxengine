@@ -68,7 +68,7 @@ public final class FmMfm
         return bytes;
     }
 
-    public static void encodeFm(Bits bits, int[] cursor, Bytes input)
+    public static void encodeFm(Bits bits, Bits.Cursor cursor, Bytes input)
     {
         if (bits.size() == 0)
             return;
@@ -82,16 +82,18 @@ public final class FmMfm
                 boolean bit = (b & 0x80) != 0;
                 b <<= 1;
 
-                if (cursor[0] >= len)
+                if (cursor.get() >= len)
                     return;
 
-                bits.set(cursor[0]++, true);
-                bits.set(cursor[0]++, bit);
+                bits.set(cursor.get(), true);
+                cursor.advance();
+                bits.set(cursor.get(), bit);
+                cursor.advance();
             }
         }
     }
 
-    public static void encodeMfm(Bits bits, int[] cursor, Bytes data, boolean[] lastBit)
+    public static void encodeMfm(Bits bits, Bits.Cursor cursor, Bytes data, boolean[] lastBit)
     {
         if (bits.size() == 0)
             return;
@@ -105,11 +107,13 @@ public final class FmMfm
                 boolean bit = (b & 0x80) != 0;
                 b <<= 1;
 
-                if (cursor[0] >= len)
+                if (cursor.get() >= len)
                     return;
 
-                bits.set(cursor[0]++, !lastBit[0] && !bit);
-                bits.set(cursor[0]++, bit);
+                bits.set(cursor.get(), !lastBit[0] && !bit);
+                cursor.advance();
+                bits.set(cursor.get(), bit);
+                cursor.advance();
                 lastBit[0] = bit;
             }
         }

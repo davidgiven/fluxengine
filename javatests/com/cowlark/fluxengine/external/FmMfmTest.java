@@ -14,7 +14,7 @@ public class FmMfmTest
     private static Bits wrapEncodeMfm(Bytes bytes)
     {
         Bits bits = new Bits(16);
-        int[] cursor = {0};
+        Bits.Cursor cursor = new Bits.Cursor(0);
         boolean[] lastBit = {false};
         FmMfm.encodeMfm(bits, cursor, bytes, lastBit);
         return bits;
@@ -23,7 +23,7 @@ public class FmMfmTest
     private static Bits wrapEncodeFm(Bytes bytes)
     {
         Bits bits = new Bits(16);
-        int[] cursor = {0};
+        Bits.Cursor cursor = new Bits.Cursor(0);
         FmMfm.encodeFm(bits, cursor, bytes);
         return bits;
     }
