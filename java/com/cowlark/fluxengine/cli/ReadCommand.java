@@ -61,7 +61,6 @@ public class ReadCommand implements Command
         if (config.getDecoder().getCopyFluxTo().getType() == FLUXTYPE_DRIVE)
             throw new FluxEngineException("you cannot copy flux to a hardware device");
 
-        // Unsupported:
         DiskLayout diskLayout = new DiskLayout(config);
         FluxSource fluxSource = FluxSource.create(config);
         Decoder decoder = Arch.createDecoder(config);
