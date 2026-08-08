@@ -63,3 +63,25 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "SectorTest",
+    srcs = ["SectorTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/data",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "RecordTest",
+    srcs = ["RecordTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/data",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
