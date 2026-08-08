@@ -6,17 +6,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 
 /**
  * The built-in format configurations, loaded on demand from the classpath
@@ -26,8 +20,8 @@ import java.util.jar.JarFile;
 public final class Formats
 {
     private static final String RESOURCE_DIR = "formats";
-    private static final String RESOURCE_PREFIX = "com/cowlark/fluxengine/data/" + RESOURCE_DIR + "/";
     private static final String RESOURCE_SUFFIX = ".bin";
+    private static final String NAMES_RESOURCE = RESOURCE_DIR + "/names.txt";
 
     private static final ConcurrentHashMap<String, ConfigProto> cache = new ConcurrentHashMap<>();
 
@@ -57,7 +51,7 @@ public final class Formats
 
     private static ConfigProto load(String name)
     {
-        String resource = RESOURCE_DIR + "/" + name + RESOURCE_SUFFIX;
+        String resource = "/" + RESOURCE_DIR + "/" + name + RESOURCE_SUFFIX;
         byte[] data;
         try (InputStream stream = Formats.class.getResourceAsStream(resource))
         {
@@ -78,62 +72,27 @@ public final class Formats
         }
     }
 
-    /* Scans the resources directory for the format files, returning their
-     * names in sorted order. */
+    /* Returns the list of format names from the generated names index. */
     private static List<String> scanNames()
     {
-        URL location = Formats.class.getProtectionDomain().getCodeSource().getLocation();
-        if (location == null)
-            throw new FluxEngineException("cannot determine the location of the format resources");
+        String contents;
+        try (InputStream stream = Formats.class.getResourceAsStream("/" + NAMES_RESOURCE))
+        {
+            if (stream == null)
+                throw new FluxEngineException("format resource not found: " + NAMES_RESOURCE);
+            contents = new String(stream.readAllBytes(), StandardCharsets.UTF_8);
+        } catch (IOException e)
+        {
+            throw new FluxEngineException("cannot read format resource " + NAMES_RESOURCE + ": " + e);
+        }
 
         List<String> names = new ArrayList<>();
-        try
+        for (String line : contents.split("\n"))
         {
-            if (location.getProtocol().equals("file"))
-            {
-                Path path = Path.of(location.toURI());
-                if (Files.isDirectory(path))
-                    scanDirectory(path.resolve(RESOURCE_PREFIX), names);
-                else
-                    scanJar(path, names);
-            } else
-            {
-                throw new FluxEngineException(
-                        "unsupported resource protocol: " + location.getProtocol());
-            }
-        } catch (Exception e)
-        {
-            throw new FluxEngineException("cannot scan format resources: " + e);
+            if (!line.isEmpty())
+                names.add(line);
         }
-
         Collections.sort(names);
         return names;
-    }
-
-    private static void scanDirectory(Path dir, List<String> names) throws IOException
-    {
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir, "*" + RESOURCE_SUFFIX))
-        {
-            for (Path entry : stream)
-            {
-                String filename = entry.getFileName().toString();
-                names.add(filename.substring(0, filename.length() - RESOURCE_SUFFIX.length()));
-            }
-        }
-    }
-
-    private static void scanJar(Path jar, List<String> names) throws IOException
-    {
-        try (JarFile jarFile = new JarFile(jar.toFile()))
-        {
-            Enumeration<JarEntry> entries = jarFile.entries();
-            while (entries.hasMoreElements())
-            {
-                String name = entries.nextElement().getName();
-                if (name.startsWith(RESOURCE_PREFIX) && name.endsWith(RESOURCE_SUFFIX))
-                    names.add(name.substring(
-                            RESOURCE_PREFIX.length(), name.length() - RESOURCE_SUFFIX.length()));
-            }
-        }
     }
 }

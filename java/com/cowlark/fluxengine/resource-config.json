@@ -9,6 +9,9 @@
       },
       {
         "pattern": "\\Qorg/usb4java/linux-x86-64/libusb4java.so\\E"
+      },
+      {
+        "pattern": "\\Qformats/\\E.*"
       }
     ]
   },
