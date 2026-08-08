@@ -1,7 +1,6 @@
 package com.cowlark.fluxengine.algorithms;
 
 import com.cowlark.fluxengine.config.ConfigProto;
-import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.core.FluxEngineException;
 import com.cowlark.fluxengine.core.LogMessage.BeginOperationLogMessage;
 import com.cowlark.fluxengine.core.LogMessage.BeginReadOperationLogMessage;
@@ -11,6 +10,7 @@ import com.cowlark.fluxengine.core.LogMessage.EndReadOperationLogMessage;
 import com.cowlark.fluxengine.core.LogMessage.EndSpeedOperationLogMessage;
 import com.cowlark.fluxengine.core.LogMessage.OperationProgressLogMessage;
 import com.cowlark.fluxengine.core.Logger;
+import com.cowlark.fluxengine.core.Utils;
 import com.cowlark.fluxengine.data.CylinderHead;
 import com.cowlark.fluxengine.data.Disk;
 import com.cowlark.fluxengine.data.DiskLayout;
@@ -43,40 +43,38 @@ public final class ReaderWriter
 {
     private static enum ReadResult
     {
-        GOOD_READ,
-        BAD_AND_CAN_RETRY,
-        BAD_AND_CAN_NOT_RETRY
+        GOOD_READ, BAD_AND_CAN_RETRY, BAD_AND_CAN_NOT_RETRY
     }
 
     private static enum BadSectorsState
     {
-        HAS_NO_BAD_SECTORS,
-        HAS_BAD_SECTORS
+        HAS_NO_BAD_SECTORS, HAS_BAD_SECTORS
     }
 
     private ReaderWriter()
     {
     }
 
-    public static void readDiskCommand(
-            ConfigProto config, DiskLayout diskLayout, FluxSource fluxSource,
-            Decoder decoder, Disk disk)
+    public static void readDiskCommand(ConfigProto config,
+                                       DiskLayout diskLayout,
+                                       FluxSource fluxSource,
+                                       Decoder decoder,
+                                       Disk disk)
     {
         FluxSinkFactory outputFluxSinkFactory = null;
         if (config.getDecoder().hasCopyFluxTo())
-            outputFluxSinkFactory = FluxSinkFactory.create(
-                    config, config.getDecoder().getCopyFluxTo());
+            outputFluxSinkFactory =
+                    FluxSinkFactory.create(config, config.getDecoder().getCopyFluxTo());
 
-        Map<CylinderHead, List<Track>> tracksByLogicalLocation =
-                new HashMap<>();
+        Map<CylinderHead, List<Track>> tracksByLogicalLocation = new HashMap<>();
         for (Map.Entry<CylinderHead, Track> entry : disk.tracksByPhysicalLocation.entries())
         {
             Track track = entry.getValue();
-            tracksByLogicalLocation
-                    .computeIfAbsent(new CylinderHead(
-                            track.ltl.logicalCylinder, track.ltl.logicalHead),
-                            k -> new ArrayList<>())
-                    .add(track);
+            tracksByLogicalLocation.computeIfAbsent(
+                    new CylinderHead(
+                            track.ltl.logicalCylinder,
+                            track.ltl.logicalHead),
+                    k -> new ArrayList<>()).add(track);
         }
 
         Logger.log(new BeginOperationLogMessage("Reading and decoding disk"));
@@ -86,8 +84,9 @@ public final class ReaderWriter
         else
             disk.rotationalPeriod = getRotationalPeriodFromConfig(config);
 
-        try (FluxSink outputFluxSink =
-                outputFluxSinkFactory != null ? outputFluxSinkFactory.create() : null)
+        try (FluxSink outputFluxSink = outputFluxSinkFactory != null ?
+                outputFluxSinkFactory.create() :
+                null)
         {
             int index = 0;
             for (Map.Entry<CylinderHead, LogicalTrackLayout> entry :
@@ -101,30 +100,38 @@ public final class ReaderWriter
 
                 testForEmergencyStop();
 
-                List<Track> trackFluxes =
-                        tracksByLogicalLocation.computeIfAbsent(
-                                logicalLocation, k -> new ArrayList<>());
+                List<Track> trackFluxes = tracksByLogicalLocation.computeIfAbsent(
+                        logicalLocation,
+                        k -> new ArrayList<>());
                 List<Sector> trackSectors = new ArrayList<>();
-                readAndDecodeTrack(config, diskLayout, fluxSource, decoder,
-                        ltl, trackFluxes, trackSectors);
+                readAndDecodeTrack(
+                        config,
+                        diskLayout,
+                        fluxSource,
+                        decoder,
+                        ltl,
+                        trackFluxes,
+                        trackSectors);
 
                 /* Replace all tracks on the disk by the new combined set. */
 
                 for (Track flux : trackFluxes)
                     disk.tracksByPhysicalLocation.removeAll(new CylinderHead(
-                            flux.ptl.physicalCylinder, flux.ptl.physicalHead));
+                            flux.ptl.physicalCylinder,
+                            flux.ptl.physicalHead));
                 for (Track flux : trackFluxes)
-                    disk.tracksByPhysicalLocation.put(new CylinderHead(
-                            flux.ptl.physicalCylinder, flux.ptl.physicalHead), flux);
+                    disk.tracksByPhysicalLocation.put(
+                            new CylinderHead(
+                                    flux.ptl.physicalCylinder,
+                                    flux.ptl.physicalHead),
+                            flux);
 
                 /* Likewise for sectors. */
 
                 for (Sector sector : trackSectors)
-                    disk.sectorsByPhysicalLocation.removeAll(
-                            sector.physicalLocation);
+                    disk.sectorsByPhysicalLocation.removeAll(sector.physicalLocation);
                 for (Sector sector : trackSectors)
-                    disk.sectorsByPhysicalLocation.put(
-                            sector.physicalLocation, sector);
+                    disk.sectorsByPhysicalLocation.put(sector.physicalLocation, sector);
 
                 if (outputFluxSink != null)
                 {
@@ -137,12 +144,10 @@ public final class ReaderWriter
 
                 if (config.getDecoder().getDumpRecords())
                 {
-                    List<com.cowlark.fluxengine.data.Record> sortedRecords =
-                            new ArrayList<>();
+                    List<com.cowlark.fluxengine.data.Record> sortedRecords = new ArrayList<>();
                     for (Track data : trackFluxes)
                         sortedRecords.addAll(data.records);
-                    sortedRecords.sort(Comparator.comparingDouble(
-                            r -> r.startTimeNs));
+                    sortedRecords.sort(Comparator.comparingDouble(r -> r.startTimeNs));
 
                     System.out.println("\nRaw (undecoded) records follow:\n");
                     for (com.cowlark.fluxengine.data.Record record : sortedRecords)
@@ -151,7 +156,7 @@ public final class ReaderWriter
                                 "I+%.2fus with %.2fus clock%n",
                                 record.startTimeNs / 1000.0,
                                 record.clockNs / 1000.0);
-                        hexdump(System.out, record.rawData);
+                        Utils.hexdump(System.out, record.rawData);
                         System.out.println();
                     }
                 }
@@ -159,8 +164,7 @@ public final class ReaderWriter
                 if (config.getDecoder().getDumpSectors())
                 {
                     List<Sector> sectors = collectSectors(trackSectors, false);
-                    sectors.sort(Comparator
-                            .comparing((Sector s) -> s.location.logicalCylinder())
+                    sectors.sort(Comparator.comparing((Sector s) -> s.location.logicalCylinder())
                             .thenComparing((Sector s) -> s.location.logicalHead())
                             .thenComparing((Sector s) -> s.location.logicalSector()));
 
@@ -168,15 +172,14 @@ public final class ReaderWriter
                     for (Sector sector : sectors)
                     {
                         System.out.printf(
-                                "%d.%02d.%02d: I+%.2fus with %.2fus clock: "
-                                        + "status %s%n",
+                                "%d.%02d.%02d: I+%.2fus with %.2fus clock: " + "status %s%n",
                                 sector.location.logicalCylinder(),
                                 sector.location.logicalHead(),
                                 sector.location.logicalSector(),
                                 sector.headerStartTimeNs / 1000.0,
                                 sector.clockNs / 1000.0,
                                 Sector.statusToString(sector.status));
-                        hexdump(System.out, sector.data);
+                        Utils.hexdump(System.out, sector.data);
                         System.out.println();
                     }
                 }
@@ -197,8 +200,11 @@ public final class ReaderWriter
         Logger.log(new EndOperationLogMessage("Read complete"));
     }
 
-    public static void readDiskCommand(ConfigProto config, DiskLayout diskLayout,
-            FluxSource fluxSource, Decoder decoder, ImageWriter writer)
+    public static void readDiskCommand(ConfigProto config,
+                                       DiskLayout diskLayout,
+                                       FluxSource fluxSource,
+                                       Decoder decoder,
+                                       ImageWriter writer)
     {
         Disk disk = new Disk();
         readDiskCommand(config, diskLayout, fluxSource, decoder, disk);
@@ -211,13 +217,11 @@ public final class ReaderWriter
 
     /* Given a set of sectors, deduplicates them sensibly (e.g. if there is a
      * good and bad version of the same sector, the bad version is dropped). */
-    private static List<Sector> collectSectors(
-            List<Sector> trackSectors, boolean collapseConflicts)
+    private static List<Sector> collectSectors(List<Sector> trackSectors, boolean collapseConflicts)
     {
         Map<LogicalLocation, List<Sector>> sectors = new LinkedHashMap<>();
         for (Sector sector : trackSectors)
-            sectors.computeIfAbsent(sector.location, k -> new ArrayList<>())
-                    .add(sector);
+            sectors.computeIfAbsent(sector.location, k -> new ArrayList<>()).add(sector);
 
         List<Sector> sectorSet = new ArrayList<>();
         for (Map.Entry<LogicalLocation, List<Sector>> entry : sectors.entrySet())
@@ -227,8 +231,7 @@ public final class ReaderWriter
             for (int i = 1; i < bucket.size(); i++)
             {
                 Sector right = bucket.get(i);
-                if ((newSector.status == Sector.Status.OK) &&
-                        (right.status == Sector.Status.OK) &&
+                if ((newSector.status == Sector.Status.OK) && (right.status == Sector.Status.OK) &&
                         (!newSector.data.equals(right.data)))
                 {
                     if (!collapseConflicts)
@@ -287,8 +290,9 @@ public final class ReaderWriter
         List<Sector> sectors;
     }
 
-    private static CombinationResult combineRecordAndSectors(
-            List<Track> tracks, Decoder decoder, LogicalTrackLayout ltl)
+    private static CombinationResult combineRecordAndSectors(List<Track> tracks,
+                                                             Decoder decoder,
+                                                             LogicalTrackLayout ltl)
     {
         CombinationResult cr = new CombinationResult();
         cr.result = BadSectorsState.HAS_NO_BAD_SECTORS;
@@ -303,12 +307,11 @@ public final class ReaderWriter
 
         for (int sectorId : ltl.diskSectorOrder)
         {
-            Sector sector = new Sector(new LogicalLocation(
-                    ltl.logicalCylinder, ltl.logicalHead, sectorId));
+            Sector sector =
+                    new Sector(new LogicalLocation(ltl.logicalCylinder, ltl.logicalHead, sectorId));
 
             sector.status = Sector.Status.MISSING;
-            sector.physicalLocation =
-                    new CylinderHead(ltl.physicalCylinder, ltl.physicalHead);
+            sector.physicalLocation = new CylinderHead(ltl.physicalCylinder, ltl.physicalHead);
             trackSectors.add(sector);
         }
 
@@ -324,8 +327,7 @@ public final class ReaderWriter
         return cr;
     }
 
-    private static void adjustTrackOnError(
-            FluxSource fluxSource, int baseTrack, ConfigProto config)
+    private static void adjustTrackOnError(FluxSource fluxSource, int baseTrack, ConfigProto config)
     {
         switch (config.getDrive().getErrorBehaviour())
         {
@@ -354,8 +356,7 @@ public final class ReaderWriter
     private static class FluxSourceIteratorHolder
     {
         private final FluxSource fluxSource;
-        private final Map<CylinderHead, FluxSourceIterator> cache =
-                new HashMap<>();
+        private final Map<CylinderHead, FluxSourceIterator> cache = new HashMap<>();
 
         FluxSourceIteratorHolder(FluxSource fluxSource)
         {
@@ -376,9 +377,11 @@ public final class ReaderWriter
     }
 
     private static ReadGroupResult readGroup(DiskLayout diskLayout,
-            FluxSourceIteratorHolder fluxSourceIteratorHolder,
-            LogicalTrackLayout ltl, List<Track> tracks, Decoder decoder,
-            ConfigProto config)
+                                             FluxSourceIteratorHolder fluxSourceIteratorHolder,
+                                             LogicalTrackLayout ltl,
+                                             List<Track> tracks,
+                                             Decoder decoder,
+                                             ConfigProto config)
     {
         ReadGroupResult rgr = new ReadGroupResult();
         rgr.result = ReadResult.BAD_AND_CAN_NOT_RETRY;
@@ -387,8 +390,7 @@ public final class ReaderWriter
          * sectors. */
 
         {
-            CombinationResult cr =
-                    combineRecordAndSectors(tracks, decoder, ltl);
+            CombinationResult cr = combineRecordAndSectors(tracks, decoder, ltl);
             rgr.combinedSectors = cr.sectors;
             if (cr.result == BadSectorsState.HAS_NO_BAD_SECTORS)
             {
@@ -399,29 +401,29 @@ public final class ReaderWriter
             }
         }
 
-        for (int offset = 0; offset < ltl.groupSize;
-                offset += diskLayout.headWidth)
+        for (int offset = 0; offset < ltl.groupSize; offset += diskLayout.headWidth)
         {
             int physicalCylinder = ltl.physicalCylinder + offset;
             int physicalHead = ltl.physicalHead;
-            PhysicalTrackLayout ptl = diskLayout.layoutByPhysicalLocation.get(
-                    new CylinderHead(physicalCylinder, physicalHead));
+            PhysicalTrackLayout ptl = diskLayout.layoutByPhysicalLocation.get(new CylinderHead(
+                    physicalCylinder,
+                    physicalHead));
 
             /* Do the physical read. */
 
-            Logger.log(new BeginReadOperationLogMessage(
-                    physicalCylinder, physicalHead));
+            Logger.log(new BeginReadOperationLogMessage(physicalCylinder, physicalHead));
 
             FluxSourceIterator fluxSourceIterator =
-                    fluxSourceIteratorHolder.getIterator(
-                            physicalCylinder, physicalHead);
+                    fluxSourceIteratorHolder.getIterator(physicalCylinder, physicalHead);
             if (!fluxSourceIterator.hasNext())
                 continue;
 
             Fluxmap fluxmap = fluxSourceIterator.next();
             Logger.log(new EndReadOperationLogMessage());
-            Logger.log(String.format("%d ms in %d bytes",
-                    (int) (fluxmap.duration() / 1e6), fluxmap.bytes()));
+            Logger.log(String.format(
+                    "%d ms in %d bytes",
+                    (int) (fluxmap.duration() / 1e6),
+                    fluxmap.bytes()));
 
             Track flux = decoder.decodeToSectors(fluxmap, ptl);
             flux.normalisedSectors = collectSectors(flux.allSectors);
@@ -429,8 +431,7 @@ public final class ReaderWriter
 
             /* Decode what we've got so far. */
 
-            CombinationResult cr =
-                    combineRecordAndSectors(tracks, decoder, ltl);
+            CombinationResult cr = combineRecordAndSectors(tracks, decoder, ltl);
             rgr.combinedSectors = cr.sectors;
             if (cr.result == BadSectorsState.HAS_NO_BAD_SECTORS)
             {
@@ -450,9 +451,12 @@ public final class ReaderWriter
     }
 
     private static void readAndDecodeTrack(ConfigProto config,
-            DiskLayout diskLayout, FluxSource fluxSource, Decoder decoder,
-            LogicalTrackLayout ltl, List<Track> tracks,
-            List<Sector> combinedSectors)
+                                           DiskLayout diskLayout,
+                                           FluxSource fluxSource,
+                                           Decoder decoder,
+                                           LogicalTrackLayout ltl,
+                                           List<Track> tracks,
+                                           List<Sector> combinedSectors)
     {
         if (fluxSource.isHardware())
             measureDiskRotation(config);
@@ -462,8 +466,8 @@ public final class ReaderWriter
         int retriesRemaining = config.getDecoder().getRetries();
         for (; ; )
         {
-            ReadGroupResult rgr = readGroup(diskLayout,
-                    fluxSourceIteratorHolder, ltl, tracks, decoder, config);
+            ReadGroupResult rgr =
+                    readGroup(diskLayout, fluxSourceIteratorHolder, ltl, tracks, decoder, config);
             combinedSectors.clear();
             combinedSectors.addAll(rgr.combinedSectors);
             if (rgr.result == ReadResult.GOOD_READ)
@@ -483,8 +487,7 @@ public final class ReaderWriter
             if (fluxSource.isHardware())
             {
                 adjustTrackOnError(fluxSource, ltl.physicalCylinder, config);
-                Logger.log(String.format("retrying; %d retries remaining",
-                        retriesRemaining));
+                Logger.log(String.format("retrying; %d retries remaining", retriesRemaining));
                 retriesRemaining--;
             }
         }
@@ -503,17 +506,16 @@ public final class ReaderWriter
         if (oneRevolution == 0)
         {
             UsbDevice device = UsbFactory.reconnect(config);
-            device.setDrive(config.getDrive().getDrive(),
+            device.setDrive(
+                    config.getDrive().getDrive(),
                     config.getDrive().getHighDensity(),
                     config.getDrive().getIndexMode().getNumber());
 
-            Logger.log(new BeginOperationLogMessage(
-                    "Measuring drive rotational speed"));
+            Logger.log(new BeginOperationLogMessage("Measuring drive rotational speed"));
             int retries = 5;
             do
             {
-                oneRevolution = device.getRotationalPeriod(
-                        config.getDrive().getHardSectorCount());
+                oneRevolution = device.getRotationalPeriod(config.getDrive().getHardSectorCount());
                 retries--;
             } while ((oneRevolution == 0) && (retries > 0));
             Logger.log(new EndOperationLogMessage(""));
@@ -528,37 +530,5 @@ public final class ReaderWriter
 
     private static void testForEmergencyStop()
     {
-    }
-
-    private static void hexdump(java.io.PrintStream stream, Bytes buffer)
-    {
-        int pos = 0;
-
-        while (pos < buffer.size())
-        {
-            stream.printf("%05x : ", pos);
-            for (int i = 0; i < 16; i++)
-            {
-                if ((pos + i) < buffer.size())
-                    stream.printf("%02x ", buffer.getByte(pos + i));
-                else
-                    stream.print("-- ");
-            }
-            stream.print(" : ");
-            for (int i = 0; i < 16; i++)
-            {
-                if ((pos + i) >= buffer.size())
-                    break;
-
-                int c = buffer.getByte(pos + i) & 0xff;
-                if ((c >= 32) && (c <= 126))
-                    stream.print((char) c);
-                else
-                    stream.print('.');
-            }
-            stream.println();
-
-            pos += 16;
-        }
     }
 }
