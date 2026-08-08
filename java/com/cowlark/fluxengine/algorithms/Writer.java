@@ -16,6 +16,7 @@ import com.cowlark.fluxengine.encoders.Encoder;
 import com.cowlark.fluxengine.fluxsink.FluxSink;
 import com.cowlark.fluxengine.fluxsink.FluxSinkFactory;
 import com.cowlark.fluxengine.fluxsource.FluxSource;
+import com.cowlark.fluxengine.fluxsource.FluxSourceIterator;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -233,5 +234,26 @@ public final class Writer
                 decoder,
                 fluxSource,
                 new ArrayList<>(diskLayout.layoutByLogicalLocation.keySet()));
+    }
+
+    public static void writeRawDiskCommand(ConfigProto config,
+                                           DiskLayout diskLayout,
+                                           FluxSource fluxSource,
+                                           FluxSinkFactory fluxSinkFactory)
+    {
+        writeTracks(
+                config,
+                diskLayout,
+                fluxSinkFactory,
+                ltl ->
+                {
+                    FluxSourceIterator iterator =
+                            fluxSource.readFlux(ltl.physicalCylinder, ltl.physicalHead);
+                    if (!iterator.hasNext())
+                        return null;
+                    return iterator.next();
+                },
+                ltl -> true,
+                diskLayout.logicalLocations);
     }
 }

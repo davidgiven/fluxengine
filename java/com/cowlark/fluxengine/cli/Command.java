@@ -43,10 +43,8 @@ public interface Command
                                     "Flux file manipulation operations."))
                     .put("format", stub("format", "Format a disk and make a file system on it."))
                     .put(
-                            "rawwrite", stub(
-                                    "rawwrite",
-                                    "Writes a flux file to a disk. Warning: you can't use this to" +
-                                            " copy disks."))
+                            "rawwrite",
+                            RawwriteCommand::new)
                     .put(
                             "convert",
                             stub("convert", "Converts a flux file from one format to another."))
