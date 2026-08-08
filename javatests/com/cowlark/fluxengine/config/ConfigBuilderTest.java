@@ -3,6 +3,7 @@ package com.cowlark.fluxengine.config;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
+import com.cowlark.fluxengine.core.FluxEngineException;
 import com.cowlark.fluxengine.core.flags.FlagGroup;
 import com.google.common.collect.ImmutableList;
 import org.junit.Test;
@@ -64,6 +65,209 @@ public class ConfigBuilderTest
         ConfigProto proto = builder().loadConfigFile("amiga").build();
 
         assertThat(proto.getShortname()).isEqualTo("Amiga");
+    }
+
+    @Test
+    public void findOptionLooksUpTopLevelOption()
+    {
+        ConfigBuilder builder = builder().loadConfigFile("_global_options");
+
+        ConfigBuilder.OptionInfo info = builder.findOption("hd");
+
+        assertThat(info.option().getName()).isEqualTo("hd");
+        assertThat(info.group()).isNull();
+        assertThat(info.usesValue()).isFalse();
+    }
+
+    @Test
+    public void buildAppliesDefaultOptions()
+    {
+        /* _global_options drivetype group has 80 set by default. */
+        ConfigProto proto = builder().loadConfigFile("_global_options").build();
+
+        assertThat(proto.getDrive().getTracks()).isEqualTo("c0-80h0-1");
+        assertThat(proto.getDrive().getDriveType())
+                .isEqualTo(com.cowlark.fluxengine.external.DriveType.DRIVETYPE_80TRACK);
+    }
+
+    @Test
+    public void buildDoesNotApplyDefaultForAppliedGroup()
+    {
+        /* If drivetype=40 is applied explicitly, the default (80) must not
+         * also be applied. */
+        ConfigBuilder builder = builder().loadConfigFile("_global_options");
+        ConfigBuilder.OptionInfo info = builder.findOption("drivetype");
+        builder.applyOption(info, "40");
+
+        ConfigProto proto = builder.build();
+
+        assertThat(proto.getDrive().getTracks()).isEqualTo("c0-40h0-1");
+    }
+
+    @Test
+    public void findOptionLooksUpOptionInUnnamedGroup()
+    {
+        ConfigBuilder builder = builder().loadConfigFile("amiga");
+
+        ConfigBuilder.OptionInfo info = builder.findOption("without_metadata");
+
+        assertThat(info.option().getName()).isEqualTo("without_metadata");
+        assertThat(info.group()).isNotNull();
+        assertThat(info.usesValue()).isFalse();
+    }
+
+    @Test
+    public void findOptionMissingThrows()
+    {
+        ConfigBuilder builder = builder().loadConfigFile("_global_options");
+
+        assertThrows(ConfigException.class, () -> builder.findOption("no such option"));
+    }
+
+    @Test
+    public void fromFlagsLooksUpOption()
+    {
+        /* --hd is a top-level option in _global_options; without a dot it is
+         * looked up as an option rather than a config path. */
+        ConfigBuilder builder = builder().loadConfigFile("_global_options");
+
+        builder.fromFlags(ImmutableList.of("--hd"), new FlagGroup());
+
+        assertThat(builder.findOption("hd").option().getName()).isEqualTo("hd");
+    }
+
+    @Test
+    public void fromFlagsUnknownOptionThrows()
+    {
+        ConfigBuilder builder = builder().loadConfigFile("_global_options");
+
+        assertThrows(
+                FluxEngineException.class,
+                () -> builder.fromFlags(ImmutableList.of("--no-such-option"), new FlagGroup()));
+    }
+
+    @Test
+    public void fromFlagsOptionWithoutValue()
+    {
+        /* --hd is a top-level option with no value in _global_options. */
+        ConfigBuilder builder = builder().loadConfigFile("_global_options");
+
+        builder.fromFlags(ImmutableList.of("--hd"), new FlagGroup());
+
+        assertThat(builder.findOption("hd").usesValue()).isFalse();
+    }
+
+    @Test
+    public void fromFlagsOptionWithValue()
+    {
+        /* --drivetype is a top-level option with a value in _global_options. */
+        ConfigBuilder builder = builder().loadConfigFile("_global_options");
+
+        builder.fromFlags(ImmutableList.of("--drivetype=80"), new FlagGroup());
+
+        assertThat(builder.findOption("drivetype").usesValue()).isTrue();
+    }
+
+    @Test
+    public void fromFlagsConfigKeySetsValue()
+    {
+        /* A dotted key is a config path, not an option. */
+        ConfigBuilder builder = builder();
+
+        builder.fromFlags(ImmutableList.of("--drive.drive=1"), new FlagGroup());
+
+        assertThat(builder.build().getDrive().getDrive()).isEqualTo(1);
+    }
+
+    @Test
+    public void applyOptionIsCallable()
+    {
+        ConfigBuilder builder = builder().loadConfigFile("_global_options");
+
+        ConfigBuilder.OptionInfo info = builder.findOption("hd");
+        builder.applyOption(info, null);
+    }
+
+    @Test
+    public void applyOptionGroupSelectsOptionByValue()
+    {
+        ConfigBuilder builder = builder().loadConfigFile("_global_options");
+
+        ConfigBuilder.OptionInfo info = builder.findOption("drivetype");
+        builder.applyOption(info, "80");
+    }
+
+    @Test
+    public void applyOptionGroupWithInvalidValueThrows()
+    {
+        ConfigBuilder builder = builder().loadConfigFile("_global_options");
+
+        ConfigBuilder.OptionInfo info = builder.findOption("drivetype");
+        assertThrows(
+                ConfigException.class,
+                () -> builder.applyOption(info, "bogus"));
+    }
+
+    @Test
+    public void checkOptionValidAppliesWhenPrerequisiteMet() throws Exception
+    {
+        Path file = Files.createTempFile("config", ".textproto");
+        Files.writeString(file, """
+                option {
+                  name: "needs_serial"
+                  prerequisite {
+                    key: "usb.serial"
+                    value: "test-serial"
+                  }
+                  config {
+                    comment: "applied"
+                  }
+                }
+                """);
+
+        ConfigBuilder builder = builder().loadConfigFile(file.toString()).set("usb.serial", "test-serial");
+        ConfigBuilder.OptionInfo info = builder.findOption("needs_serial");
+        builder.applyOption(info, null);
+
+        assertThat(builder.build().getComment()).isEqualTo("applied");
+    }
+
+    @Test
+    public void checkOptionValidThrowsWhenPrerequisiteNotMet() throws Exception
+    {
+        Path file = Files.createTempFile("config", ".textproto");
+        Files.writeString(file, """
+                option {
+                  name: "needs_serial"
+                  prerequisite {
+                    key: "usb.serial"
+                    value: "test-serial"
+                  }
+                  config {
+                    comment: "applied"
+                  }
+                }
+                """);
+
+        ConfigBuilder builder = builder().loadConfigFile(file.toString()).set("usb.serial", "other");
+        ConfigBuilder.OptionInfo info = builder.findOption("needs_serial");
+        assertThrows(
+                InapplicableOptionException.class,
+                () -> builder.applyOption(info, null));
+    }
+
+    @Test
+    public void findOptionNamedGroupReturnsUsesValue()
+    {
+        /* Named groups (drivetype, drivespeed, bus) are found, but they select
+         * an option by value, so usesValue is true and no option is set. */
+        ConfigBuilder builder = builder().loadConfigFile("_global_options");
+
+        ConfigBuilder.OptionInfo info = builder.findOption("drivetype");
+
+        assertThat(info.group()).isNotNull();
+        assertThat(info.option()).isNull();
+        assertThat(info.usesValue()).isTrue();
     }
 
     @Test

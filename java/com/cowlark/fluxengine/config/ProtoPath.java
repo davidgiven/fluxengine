@@ -27,6 +27,98 @@ public class ProtoPath
         setRecursive(builder, components, 0, value, path);
     }
 
+    /* Resolves a dotted path against a message and returns the leaf value as
+     * a string, ported from lib/config/proto.cc's findProtoPath/get. */
+    public static String get(Message.Builder builder, String path)
+    {
+        List<PathComponent> components = parsePath(path);
+        return getRecursive(builder, components, 0, path);
+    }
+
+    private static String getRecursive(Message.Builder builder,
+                                       List<PathComponent> path,
+                                       int pos,
+                                       String originalPath)
+    {
+        PathComponent component = path.get(pos);
+        FieldDescriptor field = findField(builder, component, originalPath);
+
+        if (pos == path.size() - 1)
+        {
+            return getLeaf(builder, component, field);
+        }
+
+        if (field.getJavaType() != FieldDescriptor.JavaType.MESSAGE)
+            throw new ProtoPathNotFoundException(
+                    "config field '" + component.name() + "' in '" + originalPath +
+                            "' is not a message");
+
+        Message.Builder elementBuilder;
+        if (field.isRepeated())
+        {
+            int index = requireIndex(component, field);
+            if (builder.getRepeatedFieldCount(field) <= index)
+                throw new ProtoPathNotFoundException(
+                        "could not find config field '" + field.getName() + "'");
+            Message element = (Message) builder.getRepeatedField(field, index);
+            elementBuilder = element.toBuilder();
+        } else
+        {
+            if (component.index() >= 0)
+                throw new ProtoPathNotFoundException(
+                        "config field '" + component.name() +
+                                "' is not repeated but an index is provided");
+            if (!builder.hasField(field))
+                throw new ProtoPathNotFoundException(
+                        "could not find config field '" + field.getName() + "'");
+            elementBuilder = ((Message) builder.getField(field)).toBuilder();
+        }
+        return getRecursive(elementBuilder, path, pos + 1, originalPath);
+    }
+
+    private static String getLeaf(Message.Builder builder,
+                                  PathComponent component,
+                                  FieldDescriptor field)
+    {
+        if (field.getJavaType() == FieldDescriptor.JavaType.MESSAGE)
+            throw new ConfigException("config field '" + component.name() +
+                    "' is a message and can't be directly fetched");
+
+        Object value;
+        if (field.isRepeated())
+        {
+            int index = requireIndex(component, field);
+            if (builder.getRepeatedFieldCount(field) <= index)
+                throw new ProtoPathNotFoundException(
+                        "could not find config field '" + field.getName() + "'");
+            value = builder.getRepeatedField(field, index);
+        } else
+        {
+            if (component.index() >= 0)
+                throw new ProtoPathNotFoundException(
+                        "config field '" + component.name() +
+                                "' is not repeated but an index is provided");
+            value = builder.getField(field);
+        }
+        return formatValue(field, value);
+    }
+
+    private static String formatValue(FieldDescriptor field, Object value)
+    {
+        switch (field.getType())
+        {
+            case FLOAT:
+            case DOUBLE:
+                return String.valueOf(value);
+            case BOOL:
+                return String.valueOf(value);
+            case ENUM:
+                return ((EnumValueDescriptor) value).getName();
+            default:
+                return String.valueOf(value);
+        }
+    }
+
     private static List<PathComponent> parsePath(String path)
     {
         List<PathComponent> components = new ArrayList<>();
@@ -59,7 +151,7 @@ public class ProtoPath
         }
 
         if (field.getJavaType() != FieldDescriptor.JavaType.MESSAGE)
-            throw new ConfigException(
+            throw new ProtoPathNotFoundException(
                     "config field '" + component.name() + "' in '" + originalPath +
                             "' is not a message");
 
@@ -74,8 +166,9 @@ public class ProtoPath
         } else
         {
             if (component.index() >= 0)
-                throw new ConfigException("config field '" + component.name() +
-                        "' is not repeated but an index is provided");
+                throw new ProtoPathNotFoundException(
+                        "config field '" + component.name() +
+                                "' is not repeated but an index is provided");
             Message.Builder elementBuilder;
             if (builder.hasField(field))
                 elementBuilder = ((Message) builder.getField(field)).toBuilder();
@@ -105,8 +198,9 @@ public class ProtoPath
         } else
         {
             if (component.index() >= 0)
-                throw new ConfigException("config field '" + component.name() +
-                        "' is not repeated but an index is provided");
+                throw new ProtoPathNotFoundException(
+                        "config field '" + component.name() +
+                                "' is not repeated but an index is provided");
             builder.setField(field, coerced);
         }
     }
@@ -117,7 +211,7 @@ public class ProtoPath
     {
         FieldDescriptor field = builder.getDescriptorForType().findFieldByName(component.name());
         if (field == null)
-            throw new ConfigException(
+            throw new ProtoPathNotFoundException(
                     "no such config field '" + component.name() + "' in '" + path + "'");
         return field;
     }
@@ -125,7 +219,7 @@ public class ProtoPath
     private static int requireIndex(PathComponent component, FieldDescriptor field)
     {
         if (component.index() < 0)
-            throw new ConfigException(
+            throw new ProtoPathNotFoundException(
                     "config field '" + component.name() + "' is repeated and must be indexed");
         return component.index();
     }

@@ -30,13 +30,32 @@ public class ConfigFlagGroup extends FlagGroup
     @Override
     public Flag findFlag(String key)
     {
-        if (key.startsWith("--") && key.contains("."))
+        if (key.startsWith("--"))
         {
             String path = key.substring(2);
-            return ActionFlag.builder()
-                    .setGroup(this)
-                    .setValueCallback(value -> builder.set(path, value))
-                    .build();
+            if (key.contains("."))
+            {
+                /* Dots: setting a config key. */
+                return ActionFlag.builder()
+                        .setGroup(this)
+                        .setValueCallback(value -> builder.set(path, value))
+                        .build();
+            } else
+            {
+                /* No dots: this is an option name; look it up (throws if
+                 * unknown). */
+                ConfigBuilder.OptionInfo option = builder.findOption(path);
+                if (option.usesValue())
+                    return ActionFlag.builder()
+                            .setGroup(this)
+                            .setValueCallback(arg -> builder.applyOption(option, arg))
+                            .build();
+                else
+                    return ActionFlag.builder()
+                            .setGroup(this)
+                            .setVoidCallback(() -> builder.applyOption(option, null))
+                            .build();
+            }
         }
         return super.findFlag(key);
     }

@@ -18,6 +18,61 @@ public class ProtoPathTest
         return builder.build();
     }
 
+    private static String get(String path)
+    {
+        return ProtoPath.get(ConfigProto.newBuilder(), path);
+    }
+
+    @Test
+    public void getTopLevelString()
+    {
+        assertThat(get("tracks")).isEqualTo("");
+    }
+
+    @Test
+    public void getNestedInt()
+    {
+        ConfigProto.Builder builder = ConfigProto.newBuilder();
+        ProtoPath.set(builder, "drive.drive", "5");
+        assertThat(ProtoPath.get(builder, "drive.drive")).isEqualTo("5");
+    }
+
+    @Test
+    public void getNestedBool()
+    {
+        ConfigProto.Builder builder = ConfigProto.newBuilder();
+        ProtoPath.set(builder, "drive.high_density", "true");
+        assertThat(ProtoPath.get(builder, "drive.high_density")).isEqualTo("true");
+    }
+
+    @Test
+    public void getNestedEnum()
+    {
+        ConfigProto.Builder builder = ConfigProto.newBuilder();
+        ProtoPath.set(builder, "drive.drive_type", "DRIVETYPE_80TRACK");
+        assertThat(ProtoPath.get(builder, "drive.drive_type")).isEqualTo("DRIVETYPE_80TRACK");
+    }
+
+    @Test
+    public void getRepeatedStringWithIndex()
+    {
+        ConfigProto.Builder builder = ConfigProto.newBuilder();
+        ProtoPath.set(builder, "documentation[2]", "hello");
+        assertThat(ProtoPath.get(builder, "documentation[2]")).isEqualTo("hello");
+    }
+
+    @Test
+    public void getUnknownFieldThrows()
+    {
+        assertThrows(ProtoPathNotFoundException.class, () -> get("bogus"));
+    }
+
+    @Test
+    public void getUnknownNestedFieldThrows()
+    {
+        assertThrows(ProtoPathNotFoundException.class, () -> get("drive.bogus"));
+    }
+
     @Test
     public void setTopLevelString()
     {
@@ -90,13 +145,13 @@ public class ProtoPathTest
     @Test
     public void setUnknownFieldThrows()
     {
-        assertThrows(ConfigException.class, () -> set("bogus", "x"));
+        assertThrows(ProtoPathNotFoundException.class, () -> set("bogus", "x"));
     }
 
     @Test
     public void setUnknownNestedFieldThrows()
     {
-        assertThrows(ConfigException.class, () -> set("drive.bogus", "x"));
+        assertThrows(ProtoPathNotFoundException.class, () -> set("drive.bogus", "x"));
     }
 
     @Test
@@ -120,12 +175,12 @@ public class ProtoPathTest
     @Test
     public void setRepeatedWithoutIndexThrows()
     {
-        assertThrows(ConfigException.class, () -> set("documentation", "x"));
+        assertThrows(ProtoPathNotFoundException.class, () -> set("documentation", "x"));
     }
 
     @Test
     public void setIndexOnScalarThrows()
     {
-        assertThrows(ConfigException.class, () -> set("tracks[0]", "x"));
+        assertThrows(ProtoPathNotFoundException.class, () -> set("tracks[0]", "x"));
     }
 }
