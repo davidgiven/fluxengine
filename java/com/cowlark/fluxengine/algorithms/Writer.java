@@ -75,7 +75,8 @@ public final class Writer
                             else
                             {
                                 fluxSink.addFlux(physicalCylinder, physicalHead, fluxmap);
-                                Logger.log("writing %d ms in %d bytes",
+                                Logger.logf(
+                                        "writing %d ms in %d bytes",
                                         (int) (fluxmap.duration() / 1e6),
                                         fluxmap.bytes());
                             }
@@ -88,7 +89,7 @@ public final class Writer
 
                             Fluxmap blank = new Fluxmap();
                             fluxSink.addFlux(physicalCylinder, physicalHead, blank);
-                            Logger.log("erased");
+                            Logger.logf("erased");
                         }
 
                         Logger.log(new LogMessage.EndWriteOperationLogMessage());
@@ -100,7 +101,7 @@ public final class Writer
                     if (retriesRemaining == 0)
                         throw new FluxEngineException("fatal error on write");
 
-                    Logger.log("retrying; %d retries remaining", retriesRemaining);
+                    Logger.logf("retrying; %d retries remaining", retriesRemaining);
                     retriesRemaining--;
                 }
             }
@@ -151,7 +152,7 @@ public final class Writer
                     if (rgr.result != Reader.ReadResult.GOOD_READ)
                     {
                         Common.adjustTrackOnError(fluxSource, ltl.physicalCylinder, config);
-                        Logger.log("bad read");
+                        Logger.logf("bad read");
                         return false;
                     }
 
@@ -170,12 +171,12 @@ public final class Writer
                                 sector.location.logicalSector());
                         if (s == null)
                         {
-                            Logger.log("spurious sector on verify");
+                            Logger.logf("spurious sector on verify");
                             return false;
                         }
                         if (!s.data.equals(sector.data.slice(0, s.data.size())))
                         {
-                            Logger.log("data mismatch on verify");
+                            Logger.logf("data mismatch on verify");
                             return false;
                         }
                         wanted.erase(
@@ -185,7 +186,7 @@ public final class Writer
                     }
                     if (!wanted.empty())
                     {
-                        Logger.log("missing sector on verify");
+                        Logger.logf("missing sector on verify");
                         return false;
                     }
                     return true;
@@ -241,18 +242,12 @@ public final class Writer
                                            FluxSinkFactory fluxSinkFactory)
     {
         writeTracks(
-                config,
-                diskLayout,
-                fluxSinkFactory,
-                ltl ->
-                {
+                config, diskLayout, fluxSinkFactory, ltl -> {
                     FluxSourceIterator iterator =
                             fluxSource.readFlux(ltl.physicalCylinder, ltl.physicalHead);
                     if (!iterator.hasNext())
                         return null;
                     return iterator.next();
-                },
-                ltl -> true,
-                diskLayout.logicalLocations);
+                }, ltl -> true, diskLayout.logicalLocations);
     }
 }

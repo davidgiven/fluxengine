@@ -66,9 +66,7 @@ public final class Reader
         {
             Track track = entry.getValue();
             tracksByLogicalLocation.computeIfAbsent(
-                    new CylinderHead(
-                            track.ltl.logicalCylinder,
-                            track.ltl.logicalHead),
+                    new CylinderHead(track.ltl.logicalCylinder, track.ltl.logicalHead),
                     k -> new ArrayList<>()).add(track);
         }
 
@@ -372,9 +370,7 @@ public final class Reader
 
             Fluxmap fluxmap = fluxSourceIterator.next();
             Logger.log(new EndReadOperationLogMessage());
-            Logger.log("%d ms in %d bytes",
-                    (int) (fluxmap.duration() / 1e6),
-                    fluxmap.bytes());
+            Logger.logf("%d ms in %d bytes", (int) (fluxmap.duration() / 1e6), fluxmap.bytes());
 
             Track flux = decoder.decodeToSectors(fluxmap, ptl);
             flux.normalisedSectors = collectSectors(flux.allSectors);
@@ -425,20 +421,20 @@ public final class Reader
                 break;
             if (rgr.result == ReadResult.BAD_AND_CAN_NOT_RETRY)
             {
-                Logger.log("no more data; giving up");
+                Logger.logf("no more data; giving up");
                 break;
             }
 
             if (retriesRemaining == 0)
             {
-                Logger.log("giving up");
+                Logger.logf("giving up");
                 break;
             }
 
             if (fluxSource.isHardware())
             {
                 Common.adjustTrackOnError(fluxSource, ltl.physicalCylinder, config);
-                Logger.log("retrying; %d retries remaining", retriesRemaining);
+                Logger.logf("retrying; %d retries remaining", retriesRemaining);
                 retriesRemaining--;
             }
         }

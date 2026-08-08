@@ -78,8 +78,7 @@ public class FdiImageReader extends ImageReader
         if (fullConfig.getEncoder().getFormatCase() == EncoderProto.FormatCase.FORMAT_NOT_SET)
         {
             IbmEncoderProto.Builder ibm = extra.getEncoderBuilder().getIbmBuilder();
-            IbmEncoderProto.TrackdataProto.Builder trackdata =
-                    ibm.addTrackdataBuilder();
+            IbmEncoderProto.TrackdataProto.Builder trackdata = ibm.addTrackdataBuilder();
             trackdata.setTargetClockPeriodUs(2);
 
             com.cowlark.fluxengine.config.LayoutProto.LayoutdataProto.Builder layoutdata =
@@ -89,7 +88,7 @@ public class FdiImageReader extends ImageReader
             switch (fddType)
             {
                 case 0x90:
-                    Logger.log("FDI: automatically setting format to 1.2MB (1024 byte sectors)");
+                    Logger.logf("FDI: automatically setting format to 1.2MB (1024 byte sectors)");
                     trackdata.setTargetRotationalPeriodMs(167);
                     layoutdata.setSectorSize(1024);
                     for (int i = 0; i < 9; i++)
@@ -97,7 +96,7 @@ public class FdiImageReader extends ImageReader
                     break;
 
                 case 0x30:
-                    Logger.log("FDI: automatically setting format to 1.44MB");
+                    Logger.logf("FDI: automatically setting format to 1.44MB");
                     trackdata.setTargetRotationalPeriodMs(200);
                     layoutdata.setSectorSize(512);
                     for (int i = 0; i < 18; i++)
@@ -106,15 +105,14 @@ public class FdiImageReader extends ImageReader
 
                 default:
                     throw new FluxEngineException(String.format(
-                            "FDI: unknown fdd type 0x%02x, could not determine write "
-                                    + "profile automatically",
-                            fddType));
+                            "FDI: unknown fdd type 0x%02x, could not determine write " +
+                                    "profile automatically", fddType));
             }
         }
 
         image.calculateSize();
         Geometry geometry = image.getGeometry();
-        Logger.log("FDI: read " + geometry.numCylinders + " tracks, " + geometry.numHeads +
+        Logger.logf("FDI: read " + geometry.numCylinders + " tracks, " + geometry.numHeads +
                 " sides, " + (data.size() - headerSize) / 1024 + " kB total");
 
         layout.setTracks(geometry.numCylinders);

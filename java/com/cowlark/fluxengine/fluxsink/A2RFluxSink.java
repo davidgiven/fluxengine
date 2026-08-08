@@ -54,9 +54,9 @@ public class A2RFluxSink extends FluxSink
     {
         this.filename = filename;
         this.config = config;
-        metadata.put("image_date",
-                DateTimeFormatter.ISO_INSTANT.format(
-                        ZonedDateTime.now(ZoneOffset.UTC)));
+        metadata.put(
+                "image_date",
+                DateTimeFormatter.ISO_INSTANT.format(ZonedDateTime.now(ZoneOffset.UTC)));
     }
 
     private void writeChunkAndData(int chunkId, Bytes data)
@@ -86,10 +86,9 @@ public class A2RFluxSink extends FluxSink
         infoWriter.write8(A2R.INFO_CHUNK_VERSION);
         infoWriter.write(VERSION_STRING.getBytes());
 
-        infoWriter.write8(
-                (config.getDrive().getDriveType() == DriveType.DRIVETYPE_APPLE2)
-                        ? A2R.DISK_525
-                        : A2R.DISK_35);
+        infoWriter.write8((config.getDrive().getDriveType() == DriveType.DRIVETYPE_APPLE2) ?
+                A2R.DISK_525 :
+                A2R.DISK_35);
 
         infoWriter.write8(1); /* write protected */
         infoWriter.write8(1); /* synchronized */
@@ -217,8 +216,7 @@ public class A2RFluxSink extends FluxSink
         minHead = diskLayout.minPhysicalHead;
         maxHead = diskLayout.maxPhysicalHead;
 
-        Logger.log("A2R: writing A2R " +
-                ((minHead == maxHead) ? "single sided" : "double sided") +
+        Logger.logf("A2R: writing A2R " + ((minHead == maxHead) ? "single sided" : "double sided") +
                 " file containing " + (maxCylinder - minCylinder + 1) + " tracks...");
 
         writeHeader();

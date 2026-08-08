@@ -17,12 +17,12 @@ import org.junit.runners.JUnit4;
 public class LoggerTest
 {
     @Test
-    public void logStringWrapsInStringMessage()
+    public void logfStringWrapsInStringMessage()
     {
         List<LogMessage> messages = new ArrayList<>();
         Logger.setLogger(messages::add);
 
-        Logger.log("hello");
+        Logger.logf("hello");
 
         assertThat(messages).containsExactly(new StringMessage("hello"));
     }
@@ -58,7 +58,7 @@ public class LoggerTest
         List<LogMessage> messages = new ArrayList<>();
         Logger.setLogger(messages::add);
 
-        Logger.log("one");
+        Logger.logf("one");
         Logger.log(new StringMessage("two"));
 
         assertThat(messages).hasSize(2);

@@ -8,7 +8,6 @@ import com.cowlark.fluxengine.core.Logger;
 import com.cowlark.fluxengine.data.Geometry;
 import com.cowlark.fluxengine.data.Image;
 import com.cowlark.fluxengine.data.Sector;
-import com.cowlark.fluxengine.encoders.EncoderProto;
 import com.cowlark.fluxengine.ibm.IbmEncoderProto;
 import com.cowlark.fluxengine.external.FormatType;
 import java.io.IOException;
@@ -58,8 +57,8 @@ public class NfdImageReader extends ImageReader
         ConfigProto.Builder extra = ConfigProto.newBuilder();
         IbmEncoderProto.Builder ibm = extra.getEncoderBuilder().getIbmBuilder();
         com.cowlark.fluxengine.config.LayoutProto.Builder layout = extra.getLayoutBuilder();
-        Logger.log("NFD: HD 1.2MB mode");
-        Logger.log("NFD: forcing high density mode");
+        Logger.logf("NFD: HD 1.2MB mode");
+        Logger.logf("NFD: forcing high density mode");
         extra.getDriveBuilder().setHighDensity(true);
         extra.getLayoutBuilder().setFormatType(FormatType.FORMATTYPE_80TRACK);
 
@@ -68,8 +67,7 @@ public class NfdImageReader extends ImageReader
         br.seek(0x10a10);
         for (int track = 0; track < 163; track++)
         {
-            IbmEncoderProto.TrackdataProto.Builder trackdata =
-                    ibm.addTrackdataBuilder();
+            IbmEncoderProto.TrackdataProto.Builder trackdata = ibm.addTrackdataBuilder();
             trackdata.setTargetClockPeriodUs(2);
             trackdata.setTargetRotationalPeriodMs(167);
 
@@ -83,8 +81,9 @@ public class NfdImageReader extends ImageReader
 
             for (int sectorInTrack = 0; sectorInTrack < 26; sectorInTrack++)
             {
-                ByteReader sectorHeaderReader =
-                        new ByteReader(data.slice(0x120 + track * 26 * 16 + sectorInTrack * 16, 16));
+                ByteReader sectorHeaderReader = new ByteReader(data.slice(
+                        0x120 + track * 26 * 16 + sectorInTrack * 16,
+                        16));
                 int cyl = sectorHeaderReader.seek(0).read8();
                 int head = sectorHeaderReader.seek(1).read8();
                 int sectorId = sectorHeaderReader.seek(2).read8();
@@ -104,13 +103,11 @@ public class NfdImageReader extends ImageReader
                 {
                     currentTrackTrack = cyl;
                     currentTrackHead = head;
-                }
-                else if (currentTrackTrack != cyl)
+                } else if (currentTrackTrack != cyl)
                 {
                     throw new FluxEngineException(
                             "NFD: all sectors in a track must belong to the same track");
-                }
-                else if (currentTrackHead != head)
+                } else if (currentTrackHead != head)
                 {
                     throw new FluxEngineException(
                             "NFD: all sectors in a track must belong to the same head");
@@ -138,14 +135,12 @@ public class NfdImageReader extends ImageReader
                         trackdata.setGap0(0x1b);
                         trackdata.setGap2(0x09);
                         trackdata.setGap3(0x1b);
-                    }
-                    else if (sectorSize <= 256)
+                    } else if (sectorSize <= 256)
                     {
                         trackdata.setGap0(0x36);
                         trackdata.setGap3(0x36);
                     }
-                }
-                else if (trackSectorSize != sectorSize)
+                } else if (trackSectorSize != sectorSize)
                 {
                     throw new FluxEngineException(
                             "NFD: multiple sector sizes per track are currently unsupported");
@@ -160,7 +155,8 @@ public class NfdImageReader extends ImageReader
 
         image.calculateSize();
         Geometry geometry = image.getGeometry();
-        Logger.log("NFD: read " + geometry.numCylinders + " tracks, " + geometry.numHeads + " sides");
+        Logger.logf(
+                "NFD: read " + geometry.numCylinders + " tracks, " + geometry.numHeads + " sides");
 
         extraConfig = extra.build();
         return image;

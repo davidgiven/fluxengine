@@ -79,8 +79,7 @@ public class ScpFluxSink extends FluxSink
         fileheader[7] = (byte) strackno(maxCylinder, maxHead);
         int flags = Scp.SCP_FLAG_INDEXED;
         if (config.getDrive().getDriveType() == DriveType.DRIVETYPE_APPLE2)
-            throw new FluxEngineException(
-                    "you can't write Apple II flux images to SCP files yet");
+            throw new FluxEngineException("you can't write Apple II flux images to SCP files yet");
         if (config.getDrive().getDriveType() != DriveType.DRIVETYPE_40TRACK)
             flags |= Scp.SCP_FLAG_96TPI;
         fileheader[8] = (byte) flags;
@@ -92,9 +91,9 @@ public class ScpFluxSink extends FluxSink
         else
             fileheader[10] = 0;
 
-        Logger.log("SCP: writing " + (((flags & Scp.SCP_FLAG_96TPI) != 0) ? 96 : 48) +
-                " tpi " + ((minHead == maxHead) ? "single sided" : "double sided") +
-                " file containing " + (fileheader[7] - fileheader[6] + 1) + " tracks");
+        Logger.logf("SCP: writing " + (((flags & Scp.SCP_FLAG_96TPI) != 0) ? 96 : 48) + " tpi " +
+                ((minHead == maxHead) ? "single sided" : "double sided") + " file containing " +
+                (fileheader[7] - fileheader[6] + 1) + " tracks");
     }
 
     @Override
@@ -106,7 +105,7 @@ public class ScpFluxSink extends FluxSink
 
         if (strack >= 168)
         {
-            Logger.log("SCP: cannot write track " + track + " head " + head +
+            Logger.logf("SCP: cannot write track " + track + " head " + head +
                     ", there are not enough Track Data Headers.");
             return;
         }
@@ -121,8 +120,7 @@ public class ScpFluxSink extends FluxSink
         Bytes fluxdata = new Bytes(0);
         ByteWriter fluxdataWriter = fluxdata.writer();
 
-        int revolution =
-                -1; /* -1 indicates that we are before the first index pulse */
+        int revolution = -1; /* -1 indicates that we are before the first index pulse */
         if (alignWithIndex)
         {
             fmr.skipToEvent(F_BIT_INDEX);
@@ -152,12 +150,9 @@ public class ScpFluxSink extends FluxSink
                 if (revolution >= 0)
                 {
                     int revOffset = 4 + revolution * 12;
-                    writeLe32(trackHeader, revOffset + 8,
-                            startOffset + Scp.SCP_TRACK_SIZE);
-                    writeLe32(trackHeader, revOffset + 4,
-                            (fluxdataWriter.pos() - startOffset) / 2);
-                    writeLe32(trackHeader, revOffset,
-                            (int) (revTicks * NS_PER_TICK / 25));
+                    writeLe32(trackHeader, revOffset + 8, startOffset + Scp.SCP_TRACK_SIZE);
+                    writeLe32(trackHeader, revOffset + 4, (fluxdataWriter.pos() - startOffset) / 2);
+                    writeLe32(trackHeader, revOffset, (int) (revTicks * NS_PER_TICK / 25));
                 }
                 revolution++;
                 revTicks = 0;
@@ -180,8 +175,7 @@ public class ScpFluxSink extends FluxSink
         }
 
         fileheader[5] = (byte) revolution;
-        writeLe32(fileheader, 16 + strack * 4,
-                trackdataWriter.pos() + Scp.SCP_HEADER_SIZE);
+        writeLe32(fileheader, 16 + strack * 4, trackdataWriter.pos() + Scp.SCP_HEADER_SIZE);
         trackdataWriter.write(trackHeader);
         trackdataWriter.write(fluxdata);
     }
@@ -190,12 +184,13 @@ public class ScpFluxSink extends FluxSink
     public void close()
     {
         int checksum = 0;
-        checksum = appendChecksum(checksum,
+        checksum = appendChecksum(
+                checksum,
                 new Bytes(java.util.Arrays.copyOfRange(fileheader, 0x10, fileheader.length)));
         checksum = appendChecksum(checksum, trackdata);
         writeLe32(fileheader, 12, checksum);
 
-        Logger.log("SCP: writing output file");
+        Logger.logf("SCP: writing output file");
         Bytes out = new Bytes(fileheader).concat(trackdata);
         try
         {

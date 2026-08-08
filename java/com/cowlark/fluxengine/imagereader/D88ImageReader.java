@@ -8,7 +8,6 @@ import com.cowlark.fluxengine.core.Logger;
 import com.cowlark.fluxengine.data.Geometry;
 import com.cowlark.fluxengine.data.Image;
 import com.cowlark.fluxengine.data.Sector;
-import com.cowlark.fluxengine.encoders.EncoderProto;
 import com.cowlark.fluxengine.ibm.IbmEncoderProto;
 import com.cowlark.fluxengine.external.FormatType;
 import java.io.IOException;
@@ -43,7 +42,7 @@ public class D88ImageReader extends ImageReader
 
         String diskName = header.slice(0, 0x16).toString();
         if (diskName.length() > 0 && diskName.charAt(0) != 0)
-            Logger.log("D88: disk name: " + diskName);
+            Logger.logf("D88: disk name: " + diskName);
 
         ByteReader headerReader = new ByteReader(header);
 
@@ -53,7 +52,7 @@ public class D88ImageReader extends ImageReader
         int diskSize = headerReader.seek(0x1c).readLe32();
 
         if (diskSize > fileSize)
-            Logger.log("D88: found multiple disk images. Only using first");
+            Logger.logf("D88: found multiple disk images. Only using first");
 
         int trackTableEnd = headerReader.seek(0x20).readLe32();
         int trackTableSize = trackTableEnd - 0x20;
@@ -67,8 +66,7 @@ public class D88ImageReader extends ImageReader
         {
             extra.getDriveBuilder().setHighDensity(true);
             extra.getLayoutBuilder().setFormatType(FormatType.FORMATTYPE_80TRACK);
-        }
-        else
+        } else
         {
             clockRate = 300;
             extra.getDriveBuilder().setHighDensity(false);
@@ -91,8 +89,7 @@ public class D88ImageReader extends ImageReader
             int trackSectorSize = -1;
             int trackMfm = -1;
 
-            IbmEncoderProto.TrackdataProto.Builder trackdata =
-                    ibm.addTrackdataBuilder();
+            IbmEncoderProto.TrackdataProto.Builder trackdata = ibm.addTrackdataBuilder();
             trackdata.setTargetClockPeriodUs(1e3 / clockRate);
             trackdata.setTargetRotationalPeriodMs(167);
 
@@ -123,24 +120,22 @@ public class D88ImageReader extends ImageReader
                 if (ddam != 0)
                     throw new FluxEngineException("D88: nonzero ddam currently unsupported");
                 if (rpm != 0)
-                    throw new FluxEngineException(
-                            "D88: 1.44MB 300rpm formats currently unsupported");
+                    throw new FluxEngineException("D88: 1.44MB 300rpm formats currently " +
+                            "unsupported");
                 if (fddStatusCode != 0)
                     throw new FluxEngineException(
                             "D88: nonzero fdd status codes are currently unsupported");
                 if (currentSectorsInTrack == 0xffff)
                 {
                     currentSectorsInTrack = sectorsInTrack;
-                }
-                else if (currentSectorsInTrack != sectorsInTrack)
+                } else if (currentSectorsInTrack != sectorsInTrack)
                 {
                     throw new FluxEngineException("D88: mismatched number of sectors in track");
                 }
                 if (currentTrackTrack < 0)
                 {
                     currentTrackTrack = cyl;
-                }
-                else if (currentTrackTrack != cyl)
+                } else if (currentTrackTrack != cyl)
                 {
                     throw new FluxEngineException(
                             "D88: all sectors in a track must belong to the same track");
@@ -173,23 +168,20 @@ public class D88ImageReader extends ImageReader
                             trackdata.setGap2(0x14);
                             trackdata.setGap3(0x1b);
                         }
-                    }
-                    else
+                    } else
                     {
                         if (sectorSize <= 128)
                         {
                             trackdata.setGap0(0x1b);
                             trackdata.setGap2(0x09);
                             trackdata.setGap3(0x1b);
-                        }
-                        else if (sectorSize <= 256)
+                        } else if (sectorSize <= 256)
                         {
                             trackdata.setGap0(0x36);
                             trackdata.setGap3(0x36);
                         }
                     }
-                }
-                else if (trackSectorSize != sectorSize)
+                } else if (trackSectorSize != sectorSize)
                 {
                     throw new FluxEngineException(
                             "D88: multiple sector sizes per track are currently unsupported");
@@ -205,8 +197,7 @@ public class D88ImageReader extends ImageReader
 
             if (mediaFlag != 0x20)
             {
-                IbmEncoderProto.TrackdataProto.Builder trackdata2 =
-                        ibm.addTrackdataBuilder();
+                IbmEncoderProto.TrackdataProto.Builder trackdata2 = ibm.addTrackdataBuilder();
                 trackdata2.setTargetClockPeriodUs(1e3 / clockRate);
                 trackdata2.setTargetRotationalPeriodMs(167);
             }
@@ -214,7 +205,8 @@ public class D88ImageReader extends ImageReader
 
         image.calculateSize();
         Geometry geometry = image.getGeometry();
-        Logger.log("D88: read " + geometry.numCylinders + " tracks, " + geometry.numHeads + " sides");
+        Logger.logf(
+                "D88: read " + geometry.numCylinders + " tracks, " + geometry.numHeads + " sides");
 
         layout.setTracks(geometry.numCylinders);
         layout.setSides(geometry.numHeads);

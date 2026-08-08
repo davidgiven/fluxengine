@@ -101,8 +101,7 @@ public class DimImageReader extends ImageReader
         if (fullConfig.getEncoder().getFormatCase() == EncoderProto.FormatCase.FORMAT_NOT_SET)
         {
             IbmEncoderProto.Builder ibm = extra.getEncoderBuilder().getIbmBuilder();
-            IbmEncoderProto.TrackdataProto.Builder trackdata =
-                    ibm.addTrackdataBuilder();
+            IbmEncoderProto.TrackdataProto.Builder trackdata = ibm.addTrackdataBuilder();
             trackdata.setTargetClockPeriodUs(2);
 
             com.cowlark.fluxengine.config.LayoutProto.LayoutdataProto.Builder layoutdata =
@@ -112,22 +111,21 @@ public class DimImageReader extends ImageReader
             switch (mediaByte)
             {
                 case 0x00:
-                    Logger.log(
-                            "DIM: automatically setting format to 1.2MB (1024 byte sectors)");
+                    Logger.logf("DIM: automatically setting format to 1.2MB (1024 byte sectors)");
                     trackdata.setTargetRotationalPeriodMs(167);
                     layoutdata.setSectorSize(1024);
                     for (int i = 0; i < 9; i++)
                         physical.addSector(i);
                     break;
                 case 0x02:
-                    Logger.log("DIM: automatically setting format to 1.2MB (512 byte sectors)");
+                    Logger.logf("DIM: automatically setting format to 1.2MB (512 byte sectors)");
                     trackdata.setTargetRotationalPeriodMs(167);
                     layoutdata.setSectorSize(512);
                     for (int i = 0; i < 15; i++)
                         physical.addSector(i);
                     break;
                 case 0x03:
-                    Logger.log("DIM: automatically setting format to 1.44MB");
+                    Logger.logf("DIM: automatically setting format to 1.44MB");
                     trackdata.setTargetRotationalPeriodMs(200);
                     layoutdata.setSectorSize(512);
                     for (int i = 0; i < 18; i++)
@@ -135,9 +133,8 @@ public class DimImageReader extends ImageReader
                     break;
                 default:
                     throw new FluxEngineException(String.format(
-                            "DIM: unknown media byte 0x%02x, could not determine write "
-                                    + "profile automatically",
-                            mediaByte));
+                            "DIM: unknown media byte 0x%02x, could not determine write " +
+                                    "profile automatically", mediaByte));
             }
 
             extra.getDecoderBuilder().getIbmBuilder();
@@ -145,7 +142,7 @@ public class DimImageReader extends ImageReader
 
         image.calculateSize();
         Geometry geometry = image.getGeometry();
-        Logger.log("DIM: read " + geometry.numCylinders + " tracks, " + geometry.numHeads +
+        Logger.logf("DIM: read " + geometry.numCylinders + " tracks, " + geometry.numHeads +
                 " sides, " + (data.size() - 256) / 1024 + " kB total");
 
         layout.setTracks(geometry.numCylinders);

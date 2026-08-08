@@ -32,7 +32,7 @@ public class NsiImageReader extends ImageReader
         }
         int fsize = data.size();
 
-        Logger.log("NSI: Autodetecting geometry based on file size: " + fsize);
+        Logger.logf("NSI: Autodetecting geometry based on file size: " + fsize);
 
         int numCylinders = 35;
         int numSectors = 10;
@@ -62,8 +62,8 @@ public class NsiImageReader extends ImageReader
 
         int trackSize = numSectors * sectorSize;
 
-        Logger.log("reading " + numCylinders + " tracks, " + numHeads + " heads, " +
-                numSectors + " sectors, " + sectorSize + " bytes per sector, " +
+        Logger.logf("reading " + numCylinders + " tracks, " + numHeads + " heads, " + numSectors +
+                " sectors, " + sectorSize + " bytes per sector, " +
                 numCylinders * numHeads * trackSize / 1024 + " kB total");
 
         Image image = new Image();
@@ -79,12 +79,11 @@ public class NsiImageReader extends ImageReader
                     if (head == 0)
                     { /* Head 0 is from track 0-34 */
                         sectorFileOffset = track * trackSize + sectorId * sectorSize;
-                    }
-                    else
+                    } else
                     { /* Head 1 is from track 70-35 */
                         sectorFileOffset = (trackSize * numCylinders) + /* Skip over side 0 */
-                                ((numCylinders - track - 1) * trackSize) +
-                                (sectorId * sectorSize); /* Sector offset from beginning of track. */
+                                ((numCylinders - track - 1) * trackSize) + (sectorId *
+                                sectorSize); /* Sector offset from beginning of track. */
                     }
 
                     br.seek(sectorFileOffset);

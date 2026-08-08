@@ -48,14 +48,13 @@ public class Fl2FluxSink extends FluxSink
     @Override
     public void addFlux(int track, int head, Fluxmap fluxmap)
     {
-        data.computeIfAbsent(Pair.of(track, head), k -> new ArrayList<>())
-                .add(fluxmap.rawBytes());
+        data.computeIfAbsent(Pair.of(track, head), k -> new ArrayList<>()).add(fluxmap.rawBytes());
     }
 
     @Override
     public void close()
     {
-        Logger.log("FL2: writing " + filename);
+        Logger.logf("FL2: writing " + filename);
 
         FluxFileProto.Builder proto = FluxFileProto.newBuilder();
         for (Map.Entry<Pair<Integer, Integer>, List<Bytes>> e : data.entrySet())
@@ -68,8 +67,7 @@ public class Fl2FluxSink extends FluxSink
             proto.addTrack(track);
         }
 
-        proto.setRotationalPeriodMs(
-                config.getDrive().getRotationalPeriodMs());
+        proto.setRotationalPeriodMs(config.getDrive().getRotationalPeriodMs());
         proto.setDriveType(config.getDrive().getDriveType());
         proto.setFormatType(config.getLayout().getFormatType());
 
@@ -86,8 +84,7 @@ public class Fl2FluxSink extends FluxSink
             Files.write(Path.of(filename), proto.build().toByteArray());
         } catch (IOException e)
         {
-            throw new FluxEngineException(
-                    "unable to write output file '" + filename + "'");
+            throw new FluxEngineException("unable to write output file '" + filename + "'");
         }
     }
 }

@@ -75,8 +75,9 @@ public class DiskCopyImageReader extends ImageReader
                         "don't understand DiskCopy disks of type " + encoding);
         }
 
-        Logger.log("DC42: reading image with " + numCylinders + " tracks, " +
-                numHeads + " heads; " + (mfm ? "MFM" : "GCR") + "; " + label);
+        Logger.logf(
+                "DC42: reading image with " + numCylinders + " tracks, " + numHeads + " heads; " +
+                        (mfm ? "MFM" : "GCR") + "; " + label);
 
         int dataPtr = 0x54;
         int tagPtr = dataPtr + dataSize;

@@ -10,7 +10,6 @@ import com.cowlark.fluxengine.data.Image;
 import com.cowlark.fluxengine.data.Sector;
 import com.cowlark.fluxengine.external.Crc;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -84,7 +83,7 @@ public class Td0ImageReader extends ImageReader
             comment = comment.substring(0, end);
         }
 
-        Logger.log("TD0: TeleDisk " + version / 10 + "." + version % 10 + ": " + comment);
+        Logger.logf("TD0: TeleDisk " + version / 10 + "." + version % 10 + ": " + comment);
 
         int totalSize = 0;
         Image image = new Image();
@@ -153,8 +152,7 @@ public class Td0ImageReader extends ImageReader
 
                                     length = bre.read8();
                                     bw.write(bre.read(length));
-                                }
-                                else
+                                } else
                                 {
                                     /* Repeated block */
 
@@ -171,8 +169,7 @@ public class Td0ImageReader extends ImageReader
                             data = new Bytes(0);
                             break;
                     }
-                }
-                else
+                } else
                     data = new Bytes(0);
 
                 Sector sector = image.put(logicalCylinder, logicalHead, sectorId);
@@ -184,7 +181,7 @@ public class Td0ImageReader extends ImageReader
 
         image.calculateSize();
         Geometry geometry = image.getGeometry();
-        Logger.log("TD0: found " + geometry.numCylinders + " tracks, " + geometry.numHeads +
+        Logger.logf("TD0: found " + geometry.numCylinders + " tracks, " + geometry.numHeads +
                 " sides, " + geometry.numSectors + " sectors, " + geometry.sectorSize +
                 " bytes per sector, " + totalSize / 1024 + " kB total");
         return image;

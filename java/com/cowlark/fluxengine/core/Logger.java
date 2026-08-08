@@ -15,7 +15,7 @@ public final class Logger
     {
     }
 
-    public static void log(String message, Object... args)
+    public static void logf(String message, Object... args)
     {
         log(new StringMessage(String.format(message, args)));
     }

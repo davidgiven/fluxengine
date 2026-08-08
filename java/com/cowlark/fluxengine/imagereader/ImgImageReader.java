@@ -32,9 +32,8 @@ public class ImgImageReader extends ImageReader
     {
         LayoutProto layout = fullConfig.getLayout();
         if (!layout.hasTracks() || !layout.hasSides())
-            throw new FluxEngineException(
-                    "IMG: bad configuration; did you remember to set the "
-                            + "tracks, sides and trackdata fields in the layout?");
+            throw new FluxEngineException("IMG: bad configuration; did you remember to set the " +
+                    "tracks, sides and trackdata fields in the layout?");
 
         DiskLayout diskLayout = new DiskLayout(fullConfig);
         boolean inFilesystemOrder = config.getImg().getFilesystemSectorOrder();
@@ -47,12 +46,10 @@ public class ImgImageReader extends ImageReader
                     diskLayout.logicalLocations;
             for (CylinderHead logicalLocation : locations)
             {
-                LogicalTrackLayout ltl =
-                        diskLayout.layoutByLogicalLocation.get(logicalLocation);
+                LogicalTrackLayout ltl = diskLayout.layoutByLogicalLocation.get(logicalLocation);
 
-                Iterable<Integer> sectorOrder = inFilesystemOrder ?
-                        ltl.filesystemSectorOrder :
-                        ltl.naturalSectorOrder;
+                Iterable<Integer> sectorOrder =
+                        inFilesystemOrder ? ltl.filesystemSectorOrder : ltl.naturalSectorOrder;
                 for (int sectorId : sectorOrder)
                 {
                     byte[] buf = new byte[ltl.sectorSize];
@@ -60,8 +57,8 @@ public class ImgImageReader extends ImageReader
                     if (read == -1)
                         break;
 
-                    Sector sector = image.put(
-                            logicalLocation.cylinder(), logicalLocation.head(), sectorId);
+                    Sector sector =
+                            image.put(logicalLocation.cylinder(), logicalLocation.head(), sectorId);
                     sector.status = Sector.Status.OK;
                     sector.data = new Bytes(buf);
                 }
@@ -73,9 +70,8 @@ public class ImgImageReader extends ImageReader
 
         image.calculateSize();
         Geometry geometry = image.getGeometry();
-        Logger.log("IMG: read " + geometry.numCylinders + " tracks, " +
-                geometry.numHeads + " sides, " + geometry.totalBytes / 1024 +
-                " kB total from " + config.getFilename());
+        Logger.logf("IMG: read " + geometry.numCylinders + " tracks, " + geometry.numHeads +
+                " sides, " + geometry.totalBytes / 1024 + " kB total from " + config.getFilename());
         return image;
     }
 }

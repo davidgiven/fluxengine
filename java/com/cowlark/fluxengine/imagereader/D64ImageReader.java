@@ -47,7 +47,7 @@ public class D64ImageReader extends ImageReader
         int numCylinders = 39;
         int numHeads = 1;
 
-        Logger.log("D64: reading image with " + numCylinders + " tracks, " + numHeads + " heads");
+        Logger.logf("D64: reading image with " + numCylinders + " tracks, " + numHeads + " heads");
 
         int offset = 0;
 
@@ -65,10 +65,9 @@ public class D64ImageReader extends ImageReader
                         sector.status = Sector.Status.OK;
                         sector.data = data.slice(offset, 256);
                         offset += 256;
-                    }
-                    else
+                    } else
                     { /* no more data in input file. Write sectors with status:
-                         * DATA_MISSING */
+                     * DATA_MISSING */
                         sector.status = Sector.Status.DATA_MISSING;
                     }
                 }

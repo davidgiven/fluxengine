@@ -52,8 +52,7 @@ public class ImdImageReader extends ImageReader
                 return 250;
             default:
                 throw new FluxEngineException(
-                        "IMD: don't understand IMD disks with this modulation and speed " +
-                                flags);
+                        "IMD: don't understand IMD disks with this modulation and speed " + flags);
         }
     }
 
@@ -118,7 +117,7 @@ public class ImdImageReader extends ImageReader
             n++;
         }
         headerPtr = n; /* set pointer to after comment */
-        Logger.log("Comment in IMD file: " + comment);
+        Logger.logf("Comment in IMD file: " + comment);
 
         boolean[] fm = {false};
         int trackSectorSize = -1;
@@ -193,8 +192,7 @@ public class ImdImageReader extends ImageReader
             }
 
             IbmEncoderProto.Builder ibm = extra.getEncoderBuilder().getIbmBuilder();
-            IbmEncoderProto.TrackdataProto.Builder trackdata =
-                    ibm.addTrackdataBuilder();
+            IbmEncoderProto.TrackdataProto.Builder trackdata = ibm.addTrackdataBuilder();
 
             com.cowlark.fluxengine.config.LayoutProto.LayoutdataProto.Builder layoutdata =
                     layout.addLayoutdataBuilder();
@@ -213,8 +211,7 @@ public class ImdImageReader extends ImageReader
                 layoutdata.setTrack(track);
                 layoutdata.setSide(head);
                 layoutdata.setSectorSize(sectorSize);
-            }
-            else if (trackSectorSize != sectorSize)
+            } else if (trackSectorSize != sectorSize)
             {
                 throw new FluxEngineException(
                         "IMD: multiple sector sizes per track are currently unsupported");
@@ -315,51 +312,52 @@ public class ImdImageReader extends ImageReader
 
                     default:
                         throw new FluxEngineException(String.format(
-                                "IMD: Don't understand IMD files with sector status %d, "
-                                        + "track %d, sector %d",
-                                statusSector,
-                                track,
-                                s));
+                                "IMD: Don't understand IMD files with sector status %d, " +
+                                        "track %d, sector %d", statusSector, track, s));
                 }
 
                 if (blnOptionalCylinderMap)
                 {
                     sector.location = new com.cowlark.fluxengine.data.LogicalLocation(
-                            optionalsectorMap.get(s), sector.location.logicalHead(),
+                            optionalsectorMap.get(s),
+                            sector.location.logicalHead(),
                             sector.location.logicalSector());
                     blnOptionalCylinderMap = false;
-                }
-                else
+                } else
                     sector.location = new com.cowlark.fluxengine.data.LogicalLocation(
-                            track, sector.location.logicalHead(),
+                            track,
+                            sector.location.logicalHead(),
                             sector.location.logicalSector());
 
                 if (blnOptionalHeadMap)
                 {
-                    sector.location = new com.cowlark.fluxengine.data.LogicalLocation(
-                            sector.location.logicalCylinder(), optionalheadMap.get(s),
-                            sector.location.logicalSector());
+                    sector.location =
+                            new com.cowlark.fluxengine.data.LogicalLocation(
+                                    sector.location.logicalCylinder(),
+                                    optionalheadMap.get(s),
+                                    sector.location.logicalSector());
                     blnOptionalHeadMap = false;
-                }
-                else
-                    sector.location = new com.cowlark.fluxengine.data.LogicalLocation(
-                            sector.location.logicalCylinder(), head,
-                            sector.location.logicalSector());
+                } else
+                    sector.location =
+                            new com.cowlark.fluxengine.data.LogicalLocation(
+                                    sector.location.logicalCylinder(),
+                                    head,
+                                    sector.location.logicalSector());
             }
         }
 
         if (extra.getEncoder().getFormatCase() != EncoderProto.FormatCase.FORMAT_NOT_SET)
-            Logger.log("IMD: overriding configured format");
+            Logger.logf("IMD: overriding configured format");
 
         image.calculateSize();
         Geometry geometry = image.getGeometry();
         int headSize = numSectors * sectorSize;
         int trackSize = headSize * (head + 1);
 
-        Logger.log("IMD: read " + (track + 1) + " tracks, " + (head + 1) + " heads; " +
+        Logger.logf("IMD: read " + (track + 1) + " tracks, " + (head + 1) + " heads; " +
                 (fm[0] ? "FM" : "MFM") + "; " + modulationSpeed + " kbps; " + numSectors +
-                " sectors; sectorsize " + sectorSize + "; " +
-                (track + 1) * trackSize / 1024 + " kB total.");
+                " sectors; sectorsize " + sectorSize + "; " + (track + 1) * trackSize / 1024 +
+                " kB total.");
 
         layout.setTracks(geometry.numCylinders);
         layout.setSides(geometry.numHeads);

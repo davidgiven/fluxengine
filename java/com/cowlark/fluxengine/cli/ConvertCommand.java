@@ -12,7 +12,6 @@ import com.cowlark.fluxengine.core.flags.StringFlag;
 import com.cowlark.fluxengine.core.flags.ValueFlag;
 import com.cowlark.fluxengine.data.CylinderHead;
 import com.cowlark.fluxengine.data.DiskLayout;
-import com.cowlark.fluxengine.data.Fluxmap;
 import com.cowlark.fluxengine.fluxsink.FluxSink;
 import com.cowlark.fluxengine.fluxsink.FluxSinkFactory;
 import com.cowlark.fluxengine.fluxsource.FluxSource;
@@ -70,7 +69,8 @@ public class ConvertCommand implements Command
         int maxCylinder = diskLayout.maxPhysicalCylinder;
         int minHead = diskLayout.minPhysicalHead;
         int maxHead = diskLayout.maxPhysicalHead;
-        Logger.log("CONVERT: seen cylinders %d..%d, heads %d..%d",
+        Logger.logf(
+                "CONVERT: seen cylinders %d..%d, heads %d..%d",
                 minCylinder,
                 maxCylinder,
                 minHead,
@@ -81,8 +81,8 @@ public class ConvertCommand implements Command
         {
             for (CylinderHead physicalLocation : diskLayout.physicalLocations)
             {
-                FluxSourceIterator fi = fluxSource.readFlux(
-                        physicalLocation.cylinder(), physicalLocation.head());
+                FluxSourceIterator fi =
+                        fluxSource.readFlux(physicalLocation.cylinder(), physicalLocation.head());
                 while (fi.hasNext())
                     fluxSink.addFlux(physicalLocation, fi.next());
             }

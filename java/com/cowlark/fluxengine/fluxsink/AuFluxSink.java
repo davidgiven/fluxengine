@@ -32,8 +32,8 @@ public class AuFluxSink extends FluxSink
     @Override
     public void addFlux(int track, int head, Fluxmap fluxmap)
     {
-        Logger.log("Warning: do not play these files, or you will break your "
-                + "speakers and/or ears!");
+        Logger.logf("Warning: do not play these files, or you will break your " +
+                "speakers and/or ears!");
 
         int totalTicks = fluxmap.ticks() + 2;
         int channels = indexMarkers ? 2 : 1;
@@ -71,8 +71,7 @@ public class AuFluxSink extends FluxSink
                 .writeBe32(0x2e736e64)
                 .writeBe32(24)
                 .writeBe32(totalTicks * channels)
-                .writeBe32(2) /* 8-bit PCM */
-                .writeBe32(TICK_FREQUENCY)
+                .writeBe32(2) /* 8-bit PCM */.writeBe32(TICK_FREQUENCY)
                 .writeBe32(channels); /* channels */
 
         String filename = String.format("%s/c%02d.h%01d.au", directory, track, head);
