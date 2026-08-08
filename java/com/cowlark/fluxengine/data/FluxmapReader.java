@@ -147,6 +147,55 @@ public class FluxmapReader
         posZeroes = 0;
     }
 
+    /* Ported from lib/data/fluxmapreader.cc FluxmapReader::seekToPattern. */
+
+    public double seekToPattern(FluxMatcher pattern)
+    {
+        return seekToPattern(pattern, null);
+    }
+
+    public double seekToPattern(FluxMatcher pattern, FluxMatcher[] matching)
+    {
+        int intervalCount = pattern.intervals();
+        long[] candidates = new long[intervalCount + 1];
+        FluxPosition[] positions = new FluxPosition[intervalCount + 1];
+
+        for (int i = 0; i <= intervalCount; i++)
+        {
+            positions[i] = tell();
+            candidates[i] = 0;
+        }
+
+        double clockDecodeThreshold = decoder.getBitErrorThreshold();
+        while (!eof())
+        {
+            FluxMatch match = new FluxMatch();
+            if (pattern.matches(candidates, intervalCount + 1, clockDecodeThreshold, match))
+            {
+                seek(positions[intervalCount - match.intervals]);
+                posZeroes = match.zeroes;
+                if (matching != null)
+                    matching[0] = match.matcher;
+                double detectedClock = match.clock * NS_PER_TICK;
+                if (detectedClock > decoder.getMinimumClockUs() * 1000)
+                    return match.clock * NS_PER_TICK;
+            }
+
+            for (int i = 0; i < intervalCount; i++)
+            {
+                positions[i] = positions[i + 1];
+                candidates[i] = candidates[i + 1];
+            }
+            EventResult r = findEvent(F_BIT_PULSE);
+            candidates[intervalCount] = r.ticks();
+            positions[intervalCount] = tell();
+        }
+
+        if (matching != null)
+            matching[0] = null;
+        return 0;
+    }
+
     public ClockData guessClock()
     {
         return guessClock(0.01, 0.05);
