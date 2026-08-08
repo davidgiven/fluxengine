@@ -2,10 +2,12 @@ package com.cowlark.fluxengine.data;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import lombok.Builder;
 
 /**
  * Summary information about a track, ported from lib/data/layout.h.
  */
+@Builder(setterPrefix = "set")
 public class TrackInfo
 {
     public final int numCylinders;
@@ -48,20 +50,20 @@ public class TrackInfo
     /* Mapping of natural order to filesystem order. */
     public final ImmutableMap<Integer, Integer> naturalToFilesystemSectorMap;
 
-    public TrackInfo(int numCylinders,
-                     int numHeads,
-                     int numSectors,
-                     int physicalCylinder,
-                     int physicalHead,
-                     int logicalCylinder,
-                     int logicalHead,
-                     int groupSize,
-                     int sectorSize,
-                     ImmutableList<Integer> naturalSectorOrder,
-                     ImmutableList<Integer> diskSectorOrder,
-                     ImmutableList<Integer> filesystemSectorOrder,
-                     ImmutableMap<Integer, Integer> filesystemToNaturalSectorMap,
-                     ImmutableMap<Integer, Integer> naturalToFilesystemSectorMap)
+    private TrackInfo(int numCylinders,
+                      int numHeads,
+                      int numSectors,
+                      int physicalCylinder,
+                      int physicalHead,
+                      int logicalCylinder,
+                      int logicalHead,
+                      int groupSize,
+                      int sectorSize,
+                      ImmutableList<Integer> naturalSectorOrder,
+                      ImmutableList<Integer> diskSectorOrder,
+                      ImmutableList<Integer> filesystemSectorOrder,
+                      ImmutableMap<Integer, Integer> filesystemToNaturalSectorMap,
+                      ImmutableMap<Integer, Integer> naturalToFilesystemSectorMap)
     {
         this.numCylinders = numCylinders;
         this.numHeads = numHeads;
