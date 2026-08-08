@@ -10,6 +10,7 @@ import com.cowlark.fluxengine.core.flags.FlagGroup;
 import com.cowlark.fluxengine.core.flags.StringFlag;
 import com.cowlark.fluxengine.core.flags.ValueFlag;
 import com.cowlark.fluxengine.data.DiskLayout;
+import com.cowlark.fluxengine.decoders.Decoder;
 import com.cowlark.fluxengine.fluxsource.FluxSource;
 import com.google.common.collect.ImmutableList;
 
@@ -61,7 +62,7 @@ public class ReadCommand implements Command
         // Unsupported:
         DiskLayout diskLayout = new DiskLayout(config);
         FluxSource fluxSource = FluxSource.create(config);
-        var decoder = Arch.createDecoder(config);
+        Decoder decoder = Arch.createDecoder(config);
         // var writer = ImageWriter.create(config);
         // readDiskCommand(diskLayout, fluxSource, decoder, writer);
     }

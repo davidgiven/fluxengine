@@ -1,0 +1,19 @@
+load("@rules_java//java:defs.bzl", "java_binary", "java_library")
+
+package(default_visibility = ["//visibility:public"])
+
+java_library(
+    name = "buildtools",
+    srcs = glob(["*.java"]),
+    deps = [
+        "//java/com/cowlark/fluxengine/config:config_java_proto",
+        "//java/com/cowlark/fluxengine/core",
+        "@com_google_protobuf//java/core",
+    ],
+)
+
+java_binary(
+    name = "protoencode",
+    main_class = "com.cowlark.fluxengine.buildtools.ProtoEncode",
+    runtime_deps = [":buildtools"],
+)

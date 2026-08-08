@@ -13,6 +13,7 @@ java_library(
         "//java/com/cowlark/fluxengine/core",
         "//java/com/cowlark/fluxengine/core/flags",
         "//java/com/cowlark/fluxengine/data",
+        "//java/com/cowlark/fluxengine/decoders",
         "//java/com/cowlark/fluxengine/fluxsource",
         "//java/com/cowlark/fluxengine/usb",
         "@maven//:com_google_guava_guava",
