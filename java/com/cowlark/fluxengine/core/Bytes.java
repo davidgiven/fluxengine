@@ -200,6 +200,23 @@ public final class Bytes implements List<Byte>
         return output;
     }
 
+    /* Reverses the bits within each byte, keeping the byte order. */
+    public Bytes reverseBits()
+    {
+        Bytes output = new Bytes(0);
+        for (int i = 0; i < size(); i++)
+            output.add((byte) reverseBits(getByte(i)));
+        return output;
+    }
+
+    private static int reverseBits(int b)
+    {
+        b = ((b & 0xF0) >> 4) | ((b & 0x0F) << 4);
+        b = ((b & 0xCC) >> 2) | ((b & 0x33) << 2);
+        b = ((b & 0xAA) >> 1) | ((b & 0x55) << 1);
+        return b;
+    }
+
     /* Extracts the bytes as bits, MSB-first within each byte. */
     public Bits toBits()
     {
