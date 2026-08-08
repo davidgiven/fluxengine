@@ -463,6 +463,12 @@ class GreaseweazleUsbDevice extends UsbDevice
         throw new FluxEngineException("unsupported operation on the Greaseweazle");
     }
 
+    @Override
+    public void close()
+    {
+        serial.closePort();
+    }
+
     private int readByte()
     {
         return readBytes(1).get(0) & 0xff;

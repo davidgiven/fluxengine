@@ -5,7 +5,7 @@ import com.cowlark.fluxengine.core.Bytes;
 /**
  * Base class for USB floppy drive devices, ported from lib/usb/usb.h.
  */
-public abstract class UsbDevice
+public abstract class UsbDevice implements AutoCloseable
 {
     public void recalibrate()
     {
@@ -32,6 +32,10 @@ public abstract class UsbDevice
     public abstract void setDrive(int drive, boolean highDensity, int indexMode);
 
     public abstract VoltageMeasurements measureVoltages();
+
+    /* Closes the device, releasing any underlying resources. */
+    @Override
+    public abstract void close();
 
     protected String usbError(int error)
     {

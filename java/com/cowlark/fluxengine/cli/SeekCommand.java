@@ -38,7 +38,7 @@ public class SeekCommand implements Command
         if (config.getFluxSource().getType() != FLUXTYPE_DRIVE)
             throw new FluxEngineException("this only makes sense with a real disk drive");
 
-        UsbDevice device = UsbFactory.connect(config);
+        UsbDevice device = UsbFactory.reconnect(config);
         device.seek(track.get());
     }
 }

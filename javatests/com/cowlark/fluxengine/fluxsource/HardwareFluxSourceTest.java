@@ -84,6 +84,11 @@ public class HardwareFluxSourceTest
         {
             return null;
         }
+
+        @Override
+        public void close()
+        {
+        }
     }
 
     private static ConfigProto config()

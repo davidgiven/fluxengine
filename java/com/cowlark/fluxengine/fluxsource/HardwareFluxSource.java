@@ -17,7 +17,7 @@ public class HardwareFluxSource extends FluxSource
 
     public HardwareFluxSource(ConfigProto config)
     {
-        this(config, UsbFactory.connect(config));
+        this(config, UsbFactory.reconnect(config));
     }
 
     /* Package-private for testing. */

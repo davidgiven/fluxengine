@@ -32,7 +32,7 @@ public class TestVoltagesCommand implements Command
     {
         ConfigProto config = new ConfigBuilder().fromFlags(args).build();
 
-        UsbDevice device = UsbFactory.connect(config);
+        UsbDevice device = UsbFactory.reconnect(config);
         VoltageMeasurements voltages = device.measureVoltages();
 
         System.out.printf(

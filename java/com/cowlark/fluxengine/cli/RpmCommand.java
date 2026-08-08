@@ -28,7 +28,7 @@ public class RpmCommand implements Command
         if (config.getFluxSource().getType() != FLUXTYPE_DRIVE)
             throw new FluxEngineException("this only makes sense with a real disk drive");
 
-        UsbDevice device = UsbFactory.connect(config);
+        UsbDevice device = UsbFactory.reconnect(config);
 
         double periodNs = device.getRotationalPeriod(config.getDrive().getHardSectorCount());
         if (periodNs != 0.0)

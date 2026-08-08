@@ -503,7 +503,7 @@ public final class ReaderWriter
         double oneRevolution = getRotationalPeriodFromConfig(config);
         if (oneRevolution == 0)
         {
-            UsbDevice device = UsbFactory.connect(config);
+            UsbDevice device = UsbFactory.reconnect(config);
             device.setDrive(config.getDrive().getDrive(),
                     config.getDrive().getHighDensity(),
                     config.getDrive().getIndexMode().getNumber());
