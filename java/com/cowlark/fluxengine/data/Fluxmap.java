@@ -3,6 +3,7 @@ package com.cowlark.fluxengine.data;
 import static com.cowlark.fluxengine.external.FluxEngine.F_BIT_INDEX;
 import static com.cowlark.fluxengine.external.FluxEngine.F_BIT_PULSE;
 import static com.cowlark.fluxengine.external.FluxEngine.F_DESYNC;
+import static com.cowlark.fluxengine.external.FluxEngine.NS_PER_TICK;
 
 import com.cowlark.fluxengine.core.ByteWriter;
 import com.cowlark.fluxengine.core.Bytes;
@@ -39,6 +40,13 @@ public class Fluxmap
     public int ticks()
     {
         return ticks;
+    }
+
+    /* The duration of the fluxmap in nanoseconds, ported from
+     * lib/data/fluxmap.h Fluxmap::duration(). */
+    public double duration()
+    {
+        return ticks * NS_PER_TICK;
     }
 
     public int bytes()

@@ -6,6 +6,7 @@ java_library(
     name = "cli",
     srcs = glob(["*.java"]),
     deps = [
+        "//java/com/cowlark/fluxengine/algorithms",
         "//java/com/cowlark/fluxengine/arch",
         "//java/com/cowlark/fluxengine/config",
         "//java/com/cowlark/fluxengine/config:common_java_proto",

@@ -3,6 +3,7 @@ package com.cowlark.fluxengine.cli;
 import static com.cowlark.fluxengine.config.FluxSourceSinkType.FLUXTYPE_DRIVE;
 
 import com.cowlark.fluxengine.arch.Arch;
+import com.cowlark.fluxengine.algorithms.ReaderWriter;
 import com.cowlark.fluxengine.config.ConfigBuilder;
 import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.core.FluxEngineException;
@@ -65,6 +66,6 @@ public class ReadCommand implements Command
         FluxSource fluxSource = FluxSource.create(config);
         Decoder decoder = Arch.createDecoder(config);
         ImageWriter writer = ImageWriter.create(config);
-        // readDiskCommand(diskLayout, fluxSource, decoder, writer);
+        ReaderWriter.readDiskCommand(config, diskLayout, fluxSource, decoder, writer);
     }
 }
