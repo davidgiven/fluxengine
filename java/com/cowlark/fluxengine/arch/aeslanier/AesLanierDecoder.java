@@ -1,13 +1,18 @@
 package com.cowlark.fluxengine.arch.aeslanier;
 
+import static com.cowlark.fluxengine.arch.aeslanier.AesLanier.AESLANIER_RECORD_SEPARATOR;
+import static com.cowlark.fluxengine.arch.aeslanier.AesLanier.AESLANIER_RECORD_SIZE;
+import static com.cowlark.fluxengine.arch.aeslanier.AesLanier.AESLANIER_SECTOR_LENGTH;
+import static com.cowlark.fluxengine.external.Crc.MODBUS_POLY_REF;
+
 import com.cowlark.fluxengine.core.Bits;
 import com.cowlark.fluxengine.core.Bytes;
-import com.cowlark.fluxengine.external.Crc;
 import com.cowlark.fluxengine.data.FluxPattern;
 import com.cowlark.fluxengine.data.LogicalLocation;
 import com.cowlark.fluxengine.data.Sector;
 import com.cowlark.fluxengine.decoders.Decoder;
 import com.cowlark.fluxengine.decoders.DecoderProto;
+import com.cowlark.fluxengine.external.Crc;
 import com.cowlark.fluxengine.external.FmMfm;
 
 /**
@@ -15,10 +20,6 @@ import com.cowlark.fluxengine.external.FmMfm;
  */
 public class AesLanierDecoder extends Decoder
 {
-    public static final int AESLANIER_RECORD_SEPARATOR = 0x55555122;
-    public static final int AESLANIER_SECTOR_LENGTH = 256;
-    public static final int AESLANIER_RECORD_SIZE = AESLANIER_SECTOR_LENGTH + 5;
-
     private static final FluxPattern SECTOR_PATTERN =
             new FluxPattern(32, AESLANIER_RECORD_SEPARATOR);
 
@@ -64,7 +65,7 @@ public class AesLanierDecoder extends Decoder
 
         sector.data = reversed.slice(1, AESLANIER_SECTOR_LENGTH);
         int wanted = reversed.iterator().seek(0x101).readLe16();
-        int got = Crc.crc16ref(Crc.MODBUS_POLY_REF, sector.data);
+        int got = Crc.crc16ref(MODBUS_POLY_REF, sector.data);
         sector.status = (wanted == got) ? Sector.Status.OK : Sector.Status.BAD_CHECKSUM;
     }
 }

@@ -18,7 +18,7 @@ java_proto_library(
 
 java_library(
     name = "aeslanier",
-    srcs = ["aeslanier/AesLanierDecoder.java"],
+    srcs = glob(["aeslanier/*.java"]),
     deps = [
         "//java/com/cowlark/fluxengine/core",
         "//java/com/cowlark/fluxengine/data",
