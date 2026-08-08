@@ -37,6 +37,23 @@ java_test(
 )
 
 java_test(
+    name = "HardwareFluxSourceTest",
+    srcs = ["HardwareFluxSourceTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/config",
+        "//java/com/cowlark/fluxengine/config:config_java_proto",
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/data",
+        "//java/com/cowlark/fluxengine/fluxsource",
+        "//java/com/cowlark/fluxengine/fluxsource:fluxsource_java_proto",
+        "//java/com/cowlark/fluxengine/usb",
+        "@com_google_protobuf//java/core",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
     name = "KryofluxFluxSourceTest",
     srcs = ["KryofluxFluxSourceTest.java"],
     deps = [

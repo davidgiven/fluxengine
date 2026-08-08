@@ -2,6 +2,7 @@ package com.cowlark.fluxengine.fluxsource;
 
 import com.cowlark.fluxengine.config.ConfigBuilder;
 import com.cowlark.fluxengine.config.ConfigProto;
+import com.cowlark.fluxengine.config.FluxSourceSinkType;
 import com.cowlark.fluxengine.core.FluxEngineException;
 
 /**
@@ -11,6 +12,8 @@ public abstract class FluxSource
 {
     public static FluxSource create(ConfigProto config)
     {
+        if (config.getFluxSource().getType() == FluxSourceSinkType.FLUXTYPE_DRIVE)
+            return new HardwareFluxSource(config);
         return create(config.getFluxSource());
     }
 
