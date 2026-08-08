@@ -184,7 +184,7 @@ class GreaseweazleUsbDevice extends UsbDevice
     }
 
     @Override
-    public Duration getRotationalPeriod(int hardSectorCount)
+    public double getRotationalPeriod(int hardSectorCount)
     {
         if (hardSectorCount != 0)
             throw new FluxEngineException(
@@ -259,7 +259,7 @@ class GreaseweazleUsbDevice extends UsbDevice
         doCommand(CMD_GET_FLUX_STATUS);
 
         revolutions = (secondIndex - firstIndex) * clock;
-        return Duration.ofNanos(revolutions);
+        return revolutions;
     }
 
     @Override
@@ -350,9 +350,9 @@ class GreaseweazleUsbDevice extends UsbDevice
     }
 
     @Override
-    public Bytes read(int side, boolean synced, Duration readTime, Duration hardSectorThreshold)
+    public Bytes read(int side, boolean synced, double readTimeNs, double hardSectorThresholdNs)
     {
-        if (!hardSectorThreshold.isZero())
+        if (hardSectorThresholdNs != 0.0)
             throw new FluxEngineException(
                     "hard sectors are currently unsupported on the " + "Greaseweazle");
 
@@ -362,7 +362,7 @@ class GreaseweazleUsbDevice extends UsbDevice
         {
             case V22:
             {
-                long revs = (readTime.toNanos() + revolutions - 1) / revolutions;
+                long revs = (long) ((readTimeNs + revolutions - 1) / revolutions);
                 Bytes cmd = new Bytes(0);
                 ByteWriter bw = new ByteWriter(cmd);
                 bw.write8(CMD_READ_FLUX);
@@ -379,7 +379,7 @@ class GreaseweazleUsbDevice extends UsbDevice
                 ByteWriter bw = new ByteWriter(cmd);
                 bw.write8(CMD_READ_FLUX);
                 bw.write8(8);
-                bw.writeLe32((int) ((readTime.toNanos() + (synced ? revolutions : 0)) / clock));
+                bw.writeLe32((int) ((readTimeNs + (synced ? revolutions : 0)) / clock));
                 bw.writeLe16(0);
                 doCommand(cmd);
             }
@@ -404,9 +404,9 @@ class GreaseweazleUsbDevice extends UsbDevice
     }
 
     @Override
-    public void write(int side, Bytes fldata, Duration hardSectorThreshold)
+    public void write(int side, Bytes fldata, double hardSectorThresholdNs)
     {
-        if (!hardSectorThreshold.isZero())
+        if (hardSectorThresholdNs != 0.0)
             throw new FluxEngineException(
                     "hard sectors are currently unsupported on the " + "Greaseweazle");
 
@@ -430,9 +430,9 @@ class GreaseweazleUsbDevice extends UsbDevice
     }
 
     @Override
-    public void erase(int side, Duration hardSectorThreshold)
+    public void erase(int side, double hardSectorThresholdNs)
     {
-        if (!hardSectorThreshold.isZero())
+        if (hardSectorThresholdNs != 0.0)
             throw new FluxEngineException(
                     "hard sectors are currently unsupported on the " + "Greaseweazle");
 

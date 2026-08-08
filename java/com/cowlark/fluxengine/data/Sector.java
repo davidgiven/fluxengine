@@ -1,7 +1,6 @@
 package com.cowlark.fluxengine.data;
 
 import com.cowlark.fluxengine.core.Bytes;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,11 +25,11 @@ public class Sector
 
     public Status status = Status.INTERNAL_ERROR;
     public int position = 0;
-    public Duration clock = Duration.ZERO;
-    public Duration headerStartTime = Duration.ZERO;
-    public Duration headerEndTime = Duration.ZERO;
-    public Duration dataStartTime = Duration.ZERO;
-    public Duration dataEndTime = Duration.ZERO;
+    public double clockNs = 0.0;
+    public double headerStartTimeNs = 0.0;
+    public double headerEndTimeNs = 0.0;
+    public double dataStartTimeNs = 0.0;
+    public double dataEndTimeNs = 0.0;
     public CylinderHead physicalLocation = null;
     public Bytes data = new Bytes();
     public List<Record> records = new ArrayList<>();

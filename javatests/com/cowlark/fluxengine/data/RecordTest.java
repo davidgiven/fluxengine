@@ -15,9 +15,9 @@ public class RecordTest
     {
         Record record = new Record();
 
-        assertThat(record.clock).isEqualTo(0.0);
-        assertThat(record.startTime).isEqualTo(0.0);
-        assertThat(record.endTime).isEqualTo(0.0);
+        assertThat(record.clockNs).isEqualTo(0.0);
+        assertThat(record.startTimeNs).isEqualTo(0.0);
+        assertThat(record.endTimeNs).isEqualTo(0.0);
         assertThat(record.position).isEqualTo(0);
         assertThat(record.rawData.isEmpty()).isTrue();
     }
@@ -26,15 +26,15 @@ public class RecordTest
     public void holdsFields()
     {
         Record record = new Record();
-        record.clock = 123.0;
-        record.startTime = 456.0;
-        record.endTime = 789.0;
+        record.clockNs = 123.0;
+        record.startTimeNs = 456.0;
+        record.endTimeNs = 789.0;
         record.position = 42;
         record.rawData = Bytes.of(0x11, 0x22);
 
-        assertThat(record.clock).isEqualTo(123.0);
-        assertThat(record.startTime).isEqualTo(456.0);
-        assertThat(record.endTime).isEqualTo(789.0);
+        assertThat(record.clockNs).isEqualTo(123.0);
+        assertThat(record.startTimeNs).isEqualTo(456.0);
+        assertThat(record.endTimeNs).isEqualTo(789.0);
         assertThat(record.position).isEqualTo(42);
         assertThat(record.rawData).isEqualTo(Bytes.of(0x11, 0x22));
     }

@@ -7,7 +7,6 @@ import static com.cowlark.fluxengine.external.FluxEngine.NS_PER_TICK;
 
 import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.decoders.DecoderProto;
-import java.time.Duration;
 
 /**
  * A cursor over a Fluxmap's raw bytes.
@@ -55,9 +54,9 @@ public class FluxmapReader
         posZeroes = pos.zeroes();
     }
 
-    public Duration getDuration()
+    public double getDurationNs()
     {
-        return Duration.ofNanos((long) (fluxmap.ticks() * NS_PER_TICK));
+        return fluxmap.ticks() * NS_PER_TICK;
     }
 
     public int getCurrentEvent()

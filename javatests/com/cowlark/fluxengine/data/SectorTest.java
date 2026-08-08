@@ -2,7 +2,6 @@ package com.cowlark.fluxengine.data;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import java.time.Duration;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -18,11 +17,11 @@ public class SectorTest
         assertThat(sector.location).isEqualTo(new LogicalLocation(0, 0, 0));
         assertThat(sector.status).isEqualTo(Sector.Status.INTERNAL_ERROR);
         assertThat(sector.position).isEqualTo(0);
-        assertThat(sector.clock).isEqualTo(Duration.ZERO);
-        assertThat(sector.headerStartTime).isEqualTo(Duration.ZERO);
-        assertThat(sector.headerEndTime).isEqualTo(Duration.ZERO);
-        assertThat(sector.dataStartTime).isEqualTo(Duration.ZERO);
-        assertThat(sector.dataEndTime).isEqualTo(Duration.ZERO);
+        assertThat(sector.clockNs).isEqualTo(0.0);
+        assertThat(sector.headerStartTimeNs).isEqualTo(0.0);
+        assertThat(sector.headerEndTimeNs).isEqualTo(0.0);
+        assertThat(sector.dataStartTimeNs).isEqualTo(0.0);
+        assertThat(sector.dataEndTimeNs).isEqualTo(0.0);
         assertThat(sector.physicalLocation).isNull();
         assertThat(sector.data.isEmpty()).isTrue();
         assertThat(sector.records).isEmpty();

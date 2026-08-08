@@ -5,7 +5,6 @@ import static com.cowlark.fluxengine.external.FluxEngine.NS_PER_TICK;
 import com.cowlark.fluxengine.core.Bits;
 import com.cowlark.fluxengine.data.FluxPosition;
 import com.cowlark.fluxengine.data.FluxmapReader;
-import java.time.Duration;
 
 /* This is a port of the samdisk code:
  *
@@ -31,13 +30,12 @@ public class FluxDecoder
     private boolean syncLost = false;
     private int leadingZeroes;
 
-    public FluxDecoder(FluxmapReader fmr, Duration bitcell, DecoderProto config)
+    public FluxDecoder(FluxmapReader fmr, double bitcellNs, DecoderProto config)
     {
         this.fmr = fmr;
         pllPhase = config.getPllPhase();
         pllAdjust = config.getPllAdjust();
         fluxScale = config.getFluxScale();
-        double bitcellNs = bitcell.toNanos();
         clockNs = bitcellNs;
         clockCentreNs = bitcellNs;
         clockMinNs = bitcellNs * (1.0 - pllAdjust);

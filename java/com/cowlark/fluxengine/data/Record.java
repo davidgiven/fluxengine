@@ -9,9 +9,9 @@ import java.util.List;
  */
 public class Record
 {
-    public double clock = 0.0;
-    public double startTime = 0.0;
-    public double endTime = 0.0;
+    public double clockNs = 0.0;
+    public double startTimeNs = 0.0;
+    public double endTimeNs = 0.0;
     public int position = 0;
     public Bytes rawData = new Bytes();
 

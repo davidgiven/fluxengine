@@ -8,7 +8,6 @@ import com.cowlark.fluxengine.core.FluxEngineException;
 import com.cowlark.fluxengine.usb.UsbDevice;
 import com.cowlark.fluxengine.usb.UsbFactory;
 import com.google.common.collect.ImmutableList;
-import java.time.Duration;
 
 /**
  * Measure the disk rotational speed, modelled after src/fe-rpm.cc.
@@ -31,12 +30,12 @@ public class RpmCommand implements Command
 
         UsbDevice device = UsbFactory.connect(config);
 
-        Duration period = device.getRotationalPeriod(config.getDrive().getHardSectorCount());
-        if (!period.isZero())
+        double periodNs = device.getRotationalPeriod(config.getDrive().getHardSectorCount());
+        if (periodNs != 0.0)
             System.out.printf(
-                    "Rotational period is %d ms (%.0f rpm)\n",
-                    period.toMillis(),
-                    60e9 / period.toNanos());
+                    "Rotational period is %.0f ms (%.0f rpm)\n",
+                    periodNs / 1e6,
+                    60e9 / periodNs);
         else
             System.out.println("""
                     No index pulses detected from the disk. Common causes of this are:
