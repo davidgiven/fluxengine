@@ -69,7 +69,7 @@ public interface Command
                     .put("rpm", RpmCommand::new)
                     .put("seek", SeekCommand::new)
                     .put("devices", DevicesCommand::new)
-                    .put("inspect", stub("inspect", "Low-level analysis and inspection of a disk."))
+                    .put("inspect", InspectCommand::new)
                     .put("gui", GuiCommand::new)
                     .build();
 
