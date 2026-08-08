@@ -1,0 +1,14 @@
+load("@rules_java//java:defs.bzl", "java_test")
+
+package(default_visibility = ["//visibility:public"])
+
+java_test(
+    name = "AmigaTest",
+    srcs = ["AmigaTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/arch",
+        "//java/com/cowlark/fluxengine/core",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)

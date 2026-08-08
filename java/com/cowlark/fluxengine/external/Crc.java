@@ -75,4 +75,21 @@ public final class Crc
             result ^= br.read8();
         return result;
     }
+
+    /* Thanks to user202729 on StackOverflow for miraculously reverse
+     * engineering this. */
+    public static int crcbrother(Bytes bytes)
+    {
+        ByteReader br = new ByteReader(bytes);
+
+        int crc = br.read8();
+        while (!br.eof())
+        {
+            for (int i = 0; i < 8; i++)
+                crc = (crc & 0x800000) != 0 ? ((crc << 1) ^ BROTHER_POLY) : (crc << 1);
+            crc ^= br.read8();
+        }
+
+        return crc & 0xFFFFFF;
+    }
 }

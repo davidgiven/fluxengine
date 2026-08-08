@@ -317,6 +317,13 @@ public final class Bytes implements List<Byte>
         return new ByteReader(this);
     }
 
+    /* Returns a cursor for writing into this Bytes, ported from
+     * lib/core/bytes.h Bytes::writer(). */
+    public ByteWriter writer()
+    {
+        return new ByteWriter(this);
+    }
+
     @Override
     public boolean add(Byte value)
     {

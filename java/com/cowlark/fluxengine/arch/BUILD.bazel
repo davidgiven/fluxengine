@@ -17,9 +17,11 @@ java_proto_library(
 )
 
 java_library(
-    name = "aeslanier",
-    srcs = glob(["aeslanier/*.java"]),
+    name = "arch",
+    srcs = glob(["*.java", "*/*.java"]),
     deps = [
+        ":arch_java_proto",
+        "//java/com/cowlark/fluxengine/config:config_java_proto",
         "//java/com/cowlark/fluxengine/core",
         "//java/com/cowlark/fluxengine/data",
         "//java/com/cowlark/fluxengine/decoders",
