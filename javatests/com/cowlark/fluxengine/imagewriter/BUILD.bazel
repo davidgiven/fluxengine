@@ -1,22 +1,20 @@
-load("@rules_java//java:defs.bzl", "java_library")
+load("@rules_java//java:defs.bzl", "java_test")
 
 package(default_visibility = ["//visibility:public"])
 
-java_library(
-    name = "cli",
-    srcs = glob(["*.java"]),
+java_test(
+    name = "ImageWriterTest",
+    srcs = ["ImageWriterTest.java"],
     deps = [
-        "//java/com/cowlark/fluxengine/arch",
         "//java/com/cowlark/fluxengine/config",
         "//java/com/cowlark/fluxengine/config:common_java_proto",
         "//java/com/cowlark/fluxengine/config:config_java_proto",
         "//java/com/cowlark/fluxengine/core",
-        "//java/com/cowlark/fluxengine/core/flags",
         "//java/com/cowlark/fluxengine/data",
-        "//java/com/cowlark/fluxengine/decoders",
-        "//java/com/cowlark/fluxengine/fluxsource",
         "//java/com/cowlark/fluxengine/imagewriter",
-        "//java/com/cowlark/fluxengine/usb",
-        "@maven//:com_google_guava_guava",
+        "//java/com/cowlark/fluxengine/imagewriter:imagewriter_java_proto",
+        "@com_google_protobuf//java/core",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
     ],
 )

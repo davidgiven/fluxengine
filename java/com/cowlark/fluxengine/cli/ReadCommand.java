@@ -12,6 +12,7 @@ import com.cowlark.fluxengine.core.flags.ValueFlag;
 import com.cowlark.fluxengine.data.DiskLayout;
 import com.cowlark.fluxengine.decoders.Decoder;
 import com.cowlark.fluxengine.fluxsource.FluxSource;
+import com.cowlark.fluxengine.imagewriter.ImageWriter;
 import com.google.common.collect.ImmutableList;
 
 /**
@@ -63,7 +64,7 @@ public class ReadCommand implements Command
         DiskLayout diskLayout = new DiskLayout(config);
         FluxSource fluxSource = FluxSource.create(config);
         Decoder decoder = Arch.createDecoder(config);
-        // var writer = ImageWriter.create(config);
+        ImageWriter writer = ImageWriter.create(config);
         // readDiskCommand(diskLayout, fluxSource, decoder, writer);
     }
 }
