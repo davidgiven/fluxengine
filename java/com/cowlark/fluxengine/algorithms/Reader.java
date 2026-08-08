@@ -1,13 +1,10 @@
 package com.cowlark.fluxengine.algorithms;
 
 import com.cowlark.fluxengine.config.ConfigProto;
-import com.cowlark.fluxengine.core.FluxEngineException;
 import com.cowlark.fluxengine.core.LogMessage.BeginOperationLogMessage;
 import com.cowlark.fluxengine.core.LogMessage.BeginReadOperationLogMessage;
-import com.cowlark.fluxengine.core.LogMessage.BeginSpeedOperationLogMessage;
 import com.cowlark.fluxengine.core.LogMessage.EndOperationLogMessage;
 import com.cowlark.fluxengine.core.LogMessage.EndReadOperationLogMessage;
-import com.cowlark.fluxengine.core.LogMessage.EndSpeedOperationLogMessage;
 import com.cowlark.fluxengine.core.LogMessage.OperationProgressLogMessage;
 import com.cowlark.fluxengine.core.Logger;
 import com.cowlark.fluxengine.core.Utils;
@@ -27,8 +24,6 @@ import com.cowlark.fluxengine.fluxsink.FluxSinkFactory;
 import com.cowlark.fluxengine.fluxsource.FluxSource;
 import com.cowlark.fluxengine.fluxsource.FluxSourceIterator;
 import com.cowlark.fluxengine.imagewriter.ImageWriter;
-import com.cowlark.fluxengine.usb.UsbDevice;
-import com.cowlark.fluxengine.usb.UsbFactory;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -39,19 +34,19 @@ import java.util.Map;
 /**
  * Disk read/write algorithms, ported from lib/algorithms/readerwriter.cc.
  */
-public final class ReaderWriter
+public final class Reader
 {
-    private static enum ReadResult
+    static enum ReadResult
     {
         GOOD_READ, BAD_AND_CAN_RETRY, BAD_AND_CAN_NOT_RETRY
     }
 
-    private static enum BadSectorsState
+    static enum BadSectorsState
     {
         HAS_NO_BAD_SECTORS, HAS_BAD_SECTORS
     }
 
-    private ReaderWriter()
+    private Reader()
     {
     }
 
@@ -80,9 +75,9 @@ public final class ReaderWriter
         Logger.log(new BeginOperationLogMessage("Reading and decoding disk"));
 
         if (fluxSource.isHardware())
-            disk.rotationalPeriod = measureDiskRotation(config);
+            disk.rotationalPeriod = Common.measureDiskRotation(config);
         else
-            disk.rotationalPeriod = getRotationalPeriodFromConfig(config);
+            disk.rotationalPeriod = Common.getRotationalPeriodFromConfig(config);
 
         try (FluxSink outputFluxSink = outputFluxSinkFactory != null ?
                 outputFluxSinkFactory.create() :
@@ -98,7 +93,7 @@ public final class ReaderWriter
                         index * 100 / diskLayout.layoutByLogicalLocation.size()));
                 index++;
 
-                testForEmergencyStop();
+                Common.testForEmergencyStop();
 
                 List<Track> trackFluxes = tracksByLogicalLocation.computeIfAbsent(
                         logicalLocation,
@@ -217,7 +212,7 @@ public final class ReaderWriter
 
     /* Given a set of sectors, deduplicates them sensibly (e.g. if there is a
      * good and bad version of the same sector, the bad version is dropped). */
-    private static List<Sector> collectSectors(List<Sector> trackSectors, boolean collapseConflicts)
+    static List<Sector> collectSectors(List<Sector> trackSectors, boolean collapseConflicts)
     {
         Map<LogicalLocation, List<Sector>> sectors = new LinkedHashMap<>();
         for (Sector sector : trackSectors)
@@ -263,7 +258,7 @@ public final class ReaderWriter
         return sectorSet;
     }
 
-    private static List<Sector> collectSectors(List<Sector> trackSectors)
+    static List<Sector> collectSectors(List<Sector> trackSectors)
     {
         return collectSectors(trackSectors, true);
     }
@@ -284,15 +279,15 @@ public final class ReaderWriter
         return s;
     }
 
-    private static class CombinationResult
+    static class CombinationResult
     {
         BadSectorsState result;
         List<Sector> sectors;
     }
 
-    private static CombinationResult combineRecordAndSectors(List<Track> tracks,
-                                                             Decoder decoder,
-                                                             LogicalTrackLayout ltl)
+    static CombinationResult combineRecordAndSectors(List<Track> tracks,
+                                                     Decoder decoder,
+                                                     LogicalTrackLayout ltl)
     {
         CombinationResult cr = new CombinationResult();
         cr.result = BadSectorsState.HAS_NO_BAD_SECTORS;
@@ -327,61 +322,18 @@ public final class ReaderWriter
         return cr;
     }
 
-    private static void adjustTrackOnError(FluxSource fluxSource, int baseTrack, ConfigProto config)
-    {
-        switch (config.getDrive().getErrorBehaviour())
-        {
-            case NOTHING:
-                break;
-
-            case RECALIBRATE:
-                fluxSource.recalibrate();
-                break;
-
-            case JIGGLE:
-                if (baseTrack > 0)
-                    fluxSource.seek(baseTrack - 1);
-                else
-                    fluxSource.seek(baseTrack + 1);
-                break;
-        }
-    }
-
-    private static class ReadGroupResult
+    static class ReadGroupResult
     {
         ReadResult result;
         List<Sector> combinedSectors;
     }
 
-    private static class FluxSourceIteratorHolder
-    {
-        private final FluxSource fluxSource;
-        private final Map<CylinderHead, FluxSourceIterator> cache = new HashMap<>();
-
-        FluxSourceIteratorHolder(FluxSource fluxSource)
-        {
-            this.fluxSource = fluxSource;
-        }
-
-        FluxSourceIterator getIterator(int physicalCylinder, int head)
-        {
-            CylinderHead key = new CylinderHead(physicalCylinder, head);
-            FluxSourceIterator it = cache.get(key);
-            if (it == null)
-            {
-                it = fluxSource.readFlux(physicalCylinder, head);
-                cache.put(key, it);
-            }
-            return it;
-        }
-    }
-
-    private static ReadGroupResult readGroup(DiskLayout diskLayout,
-                                             FluxSourceIteratorHolder fluxSourceIteratorHolder,
-                                             LogicalTrackLayout ltl,
-                                             List<Track> tracks,
-                                             Decoder decoder,
-                                             ConfigProto config)
+    static ReadGroupResult readGroup(DiskLayout diskLayout,
+                                     Common.FluxSourceIteratorHolder fluxSourceIteratorHolder,
+                                     LogicalTrackLayout ltl,
+                                     List<Track> tracks,
+                                     Decoder decoder,
+                                     ConfigProto config)
     {
         ReadGroupResult rgr = new ReadGroupResult();
         rgr.result = ReadResult.BAD_AND_CAN_NOT_RETRY;
@@ -459,10 +411,10 @@ public final class ReaderWriter
                                            List<Sector> combinedSectors)
     {
         if (fluxSource.isHardware())
-            measureDiskRotation(config);
+            Common.measureDiskRotation(config);
 
-        FluxSourceIteratorHolder fluxSourceIteratorHolder =
-                new FluxSourceIteratorHolder(fluxSource);
+        Common.FluxSourceIteratorHolder fluxSourceIteratorHolder =
+                new Common.FluxSourceIteratorHolder(fluxSource);
         int retriesRemaining = config.getDecoder().getRetries();
         for (; ; )
         {
@@ -486,49 +438,11 @@ public final class ReaderWriter
 
             if (fluxSource.isHardware())
             {
-                adjustTrackOnError(fluxSource, ltl.physicalCylinder, config);
+                Common.adjustTrackOnError(fluxSource, ltl.physicalCylinder, config);
                 Logger.log(String.format("retrying; %d retries remaining", retriesRemaining));
                 retriesRemaining--;
             }
         }
     }
 
-    private static double getRotationalPeriodFromConfig(ConfigProto config)
-    {
-        return config.getDrive().getRotationalPeriodMs() * 1e6;
-    }
-
-    private static double measureDiskRotation(ConfigProto config)
-    {
-        Logger.log(new BeginSpeedOperationLogMessage());
-
-        double oneRevolution = getRotationalPeriodFromConfig(config);
-        if (oneRevolution == 0)
-        {
-            UsbDevice device = UsbFactory.reconnect(config);
-            device.setDrive(
-                    config.getDrive().getDrive(),
-                    config.getDrive().getHighDensity(),
-                    config.getDrive().getIndexMode().getNumber());
-
-            Logger.log(new BeginOperationLogMessage("Measuring drive rotational speed"));
-            int retries = 5;
-            do
-            {
-                oneRevolution = device.getRotationalPeriod(config.getDrive().getHardSectorCount());
-                retries--;
-            } while ((oneRevolution == 0) && (retries > 0));
-            Logger.log(new EndOperationLogMessage(""));
-        }
-
-        if (oneRevolution == 0)
-            throw new FluxEngineException("Failed\nIs a disk in the drive?");
-
-        Logger.log(new EndSpeedOperationLogMessage(oneRevolution));
-        return oneRevolution;
-    }
-
-    private static void testForEmergencyStop()
-    {
-    }
 }

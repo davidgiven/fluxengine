@@ -12,6 +12,7 @@ java_library(
         "//java/com/cowlark/fluxengine/data",
         "//java/com/cowlark/fluxengine/decoders",
         "//java/com/cowlark/fluxengine/decoders:decoders_java_proto",
+        "//java/com/cowlark/fluxengine/encoders",
         "//java/com/cowlark/fluxengine/fluxsink",
         "//java/com/cowlark/fluxengine/fluxsource",
         "//java/com/cowlark/fluxengine/imagewriter",
