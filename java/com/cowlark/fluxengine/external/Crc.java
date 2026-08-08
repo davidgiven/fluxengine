@@ -27,6 +27,7 @@ public final class Crc
             crc ^= br.read8() << 8;
             for (int i = 0; i < 8; i++)
                 crc = (crc & 0x8000) != 0 ? ((crc << 1) ^ poly) : (crc << 1);
+            crc &= 0xffff;
         }
 
         return crc;
