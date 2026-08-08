@@ -14,6 +14,18 @@ java_test(
 )
 
 java_test(
+    name = "ImageTest",
+    srcs = ["ImageTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/config:config_java_proto",
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/data",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
     name = "FluxmapTest",
     srcs = ["FluxmapTest.java"],
     deps = [
