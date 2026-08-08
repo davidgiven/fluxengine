@@ -24,10 +24,17 @@ public abstract class ImageWriter
         this.config = config;
     }
 
+    protected ImageWriterProto getWriterConfig()
+    {
+        return config;
+    }
+
     public static ImageWriter create(ConfigProto config)
     {
         if (!config.hasImageWriter())
             throw new FluxEngineException("no image writer configured");
+        if (config.getImageWriter().getType() == ImageReaderWriterType.IMAGETYPE_IMG)
+            return new ImgImageWriter(config.getImageWriter(), config);
         return create(config.getImageWriter());
     }
 
@@ -38,19 +45,19 @@ public abstract class ImageWriter
             case IMAGETYPE_IMG:
                 return notImplemented("img");
             case IMAGETYPE_D64:
-                return notImplemented("d64");
+                return new D64ImageWriter(config);
             case IMAGETYPE_LDBS:
                 return notImplemented("ldbs");
             case IMAGETYPE_DISKCOPY:
-                return notImplemented("diskcopy");
+                return new DiskCopyImageWriter(config);
             case IMAGETYPE_NSI:
-                return notImplemented("nsi");
+                return new NsiImageWriter(config);
             case IMAGETYPE_RAW:
-                return notImplemented("raw");
+                return new RawImageWriter(config);
             case IMAGETYPE_D88:
-                return notImplemented("d88");
+                return new D88ImageWriter(config);
             case IMAGETYPE_IMD:
-                return notImplemented("imd");
+                return new ImdImageWriter(config);
             default:
                 throw new FluxEngineException("bad output image config");
         }

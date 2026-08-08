@@ -24,10 +24,81 @@ public class ImageWriterTest
     public void createUnportedTypeThrows()
     {
         ImageWriterProto config = ImageWriterProto.newBuilder()
-                .setType(ImageReaderWriterType.IMAGETYPE_IMG)
+                .setType(ImageReaderWriterType.IMAGETYPE_LDBS)
                 .build();
 
         assertThrows(FluxEngineException.class, () -> ImageWriter.create(config));
+    }
+
+    @Test
+    public void createD64ImageWriter()
+    {
+        ImageWriterProto config = ImageWriterProto.newBuilder()
+                .setType(ImageReaderWriterType.IMAGETYPE_D64)
+                .build();
+
+        assertThat(ImageWriter.create(config)).isInstanceOf(D64ImageWriter.class);
+    }
+
+    @Test
+    public void createD88ImageWriter()
+    {
+        ImageWriterProto config = ImageWriterProto.newBuilder()
+                .setType(ImageReaderWriterType.IMAGETYPE_D88)
+                .build();
+
+        assertThat(ImageWriter.create(config)).isInstanceOf(D88ImageWriter.class);
+    }
+
+    @Test
+    public void createDiskCopyImageWriter()
+    {
+        ImageWriterProto config = ImageWriterProto.newBuilder()
+                .setType(ImageReaderWriterType.IMAGETYPE_DISKCOPY)
+                .build();
+
+        assertThat(ImageWriter.create(config)).isInstanceOf(DiskCopyImageWriter.class);
+    }
+
+    @Test
+    public void createImdImageWriter()
+    {
+        ImageWriterProto config = ImageWriterProto.newBuilder()
+                .setType(ImageReaderWriterType.IMAGETYPE_IMD)
+                .build();
+
+        assertThat(ImageWriter.create(config)).isInstanceOf(ImdImageWriter.class);
+    }
+
+    @Test
+    public void createNsiImageWriter()
+    {
+        ImageWriterProto config = ImageWriterProto.newBuilder()
+                .setType(ImageReaderWriterType.IMAGETYPE_NSI)
+                .build();
+
+        assertThat(ImageWriter.create(config)).isInstanceOf(NsiImageWriter.class);
+    }
+
+    @Test
+    public void createRawImageWriter()
+    {
+        ImageWriterProto config = ImageWriterProto.newBuilder()
+                .setType(ImageReaderWriterType.IMAGETYPE_RAW)
+                .build();
+
+        assertThat(ImageWriter.create(config)).isInstanceOf(RawImageWriter.class);
+    }
+
+    @Test
+    public void createImgImageWriterFromConfig()
+    {
+        ConfigProto config = new ConfigBuilder()
+                .set("usb.serial", "test-serial")
+                .withImageWriter("out.dsk")
+                .build();
+
+        assertThat(ImageWriter.create(config)).isInstanceOf(ImgImageWriter.class);
     }
 
     @Test
@@ -48,6 +119,46 @@ public class ImageWriterTest
                 .build();
 
         assertThrows(FluxEngineException.class, () -> ImageWriter.create(config));
+    }
+
+    @Test
+    public void d64WritesSectorData() throws Exception
+    {
+        Image image = new Image();
+        Sector sector = image.put(0, 0, 0);
+        sector.data = com.cowlark.fluxengine.core.Bytes.of(1, 2, 3, 4);
+
+        Path file = Files.createTempFile("image", ".d64");
+        ImageWriterProto config = ImageWriterProto.newBuilder()
+                .setType(ImageReaderWriterType.IMAGETYPE_D64)
+                .setFilename(file.toString())
+                .build();
+
+        new D64ImageWriter(config).writeImage(image);
+
+        byte[] data = Files.readAllBytes(file);
+        assertThat(data.length).isEqualTo(4);
+        assertThat(data[0]).isEqualTo((byte) 1);
+        assertThat(data[1]).isEqualTo((byte) 2);
+        assertThat(data[2]).isEqualTo((byte) 3);
+        assertThat(data[3]).isEqualTo((byte) 4);
+    }
+
+    @Test
+    public void d64EmptyImageWritesNothing() throws Exception
+    {
+        Image image = new Image();
+
+        Path file = Files.createTempFile("image", ".d64");
+        ImageWriterProto config = ImageWriterProto.newBuilder()
+                .setType(ImageReaderWriterType.IMAGETYPE_D64)
+                .setFilename(file.toString())
+                .build();
+
+        new D64ImageWriter(config).writeImage(image);
+
+        byte[] data = Files.readAllBytes(file);
+        assertThat(data).isEmpty();
     }
 
     @Test

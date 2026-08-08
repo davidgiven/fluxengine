@@ -2,6 +2,7 @@ package com.cowlark.fluxengine.core;
 
 import com.google.common.collect.ImmutableList;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
@@ -108,6 +109,21 @@ public final class Bytes implements List<Byte>
         byte[] result = new byte[size()];
         System.arraycopy(storage.data, low, result, 0, result.length);
         return result;
+    }
+
+    /* Writes the contents to a file, ported from lib/core/bytes.h
+     * Bytes::writeToFile(). */
+    public void writeToFile(String filename)
+    {
+        try
+        {
+            java.nio.file.Files.write(
+                    java.nio.file.Path.of(filename), toByteArray());
+        } catch (IOException e)
+        {
+            throw new FluxEngineException(
+                    "cannot write to file " + filename + ": " + e.getMessage());
+        }
     }
 
     @Override
