@@ -15,10 +15,7 @@ public class FluxMatchers implements FluxMatcher
     public FluxMatchers(List<FluxMatcher> matchers)
     {
         this.matchers = matchers;
-        intervalCount = matchers.stream()
-                .mapToInt(FluxMatcher::intervals)
-                .max()
-                .orElse(0);
+        intervalCount = matchers.stream().mapToInt(FluxMatcher::intervals).max().orElse(0);
     }
 
     public static FluxMatchers of(FluxMatcher... matchers)
@@ -27,8 +24,10 @@ public class FluxMatchers implements FluxMatcher
     }
 
     @Override
-    public boolean matches(long[] candidates, int endIndex, double clockDecodeThreshold,
-            FluxMatch match)
+    public boolean matches(long[] candidates,
+                           int endIndex,
+                           double clockDecodeThreshold,
+                           FluxMatch match)
     {
         for (FluxMatcher matcher : matchers)
         {

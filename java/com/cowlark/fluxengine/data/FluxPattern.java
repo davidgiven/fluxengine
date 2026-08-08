@@ -73,9 +73,10 @@ public class FluxPattern implements FluxMatcher
 
     @Override
     /* The `endIndex` is one past the newest candidate interval, mirroring the
-     * C++ pointer passed as `&*candidates.end()`. */
-    public boolean matches(long[] candidates, int endIndex, double clockDecodeThreshold,
-            FluxMatch match)
+     * C++ pointer passed as `&*candidates.end()`. */ public boolean matches(long[] candidates,
+                                                                             int endIndex,
+                                                                             double clockDecodeThreshold,
+                                                                             FluxMatch match)
     {
         int start = endIndex - intervals.size();
 

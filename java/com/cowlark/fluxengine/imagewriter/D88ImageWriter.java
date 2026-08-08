@@ -69,8 +69,7 @@ public class D88ImageWriter extends ImageWriter
             headerWriter.writeLe32(trackOffset);
             int side = track & 1;
             List<Sector> sectors = new ArrayList<>();
-            for (int sectorId = geometry.firstSector; sectorId <= geometry.numSectors;
-                    sectorId++)
+            for (int sectorId = geometry.firstSector; sectorId <= geometry.numSectors; sectorId++)
             {
                 Sector sector = image.get(track >> 1, side, sectorId);
                 if (sector != null)
@@ -113,7 +112,10 @@ public class D88ImageWriter extends ImageWriter
 
         output.writeToFile(config.getFilename());
 
-        System.out.printf("D88: wrote %d tracks, %d sides, %d kB total%n",
-                tracks, sides, output.size() / 1024);
+        System.out.printf(
+                "D88: wrote %d tracks, %d sides, %d kB total%n",
+                tracks,
+                sides,
+                output.size() / 1024);
     }
 }

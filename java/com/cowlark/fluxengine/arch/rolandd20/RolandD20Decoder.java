@@ -33,20 +33,6 @@ public class RolandD20Decoder extends Decoder
         super(config);
     }
 
-    @Override
-    protected double advanceToNextRecord()
-    {
-        return seekToPattern(SECTOR_PATTERN);
-    }
-
-    @Override
-    protected void decodeSectorRecord()
-    {
-        Bytes bytes = FmMfm.decodeFmMfm(readRawBits(256));
-        System.out.printf("%.3f ", sector.clockNs);
-        hexdump(bytes);
-    }
-
     private static void hexdump(Bytes buffer)
     {
         int pos = 0;
@@ -77,5 +63,19 @@ public class RolandD20Decoder extends Decoder
 
             pos += 16;
         }
+    }
+
+    @Override
+    protected double advanceToNextRecord()
+    {
+        return seekToPattern(SECTOR_PATTERN);
+    }
+
+    @Override
+    protected void decodeSectorRecord()
+    {
+        Bytes bytes = FmMfm.decodeFmMfm(readRawBits(256));
+        System.out.printf("%.3f ", sector.clockNs);
+        hexdump(bytes);
     }
 }

@@ -20,7 +20,8 @@ public class TartuDecoder extends Decoder
     private static final FluxPattern HEADER_PATTERN = new FluxPattern(64, Tartu.HEADER_BITS);
     private static final FluxPattern DATA_PATTERN = new FluxPattern(64, Tartu.DATA_BITS);
 
-    private static final FluxMatchers ANY_RECORD_PATTERN = FluxMatchers.of(HEADER_PATTERN, DATA_PATTERN);
+    private static final FluxMatchers ANY_RECORD_PATTERN =
+            FluxMatchers.of(HEADER_PATTERN, DATA_PATTERN);
 
     public TartuDecoder(DecoderProto config)
     {
@@ -70,6 +71,7 @@ public class TartuDecoder extends Decoder
 
         int wantChecksum = bytes.iterator().seek(128).read8();
         int gotChecksum = ~Crc.sumBytes(sector.data) & 0xff;
-        sector.status = (wantChecksum == gotChecksum) ? Sector.Status.OK : Sector.Status.BAD_CHECKSUM;
+        sector.status =
+                (wantChecksum == gotChecksum) ? Sector.Status.OK : Sector.Status.BAD_CHECKSUM;
     }
 }

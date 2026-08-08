@@ -17,6 +17,11 @@ public class Fb100Decoder extends Decoder
 {
     private static final FluxPattern SECTOR_ID_PATTERN = new FluxPattern(16, 0xabaa);
 
+    public Fb100Decoder(DecoderProto config)
+    {
+        super(config);
+    }
+
     /*
      * Reverse engineered from a dump of the floppy drive's ROM. I have no idea
      * how it works.
@@ -98,11 +103,6 @@ public class Fb100Decoder extends Decoder
         }
 
         return (crchi << 8) | crclo;
-    }
-
-    public Fb100Decoder(DecoderProto config)
-    {
-        super(config);
     }
 
     @Override

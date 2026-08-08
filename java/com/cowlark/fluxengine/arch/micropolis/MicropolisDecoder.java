@@ -25,7 +25,17 @@ public class MicropolisDecoder extends Decoder
     private static final FluxPattern SECTOR_SYNC_PATTERN = new FluxPattern(64, 0xAAAAAAAAAAAA5555L);
 
     /* Pattern to skip past current SYNC. */
-    private static final FluxPattern SECTOR_ADVANCE_PATTERN = new FluxPattern(64, 0xAAAAAAAAAAAAAAAAL);
+    private static final FluxPattern SECTOR_ADVANCE_PATTERN =
+            new FluxPattern(64, 0xAAAAAAAAAAAAAAAAL);
+    private final MicropolisDecoderProto config;
+    private MicropolisDecoderProto.ChecksumType checksumType;
+
+    public MicropolisDecoder(DecoderProto config)
+    {
+        super(config);
+        this.config = config.getMicropolis();
+        checksumType = this.config.getChecksumType();
+    }
 
     /* Standard Micropolis checksum. Adds all bytes, with carry. */
     public static int micropolisChecksum(Bytes bytes)
@@ -129,16 +139,6 @@ public class MicropolisDecoder extends Decoder
         return true;
     }
 
-    private final MicropolisDecoderProto config;
-    private MicropolisDecoderProto.ChecksumType checksumType;
-
-    public MicropolisDecoder(DecoderProto config)
-    {
-        super(config);
-        this.config = config.getMicropolis();
-        checksumType = this.config.getChecksumType();
-    }
-
     @Override
     protected double advanceToNextRecord()
     {
@@ -187,8 +187,10 @@ public class MicropolisDecoder extends Decoder
     protected void decodeSectorRecord()
     {
         readRawBits(48);
-        com.cowlark.fluxengine.core.Bits rawbits = readRawBits(Micropolis.MICROPOLIS_ENCODED_SECTOR_SIZE * 16);
-        Bytes bytes = FmMfm.decodeFmMfm(rawbits).slice(0, Micropolis.MICROPOLIS_ENCODED_SECTOR_SIZE);
+        com.cowlark.fluxengine.core.Bits rawbits =
+                readRawBits(Micropolis.MICROPOLIS_ENCODED_SECTOR_SIZE * 16);
+        Bytes bytes =
+                FmMfm.decodeFmMfm(rawbits).slice(0, Micropolis.MICROPOLIS_ENCODED_SECTOR_SIZE);
 
         boolean eccPresent = (bytes.getByte(274) & 0xff) == 0xaa;
         int ecc = 0;
@@ -232,7 +234,8 @@ public class MicropolisDecoder extends Decoder
             {
                 checksumType = MicropolisDecoderProto.ChecksumType.MICROPOLIS;
             } else if (wantChecksum == mzosChecksum(bytes.slice(
-                    Micropolis.MICROPOLIS_HEADER_SIZE, Micropolis.MICROPOLIS_PAYLOAD_SIZE)))
+                    Micropolis.MICROPOLIS_HEADER_SIZE,
+                    Micropolis.MICROPOLIS_PAYLOAD_SIZE)))
             {
                 checksumType = MicropolisDecoderProto.ChecksumType.MZOS;
                 System.out.println("Note: MZOS checksum detected.");
@@ -244,7 +247,8 @@ public class MicropolisDecoder extends Decoder
         if (checksumType == MicropolisDecoderProto.ChecksumType.MZOS)
         {
             gotChecksum = mzosChecksum(bytes.slice(
-                    Micropolis.MICROPOLIS_HEADER_SIZE, Micropolis.MICROPOLIS_PAYLOAD_SIZE));
+                    Micropolis.MICROPOLIS_HEADER_SIZE,
+                    Micropolis.MICROPOLIS_PAYLOAD_SIZE));
         } else
         {
             gotChecksum = micropolisChecksum(bytes.slice(1, 2 + 266));

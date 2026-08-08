@@ -29,13 +29,14 @@ public class RawImageWriter extends ImageWriter
 
         if (geometry.numCylinders * trackSize == 0)
         {
-            System.out.println(
-                    "RAW: no sectors in output; skipping image file generation.");
+            System.out.println("RAW: no sectors in output; skipping image file generation.");
             return;
         }
 
-        System.out.printf("RAW: writing %d tracks, %d sides%n",
-                geometry.numCylinders, geometry.numHeads);
+        System.out.printf(
+                "RAW: writing %d tracks, %d sides%n",
+                geometry.numCylinders,
+                geometry.numHeads);
 
         Bytes output = new Bytes();
 

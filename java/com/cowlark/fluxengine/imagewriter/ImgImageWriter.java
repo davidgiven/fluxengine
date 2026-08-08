@@ -31,8 +31,9 @@ public class ImgImageWriter extends ImageWriter
     {
         Geometry geometry = image.getGeometry();
 
-        int tracks =
-                config.getLayout().hasTracks() ? config.getLayout().getTracks() : geometry.numCylinders;
+        int tracks = config.getLayout().hasTracks() ?
+                config.getLayout().getTracks() :
+                geometry.numCylinders;
         int sides =
                 config.getLayout().hasSides() ? config.getLayout().getSides() : geometry.numHeads;
 
@@ -42,21 +43,19 @@ public class ImgImageWriter extends ImageWriter
         Bytes output = new Bytes();
         ByteWriter bw = output.writer();
 
-        Iterable<CylinderHead> locations = inFilesystemOrder
-                ? diskLayout.logicalLocationsInFilesystemOrder
-                : diskLayout.logicalLocations;
+        Iterable<CylinderHead> locations = inFilesystemOrder ?
+                diskLayout.logicalLocationsInFilesystemOrder :
+                diskLayout.logicalLocations;
         for (CylinderHead logicalLocation : locations)
         {
-            LogicalTrackLayout ltl =
-                    diskLayout.layoutByLogicalLocation.get(logicalLocation);
+            LogicalTrackLayout ltl = diskLayout.layoutByLogicalLocation.get(logicalLocation);
 
-            Iterable<Integer> sectorOrder = inFilesystemOrder
-                    ? ltl.filesystemSectorOrder
-                    : ltl.naturalSectorOrder;
+            Iterable<Integer> sectorOrder =
+                    inFilesystemOrder ? ltl.filesystemSectorOrder : ltl.naturalSectorOrder;
             for (int sectorId : sectorOrder)
             {
-                Sector sector = image.get(
-                        logicalLocation.cylinder(), logicalLocation.head(), sectorId);
+                Sector sector =
+                        image.get(logicalLocation.cylinder(), logicalLocation.head(), sectorId);
                 if (sector != null)
                     bw.write(sector.data.slice(0, ltl.sectorSize));
                 else
@@ -66,7 +65,11 @@ public class ImgImageWriter extends ImageWriter
 
         output.writeToFile(getWriterConfig().getFilename());
 
-        System.out.printf("IMG: wrote %d tracks, %d sides, %d kB total to %s%n",
-                tracks, sides, output.size() / 1024, getWriterConfig().getFilename());
+        System.out.printf(
+                "IMG: wrote %d tracks, %d sides, %d kB total to %s%n",
+                tracks,
+                sides,
+                output.size() / 1024,
+                getWriterConfig().getFilename());
     }
 }

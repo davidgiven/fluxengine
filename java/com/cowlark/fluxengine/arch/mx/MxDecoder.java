@@ -81,7 +81,8 @@ public class MxDecoder extends Decoder
         int logicalSector = currentSector;
         sector.location = new LogicalLocation(logicalCylinder, logicalHead, logicalSector);
         sector.data = bytes.slice(0, Mx.SECTOR_SIZE).swab();
-        sector.status = (gotChecksum == wantChecksum) ? Sector.Status.OK : Sector.Status.BAD_CHECKSUM;
+        sector.status =
+                (gotChecksum == wantChecksum) ? Sector.Status.OK : Sector.Status.BAD_CHECKSUM;
         currentSector++;
     }
 }

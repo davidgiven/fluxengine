@@ -63,6 +63,14 @@ public final class Bytes implements List<Byte>
         return new Bytes(data);
     }
 
+    private static int reverseBits(int b)
+    {
+        b = ((b & 0xF0) >> 4) | ((b & 0x0F) << 4);
+        b = ((b & 0xCC) >> 2) | ((b & 0x33) << 2);
+        b = ((b & 0xAA) >> 1) | ((b & 0x55) << 1);
+        return b;
+    }
+
     public int size()
     {
         return high - low;
@@ -117,8 +125,7 @@ public final class Bytes implements List<Byte>
     {
         try
         {
-            java.nio.file.Files.write(
-                    java.nio.file.Path.of(filename), toByteArray());
+            java.nio.file.Files.write(java.nio.file.Path.of(filename), toByteArray());
         } catch (IOException e)
         {
             throw new FluxEngineException(
@@ -223,14 +230,6 @@ public final class Bytes implements List<Byte>
         for (int i = 0; i < size(); i++)
             output.add((byte) reverseBits(getByte(i)));
         return output;
-    }
-
-    private static int reverseBits(int b)
-    {
-        b = ((b & 0xF0) >> 4) | ((b & 0x0F) << 4);
-        b = ((b & 0xCC) >> 2) | ((b & 0x33) << 2);
-        b = ((b & 0xAA) >> 1) | ((b & 0x55) << 1);
-        return b;
     }
 
     /* Extracts the bytes as bits, MSB-first within each byte. */

@@ -1,8 +1,8 @@
 package com.cowlark.fluxengine.arch.ibm;
 
+import com.cowlark.fluxengine.core.Bits;
 import com.cowlark.fluxengine.core.ByteReader;
 import com.cowlark.fluxengine.core.ByteWriter;
-import com.cowlark.fluxengine.core.Bits;
 import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.data.FluxMatchers;
 import com.cowlark.fluxengine.data.FluxPattern;
@@ -105,7 +105,8 @@ public class IbmDecoder extends Decoder
 
     private IbmDecoderProto.TrackdataProto getTrackFormat(int track, int head)
     {
-        IbmDecoderProto.TrackdataProto.Builder builder = IbmDecoderProto.TrackdataProto.newBuilder();
+        IbmDecoderProto.TrackdataProto.Builder builder =
+                IbmDecoderProto.TrackdataProto.newBuilder();
         for (IbmDecoderProto.TrackdataProto f : config.getTrackdataList())
         {
             if (f.hasTrack() && (f.getTrack() != track))
@@ -204,8 +205,8 @@ public class IbmDecoder extends Decoder
             readByte(bw);
             id = readByte(bw);
         }
-        if ((id != Ibm.IBM_DAM1) && (id != Ibm.IBM_DAM2) &&
-                (id != Ibm.IBM_TRS80DAM1) && (id != Ibm.IBM_TRS80DAM2))
+        if ((id != Ibm.IBM_DAM1) && (id != Ibm.IBM_DAM2) && (id != Ibm.IBM_TRS80DAM1) &&
+                (id != Ibm.IBM_TRS80DAM2))
             return;
 
         ByteReader br = bytes.iterator();
@@ -221,7 +222,8 @@ public class IbmDecoder extends Decoder
 
         if (currentSectorSize != ltl.sectorSize)
             System.err.printf(
-                    "Warning: configured sector size for t%d.h%d.s%d is %d bytes but that seen on disk is %d bytes%n",
+                    "Warning: configured sector size for t%d.h%d.s%d is %d bytes but that seen on" +
+                            " disk is %d bytes%n",
                     sector.location.logicalCylinder(),
                     sector.location.logicalHead(),
                     sector.location.logicalSector(),

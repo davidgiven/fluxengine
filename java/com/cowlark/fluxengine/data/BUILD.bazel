@@ -12,9 +12,9 @@ java_plugin(
 java_library(
     name = "data",
     srcs = glob(["*.java"]),
-    resources = ["//src/formats:formats_files"],
-    resource_strip_prefix = "src/formats",
     plugins = [":lombok_plugin"],
+    resource_strip_prefix = "src/formats",
+    resources = ["//src/formats:formats_files"],
     deps = [
         "//java/com/cowlark/fluxengine/config:config_java_proto",
         "//java/com/cowlark/fluxengine/config:layout_java_proto",

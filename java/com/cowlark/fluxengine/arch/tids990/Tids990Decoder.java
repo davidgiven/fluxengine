@@ -101,6 +101,7 @@ public class Tids990Decoder extends Decoder
 
         sector.data = br.read(Tids990.TIDS990_PAYLOAD_SIZE);
         int wantChecksum = br.readBe16();
-        sector.status = (wantChecksum == gotChecksum) ? Sector.Status.OK : Sector.Status.BAD_CHECKSUM;
+        sector.status =
+                (wantChecksum == gotChecksum) ? Sector.Status.OK : Sector.Status.BAD_CHECKSUM;
     }
 }

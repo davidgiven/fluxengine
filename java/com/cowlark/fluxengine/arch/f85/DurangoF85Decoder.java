@@ -18,32 +18,55 @@ import com.cowlark.fluxengine.external.Crc;
  */
 public class DurangoF85Decoder extends Decoder
 {
-    private static final FluxPattern SECTOR_RECORD_PATTERN = new FluxPattern(24, F85.F85_SECTOR_RECORD);
+    private static final FluxPattern SECTOR_RECORD_PATTERN =
+            new FluxPattern(24, F85.F85_SECTOR_RECORD);
     private static final FluxPattern DATA_RECORD_PATTERN = new FluxPattern(24, F85.F85_DATA_RECORD);
     private static final FluxMatchers ANY_RECORD_PATTERN =
             FluxMatchers.of(SECTOR_RECORD_PATTERN, DATA_RECORD_PATTERN);
+
+    public DurangoF85Decoder(DecoderProto config)
+    {
+        super(config);
+    }
 
     private static int decodeDataGcr(int gcr)
     {
         switch (gcr)
         {
-            case 0x19: return 0x00;
-            case 0x1b: return 0x01;
-            case 0x12: return 0x02;
-            case 0x13: return 0x03;
-            case 0x1d: return 0x04;
-            case 0x15: return 0x05;
-            case 0x16: return 0x06;
-            case 0x17: return 0x07;
-            case 0x1a: return 0x08;
-            case 0x09: return 0x09;
-            case 0x0a: return 0x0a;
-            case 0x0b: return 0x0b;
-            case 0x1e: return 0x0c;
-            case 0x0d: return 0x0d;
-            case 0x0e: return 0x0e;
-            case 0x0f: return 0x0f;
-            default: return -1;
+            case 0x19:
+                return 0x00;
+            case 0x1b:
+                return 0x01;
+            case 0x12:
+                return 0x02;
+            case 0x13:
+                return 0x03;
+            case 0x1d:
+                return 0x04;
+            case 0x15:
+                return 0x05;
+            case 0x16:
+                return 0x06;
+            case 0x17:
+                return 0x07;
+            case 0x1a:
+                return 0x08;
+            case 0x09:
+                return 0x09;
+            case 0x0a:
+                return 0x0a;
+            case 0x0b:
+                return 0x0b;
+            case 0x1e:
+                return 0x0c;
+            case 0x0d:
+                return 0x0d;
+            case 0x0e:
+                return 0x0e;
+            case 0x0f:
+                return 0x0f;
+            default:
+                return -1;
         }
     }
 
@@ -69,11 +92,6 @@ public class DurangoF85Decoder extends Decoder
         bitw.flush();
 
         return output;
-    }
-
-    public DurangoF85Decoder(DecoderProto config)
-    {
-        super(config);
     }
 
     @Override
@@ -113,13 +131,15 @@ public class DurangoF85Decoder extends Decoder
         if (readRaw24() != F85.F85_DATA_RECORD)
             return;
 
-        Bytes bytes = decode(readRawBits((F85.F85_SECTOR_LENGTH + 3) * 10))
-                .slice(0, F85.F85_SECTOR_LENGTH + 3);
+        Bytes bytes = decode(readRawBits((F85.F85_SECTOR_LENGTH + 3) * 10)).slice(
+                0,
+                F85.F85_SECTOR_LENGTH + 3);
         ByteReader br = bytes.iterator();
 
         sector.data = br.read(F85.F85_SECTOR_LENGTH);
         int wantChecksum = br.readBe16();
         int gotChecksum = Crc.crc16(Crc.CCITT_POLY, 0xbf84, sector.data);
-        sector.status = (wantChecksum == gotChecksum) ? Sector.Status.OK : Sector.Status.BAD_CHECKSUM;
+        sector.status =
+                (wantChecksum == gotChecksum) ? Sector.Status.OK : Sector.Status.BAD_CHECKSUM;
     }
 }

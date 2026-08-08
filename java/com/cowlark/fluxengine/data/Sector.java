@@ -9,20 +9,9 @@ import java.util.List;
  */
 public class Sector
 {
-    public enum Status
-    {
-        OK,
-        BAD_CHECKSUM,
-        MISSING,
-        DATA_MISSING,
-        CONFLICT,
-        INTERNAL_ERROR
-    }
-
-    /* The logical location of this sector. */
-
     public LogicalLocation location;
 
+    /* The logical location of this sector. */
     public Status status = Status.INTERNAL_ERROR;
     public int position = 0;
     public double clockNs = 0.0;
@@ -89,5 +78,10 @@ public class Sector
         if (value.equals("conflicting data"))
             return Status.CONFLICT;
         return Status.INTERNAL_ERROR;
+    }
+
+    public enum Status
+    {
+        OK, BAD_CHECKSUM, MISSING, DATA_MISSING, CONFLICT, INTERNAL_ERROR
     }
 }

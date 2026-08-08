@@ -27,14 +27,12 @@ public class NsiImageWriter extends ImageWriter
 
         if (geometry.numCylinders * trackSize == 0)
         {
-            System.out.println(
-                    "No sectors in output; skipping .nsi image file generation.");
+            System.out.println("No sectors in output; skipping .nsi image file generation.");
             return;
         }
 
         System.out.printf(
-                "Writing %d tracks, %d sides, %d sectors, %s (%d bytes/sector), "
-                        + "%d kB total%n",
+                "Writing %d tracks, %d sides, %d sectors, %s (%d bytes/sector), " + "%d kB total%n",
                 geometry.numCylinders,
                 geometry.numHeads,
                 geometry.numSectors,
@@ -43,8 +41,7 @@ public class NsiImageWriter extends ImageWriter
                 geometry.numCylinders * geometry.numHeads * geometry.numSectors *
                         geometry.sectorSize / 1024);
 
-        Bytes output = new Bytes(
-                geometry.numCylinders * geometry.numHeads * geometry.numSectors *
+        Bytes output = new Bytes(geometry.numCylinders * geometry.numHeads * geometry.numSectors *
                 geometry.sectorSize);
         ByteWriter bw = output.writer();
 
@@ -59,15 +56,12 @@ public class NsiImageWriter extends ImageWriter
                 {
                     if (side == 0)
                     { /* Side 0 is from track 0-34 */
-                        sectorFileOffset =
-                                track * trackSize + sectorId * geometry.sectorSize;
+                        sectorFileOffset = track * trackSize + sectorId * geometry.sectorSize;
                     } else
                     { /* Side 1 is from track 70-35 */
-                        sectorFileOffset =
-                                (geometry.sectorSize * geometry.numSectors *
-                                        geometry.numCylinders) + /* Skip over side 0 */
-                                ((geometry.numCylinders - 1) -
-                                        (track % geometry.numCylinders)) *
+                        sectorFileOffset = (geometry.sectorSize * geometry.numSectors *
+                                geometry.numCylinders) + /* Skip over side 0 */
+                                ((geometry.numCylinders - 1) - (track % geometry.numCylinders)) *
                                         (geometry.sectorSize * geometry.numSectors) +
                                 (sectorId * geometry.sectorSize);
                     }
@@ -84,9 +78,8 @@ public class NsiImageWriter extends ImageWriter
                          * spaces. */
                         if (!mixedDensity)
                         {
-                            System.out.println(
-                                    "Warning: Disk contains mixed "
-                                            + "single/double-density sectors.");
+                            System.out.println("Warning: Disk contains mixed " +
+                                    "single/double-density sectors.");
                         }
                         mixedDensity = true;
                         bw.write(sector.data.slice(0, 256));

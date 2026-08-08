@@ -14,13 +14,13 @@ import com.cowlark.fluxengine.external.FmMfm;
 /**
  * Decoder for North Star 10-sector hard-sectored disks, ported from
  * arch/northstar/decoder.cc.
- *
+ * <p>
  * Supports both single- and double-density. For the sector format and
  * checksum algorithm, see pp. 33 of the North Star Double Density Controller
  * manual:
- *
+ * <p>
  * http://bitsavers.org/pdf/northstar/boards/Northstar_MDS-A-D_1978.pdf
- *
+ * <p>
  * North Star disks do not contain any track/head/sector information encoded in
  * the sector record. For this reason, we have to be absolutely sure that the
  * hardSectorId is correct.
@@ -52,6 +52,12 @@ public class NorthstarDecoder extends Decoder
     private static final FluxPattern FM_PATTERN = new FluxPattern(64, FM_ID);
 
     private static final FluxMatchers ANY_SECTOR_PATTERN = FluxMatchers.of(MFM_PATTERN, FM_PATTERN);
+    private int hardSectorId;
+
+    public NorthstarDecoder(DecoderProto config)
+    {
+        super(config);
+    }
 
     /* Checksum is initially 0. For each data byte, XOR with the current
      * checksum. Rotate checksum left, carrying bit 7 to bit 0. */
@@ -67,13 +73,6 @@ public class NorthstarDecoder extends Decoder
         }
 
         return checksum;
-    }
-
-    private int hardSectorId;
-
-    public NorthstarDecoder(DecoderProto config)
-    {
-        super(config);
     }
 
     /* Search for FM or MFM sector record. */
@@ -161,6 +160,7 @@ public class NorthstarDecoder extends Decoder
         sector.data = br.read(payloadSize);
         int wantChecksum = br.read8();
         int gotChecksum = northstarChecksum(bytes.slice(headerSize - 1, payloadSize));
-        sector.status = (wantChecksum == gotChecksum) ? Sector.Status.OK : Sector.Status.BAD_CHECKSUM;
+        sector.status =
+                (wantChecksum == gotChecksum) ? Sector.Status.OK : Sector.Status.BAD_CHECKSUM;
     }
 }

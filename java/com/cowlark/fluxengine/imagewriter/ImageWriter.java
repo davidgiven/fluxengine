@@ -24,11 +24,6 @@ public abstract class ImageWriter
         this.config = config;
     }
 
-    protected ImageWriterProto getWriterConfig()
-    {
-        return config;
-    }
-
     public static ImageWriter create(ConfigProto config)
     {
         if (!config.hasImageWriter())
@@ -68,6 +63,11 @@ public abstract class ImageWriter
         throw new FluxEngineException(name + " image writer is not implemented yet");
     }
 
+    protected ImageWriterProto getWriterConfig()
+    {
+        return config;
+    }
+
     public void writeCsv(Image image, String filename)
     {
         StringBuilder f = new StringBuilder();
@@ -88,12 +88,10 @@ public abstract class ImageWriter
 
         for (Sector sector : image)
         {
-            f.append(sector.physicalLocation != null
-                    ? sector.physicalLocation.cylinder()
-                    : -1).append(',');
-            f.append(sector.physicalLocation != null
-                    ? sector.physicalLocation.head()
-                    : -1).append(',');
+            f.append(sector.physicalLocation != null ? sector.physicalLocation.cylinder() : -1)
+                    .append(',');
+            f.append(sector.physicalLocation != null ? sector.physicalLocation.head() : -1)
+                    .append(',');
             f.append(sector.location.logicalSector()).append(',');
             f.append(sector.location.logicalCylinder()).append(',');
             f.append(sector.location.logicalHead()).append(',');
@@ -183,12 +181,21 @@ public abstract class ImageWriter
             System.out.println("No sectors in output; skipping analysis");
         else
         {
-            System.out.printf("Good sectors: %d/%d (%d%%)%n",
-                    goodSectors, totalSectors, 100 * goodSectors / totalSectors);
-            System.out.printf("Missing sectors: %d/%d (%d%%)%n",
-                    missingSectors, totalSectors, 100 * missingSectors / totalSectors);
-            System.out.printf("Bad sectors: %d/%d (%d%%)%n",
-                    badSectors, totalSectors, 100 * badSectors / totalSectors);
+            System.out.printf(
+                    "Good sectors: %d/%d (%d%%)%n",
+                    goodSectors,
+                    totalSectors,
+                    100 * goodSectors / totalSectors);
+            System.out.printf(
+                    "Missing sectors: %d/%d (%d%%)%n",
+                    missingSectors,
+                    totalSectors,
+                    100 * missingSectors / totalSectors);
+            System.out.printf(
+                    "Bad sectors: %d/%d (%d%%)%n",
+                    badSectors,
+                    totalSectors,
+                    100 * badSectors / totalSectors);
         }
     }
 

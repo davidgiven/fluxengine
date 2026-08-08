@@ -52,6 +52,7 @@ public class ZilogMczDecoder extends Decoder
         int wantChecksum = br.readBe16();
         int gotChecksum = Crc.crc16(Crc.MODBUS_POLY, 0x0000, bytes.slice(0, 134));
 
-        sector.status = (wantChecksum == gotChecksum) ? Sector.Status.OK : Sector.Status.BAD_CHECKSUM;
+        sector.status =
+                (wantChecksum == gotChecksum) ? Sector.Status.OK : Sector.Status.BAD_CHECKSUM;
     }
 }

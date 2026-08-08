@@ -22,76 +22,148 @@ public class Apple2Decoder extends Decoder
             new FluxPattern(24, Apple2.APPLE2_DATA_RECORD);
     private static final FluxMatchers ANY_RECORD_PATTERN =
             FluxMatchers.of(SECTOR_RECORD_PATTERN, DATA_RECORD_PATTERN);
+    private final Apple2DecoderProto config;
+
+    public Apple2Decoder(DecoderProto config)
+    {
+        super(config);
+        this.config = config.getApple2();
+    }
 
     private static int decodeDataGcr(int gcr)
     {
         switch (gcr)
         {
-            case 0x96: return 0x00;
-            case 0x97: return 0x01;
-            case 0x9a: return 0x02;
-            case 0x9b: return 0x03;
-            case 0x9d: return 0x04;
-            case 0x9e: return 0x05;
-            case 0x9f: return 0x06;
-            case 0xa6: return 0x07;
-            case 0xa7: return 0x08;
-            case 0xab: return 0x09;
-            case 0xac: return 0x0a;
-            case 0xad: return 0x0b;
-            case 0xae: return 0x0c;
-            case 0xaf: return 0x0d;
-            case 0xb2: return 0x0e;
-            case 0xb3: return 0x0f;
-            case 0xb4: return 0x10;
-            case 0xb5: return 0x11;
-            case 0xb6: return 0x12;
-            case 0xb7: return 0x13;
-            case 0xb9: return 0x14;
-            case 0xba: return 0x15;
-            case 0xbb: return 0x16;
-            case 0xbc: return 0x17;
-            case 0xbd: return 0x18;
-            case 0xbe: return 0x19;
-            case 0xbf: return 0x1a;
-            case 0xcb: return 0x1b;
-            case 0xcd: return 0x1c;
-            case 0xce: return 0x1d;
-            case 0xcf: return 0x1e;
-            case 0xd3: return 0x1f;
-            case 0xd6: return 0x20;
-            case 0xd7: return 0x21;
-            case 0xd9: return 0x22;
-            case 0xda: return 0x23;
-            case 0xdb: return 0x24;
-            case 0xdc: return 0x25;
-            case 0xdd: return 0x26;
-            case 0xde: return 0x27;
-            case 0xdf: return 0x28;
-            case 0xe5: return 0x29;
-            case 0xe6: return 0x2a;
-            case 0xe7: return 0x2b;
-            case 0xe9: return 0x2c;
-            case 0xea: return 0x2d;
-            case 0xeb: return 0x2e;
-            case 0xec: return 0x2f;
-            case 0xed: return 0x30;
-            case 0xee: return 0x31;
-            case 0xef: return 0x32;
-            case 0xf2: return 0x33;
-            case 0xf3: return 0x34;
-            case 0xf4: return 0x35;
-            case 0xf5: return 0x36;
-            case 0xf6: return 0x37;
-            case 0xf7: return 0x38;
-            case 0xf9: return 0x39;
-            case 0xfa: return 0x3a;
-            case 0xfb: return 0x3b;
-            case 0xfc: return 0x3c;
-            case 0xfd: return 0x3d;
-            case 0xfe: return 0x3e;
-            case 0xff: return 0x3f;
-            default: return -1;
+            case 0x96:
+                return 0x00;
+            case 0x97:
+                return 0x01;
+            case 0x9a:
+                return 0x02;
+            case 0x9b:
+                return 0x03;
+            case 0x9d:
+                return 0x04;
+            case 0x9e:
+                return 0x05;
+            case 0x9f:
+                return 0x06;
+            case 0xa6:
+                return 0x07;
+            case 0xa7:
+                return 0x08;
+            case 0xab:
+                return 0x09;
+            case 0xac:
+                return 0x0a;
+            case 0xad:
+                return 0x0b;
+            case 0xae:
+                return 0x0c;
+            case 0xaf:
+                return 0x0d;
+            case 0xb2:
+                return 0x0e;
+            case 0xb3:
+                return 0x0f;
+            case 0xb4:
+                return 0x10;
+            case 0xb5:
+                return 0x11;
+            case 0xb6:
+                return 0x12;
+            case 0xb7:
+                return 0x13;
+            case 0xb9:
+                return 0x14;
+            case 0xba:
+                return 0x15;
+            case 0xbb:
+                return 0x16;
+            case 0xbc:
+                return 0x17;
+            case 0xbd:
+                return 0x18;
+            case 0xbe:
+                return 0x19;
+            case 0xbf:
+                return 0x1a;
+            case 0xcb:
+                return 0x1b;
+            case 0xcd:
+                return 0x1c;
+            case 0xce:
+                return 0x1d;
+            case 0xcf:
+                return 0x1e;
+            case 0xd3:
+                return 0x1f;
+            case 0xd6:
+                return 0x20;
+            case 0xd7:
+                return 0x21;
+            case 0xd9:
+                return 0x22;
+            case 0xda:
+                return 0x23;
+            case 0xdb:
+                return 0x24;
+            case 0xdc:
+                return 0x25;
+            case 0xdd:
+                return 0x26;
+            case 0xde:
+                return 0x27;
+            case 0xdf:
+                return 0x28;
+            case 0xe5:
+                return 0x29;
+            case 0xe6:
+                return 0x2a;
+            case 0xe7:
+                return 0x2b;
+            case 0xe9:
+                return 0x2c;
+            case 0xea:
+                return 0x2d;
+            case 0xeb:
+                return 0x2e;
+            case 0xec:
+                return 0x2f;
+            case 0xed:
+                return 0x30;
+            case 0xee:
+                return 0x31;
+            case 0xef:
+                return 0x32;
+            case 0xf2:
+                return 0x33;
+            case 0xf3:
+                return 0x34;
+            case 0xf4:
+                return 0x35;
+            case 0xf5:
+                return 0x36;
+            case 0xf6:
+                return 0x37;
+            case 0xf7:
+                return 0x38;
+            case 0xf9:
+                return 0x39;
+            case 0xfa:
+                return 0x3a;
+            case 0xfb:
+                return 0x3b;
+            case 0xfc:
+                return 0x3c;
+            case 0xfd:
+                return 0x3d;
+            case 0xfe:
+                return 0x3e;
+            case 0xff:
+                return 0x3f;
+            default:
+                return -1;
         }
     }
 
@@ -102,7 +174,8 @@ public class Apple2Decoder extends Decoder
 
     /* This is extremely inspired by the MESS implementation, written by Nathan
      * Woods and R. Belmont:
-     * https://github.com/mamedev/mame/blob/7914a6083a3b3a8c243ae6c3b8cb50b023f21e0e/src/lib/formats/ap2_dsk.cpp
+     * https://github.com/mamedev/mame/blob/7914a6083a3b3a8c243ae6c3b8cb50b023f21e0e/src/lib
+     * /formats/ap2_dsk.cpp
      */
     private static Bytes decodeCrazyData(Bytes input, Sector.Status[] status)
     {
@@ -121,24 +194,21 @@ public class Apple2Decoder extends Decoder
             {
                 /* 3 * 2 bit */
                 output.setByte(i, (byte) (((checksum >> 1) & 0x01) | ((checksum << 1) & 0x02)));
-                output.setByte(i + 86, (byte) (((checksum >> 3) & 0x01) | ((checksum >> 1) & 0x02)));
+                output.setByte(
+                        i + 86,
+                        (byte) (((checksum >> 3) & 0x01) | ((checksum >> 1) & 0x02)));
                 if ((i + 172) < Apple2.APPLE2_SECTOR_LENGTH)
-                    output.setByte(i + 172, (byte) (((checksum >> 5) & 0x01) | ((checksum >> 3) & 0x02)));
+                    output.setByte(
+                            i + 172,
+                            (byte) (((checksum >> 5) & 0x01) | ((checksum >> 3) & 0x02)));
             }
         }
 
         checksum &= 0x3f;
-        int wantedchecksum = decodeDataGcr(input.getByte(Apple2.APPLE2_ENCODED_SECTOR_LENGTH) & 0xff);
+        int wantedchecksum =
+                decodeDataGcr(input.getByte(Apple2.APPLE2_ENCODED_SECTOR_LENGTH) & 0xff);
         status[0] = (checksum == wantedchecksum) ? Sector.Status.OK : Sector.Status.BAD_CHECKSUM;
         return output;
-    }
-
-    private final Apple2DecoderProto config;
-
-    public Apple2Decoder(DecoderProto config)
-    {
-        super(config);
-        this.config = config.getApple2();
     }
 
     @Override

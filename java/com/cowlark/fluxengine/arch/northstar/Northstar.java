@@ -2,10 +2,10 @@ package com.cowlark.fluxengine.arch.northstar;
 
 /**
  * Constants for the North Star format, ported from arch/northstar/northstar.h.
- *
+ * <p>
  * Northstar floppies are 10-hard sectored disks with a sector format as
  * follows:
- *
+ * <p>
  * |----------------------------------|
  * | SYNC Byte  | Payload  | Checksum |
  * |------------+----------+----------|

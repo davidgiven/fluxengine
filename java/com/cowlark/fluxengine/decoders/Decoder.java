@@ -20,18 +20,12 @@ import com.cowlark.fluxengine.data.Track;
  */
 public abstract class Decoder
 {
-    public enum RecordType
-    {
-        SECTOR_RECORD, DATA_RECORD, UNKNOWN_RECORD
-    }
-
     protected final DecoderProto config;
     protected LogicalTrackLayout ltl;
     protected Track trackdata;
     protected Sector sector;
     protected FluxDecoder decoder;
     protected Bits recordBits = new Bits();
-
     private FluxmapReader fmr;
 
     public Decoder(DecoderProto config)
@@ -235,5 +229,10 @@ public abstract class Decoder
 
     protected void decodeDataRecord()
     {
+    }
+
+    public enum RecordType
+    {
+        SECTOR_RECORD, DATA_RECORD, UNKNOWN_RECORD
     }
 }

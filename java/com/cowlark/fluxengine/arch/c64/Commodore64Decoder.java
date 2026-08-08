@@ -17,32 +17,55 @@ import com.cowlark.fluxengine.external.Crc;
  */
 public class Commodore64Decoder extends Decoder
 {
-    private static final FluxPattern SECTOR_RECORD_PATTERN = new FluxPattern(20, C64.C64_SECTOR_RECORD);
+    private static final FluxPattern SECTOR_RECORD_PATTERN =
+            new FluxPattern(20, C64.C64_SECTOR_RECORD);
     private static final FluxPattern DATA_RECORD_PATTERN = new FluxPattern(20, C64.C64_DATA_RECORD);
     private static final FluxMatchers ANY_RECORD_PATTERN =
             FluxMatchers.of(SECTOR_RECORD_PATTERN, DATA_RECORD_PATTERN);
+
+    public Commodore64Decoder(DecoderProto config)
+    {
+        super(config);
+    }
 
     private static int decodeDataGcr(int gcr)
     {
         switch (gcr)
         {
-            case 0x0a: return 0x0;
-            case 0x0b: return 0x1;
-            case 0x12: return 0x2;
-            case 0x13: return 0x3;
-            case 0x0e: return 0x4;
-            case 0x0f: return 0x5;
-            case 0x16: return 0x6;
-            case 0x17: return 0x7;
-            case 0x09: return 0x8;
-            case 0x19: return 0x9;
-            case 0x1a: return 0xa;
-            case 0x1b: return 0xb;
-            case 0x0d: return 0xc;
-            case 0x1d: return 0xd;
-            case 0x1e: return 0xe;
-            case 0x15: return 0xf;
-            default: return -1;
+            case 0x0a:
+                return 0x0;
+            case 0x0b:
+                return 0x1;
+            case 0x12:
+                return 0x2;
+            case 0x13:
+                return 0x3;
+            case 0x0e:
+                return 0x4;
+            case 0x0f:
+                return 0x5;
+            case 0x16:
+                return 0x6;
+            case 0x17:
+                return 0x7;
+            case 0x09:
+                return 0x8;
+            case 0x19:
+                return 0x9;
+            case 0x1a:
+                return 0xa;
+            case 0x1b:
+                return 0xb;
+            case 0x0d:
+                return 0xc;
+            case 0x1d:
+                return 0xd;
+            case 0x1e:
+                return 0xe;
+            case 0x15:
+                return 0xf;
+            default:
+                return -1;
         }
     }
 
@@ -68,11 +91,6 @@ public class Commodore64Decoder extends Decoder
         bitw.flush();
 
         return output;
-    }
-
-    public Commodore64Decoder(DecoderProto config)
-    {
-        super(config);
     }
 
     @Override
@@ -111,6 +129,7 @@ public class Commodore64Decoder extends Decoder
         sector.data = bytes.slice(0, C64.C64_SECTOR_LENGTH);
         int gotChecksum = Crc.xorBytes(sector.data);
         int wantChecksum = bytes.getByte(256) & 0xff;
-        sector.status = (wantChecksum == gotChecksum) ? Sector.Status.OK : Sector.Status.BAD_CHECKSUM;
+        sector.status =
+                (wantChecksum == gotChecksum) ? Sector.Status.OK : Sector.Status.BAD_CHECKSUM;
     }
 }

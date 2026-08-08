@@ -20,14 +20,9 @@ import java.util.List;
 public class Smaky6Decoder extends Decoder
 {
     private static final FluxPattern SECTOR_PATTERN = new FluxPattern(32, 0x54892aaa);
-
-    private record SectorStart(int id, FluxPosition pos)
-    {
-    }
-
+    private final List<SectorStart> sectorStarts = new ArrayList<>();
     private int sectorId;
     private int sectorIndex;
-    private final List<SectorStart> sectorStarts = new ArrayList<>();
 
     public Smaky6Decoder(DecoderProto config)
     {
@@ -128,9 +123,7 @@ public class Smaky6Decoder extends Decoder
 
         /* The Smaky bytes are stored backwards! Backwards! */
 
-        Bytes bytes = FmMfm.decodeFmMfm(rawbits)
-                .slice(0, Smaky6.SMAKY6_RECORD_SIZE)
-                .reverseBits();
+        Bytes bytes = FmMfm.decodeFmMfm(rawbits).slice(0, Smaky6.SMAKY6_RECORD_SIZE).reverseBits();
         ByteReader br = bytes.iterator();
 
         int track = br.read8();
@@ -149,5 +142,9 @@ public class Smaky6Decoder extends Decoder
         sector.data = data;
         sector.status =
                 (wantedChecksum == gotChecksum) ? Sector.Status.OK : Sector.Status.BAD_CHECKSUM;
+    }
+
+    private record SectorStart(int id, FluxPosition pos)
+    {
     }
 }

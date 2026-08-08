@@ -83,7 +83,8 @@ public final class Formats
             contents = new String(stream.readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException e)
         {
-            throw new FluxEngineException("cannot read format resource " + NAMES_RESOURCE + ": " + e);
+            throw new FluxEngineException(
+                    "cannot read format resource " + NAMES_RESOURCE + ": " + e);
         }
 
         List<String> names = new ArrayList<>();

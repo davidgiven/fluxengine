@@ -54,6 +54,26 @@ java_test(
 )
 
 java_test(
+    name = "LoggerTest",
+    srcs = ["LoggerTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/core",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "LogRendererTest",
+    srcs = ["LogRendererTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/core",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
     name = "BitsTest",
     srcs = ["BitsTest.java"],
     deps = [

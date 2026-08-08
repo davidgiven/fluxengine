@@ -1,7 +1,7 @@
 package com.cowlark.fluxengine.arch;
 
-import com.cowlark.fluxengine.arch.agat.AgatDecoder;
 import com.cowlark.fluxengine.arch.aeslanier.AesLanierDecoder;
+import com.cowlark.fluxengine.arch.agat.AgatDecoder;
 import com.cowlark.fluxengine.arch.amiga.AmigaDecoder;
 import com.cowlark.fluxengine.arch.apple2.Apple2Decoder;
 import com.cowlark.fluxengine.arch.brother.BrotherDecoder;

@@ -1,6 +1,5 @@
 package com.cowlark.fluxengine.arch.agat;
 
-import com.cowlark.fluxengine.core.Bits;
 import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.data.FluxMatchers;
 import com.cowlark.fluxengine.data.FluxPattern;
@@ -16,11 +15,15 @@ import com.cowlark.fluxengine.external.FmMfm;
 public class AgatDecoder extends Decoder
 {
     /*
-     * data:    X  X  X  X   X  X  X  X   X  -  -  X   -  X  -  X   -  X  X  -   X  -  X  -  = 0xff956a
-     * flux:   01 01 01 01  01 01 01 01  01 00 10 01  00 01 00 01  00 01 01 00  01 00 01 00  = 0x555549111444
+     * data:    X  X  X  X   X  X  X  X   X  -  -  X   -  X  -  X   -  X  X  -   X  -  X  -  =
+     * 0xff956a
+     * flux:   01 01 01 01  01 01 01 01  01 00 10 01  00 01 00 01  00 01 01 00  01 00 01 00  =
+     * 0x555549111444
      *
-     * data:    X  X  X  X   X  X  X  X   -  X  X  -   X  -  X  -   X  -  -  X   -  X  -  X  = 0xff6a95
-     * flux:   01 01 01 01  01 01 01 01  00 01 01 00  01 00 01 00  01 00 10 01  00 01 00 01  = 0x555514444911
+     * data:    X  X  X  X   X  X  X  X   -  X  X  -   X  -  X  -   X  -  -  X   -  X  -  X  =
+     * 0xff6a95
+     * flux:   01 01 01 01  01 01 01 01  00 01 01 00  01 00 01 00  01 00 10 01  00 01 00 01  =
+     * 0x555514444911
      *
      * Each pattern is prefixed with this one:
      *

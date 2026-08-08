@@ -22,8 +22,7 @@ public class DiskCopyImageWriter extends ImageWriter
         super(config);
     }
 
-    private static void writeAndUpdateChecksum(
-            ByteWriter bw, int[] checksum, Bytes data)
+    private static void writeAndUpdateChecksum(ByteWriter bw, int[] checksum, Bytes data)
     {
         ByteReader br = data.iterator();
         while (!br.eof())
@@ -68,8 +67,7 @@ public class DiskCopyImageWriter extends ImageWriter
                 geometry.sectorSize,
                 isMfm ? "MFM" : "GCR");
 
-        java.util.function.IntUnaryOperator sectorsPerTrack = track ->
-        {
+        java.util.function.IntUnaryOperator sectorsPerTrack = track -> {
             if (isMfm)
                 return geometry.numSectors;
 
@@ -124,8 +122,7 @@ public class DiskCopyImageWriter extends ImageWriter
                         if (sector != null)
                         {
                             bw.seek(offset);
-                            writeAndUpdateChecksum(
-                                    bw, tagChecksum, sector.data.slice(512, 12));
+                            writeAndUpdateChecksum(bw, tagChecksum, sector.data.slice(512, 12));
                         }
                         offset += 12;
                     }

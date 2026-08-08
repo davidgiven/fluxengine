@@ -31,9 +31,8 @@ public class ImdImageWriter extends ImageWriter
         if (flags == 0)
         {
             throw new FluxEngineException(
-                    "Can't write IMD files with this speed " + flags
-                            + ", and modulation " + mode
-                            + ". Did you read a real disk?");
+                    "Can't write IMD files with this speed " + flags + ", and modulation " + mode +
+                            ". Did you read a real disk?");
         } else
         {
             flags = (int) (1000000.0 / flags);
@@ -72,8 +71,8 @@ public class ImdImageWriter extends ImageWriter
         } else
         {
             throw new FluxEngineException(
-                    "IMD: Can't write IMD files with this speed " + flags
-                            + ", and modulation " + mode + ". Try another format.");
+                    "IMD: Can't write IMD files with this speed " + flags + ", and modulation " +
+                            mode + ". Try another format.");
         }
     }
 
@@ -96,9 +95,8 @@ public class ImdImageWriter extends ImageWriter
             case 8192:
                 return 6;
         }
-        throw new FluxEngineException(
-                "IMD: Sector size " + flags
-                        + " not in standard range (128, 256, 512, 1024, 2048, 4096, 8192).");
+        throw new FluxEngineException("IMD: Sector size " + flags +
+                " not in standard range (128, 256, 512, 1024, 2048, 4096, 8192).");
     }
 
     @Override
@@ -120,9 +118,9 @@ public class ImdImageWriter extends ImageWriter
         ImdOutputProto.DataRate dataRate = config.getImd().getDataRate();
         if (dataRate == ImdOutputProto.DataRate.RATE_GUESS)
         {
-            dataRate = (geometry.numSectors > 10)
-                    ? ImdOutputProto.DataRate.RATE_HD
-                    : ImdOutputProto.DataRate.RATE_DD;
+            dataRate = (geometry.numSectors > 10) ?
+                    ImdOutputProto.DataRate.RATE_HD :
+                    ImdOutputProto.DataRate.RATE_DD;
             if (geometry.sectorSize <= 256)
                 dataRate = ImdOutputProto.DataRate.RATE_SD;
             System.out.println("IMD: guessing data rate as " + dataRate);
@@ -139,9 +137,8 @@ public class ImdImageWriter extends ImageWriter
         if (comment.length() == 0)
         {
             comment = LABEL;
-            comment = comment + " date: "
-                    + LocalDateTime.now().format(DateTimeFormatter.ofPattern(
-                            "E MMM d HH:mm:ss yyyy"));
+            comment = comment + " date: " + LocalDateTime.now()
+                    .format(DateTimeFormatter.ofPattern("E MMM d HH:mm:ss yyyy"));
         } else
         {
             comment = "IMD " + comment;
@@ -172,8 +169,11 @@ public class ImdImageWriter extends ImageWriter
                 {
                     /* sector 0 doesnt exist exit with error */
                     statusSector = 0;
-                    System.out.printf("IMD: sector %d not found on track %d, head %d%n",
-                            sectorId + 1, track, head);
+                    System.out.printf(
+                            "IMD: sector %d not found on track %d, head %d%n",
+                            sectorId + 1,
+                            track,
+                            head);
                     break;
                 } else
                 {
@@ -231,10 +231,8 @@ public class ImdImageWriter extends ImageWriter
                     {
                         sectorSkew = sectorSkew + (char) ((i + sectorIdBase) + '0');
                         if (s.physicalLocation != null &&
-                                ((s.physicalLocation.cylinder() !=
-                                        s.location.logicalCylinder()) ||
-                                        (s.physicalLocation.head() !=
-                                                s.location.logicalHead())))
+                                ((s.physicalLocation.cylinder() != s.location.logicalCylinder()) ||
+                                        (s.physicalLocation.head() != s.location.logicalHead())))
                             blnOptionalHeadMap = true;
                     }
                 }
@@ -333,8 +331,8 @@ public class ImdImageWriter extends ImageWriter
 
                             default:
                                 throw new FluxEngineException(
-                                        "IMD: Don't understand IMD files with sector status "
-                                                + statusSector);
+                                        "IMD: Don't understand IMD files with sector status " +
+                                                statusSector);
                         }
                         bw.write8(statusSector); /* 1 byte status sector */
                         if (blnCompressable)
@@ -354,8 +352,8 @@ public class ImdImageWriter extends ImageWriter
         }
         imagenew.writeToFile(config.getFilename());
         System.out.printf(
-                "IMD: Written %d tracks, %d heads, %d sectors, %d bytes per "
-                        + "sector, %d kB total%n",
+                "IMD: Written %d tracks, %d heads, %d sectors, %d bytes per " +
+                        "sector, %d kB total%n",
                 geometry.numCylinders,
                 numHeads,
                 numSectors,

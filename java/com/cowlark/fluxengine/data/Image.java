@@ -35,10 +35,9 @@ public class Image implements Iterable<Sector>
             Sector sector = entry.getValue();
             if (sector != null)
             {
-                geometry.numCylinders = Math.max(
-                        geometry.numCylinders, sector.location.logicalCylinder() + 1);
-                geometry.numHeads =
-                        Math.max(geometry.numHeads, sector.location.logicalHead() + 1);
+                geometry.numCylinders =
+                        Math.max(geometry.numCylinders, sector.location.logicalCylinder() + 1);
+                geometry.numHeads = Math.max(geometry.numHeads, sector.location.logicalHead() + 1);
                 geometry.firstSector =
                         Math.min(geometry.firstSector, sector.location.logicalSector());
                 maxSector = Math.max(maxSector, sector.location.logicalSector());
@@ -144,22 +143,21 @@ public class Image implements Iterable<Sector>
             newSector.dataEndTimeNs = sector.dataEndTimeNs;
             newSector.data = sector.data;
             newSector.records = sector.records;
-            newSector.physicalLocation =
-                    new CylinderHead(ltl.physicalCylinder, ltl.physicalHead);
+            newSector.physicalLocation = new CylinderHead(ltl.physicalCylinder, ltl.physicalHead);
         }
 
         for (Sector sector : tempImage)
             sectors.put(sector.location, sector);
     }
 
-    public void setGeometry(Geometry geometry)
-    {
-        this.geometry = geometry;
-    }
-
     public Geometry getGeometry()
     {
         return geometry;
+    }
+
+    public void setGeometry(Geometry geometry)
+    {
+        this.geometry = geometry;
     }
 
     @Override

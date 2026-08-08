@@ -17,7 +17,7 @@ import java.util.List;
  * Reads a textpb file (with the {@code <<<}...{@code >>>} multiline string
  * extension) and writes out the binary representation of the encoded protobuf,
  * ported from scripts/protoencode.cc.
- *
+ * <p>
  * Usage: ProtoEncode &lt;input.textpb&gt; &lt;output.bin&gt;
  * [&lt;proto-class-fqn&gt;]
  */
@@ -32,13 +32,11 @@ public final class ProtoEncode
         if (args.length < 2)
         {
             System.err.println(
-                    "Usage: ProtoEncode <input.textpb> <output.bin> [<proto-class-fqn>]");
+                    "Usage: ProtoEncode <input.textpb> <output.bin> " + "[<proto-class-fqn>]");
             System.exit(1);
         }
 
-        String protoClass = args.length > 2
-                ? args[2]
-                : "com.cowlark.fluxengine.config.ConfigProto";
+        String protoClass = args.length > 2 ? args[2] : "com.cowlark.fluxengine.config.ConfigProto";
 
         try
         {
@@ -133,7 +131,7 @@ public final class ProtoEncode
             Method method = clazz.getMethod("newBuilder");
             return (Message.Builder) method.invoke(null);
         } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException |
-                InvocationTargetException | ClassCastException e)
+                 InvocationTargetException | ClassCastException e)
         {
             throw new FluxEngineException("cannot create builder for " + protoClass + ": " + e);
         }

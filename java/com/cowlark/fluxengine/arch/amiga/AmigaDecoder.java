@@ -66,11 +66,10 @@ public class AmigaDecoder extends Decoder
         int gotdatachecksum = Amiga.amigaChecksum(rawbytes.slice(56, 1024));
 
         Bytes data = new Bytes();
-        data.writer()
-                .write(Amiga.amigaDeinterleave(bytes, index, 512))
-                .write(recoveryinfo);
+        data.writer().write(Amiga.amigaDeinterleave(bytes, index, 512)).write(recoveryinfo);
         sector.data = data;
-        sector.status =
-                (gotdatachecksum == wanteddatachecksum) ? Sector.Status.OK : Sector.Status.BAD_CHECKSUM;
+        sector.status = (gotdatachecksum == wanteddatachecksum) ?
+                Sector.Status.OK :
+                Sector.Status.BAD_CHECKSUM;
     }
 }
