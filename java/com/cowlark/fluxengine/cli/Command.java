@@ -63,9 +63,7 @@ public interface Command
                     .put("read", ReadCommand::new)
                     .put("write", WriteCommand::new)
                     .put("rawwrite", RawwriteCommand::new)
-                    .put(
-                            "convert",
-                            stub("convert", "Converts a flux file from one format to another."))
+                    .put("convert", ConvertCommand::new)
                     .put("rpm", RpmCommand::new)
                     .put("seek", SeekCommand::new)
                     .put("devices", DevicesCommand::new)

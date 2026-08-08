@@ -372,10 +372,9 @@ public final class Reader
 
             Fluxmap fluxmap = fluxSourceIterator.next();
             Logger.log(new EndReadOperationLogMessage());
-            Logger.log(String.format(
-                    "%d ms in %d bytes",
+            Logger.log("%d ms in %d bytes",
                     (int) (fluxmap.duration() / 1e6),
-                    fluxmap.bytes()));
+                    fluxmap.bytes());
 
             Track flux = decoder.decodeToSectors(fluxmap, ptl);
             flux.normalisedSectors = collectSectors(flux.allSectors);
@@ -439,7 +438,7 @@ public final class Reader
             if (fluxSource.isHardware())
             {
                 Common.adjustTrackOnError(fluxSource, ltl.physicalCylinder, config);
-                Logger.log(String.format("retrying; %d retries remaining", retriesRemaining));
+                Logger.log("retrying; %d retries remaining", retriesRemaining);
                 retriesRemaining--;
             }
         }

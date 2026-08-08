@@ -75,10 +75,9 @@ public final class Writer
                             else
                             {
                                 fluxSink.addFlux(physicalCylinder, physicalHead, fluxmap);
-                                Logger.log(String.format(
-                                        "writing %d ms in %d bytes",
+                                Logger.log("writing %d ms in %d bytes",
                                         (int) (fluxmap.duration() / 1e6),
-                                        fluxmap.bytes()));
+                                        fluxmap.bytes());
                             }
                         } else
                             erase = true;
@@ -101,7 +100,7 @@ public final class Writer
                     if (retriesRemaining == 0)
                         throw new FluxEngineException("fatal error on write");
 
-                    Logger.log(String.format("retrying; %d retries remaining", retriesRemaining));
+                    Logger.log("retrying; %d retries remaining", retriesRemaining);
                     retriesRemaining--;
                 }
             }
