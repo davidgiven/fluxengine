@@ -137,4 +137,47 @@ public class BitsTest
         Bytes bytes = Bytes.of(0xd6, 0xa5);
         assertThat(bytes.toBits().toBytes()).isEqualTo(bytes);
     }
+
+    @Test
+    public void fillBitmapToPattern()
+    {
+        Bits bits = new Bits(4);
+        Bits.Cursor cursor = new Bits.Cursor(0);
+
+        bits.fillBitmapTo(cursor, 4, new boolean[] {true, false});
+
+        assertThat(cursor.get()).isEqualTo(4);
+        assertThat(bits.get(0)).isTrue();
+        assertThat(bits.get(1)).isFalse();
+        assertThat(bits.get(2)).isTrue();
+        assertThat(bits.get(3)).isFalse();
+    }
+
+    @Test
+    public void fillBitmapToRespectsTerminateAt()
+    {
+        Bits bits = new Bits(10);
+        Bits.Cursor cursor = new Bits.Cursor(3);
+
+        bits.fillBitmapTo(cursor, 7, new boolean[] {false, true});
+
+        assertThat(cursor.get()).isEqualTo(7);
+        assertThat(bits.get(3)).isFalse();
+        assertThat(bits.get(4)).isTrue();
+        assertThat(bits.get(5)).isFalse();
+        assertThat(bits.get(6)).isTrue();
+    }
+
+    @Test
+    public void fillBitmapToStopAtSize()
+    {
+        /* The bitmap ends at terminateAt; filling must stop exactly there. */
+        Bits bits = new Bits(5);
+        Bits.Cursor cursor = new Bits.Cursor(0);
+
+        bits.fillBitmapTo(cursor, 5, new boolean[] {true});
+
+        assertThat(cursor.get()).isEqualTo(5);
+        assertThat(bits.get(4)).isTrue();
+    }
 }

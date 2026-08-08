@@ -118,9 +118,62 @@ public final class Bits extends AbstractList<Boolean>
         return bytes;
     }
 
+    /* Fills this Bits from the cursor's current position up to (but not
+     * including) terminateAt with the given pattern, advancing the cursor. */
+    public void fillBitmapTo(Cursor cursor, int terminateAt, boolean[] pattern)
+    {
+        while (cursor.get() < terminateAt)
+        {
+            for (boolean b : pattern)
+            {
+                if (cursor.get() < size)
+                {
+                    setBit(cursor.get(), b);
+                    cursor.advance();
+                }
+            }
+        }
+    }
+
     private void checkIndex(int index)
     {
         if (index < 0 || index >= size)
             throw new IndexOutOfBoundsException(String.valueOf(index));
+    }
+
+    /**
+     * A mutable cursor into a {@link Bits}, providing the in/out semantics of the
+     * C++ {@code unsigned& cursor} parameter passed to the bit-writing helpers.
+     * The current position is held directly, so a single cursor can be shared and
+     * advanced by successive calls.
+     */
+    public static final class Cursor
+    {
+        private int index;
+
+        public Cursor(int index)
+        {
+            this.index = index;
+        }
+
+        public int get()
+        {
+            return index;
+        }
+
+        public void set(int value)
+        {
+            index = value;
+        }
+
+        public void advance()
+        {
+            index++;
+        }
+
+        public void advance(int delta)
+        {
+            index += delta;
+        }
     }
 }
