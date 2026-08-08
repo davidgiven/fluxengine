@@ -70,6 +70,7 @@ public interface Command
                     .put("seek", SeekCommand::new)
                     .put("devices", DevicesCommand::new)
                     .put("inspect", stub("inspect", "Low-level analysis and inspection of a disk."))
+                    .put("gui", GuiCommand::new)
                     .build();
 
     /* Consume arguments until we reach a real command, instantiate it, and
