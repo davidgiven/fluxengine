@@ -78,6 +78,7 @@ java_library(
         ":config_java_proto",
         "//java/com/cowlark/fluxengine/core",
         "//java/com/cowlark/fluxengine/core/flags",
+        "//java/com/cowlark/fluxengine/data",
         "//java/com/cowlark/fluxengine/fluxsink:fluxsink_java_proto",
         "//java/com/cowlark/fluxengine/fluxsource:fluxsource_java_proto",
         "//java/com/cowlark/fluxengine/imagewriter:imagewriter_java_proto",

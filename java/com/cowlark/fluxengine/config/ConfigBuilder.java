@@ -26,6 +26,7 @@ import static com.cowlark.fluxengine.config.ImageReaderWriterType.IMAGETYPE_TD0;
 
 import com.cowlark.fluxengine.core.flags.FlagGroup;
 import com.cowlark.fluxengine.core.flags.Flags;
+import com.cowlark.fluxengine.data.Formats;
 import com.cowlark.fluxengine.fluxsink.FluxSinkProto;
 import com.cowlark.fluxengine.fluxsource.FluxSourceProto;
 import com.google.common.collect.ImmutableList;
@@ -96,6 +97,15 @@ public class ConfigBuilder
 
     public ConfigBuilder loadConfigFile(String name)
     {
+        /* Try to load the config from the built-in formats first. */
+
+        ConfigProto config = Formats.get(name);
+        if (config != null)
+        {
+            proto.mergeFrom(config);
+            return this;
+        }
+
         String contents;
         try
         {

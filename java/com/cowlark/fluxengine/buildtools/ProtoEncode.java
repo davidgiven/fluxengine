@@ -9,6 +9,8 @@ import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -84,7 +86,10 @@ public final class ProtoEncode
     private static String processMultilineStrings(String contents)
     {
         StringBuilder result = new StringBuilder();
-        List<String> lines = contents.lines().toList();
+        List<String> lines = new ArrayList<>();
+        Iterator<String> it = contents.lines().iterator();
+        while (it.hasNext())
+            lines.add(it.next());
         int i = 0;
         while (i < lines.size())
         {

@@ -59,6 +59,24 @@ public class ConfigBuilderTest
     }
 
     @Test
+    public void loadConfigFileLoadsBuiltInFormatByName()
+    {
+        ConfigProto proto = builder().loadConfigFile("amiga").build();
+
+        assertThat(proto.getShortname()).isEqualTo("Amiga");
+    }
+
+    @Test
+    public void loadConfigFileLoadsBuiltInFormatBeforeFile()
+    {
+        /* A file named "amiga" may exist, but the built-in format must take
+         * precedence. */
+        ConfigProto proto = builder().loadConfigFile("amiga").build();
+
+        assertThat(proto.getShortname()).isEqualTo("Amiga");
+    }
+
+    @Test
     public void loadConfigFileBadTextprotoThrows() throws IOException
     {
         Path file = Files.createTempFile("config", ".textproto");
