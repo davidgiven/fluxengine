@@ -9,15 +9,15 @@ import java.util.function.Consumer;
 public final class Logger
 {
     private static Consumer<? super LogMessage> loggerImpl =
-            message -> LogRenderer.create(System.out).add(message);
+            new DefaultLogRenderer(System.out)::add;
 
     private Logger()
     {
     }
 
-    public static void log(String message)
+    public static void log(String message, Object... args)
     {
-        log(new StringMessage(message));
+        log(new StringMessage(String.format(message, args)));
     }
 
     public static void log(LogMessage message)

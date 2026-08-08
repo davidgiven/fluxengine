@@ -1,12 +1,5 @@
 package com.cowlark.fluxengine.core;
 
-import com.cowlark.fluxengine.core.LogMessage.BeginReadOperationLogMessage;
-import com.cowlark.fluxengine.core.LogMessage.BeginSpeedOperationLogMessage;
-import com.cowlark.fluxengine.core.LogMessage.BeginWriteOperationLogMessage;
-import com.cowlark.fluxengine.core.LogMessage.EmergencyStopMessage;
-import com.cowlark.fluxengine.core.LogMessage.EndSpeedOperationLogMessage;
-import com.cowlark.fluxengine.core.LogMessage.ErrorLogMessage;
-import com.cowlark.fluxengine.core.LogMessage.OptionLogMessage;
 import java.io.PrintStream;
 
 /**
@@ -21,19 +14,8 @@ public abstract class LogRenderer
 
     public LogRenderer add(LogMessage message)
     {
-        return switch (message)
-        {
-            case ErrorLogMessage msg -> newline().add("Error:").add(msg.render()).newline();
-            case EmergencyStopMessage msg -> newline().add("Stop!").newline();
-            case BeginSpeedOperationLogMessage msg -> newline().add(msg.render()).newline();
-            case EndSpeedOperationLogMessage msg -> newline().add(msg.render()).newline();
-            case BeginReadOperationLogMessage msg ->
-                    header(String.format("R%2d.%d: ", msg.track(), msg.head()));
-            case BeginWriteOperationLogMessage msg ->
-                    header(String.format("W%2d.%d: ", msg.track(), msg.head()));
-            case OptionLogMessage msg -> newline().add("OPTION:").add(msg.render()).newline();
-            default -> newline().add(message.render()).newline();
-        };
+        message.render(this);
+        return this;
     }
 
     public abstract LogRenderer add(String message);
@@ -86,8 +68,7 @@ public abstract class LogRenderer
                 indent();
             }
             stream.print(message);
-            space = !message.isEmpty() &&
-                    Character.isWhitespace(message.charAt(message.length() - 1));
+            space = !message.isEmpty() && Character.isWhitespace(message.charAt(message.length() - 1));
             return this;
         }
 
@@ -100,8 +81,7 @@ public abstract class LogRenderer
             lineLen = message.length();
             header = true;
             newline = true;
-            space = !message.isEmpty() &&
-                    Character.isWhitespace(message.charAt(message.length() - 1));
+            space = !message.isEmpty() && Character.isWhitespace(message.charAt(message.length() - 1));
             return this;
         }
 
@@ -132,4 +112,5 @@ public abstract class LogRenderer
             return this;
         }
     }
+
 }
