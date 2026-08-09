@@ -86,20 +86,21 @@ public class Apple2Encoder extends Encoder
         ENCODE_DATA_GCR[0x3f] = 0xff;
     }
 
-    private static int encodeDataGcr(int data)
-    {
-        if (data < 0 || data >= ENCODE_DATA_GCR.length)
-            return -1;
-        return ENCODE_DATA_GCR[data];
-    }
-
     private final ConfigProto fullConfig;
     private final Apple2EncoderProto config;
+    private int volumeId = 254;
 
     public Apple2Encoder(ConfigProto config)
     {
         this.fullConfig = config;
         this.config = config.getEncoder().getApple2();
+    }
+
+    private static int encodeDataGcr(int data)
+    {
+        if (data < 0 || data >= ENCODE_DATA_GCR.length)
+            return -1;
+        return ENCODE_DATA_GCR[data];
     }
 
     @Override
@@ -117,25 +118,24 @@ public class Apple2Encoder extends Encoder
         if (cursor.get() >= bits.size())
             throw new FluxEngineException(
                     "track data overrun by " + (cursor.get() - bits.size()) + " bits");
-        bits.fillBitmapTo(cursor, bits.size(), new boolean[] {true, false});
+        bits.fillBitmapTo(cursor, bits.size(), new boolean[]{true, false});
 
         Fluxmap fluxmap = new Fluxmap();
         fluxmap.appendBits(
-                bits,
-                (long) calculatePhysicalClockPeriod(
+                bits, (long) calculatePhysicalClockPeriod(
                         fullConfig,
                         config.getClockPeriodUs() * 1e3,
                         config.getRotationalPeriodMs() * 1e6));
         return fluxmap;
     }
 
-    private int volumeId = 254;
-
     /* This is extremely inspired by the MESS implementation, written by Nathan
      * Woods and R. Belmont:
-     * https://github.com/mamedev/mame/blob/7914a6083a3b3a8c243ae6c3b8cb50b023f21e0e/src/lib/formats/ap2_dsk.cpp
+     * https://github.com/mamedev/mame/blob/7914a6083a3b3a8c243ae6c3b8cb50b023f21e0e/src/lib
+     * /formats/ap2_dsk.cpp
      * as well as Understanding the Apple II (1983) Chapter 9
-     * https://archive.org/details/Understanding_the_Apple_II_1983_Quality_Software/page/n230/mode/1up?view=theater
+     * https://archive.org/details/Understanding_the_Apple_II_1983_Quality_Software/page/n230
+     * /mode/1up?view=theater
      */
 
     private void writeSector(Bits bits, Bits.Cursor cursor, Sector sector)
@@ -180,8 +180,7 @@ public class Apple2Encoder extends Encoder
 
             // Convert the sector data to GCR, append the checksum, and write it
             // out
-            final int TWOBIT_COUNT =
-                    0x56; // Size of the 'twobit' area at the start of the GCR data
+            final int TWOBIT_COUNT = 0x56; // Size of the 'twobit' area at the start of the GCR data
             int checksum = 0;
             for (int i = 0; i < Apple2.APPLE2_ENCODED_SECTOR_LENGTH; i++)
             {
@@ -189,8 +188,7 @@ public class Apple2Encoder extends Encoder
                 if (i >= TWOBIT_COUNT)
                 {
                     value = sector.data.getByte(i - TWOBIT_COUNT) >> 2;
-                }
-                else
+                } else
                 {
                     int tmp = sector.data.getByte(i);
                     value = ((tmp & 1) << 1) | ((tmp & 2) >> 1);
@@ -224,7 +222,7 @@ public class Apple2Encoder extends Encoder
 
     private void writeBits(Bits bits, Bits.Cursor cursor, int data, int width)
     {
-        for (int i = width; i-- != 0;)
+        for (int i = width; i-- != 0; )
             writeBit(bits, cursor, (data & (1 << i)) != 0);
     }
 
@@ -240,7 +238,7 @@ public class Apple2Encoder extends Encoder
 
     private void writeFf40(Bits bits, Bits.Cursor cursor, int n)
     {
-        for (; n-- != 0;)
+        for (; n-- != 0; )
             writeBits(bits, cursor, 0xff << 2, 10);
     }
 }

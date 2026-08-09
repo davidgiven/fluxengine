@@ -49,22 +49,25 @@ public class NorthstarEncoder extends Encoder
         {
             case Northstar.NORTHSTAR_PAYLOAD_SIZE_SD:
                 preambleSize = Northstar.NORTHSTAR_PREAMBLE_SIZE_SD;
-                encodedSectorSize = PRE_HEADER_GAP_FILL_SIZE_SD +
-                        Northstar.NORTHSTAR_ENCODED_SECTOR_SIZE_SD + GAP_FILL_SIZE_SD;
+                encodedSectorSize =
+                        PRE_HEADER_GAP_FILL_SIZE_SD + Northstar.NORTHSTAR_ENCODED_SECTOR_SIZE_SD +
+                                GAP_FILL_SIZE_SD;
                 gapFillSize = GAP_FILL_SIZE_SD;
                 preHeaderGapFillSize = PRE_HEADER_GAP_FILL_SIZE_SD;
                 doubleDensity = false;
                 break;
             case Northstar.NORTHSTAR_PAYLOAD_SIZE_DD:
                 preambleSize = Northstar.NORTHSTAR_PREAMBLE_SIZE_DD;
-                encodedSectorSize = PRE_HEADER_GAP_FILL_SIZE_DD +
-                        Northstar.NORTHSTAR_ENCODED_SECTOR_SIZE_DD + GAP_FILL_SIZE_DD;
+                encodedSectorSize =
+                        PRE_HEADER_GAP_FILL_SIZE_DD + Northstar.NORTHSTAR_ENCODED_SECTOR_SIZE_DD +
+                                GAP_FILL_SIZE_DD;
                 gapFillSize = GAP_FILL_SIZE_DD;
                 preHeaderGapFillSize = PRE_HEADER_GAP_FILL_SIZE_DD;
                 doubleDensity = true;
                 break;
             default:
-                throw new FluxEngineException("unsupported sector size --- you must pick 256 or 512");
+                throw new FluxEngineException(
+                        "unsupported sector size --- you must pick 256 or " + "512");
         }
 
         int fullSectorSize = preambleSize + encodedSectorSize;
@@ -95,8 +98,7 @@ public class NorthstarEncoder extends Encoder
             if (doubleDensity)
             {
                 writer.write8(NorthstarDecoder.northstarChecksum(sectorData.slice(2)));
-            }
-            else
+            } else
             {
                 writer.write8(NorthstarDecoder.northstarChecksum(sectorData.slice(1)));
             }
@@ -123,8 +125,7 @@ public class NorthstarEncoder extends Encoder
         if (doubleDensity)
         {
             FmMfm.encodeMfm(bits, cursor, fullSector, lastBit);
-        }
-        else
+        } else
         {
             FmMfm.encodeFm(bits, cursor, fullSector);
         }

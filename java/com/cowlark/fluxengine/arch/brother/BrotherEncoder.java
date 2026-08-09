@@ -136,6 +136,15 @@ public class BrotherEncoder extends Encoder
         ENCODE_DATA_GCR[31] = 0xfb;
     }
 
+    private final ConfigProto fullConfig;
+    private final BrotherEncoderProto config;
+
+    public BrotherEncoder(ConfigProto config)
+    {
+        this.fullConfig = config;
+        this.config = config.getEncoder().getBrother();
+    }
+
     private static int encodeHeaderGcr(int word)
     {
         if (word < 0 || word >= ENCODE_HEADER_GCR.length)
@@ -210,15 +219,6 @@ public class BrotherEncoder extends Encoder
             writeByte.accept(0);
     }
 
-    private final ConfigProto fullConfig;
-    private final BrotherEncoderProto config;
-
-    public BrotherEncoder(ConfigProto config)
-    {
-        this.fullConfig = config;
-        this.config = config.getEncoder().getBrother();
-    }
-
     @Override
     public Fluxmap encode(LogicalTrackLayout ltl, List<Sector> sectors, Image image)
     {
@@ -229,15 +229,19 @@ public class BrotherEncoder extends Encoder
         int sectorCount = 0;
         for (Sector sectorData : sectors)
         {
-            double headerMs = config.getPostIndexGapMs() + sectorCount * config.getSectorSpacingMs();
+            double headerMs =
+                    config.getPostIndexGapMs() + sectorCount * config.getSectorSpacingMs();
             int headerCursor = (int) (headerMs * 1e3 / config.getClockRateUs());
             double dataMs = headerMs + config.getPostHeaderSpacingMs();
             int dataCursor = (int) (dataMs * 1e3 / config.getClockRateUs());
 
-            bits.fillBitmapTo(cursor, headerCursor, new boolean[] {true, false});
+            bits.fillBitmapTo(cursor, headerCursor, new boolean[]{true, false});
             writeSectorHeader(
-                    bits, cursor, sectorData.location.logicalCylinder(), sectorData.location.logicalSector());
-            bits.fillBitmapTo(cursor, dataCursor, new boolean[] {true, false});
+                    bits,
+                    cursor,
+                    sectorData.location.logicalCylinder(),
+                    sectorData.location.logicalSector());
+            bits.fillBitmapTo(cursor, dataCursor, new boolean[]{true, false});
             writeSectorData(bits, cursor, sectorData.data);
 
             sectorCount++;
@@ -245,7 +249,7 @@ public class BrotherEncoder extends Encoder
 
         if (cursor.get() >= bits.size())
             throw new FluxEngineException("track data overrun");
-        bits.fillBitmapTo(cursor, bits.size(), new boolean[] {true, false});
+        bits.fillBitmapTo(cursor, bits.size(), new boolean[]{true, false});
 
         Fluxmap fluxmap = new Fluxmap();
         fluxmap.appendBits(bits, (long) (config.getClockRateUs() * 1e3));

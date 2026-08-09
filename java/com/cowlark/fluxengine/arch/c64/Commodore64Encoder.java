@@ -40,6 +40,17 @@ public class Commodore64Encoder extends Encoder
         ENCODE_DATA_GCR[0xf] = 0x15;
     }
 
+    private final ConfigProto fullConfig;
+    private final Commodore64EncoderProto config;
+    private int formatByte1;
+    private int formatByte2;
+
+    public Commodore64Encoder(ConfigProto config)
+    {
+        this.fullConfig = config;
+        this.config = config.getEncoder().getC64();
+    }
+
     private static int encodeDataGcr(int data)
     {
         if (data < 0 || data >= ENCODE_DATA_GCR.length)
@@ -89,8 +100,7 @@ public class Commodore64Encoder extends Encoder
             {
                 output[4 - i] = (loGcr & 1) != 0;
                 loGcr >>= 1;
-            }
-            else
+            } else
             {
                 output[i + b] = (hiGcr & 1) != 0;
                 hiGcr >>= 1;
@@ -98,17 +108,6 @@ public class Commodore64Encoder extends Encoder
             }
         }
         return output;
-    }
-
-    private final ConfigProto fullConfig;
-    private final Commodore64EncoderProto config;
-    private int formatByte1;
-    private int formatByte2;
-
-    public Commodore64Encoder(ConfigProto config)
-    {
-        this.fullConfig = config;
-        this.config = config.getEncoder().getC64();
     }
 
     @Override
@@ -128,8 +127,7 @@ public class Commodore64Encoder extends Encoder
             br.seek(162); /* goto position of the first Disk ID Byte */
             formatByte1 = br.read8();
             formatByte2 = br.read8();
-        }
-        else
+        } else
         {
             formatByte1 = formatByte2 = 0;
         }
@@ -143,7 +141,7 @@ public class Commodore64Encoder extends Encoder
         bits.fillBitmapTo(
                 cursor,
                 (int) (config.getPostIndexGapUs() / clockRateUs),
-                new boolean[] {true, false});
+                new boolean[]{true, false});
 
         for (Sector sector : sectors)
             writeSector(bits, cursor, sector);
@@ -151,7 +149,7 @@ public class Commodore64Encoder extends Encoder
         if (cursor.get() >= bits.size())
             throw new FluxEngineException(
                     "track data overrun by " + (cursor.get() - bits.size()) + " bits");
-        bits.fillBitmapTo(cursor, bits.size(), new boolean[] {true, false});
+        bits.fillBitmapTo(cursor, bits.size(), new boolean[]{true, false});
 
         Fluxmap fluxmap = new Fluxmap();
         fluxmap.appendBits(
@@ -176,8 +174,7 @@ public class Commodore64Encoder extends Encoder
             // 2. Write Header info 10 GCR bytes
             int encodedTrack = sector.location.logicalCylinder() + 1;
             int encodedSector = sector.location.logicalSector();
-            int headerChecksum =
-                    (encodedTrack ^ encodedSector ^ formatByte1 ^ formatByte2);
+            int headerChecksum = (encodedTrack ^ encodedSector ^ formatByte1 ^ formatByte2);
             writeBits(bits, cursor, encodeData(C64.C64_HEADER_BLOCK_ID));
             writeBits(bits, cursor, encodeData(headerChecksum));
             writeBits(bits, cursor, encodeData(encodedSector));

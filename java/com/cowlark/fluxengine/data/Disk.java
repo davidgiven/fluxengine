@@ -29,8 +29,7 @@ public class Disk
     {
         this.image = image;
 
-        ListMultimap<CylinderHead, Sector> sectorsGroupedByTrack =
-                ArrayListMultimap.create();
+        ListMultimap<CylinderHead, Sector> sectorsGroupedByTrack = ArrayListMultimap.create();
         for (Sector sector : image)
             sectorsGroupedByTrack.put(sector.physicalLocation, sector);
 
@@ -40,8 +39,7 @@ public class Disk
 
         for (CylinderHead physicalLocation : sectorLocations)
         {
-            PhysicalTrackLayout ptl =
-                    diskLayout.layoutByPhysicalLocation.get(physicalLocation);
+            PhysicalTrackLayout ptl = diskLayout.layoutByPhysicalLocation.get(physicalLocation);
             LogicalTrackLayout ltl = ptl.logicalTrackLayout;
 
             Track decodedTrack = new Track();

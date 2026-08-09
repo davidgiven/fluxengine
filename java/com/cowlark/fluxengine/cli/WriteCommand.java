@@ -35,6 +35,7 @@ public class WriteCommand implements Command
             .setName("-d")
             .setHelpText("flux destination to write to")
             .build();
+    private boolean verify = true;
     private ActionFlag noVerifyFlag = ActionFlag.builder()
             .setGroup(flags)
             .setName("--no-verify")
@@ -42,8 +43,6 @@ public class WriteCommand implements Command
             .setHelpText("skip verification of write")
             .setVoidCallback(() -> verify = false)
             .build();
-
-    private boolean verify = true;
 
     @Override
     public String getHelp()
@@ -65,9 +64,7 @@ public class WriteCommand implements Command
         ImageReader reader = ImageReader.create(config);
         Image image = reader.readImage();
 
-        config = config.toBuilder()
-                .mergeFrom(reader.getExtraConfig())
-                .build();
+        config = config.toBuilder().mergeFrom(reader.getExtraConfig()).build();
 
         DiskLayout diskLayout = new DiskLayout(config);
         Encoder encoder = Arch.createEncoder(config);

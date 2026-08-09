@@ -8,8 +8,8 @@ import com.cowlark.fluxengine.core.Logger;
 import com.cowlark.fluxengine.data.Geometry;
 import com.cowlark.fluxengine.data.Image;
 import com.cowlark.fluxengine.data.Sector;
-import com.cowlark.fluxengine.ibm.IbmEncoderProto;
 import com.cowlark.fluxengine.external.FormatType;
+import com.cowlark.fluxengine.ibm.IbmEncoderProto;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -120,8 +120,8 @@ public class D88ImageReader extends ImageReader
                 if (ddam != 0)
                     throw new FluxEngineException("D88: nonzero ddam currently unsupported");
                 if (rpm != 0)
-                    throw new FluxEngineException("D88: 1.44MB 300rpm formats currently " +
-                            "unsupported");
+                    throw new FluxEngineException(
+                            "D88: 1.44MB 300rpm formats currently " + "unsupported");
                 if (fddStatusCode != 0)
                     throw new FluxEngineException(
                             "D88: nonzero fdd status codes are currently unsupported");

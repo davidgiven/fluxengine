@@ -28,7 +28,8 @@ public class HardwareFluxSink extends FluxSink
     @Override
     public void addFlux(int track, int side, Fluxmap fluxmap)
     {
-        device.setDrive(config.getDrive().getDrive(),
+        device.setDrive(
+                config.getDrive().getDrive(),
                 config.getDrive().getHighDensity(),
                 config.getDrive().getIndexMode().getNumber());
         device.seek(track);

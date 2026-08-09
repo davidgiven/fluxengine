@@ -8,7 +8,6 @@ import com.cowlark.fluxengine.data.Image;
 import com.cowlark.fluxengine.data.LogicalTrackLayout;
 import com.cowlark.fluxengine.data.Sector;
 import com.google.common.collect.ImmutableList;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -48,20 +47,17 @@ public abstract class Encoder
         return sectors.build();
     }
 
-    public abstract Fluxmap encode(
-            LogicalTrackLayout ltl, List<Sector> sectors, Image image);
+    public abstract Fluxmap encode(LogicalTrackLayout ltl, List<Sector> sectors, Image image);
 
     public double calculatePhysicalClockPeriod(ConfigProto config,
-            double targetClockPeriod, double targetRotationalPeriod)
+                                               double targetClockPeriod,
+                                               double targetRotationalPeriod)
     {
-        double currentRotationalPeriod =
-                config.getDrive().getRotationalPeriodMs() * 1e6;
+        double currentRotationalPeriod = config.getDrive().getRotationalPeriodMs() * 1e6;
         if (currentRotationalPeriod == 0)
             throw new FluxEngineException(
-                    "you must set --drive.rotational_period_ms as it can't be "
-                            + "autodetected");
+                    "you must set --drive.rotational_period_ms as it can't be " + "autodetected");
 
-        return targetClockPeriod *
-                (currentRotationalPeriod / targetRotationalPeriod);
+        return targetClockPeriod * (currentRotationalPeriod / targetRotationalPeriod);
     }
 }

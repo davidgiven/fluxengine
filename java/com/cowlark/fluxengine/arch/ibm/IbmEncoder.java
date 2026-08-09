@@ -56,14 +56,6 @@ public class IbmEncoder extends Encoder
      */
     private static final int MFM_RECORD_SEPARATOR = 0x4489;
     private static final int MFM_RECORD_SEPARATOR_BYTE = 0xa1;
-
-    private static int decodeUint16(int raw)
-    {
-        Bytes b = new Bytes(2);
-        b.writer().writeBe16(raw);
-        return FmMfm.decodeFmMfm(b.toBits()).getByte(0) & 0xff;
-    }
-
     private final ConfigProto fullConfig;
     private final IbmEncoderProto config;
     private final boolean[] lastBit = new boolean[1];
@@ -74,6 +66,13 @@ public class IbmEncoder extends Encoder
     {
         this.fullConfig = config;
         this.config = config.getEncoder().getIbm();
+    }
+
+    private static int decodeUint16(int raw)
+    {
+        Bytes b = new Bytes(2);
+        b.writer().writeBe16(raw);
+        return FmMfm.decodeFmMfm(b.toBits()).getByte(0) & 0xff;
     }
 
     private void writeRawBits(int data, int width)
@@ -195,8 +194,7 @@ public class IbmEncoder extends Encoder
                 }
                 bw.write8(idamUnencoded);
                 bw.write8(sectorData.location.logicalCylinder());
-                bw.write8(
-                        sectorData.location.logicalHead() ^
+                bw.write8(sectorData.location.logicalHead() ^
                         (trackdata.getInvertSideByte() ? 1 : 0));
                 bw.write8(sectorData.location.logicalSector());
                 bw.write8(sectorSize);
@@ -256,8 +254,7 @@ public class IbmEncoder extends Encoder
 
         Fluxmap fluxmap = new Fluxmap();
         fluxmap.appendBits(
-                bits,
-                (long) calculatePhysicalClockPeriod(
+                bits, (long) calculatePhysicalClockPeriod(
                         fullConfig,
                         clockRateUs * 1e3,
                         trackdata.getTargetRotationalPeriodMs() * 1e6));

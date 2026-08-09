@@ -40,12 +40,6 @@ public class Victor9kEncoder extends Encoder
         ENCODE_DATA_GCR[0xf] = 0x15;
     }
 
-    private static int encodeDataGcr(int data)
-    {
-        data &= 0x0f;
-        return ENCODE_DATA_GCR[data];
-    }
-
     private final ConfigProto fullConfig;
     private final Victor9kEncoderProto config;
     private final boolean[] lastBit = new boolean[1];
@@ -54,6 +48,12 @@ public class Victor9kEncoder extends Encoder
     {
         this.fullConfig = config;
         this.config = config.getEncoder().getVictor9K();
+    }
+
+    private static int encodeDataGcr(int data)
+    {
+        data &= 0x0f;
+        return ENCODE_DATA_GCR[data];
     }
 
     private void writeZeroBits(Bits bits, Bits.Cursor cursor, int count)
@@ -138,9 +138,9 @@ public class Victor9kEncoder extends Encoder
     }
 
     private void writeSector(Bits bits,
-            Bits.Cursor cursor,
-            Victor9kEncoderProto.TrackdataProto trackdata,
-            Sector sector)
+                             Bits.Cursor cursor,
+                             Victor9kEncoderProto.TrackdataProto trackdata,
+                             Sector sector)
     {
         writeOneBits(bits, cursor, trackdata.getPreHeaderSyncBits());
         writeBits(bits, cursor, Victor9k.VICTOR9K_SECTOR_RECORD, 10);
@@ -150,10 +150,7 @@ public class Victor9kEncoder extends Encoder
         writeBytes(
                 bits,
                 cursor,
-                Bytes.of(
-                        encodedTrack,
-                        encodedSector,
-                        (encodedTrack + encodedSector) & 0xff));
+                Bytes.of(encodedTrack, encodedSector, (encodedTrack + encodedSector) & 0xff));
 
         writeGap(bits, cursor, trackdata.getPostHeaderGapBits());
 
@@ -195,17 +192,16 @@ public class Victor9kEncoder extends Encoder
         int bitsPerRevolution =
                 (int) ((trackdata.getRotationalPeriodMs() * 1e3) / trackdata.getClockPeriodUs());
         Bits bits = new Bits(bitsPerRevolution);
-        long clockPeriod =
-                (long) calculatePhysicalClockPeriod(
-                        fullConfig,
-                        trackdata.getClockPeriodUs() * 1e3,
-                        trackdata.getRotationalPeriodMs() * 1e6);
+        long clockPeriod = (long) calculatePhysicalClockPeriod(
+                fullConfig,
+                trackdata.getClockPeriodUs() * 1e3,
+                trackdata.getRotationalPeriodMs() * 1e6);
         Bits.Cursor cursor = new Bits.Cursor(0);
 
         bits.fillBitmapTo(
                 cursor,
                 (int) (trackdata.getPostIndexGapUs() * 1e3 / clockPeriod),
-                new boolean[] {true, false});
+                new boolean[]{true, false});
         lastBit[0] = false;
 
         for (Sector sector : sectors)
@@ -214,7 +210,7 @@ public class Victor9kEncoder extends Encoder
         if (cursor.get() >= bits.size())
             throw new FluxEngineException(
                     "track data overrun by " + (cursor.get() - bits.size()) + " bits");
-        bits.fillBitmapTo(cursor, bits.size(), new boolean[] {true, false});
+        bits.fillBitmapTo(cursor, bits.size(), new boolean[]{true, false});
 
         Fluxmap fluxmap = new Fluxmap();
         fluxmap.appendBits(bits, clockPeriod);

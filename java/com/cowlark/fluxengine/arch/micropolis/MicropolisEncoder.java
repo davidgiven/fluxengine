@@ -53,11 +53,10 @@ public class MicropolisEncoder extends Encoder
             throw new FluxEngineException("track data mismatched length");
 
         Fluxmap fluxmap = new Fluxmap();
-        long clockPeriod =
-                (long) calculatePhysicalClockPeriod(
-                        fullConfig,
-                        config.getClockPeriodUs() * 1e3,
-                        config.getRotationalPeriodMs() * 1e6);
+        long clockPeriod = (long) calculatePhysicalClockPeriod(
+                fullConfig,
+                config.getClockPeriodUs() * 1e3,
+                config.getRotationalPeriodMs() * 1e6);
         int pos = 0;
         for (int i = 1; i < indexes.size(); i++)
         {
@@ -70,11 +69,12 @@ public class MicropolisEncoder extends Encoder
     }
 
     private void writeSector(Bits bits,
-            Bits.Cursor cursor,
-            Sector sector,
-            MicropolisEncoderProto.EccType eccType)
+                             Bits.Cursor cursor,
+                             Sector sector,
+                             MicropolisEncoderProto.EccType eccType)
     {
-        if ((sector.data.size() != 256) && (sector.data.size() != Micropolis.MICROPOLIS_ENCODED_SECTOR_SIZE))
+        if ((sector.data.size() != 256) &&
+                (sector.data.size() != Micropolis.MICROPOLIS_ENCODED_SECTOR_SIZE))
             throw new FluxEngineException("unsupported sector size --- you must pick 256 or 275");
 
         int fullSectorSize = 40 + Micropolis.MICROPOLIS_ENCODED_SECTOR_SIZE + 40 + 35;
@@ -97,8 +97,7 @@ public class MicropolisEncoder extends Encoder
                 System.err.println(
                         "Warning: checksum incorrect. Sector: " + sector.location.logicalSector());
             sectorData = sector.data;
-        }
-        else
+        } else
         {
             sectorData = new Bytes(0);
             ByteWriter writer = sectorData.writer();

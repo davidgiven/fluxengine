@@ -5,8 +5,8 @@ import static com.cowlark.fluxengine.external.FluxEngine.F_BIT_PULSE;
 import static com.cowlark.fluxengine.external.FluxEngine.NS_PER_TICK;
 
 import com.cowlark.fluxengine.config.ConfigProto;
-import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.core.ByteWriter;
+import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.core.FluxEngineException;
 import com.cowlark.fluxengine.core.Logger;
 import com.cowlark.fluxengine.data.DiskLayout;
@@ -31,12 +31,6 @@ import java.util.Map;
 public class A2RFluxSink extends FluxSink
 {
     private static final String VERSION_STRING = String.format("%-32s", "FluxEngine");
-
-    private static long ticksToA2r(long ticks)
-    {
-        return (long) (ticks * NS_PER_TICK / A2R.NS_PER_TICK);
-    }
-
     private final String filename;
     private final ConfigProto config;
     private final Bytes bytes = new Bytes(0);
@@ -44,7 +38,6 @@ public class A2RFluxSink extends FluxSink
     private final Bytes strmBytes = new Bytes(0);
     private final ByteWriter strmWriter = strmBytes.writer();
     private final Map<String, String> metadata = new LinkedHashMap<>();
-
     private int minHead;
     private int maxHead;
     private int minCylinder;
@@ -57,6 +50,11 @@ public class A2RFluxSink extends FluxSink
         metadata.put(
                 "image_date",
                 DateTimeFormatter.ISO_INSTANT.format(ZonedDateTime.now(ZoneOffset.UTC)));
+    }
+
+    private static long ticksToA2r(long ticks)
+    {
+        return (long) (ticks * NS_PER_TICK / A2R.NS_PER_TICK);
     }
 
     private void writeChunkAndData(int chunkId, Bytes data)

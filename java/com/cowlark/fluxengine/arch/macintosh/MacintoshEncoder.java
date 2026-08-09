@@ -89,6 +89,15 @@ public class MacintoshEncoder extends Encoder
         ENCODE_DATA_GCR[0x3f] = 0xff;
     }
 
+    private final ConfigProto fullConfig;
+    private final MacintoshEncoderProto config;
+
+    public MacintoshEncoder(ConfigProto config)
+    {
+        this.fullConfig = config;
+        this.config = config.getEncoder().getMacintosh();
+    }
+
     private static int encodeDataGcr(int data)
     {
         if (data < 0 || data >= ENCODE_DATA_GCR.length)
@@ -125,7 +134,8 @@ public class MacintoshEncoder extends Encoder
 
     /* This is extremely inspired by the MESS implementation, written by Nathan
      * Woods and R. Belmont:
-     * https://github.com/mamedev/mame/blob/4263a71e64377db11392c458b580c5ae83556bc7/src/lib/formats/ap_dsk35.cpp
+     * https://github.com/mamedev/mame/blob/4263a71e64377db11392c458b580c5ae83556bc7/src/lib
+     * /formats/ap_dsk35.cpp
      */
     private static Bytes encodeCrazyData(Bytes input)
     {
@@ -249,10 +259,10 @@ public class MacintoshEncoder extends Encoder
 
         int encodedTrack = sector.location.logicalCylinder() & 0x3f;
         int encodedSector = sector.location.logicalSector();
-        int encodedSide = encodeSide(sector.location.logicalCylinder(), sector.location.logicalHead());
+        int encodedSide =
+                encodeSide(sector.location.logicalCylinder(), sector.location.logicalHead());
         int formatByte = Macintosh.MAC_FORMAT_BYTE;
-        int headerChecksum =
-                (encodedTrack ^ encodedSector ^ encodedSide ^ formatByte) & 0x3f;
+        int headerChecksum = (encodedTrack ^ encodedSector ^ encodedSide ^ formatByte) & 0x3f;
 
         writeBits(bits, cursor, encodeDataGcr(encodedTrack), 1 * 8);
         writeBits(bits, cursor, encodeDataGcr(encodedSector), 1 * 8);
@@ -265,23 +275,12 @@ public class MacintoshEncoder extends Encoder
         writeBits(bits, cursor, Macintosh.MAC_DATA_RECORD, 3 * 8);
         writeBits(bits, cursor, encodeDataGcr(sector.location.logicalSector()), 1 * 8);
 
-        Bytes wireData = sector.data
-                .slice(512, 12)
-                .concat(sector.data.slice(0, 512));
+        Bytes wireData = sector.data.slice(512, 12).concat(sector.data.slice(0, 512));
         Bytes crazy = encodeCrazyData(wireData);
         for (int i = 0; i < crazy.size(); i++)
             writeBits(bits, cursor, encodeDataGcr(crazy.getByte(i) & 0xff), 1 * 8);
 
         writeBits(bits, cursor, 0xdeaaff, 3 * 8);
-    }
-
-    private final ConfigProto fullConfig;
-    private final MacintoshEncoderProto config;
-
-    public MacintoshEncoder(ConfigProto config)
-    {
-        this.fullConfig = config;
-        this.config = config.getEncoder().getMacintosh();
     }
 
     @Override
@@ -295,7 +294,7 @@ public class MacintoshEncoder extends Encoder
         bits.fillBitmapTo(
                 cursor,
                 (int) (config.getPostIndexGapUs() / clockRateUs),
-                new boolean[] {true, false});
+                new boolean[]{true, false});
 
         for (Sector sector : sectors)
             writeSector(bits, cursor, sector);
@@ -303,7 +302,7 @@ public class MacintoshEncoder extends Encoder
         if (cursor.get() >= bits.size())
             throw new FluxEngineException(
                     "track data overrun by " + (cursor.get() - bits.size()) + " bits");
-        bits.fillBitmapTo(cursor, bits.size(), new boolean[] {true, false});
+        bits.fillBitmapTo(cursor, bits.size(), new boolean[]{true, false});
 
         Fluxmap fluxmap = new Fluxmap();
         fluxmap.appendBits(

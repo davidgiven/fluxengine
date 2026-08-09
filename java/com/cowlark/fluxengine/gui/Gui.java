@@ -11,6 +11,11 @@ import javafx.stage.Stage;
  */
 public class Gui extends Application
 {
+    public static void main(String[] args)
+    {
+        launch(Gui.class, args);
+    }
+
     @Override
     public void start(Stage stage)
     {
@@ -21,10 +26,5 @@ public class Gui extends Application
         stage.setTitle("FluxEngine");
         stage.setScene(scene);
         stage.show();
-    }
-
-    public static void main(String[] args)
-    {
-        launch(Gui.class, args);
     }
 }

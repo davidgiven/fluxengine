@@ -1,6 +1,20 @@
 package com.cowlark.fluxengine.usb;
 
+import static com.cowlark.fluxengine.external.FluxEngine.FLUXENGINE_CMD_IN_EP;
+import static com.cowlark.fluxengine.external.FluxEngine.FLUXENGINE_CMD_OUT_EP;
+import static com.cowlark.fluxengine.external.FluxEngine.FLUXENGINE_DATA_IN_EP;
+import static com.cowlark.fluxengine.external.FluxEngine.FLUXENGINE_DATA_OUT_EP;
+import static com.cowlark.fluxengine.external.FluxEngine.FLUXENGINE_PROTOCOL_VERSION;
+import static com.cowlark.fluxengine.external.FluxEngine.FRAME_SIZE;
+import static com.cowlark.fluxengine.external.FluxEngine.F_ERROR_BAD_COMMAND;
+import static com.cowlark.fluxengine.external.FluxEngine.F_ERROR_UNDERRUN;
+import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_BULK_READ_TEST_CMD;
+import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_BULK_READ_TEST_REPLY;
+import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_BULK_WRITE_TEST_CMD;
+import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_BULK_WRITE_TEST_REPLY;
 import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_DEBUG;
+import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_ERASE_CMD;
+import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_ERASE_REPLY;
 import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_ERROR;
 import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_GET_VERSION_CMD;
 import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_GET_VERSION_REPLY;
@@ -8,43 +22,26 @@ import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_MEASURE_SPEED_C
 import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_MEASURE_SPEED_REPLY;
 import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_MEASURE_VOLTAGES_CMD;
 import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_MEASURE_VOLTAGES_REPLY;
+import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_READ_CMD;
+import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_READ_REPLY;
 import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_RECALIBRATE_CMD;
 import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_RECALIBRATE_REPLY;
 import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_SEEK_CMD;
 import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_SEEK_REPLY;
-import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_BULK_READ_TEST_CMD;
-import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_BULK_READ_TEST_REPLY;
-import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_BULK_WRITE_TEST_CMD;
-import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_BULK_WRITE_TEST_REPLY;
-import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_READ_CMD;
-import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_READ_REPLY;
-import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_WRITE_CMD;
-import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_WRITE_REPLY;
-import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_ERASE_CMD;
-import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_ERASE_REPLY;
 import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_SET_DRIVE_CMD;
 import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_SET_DRIVE_REPLY;
-import static com.cowlark.fluxengine.external.FluxEngine.F_ERROR_BAD_COMMAND;
-import static com.cowlark.fluxengine.external.FluxEngine.F_ERROR_UNDERRUN;
-import static com.cowlark.fluxengine.external.FluxEngine.FLUXENGINE_CMD_IN_EP;
-import static com.cowlark.fluxengine.external.FluxEngine.FLUXENGINE_CMD_OUT_EP;
-import static com.cowlark.fluxengine.external.FluxEngine.FLUXENGINE_DATA_IN_EP;
-import static com.cowlark.fluxengine.external.FluxEngine.FLUXENGINE_DATA_OUT_EP;
-import static com.cowlark.fluxengine.external.FluxEngine.FLUXENGINE_PROTOCOL_VERSION;
-import static com.cowlark.fluxengine.external.FluxEngine.FRAME_SIZE;
+import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_WRITE_CMD;
+import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_WRITE_REPLY;
 
-import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.core.ByteWriter;
+import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.core.FluxEngineException;
-import java.util.ArrayList;
-import java.util.List;
 import javax.usb.UsbConfiguration;
-import javax.usb.UsbConst;
-
 import javax.usb.UsbEndpoint;
 import javax.usb.UsbException;
 import javax.usb.UsbInterface;
 import javax.usb.UsbPipe;
+import java.util.List;
 
 /**
  * FluxEngine floppy drive device, ported from lib/usb/fluxengineusb.cc.
@@ -125,14 +122,19 @@ class FluxEngineUsbDevice extends UsbDevice
         if (version != FLUXENGINE_PROTOCOL_VERSION)
             throw new FluxEngineException(String.format(
                     "your FluxEngine firmware is at version %d but the client is for version %d; " +
-                            "please upgrade",
-                    version,
-                    FLUXENGINE_PROTOCOL_VERSION));
+                            "please upgrade", version, FLUXENGINE_PROTOCOL_VERSION));
     }
 
     private static double getCurrentTime()
     {
         return System.nanoTime() / 1e9;
+    }
+
+    private static Voltages readVoltages(byte[] r, int ptr)
+    {
+        int logic0 = (r[ptr] & 0xff) | ((r[ptr + 1] & 0xff) << 8);
+        int logic1 = (r[ptr + 2] & 0xff) | ((r[ptr + 3] & 0xff) << 8);
+        return new Voltages(logic0, logic1);
     }
 
     private void usbCmdSend(byte[] data)
@@ -297,8 +299,8 @@ class FluxEngineUsbDevice extends UsbDevice
         Bytes bulkBuffer = usbDataRecv(XSIZE * YSIZE * ZSIZE);
         double elapsedTime = getCurrentTime() - startTime;
 
-        System.out.println("transferred " + bulkBuffer.size() +
-                " bytes from device -> PC in " + (int) (elapsedTime * 1000.0) + " ms (" +
+        System.out.println("transferred " + bulkBuffer.size() + " bytes from device -> PC in " +
+                (int) (elapsedTime * 1000.0) + " ms (" +
                 (int) ((bulkBuffer.size() / 1024.0) / elapsedTime) + " kB/s)");
 
         for (int x = 0; x < XSIZE; x++)
@@ -308,7 +310,7 @@ class FluxEngineUsbDevice extends UsbDevice
                     int offset = x * XSIZE * YSIZE + y * ZSIZE + z;
                     if ((bulkBuffer.getByte(offset) & 0xff) != (x + y + z) % 256)
                         throw new FluxEngineException(String.format(
-                                "data transfer corrupted at 0x%x %d.%d.%d",
+                                "data transfer corrupted at " + "0x%x %d.%d.%d",
                                 offset,
                                 x,
                                 y,
@@ -344,18 +346,15 @@ class FluxEngineUsbDevice extends UsbDevice
         usbDataSend(bulkBuffer);
         double elapsedTime = getCurrentTime() - startTime;
 
-        System.out.println("transferred " + bulkBuffer.size() +
-                " bytes from PC -> device in " + (int) (elapsedTime * 1000.0) + " ms (" +
+        System.out.println("transferred " + bulkBuffer.size() + " bytes from PC -> device in " +
+                (int) (elapsedTime * 1000.0) + " ms (" +
                 (int) ((bulkBuffer.size() / 1024.0) / elapsedTime) + " kB/s)");
 
         awaitReply(F_FRAME_BULK_READ_TEST_REPLY);
     }
 
     @Override
-    public Bytes read(int side,
-                      boolean synced,
-                      double readTimeNs,
-                      double hardSectorThresholdNs)
+    public Bytes read(int side, boolean synced, double readTimeNs, double hardSectorThresholdNs)
     {
         Bytes f = new Bytes(0);
         ByteWriter bw = f.writer();
@@ -414,9 +413,11 @@ class FluxEngineUsbDevice extends UsbDevice
     @Override
     public void setDrive(int drive, boolean highDensity, int indexMode)
     {
-        byte[] f = {
-                F_FRAME_SET_DRIVE_CMD, 5, (byte) drive, (byte) (highDensity ? 1 : 0), (byte) indexMode
-        };
+        byte[] f = {F_FRAME_SET_DRIVE_CMD,
+                5,
+                (byte) drive,
+                (byte) (highDensity ? 1 : 0),
+                (byte) indexMode};
         usbCmdSend(f);
         awaitReply(F_FRAME_SET_DRIVE_REPLY);
     }
@@ -451,13 +452,6 @@ class FluxEngineUsbDevice extends UsbDevice
         ptr += 4;
         measurements.inputDrive1Running = readVoltages(r, ptr);
         return measurements;
-    }
-
-    private static Voltages readVoltages(byte[] r, int ptr)
-    {
-        int logic0 = (r[ptr] & 0xff) | ((r[ptr + 1] & 0xff) << 8);
-        int logic1 = (r[ptr + 2] & 0xff) | ((r[ptr + 3] & 0xff) << 8);
-        return new Voltages(logic0, logic1);
     }
 
     @Override

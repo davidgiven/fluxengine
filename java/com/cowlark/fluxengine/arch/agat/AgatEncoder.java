@@ -103,12 +103,11 @@ public class AgatEncoder extends Encoder
 
         if (cursor.get() >= bits.size())
             throw new FluxEngineException("track data overrun");
-        bits.fillBitmapTo(cursor, bits.size(), new boolean[] {true, false});
+        bits.fillBitmapTo(cursor, bits.size(), new boolean[]{true, false});
 
         Fluxmap fluxmap = new Fluxmap();
         fluxmap.appendBits(
-                bits,
-                (long) calculatePhysicalClockPeriod(
+                bits, (long) calculatePhysicalClockPeriod(
                         fullConfig,
                         config.getTargetClockPeriodUs() * 1e3,
                         config.getTargetRotationalPeriodMs() * 1e6));

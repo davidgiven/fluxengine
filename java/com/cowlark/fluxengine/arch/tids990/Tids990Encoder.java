@@ -20,13 +20,6 @@ import java.util.List;
  */
 public class Tids990Encoder extends Encoder
 {
-    private static int decodeUint16(int raw)
-    {
-        Bytes b = new Bytes(2);
-        b.writer().writeBe16(raw);
-        return FmMfm.decodeFmMfm(b.toBits()).getByte(0) & 0xff;
-    }
-
     private final ConfigProto fullConfig;
     private final Tids990EncoderProto config;
     private final boolean[] lastBit = new boolean[1];
@@ -37,6 +30,13 @@ public class Tids990Encoder extends Encoder
     {
         this.fullConfig = config;
         this.config = config.getEncoder().getTids990();
+    }
+
+    private static int decodeUint16(int raw)
+    {
+        Bytes b = new Bytes(2);
+        b.writer().writeBe16(raw);
+        return FmMfm.decodeFmMfm(b.toBits()).getByte(0) & 0xff;
     }
 
     private void writeRawBits(int data, int width)
@@ -68,8 +68,7 @@ public class Tids990Encoder extends Encoder
     public Fluxmap encode(LogicalTrackLayout ltl, List<Sector> sectors, Image image)
     {
         double clockRateUs = config.getClockPeriodUs() / 2.0;
-        int bitsPerRevolution =
-                (int) ((config.getRotationalPeriodMs() * 1000.0) / clockRateUs);
+        int bitsPerRevolution = (int) ((config.getRotationalPeriodMs() * 1000.0) / clockRateUs);
         bits = new Bits(bitsPerRevolution);
         cursor = new Bits.Cursor(0);
 

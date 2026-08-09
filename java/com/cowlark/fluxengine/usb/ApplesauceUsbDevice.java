@@ -20,14 +20,36 @@ import java.util.List;
  */
 class ApplesauceUsbDevice extends UsbDevice
 {
+    private final SerialPort serial;
+    private final ApplesauceProto config;
+    private boolean connected;
+
+    ApplesauceUsbDevice(String port, ApplesauceProto config)
+    {
+        this.config = config;
+        this.serial = SerialPort.getCommPort(port);
+        serial.setBaudRate(38400);
+        serial.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 0, 0);
+        if (!serial.openPort())
+            throw new FluxEngineException("Unable to open serial port " + port);
+
+        String s = sendrecv("?");
+        if (!s.equals("Applesauce"))
+            throw new FluxEngineException(String.format("Applesauce device not responding " +
+                            "(expected 'Applesauce', got '%s')",
+                    s));
+
+        doCommand("client:v2");
+    }
+
     private static long ssRandNext(long x)
     {
         return (x & 1) != 0 ? (x >> 1) ^ 0x80000062L : x >> 1;
     }
 
     private static Bytes applesauceReadDataToFluxEngine(Bytes asdata,
-            double clock,
-            List<Integer> indexMarks)
+                                                        double clock,
+                                                        List<Integer> indexMarks)
     {
         ByteReader br = new ByteReader(asdata);
         Fluxmap fluxmap = new Fluxmap();
@@ -82,30 +104,27 @@ class ApplesauceUsbDevice extends UsbDevice
         return asdata;
     }
 
-    private final SerialPort serial;
-    private final ApplesauceProto config;
-    private boolean connected;
-
-    ApplesauceUsbDevice(String port, ApplesauceProto config)
-    {
-        this.config = config;
-        this.serial = SerialPort.getCommPort(port);
-        serial.setBaudRate(38400);
-        serial.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 0, 0);
-        if (!serial.openPort())
-            throw new FluxEngineException("Unable to open serial port " + port);
-
-        String s = sendrecv("?");
-        if (!s.equals("Applesauce"))
-            throw new FluxEngineException(String.format(
-                    "Applesauce device not responding (expected 'Applesauce', got '%s')", s));
-
-        doCommand("client:v2");
-    }
-
     private static double getCurrentTime()
     {
         return System.nanoTime() / 1e9;
+    }
+
+    private static List<String> split(String s, char separator)
+    {
+        List<String> result = new ArrayList<>();
+        StringBuilder current = new StringBuilder();
+        for (int i = 0; i < s.length(); i++)
+        {
+            char c = s.charAt(i);
+            if (c == separator)
+            {
+                result.add(current.toString());
+                current.setLength(0);
+            } else
+                current.append(c);
+        }
+        result.add(current.toString());
+        return result;
     }
 
     private String sendrecv(String command)
@@ -171,7 +190,7 @@ class ApplesauceUsbDevice extends UsbDevice
     {
         if (hardSectorCount != 0)
             throw new FluxEngineException(
-                    "hard sectors are currently unsupported on the Applesauce");
+                    "hard sectors are currently unsupported on the " + "Applesauce");
 
         connect();
         try
@@ -235,16 +254,14 @@ class ApplesauceUsbDevice extends UsbDevice
     }
 
     @Override
-    public Bytes read(int side,
-                      boolean synced,
-                      double readTimeNs,
-                      double hardSectorThresholdNs)
+    public Bytes read(int side, boolean synced, double readTimeNs, double hardSectorThresholdNs)
     {
         if (hardSectorThresholdNs != 0.0)
             throw new FluxEngineException(
-                    "hard sectors are currently unsupported on the Applesauce");
+                    "hard sectors are currently unsupported on the " + "Applesauce");
         boolean shortRead = readTimeNs < 400e6;
-        Logger.logf("applesauce: timed reads not supported; using read of %s revolutions",
+        Logger.logf(
+                "applesauce: timed reads not supported; using read of %s revolutions",
                 shortRead ? "1.25" : "2.25");
 
         connect();
@@ -277,8 +294,7 @@ class ApplesauceUsbDevice extends UsbDevice
         if (sendrecv("?safe").equals("+"))
             throw new FluxEngineException("cannot write --- Applesauce 'safe' switch is on");
         if (sendrecv("?vers").compareTo("0300") < 0)
-            throw new FluxEngineException(
-                    "cannot write --- need Applesauce firmware 2.0 or above");
+            throw new FluxEngineException("cannot write --- need Applesauce firmware 2.0 or above");
     }
 
     @Override
@@ -286,7 +302,7 @@ class ApplesauceUsbDevice extends UsbDevice
     {
         if (hardSectorThresholdNs != 0.0)
             throw new FluxEngineException(
-                    "hard sectors are currently unsupported on the Applesauce");
+                    "hard sectors are currently unsupported on the " + "Applesauce");
         checkWritable();
 
         connect();
@@ -309,7 +325,7 @@ class ApplesauceUsbDevice extends UsbDevice
     {
         if (hardSectorThresholdNs != 0.0)
             throw new FluxEngineException(
-                    "hard sectors are currently unsupported on the Applesauce");
+                    "hard sectors are currently unsupported on the " + "Applesauce");
         checkWritable();
 
         connect();
@@ -343,24 +359,6 @@ class ApplesauceUsbDevice extends UsbDevice
         {
             serial.closePort();
         }
-    }
-
-    private static List<String> split(String s, char separator)
-    {
-        List<String> result = new ArrayList<>();
-        StringBuilder current = new StringBuilder();
-        for (int i = 0; i < s.length(); i++)
-        {
-            char c = s.charAt(i);
-            if (c == separator)
-            {
-                result.add(current.toString());
-                current.setLength(0);
-            } else
-                current.append(c);
-        }
-        result.add(current.toString());
-        return result;
     }
 
     private void writeLine(String s)
@@ -406,7 +404,7 @@ class ApplesauceUsbDevice extends UsbDevice
 
     private void writeByte(int b)
     {
-        writeBytes(new byte[] {(byte) b});
+        writeBytes(new byte[]{(byte) b});
     }
 
     private void writeBytes(byte[] data)

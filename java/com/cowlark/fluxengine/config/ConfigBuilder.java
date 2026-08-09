@@ -43,12 +43,11 @@ import java.util.Set;
  */
 public class ConfigBuilder
 {
-    private ConfigProto.Builder proto = ConfigProto.newBuilder()
-            .setFluxSource(FluxSourceProto.newBuilder().setType(FLUXTYPE_DRIVE).build());
-
     /* The groups which have had an option applied, so that applyDefaultOptions
      * knows not to apply their defaults. */
     private final Set<OptionGroupProto> appliedOptions = new HashSet<>();
+    private ConfigProto.Builder proto = ConfigProto.newBuilder()
+            .setFluxSource(FluxSourceProto.newBuilder().setType(FLUXTYPE_DRIVE).build());
 
     public ConfigBuilder()
     {
@@ -88,6 +87,32 @@ public class ConfigBuilder
     {
         return filename.endsWith(".dim") || filename.endsWith(".fdi") ||
                 filename.endsWith(".jv3") || filename.endsWith(".nfd") || filename.endsWith(".td0");
+    }
+
+    /* Quotes a string if it contains spaces or quote characters, ported from
+     * lib/core/utils.cc quote(). */
+    private static String quote(String s)
+    {
+        boolean spaces = s.contains(" ");
+        if (!spaces && !s.contains("\\") && !s.contains("'") && !s.contains("\""))
+            return s;
+
+        StringBuilder ss = new StringBuilder();
+        if (spaces)
+            ss.append('"');
+
+        for (int i = 0; i < s.length(); i++)
+        {
+            char c = s.charAt(i);
+            if ((c == '\\') || (c == '"') || (c == '!'))
+                ss.append('\\');
+            ss.append(c);
+        }
+
+        if (spaces)
+            ss.append('"');
+
+        return ss.toString();
     }
 
     public ConfigBuilder fromFlags(ImmutableList<String> args, FlagGroup... group)
@@ -255,12 +280,6 @@ public class ConfigBuilder
         return this;
     }
 
-    /* The result of looking up an option, ported from
-     * lib/config/config.h Config::OptionInfo. */
-    public record OptionInfo(OptionGroupProto group, OptionProto option, boolean usesValue)
-    {
-    }
-
     /* Looks up an option by name, ported from Config::findOption. The group
      * value parameter of the C++ version is not needed here, so it takes a
      * key only. */
@@ -386,39 +405,13 @@ public class ConfigBuilder
                 ss.append(']');
 
                 throw new InapplicableOptionException(
-                        "option '%s' is inapplicable to this configuration "
-                                + "because %s=%s could not be met",
+                        "option '%s' is inapplicable to this configuration " +
+                                "because %s=%s could not be met",
                         optionProto.getName(),
                         req.getKey(),
                         ss.toString());
             }
         }
-    }
-
-    /* Quotes a string if it contains spaces or quote characters, ported from
-     * lib/core/utils.cc quote(). */
-    private static String quote(String s)
-    {
-        boolean spaces = s.contains(" ");
-        if (!spaces && !s.contains("\\") && !s.contains("'") && !s.contains("\""))
-            return s;
-
-        StringBuilder ss = new StringBuilder();
-        if (spaces)
-            ss.append('"');
-
-        for (int i = 0; i < s.length(); i++)
-        {
-            char c = s.charAt(i);
-            if ((c == '\\') || (c == '"') || (c == '!'))
-                ss.append('\\');
-            ss.append(c);
-        }
-
-        if (spaces)
-            ss.append('"');
-
-        return ss.toString();
     }
 
     public ConfigProto build()
@@ -439,6 +432,12 @@ public class ConfigBuilder
     {
         if (!proto.getUsb().hasSerial())
             proto.getUsbBuilder().setSerial(UsbFinder.selectDevice(proto).serial);
+    }
+
+    /* The result of looking up an option, ported from
+     * lib/config/config.h Config::OptionInfo. */
+    public record OptionInfo(OptionGroupProto group, OptionProto option, boolean usesValue)
+    {
     }
 
 }

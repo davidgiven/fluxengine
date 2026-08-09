@@ -2,8 +2,8 @@ package com.cowlark.fluxengine.cli;
 
 import static com.cowlark.fluxengine.config.FluxSourceSinkType.FLUXTYPE_DRIVE;
 
-import com.cowlark.fluxengine.arch.Arch;
 import com.cowlark.fluxengine.algorithms.Reader;
+import com.cowlark.fluxengine.arch.Arch;
 import com.cowlark.fluxengine.config.ConfigBuilder;
 import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.core.FluxEngineException;

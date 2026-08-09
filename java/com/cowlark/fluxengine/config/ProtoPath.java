@@ -65,9 +65,8 @@ public class ProtoPath
         } else
         {
             if (component.index() >= 0)
-                throw new ProtoPathNotFoundException(
-                        "config field '" + component.name() +
-                                "' is not repeated but an index is provided");
+                throw new ProtoPathNotFoundException("config field '" + component.name() +
+                        "' is not repeated but an index is provided");
             if (!builder.hasField(field))
                 throw new ProtoPathNotFoundException(
                         "could not find config field '" + field.getName() + "'");
@@ -95,9 +94,8 @@ public class ProtoPath
         } else
         {
             if (component.index() >= 0)
-                throw new ProtoPathNotFoundException(
-                        "config field '" + component.name() +
-                                "' is not repeated but an index is provided");
+                throw new ProtoPathNotFoundException("config field '" + component.name() +
+                        "' is not repeated but an index is provided");
             value = builder.getField(field);
         }
         return formatValue(field, value);
@@ -166,9 +164,8 @@ public class ProtoPath
         } else
         {
             if (component.index() >= 0)
-                throw new ProtoPathNotFoundException(
-                        "config field '" + component.name() +
-                                "' is not repeated but an index is provided");
+                throw new ProtoPathNotFoundException("config field '" + component.name() +
+                        "' is not repeated but an index is provided");
             Message.Builder elementBuilder;
             if (builder.hasField(field))
                 elementBuilder = ((Message) builder.getField(field)).toBuilder();
@@ -198,9 +195,8 @@ public class ProtoPath
         } else
         {
             if (component.index() >= 0)
-                throw new ProtoPathNotFoundException(
-                        "config field '" + component.name() +
-                                "' is not repeated but an index is provided");
+                throw new ProtoPathNotFoundException("config field '" + component.name() +
+                        "' is not repeated but an index is provided");
             builder.setField(field, coerced);
         }
     }

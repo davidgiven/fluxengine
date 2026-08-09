@@ -23,12 +23,16 @@ public class Jv3ImageReader extends ImageReader
     private static final int JV3_SIDE = 0x10;    /* 0=side 0, 1=side 1 */
     private static final int JV3_ERROR = 0x08;   /* 0=ok, 1=CRC error */
     private static final int JV3_NONIBM = 0x04;  /* 0=normal, 1=short */
-    private static final int JV3_SIZE =
-            0x03; /* in used sectors: 0=256,1=128,2=1024,3=512
+    private static final int JV3_SIZE = 0x03; /* in used sectors: 0=256,1=128,2=1024,3=512
                      in free sectors: 0=512,1=1024,2=128,3=256 */
 
     private static final int JV3_FREE = 0xFF;  /* in track and sector fields of free sectors */
     private static final int JV3_FREEF = 0xFC; /* in flags field, or'd with size code */
+
+    public Jv3ImageReader(ImageReaderProto config)
+    {
+        super(config);
+    }
 
     private static int getSectorSize(int flags)
     {
@@ -45,8 +49,7 @@ public class Jv3ImageReader extends ImageReader
                 case 3:
                     return 256;
             }
-        }
-        else
+        } else
         {
             switch (flags & JV3_SIZE)
             {
@@ -61,11 +64,6 @@ public class Jv3ImageReader extends ImageReader
             }
         }
         throw new FluxEngineException("not reachable");
-    }
-
-    public Jv3ImageReader(ImageReaderProto config)
-    {
-        super(config);
     }
 
     @Override

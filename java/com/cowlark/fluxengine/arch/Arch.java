@@ -36,7 +36,6 @@ import com.cowlark.fluxengine.core.FluxEngineException;
 import com.cowlark.fluxengine.decoders.Decoder;
 import com.cowlark.fluxengine.decoders.DecoderProto;
 import com.cowlark.fluxengine.encoders.Encoder;
-import com.cowlark.fluxengine.encoders.EncoderProto;
 
 /**
  * The Arch class, ported from arch/arch.{h,cc}.

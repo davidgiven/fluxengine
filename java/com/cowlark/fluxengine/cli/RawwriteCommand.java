@@ -1,7 +1,6 @@
 package com.cowlark.fluxengine.cli;
 
 import static com.cowlark.fluxengine.config.FluxSourceSinkType.FLUXTYPE_DRIVE;
-import static com.cowlark.fluxengine.config.FluxSourceSinkType.FLUXTYPE_ERASE;
 
 import com.cowlark.fluxengine.algorithms.Writer;
 import com.cowlark.fluxengine.config.ConfigBuilder;
@@ -34,14 +33,13 @@ public class RawwriteCommand implements Command
             .setName("-d")
             .setHelpText("flux destination to write to")
             .build();
+    private boolean erase = false;
     private ActionFlag eraseFlag = ActionFlag.builder()
             .setGroup(flags)
             .setName("--erase")
             .setHelpText("erases the destination")
             .setVoidCallback(this::setErase)
             .build();
-
-    private boolean erase = false;
 
     @Override
     public String getHelp()

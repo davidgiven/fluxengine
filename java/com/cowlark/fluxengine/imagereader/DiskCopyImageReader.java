@@ -23,6 +23,22 @@ public class DiskCopyImageReader extends ImageReader
         super(config);
     }
 
+    private static int sectorsPerTrack(int track, int numSectors, boolean mfm)
+    {
+        if (mfm)
+            return numSectors;
+
+        if (track < 16)
+            return 12;
+        if (track < 32)
+            return 11;
+        if (track < 48)
+            return 10;
+        if (track < 64)
+            return 9;
+        return 8;
+    }
+
     @Override
     public Image readImage()
     {
@@ -117,21 +133,5 @@ public class DiskCopyImageReader extends ImageReader
         geometry.irregular = true;
         image.setGeometry(geometry);
         return image;
-    }
-
-    private static int sectorsPerTrack(int track, int numSectors, boolean mfm)
-    {
-        if (mfm)
-            return numSectors;
-
-        if (track < 16)
-            return 12;
-        if (track < 32)
-            return 11;
-        if (track < 48)
-            return 10;
-        if (track < 64)
-            return 9;
-        return 8;
     }
 }

@@ -5,9 +5,9 @@ import static com.cowlark.fluxengine.external.FluxEngine.F_BIT_PULSE;
 import static com.cowlark.fluxengine.external.FluxEngine.NS_PER_TICK;
 
 import com.cowlark.fluxengine.config.ConfigProto;
-import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.core.ByteReader;
 import com.cowlark.fluxengine.core.ByteWriter;
+import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.core.FluxEngineException;
 import com.cowlark.fluxengine.core.Logger;
 import com.cowlark.fluxengine.data.DiskLayout;
@@ -26,32 +26,10 @@ import java.nio.file.Path;
  */
 public class ScpFluxSink extends FluxSink
 {
-    private static int strackno(int track, int side)
-    {
-        return (track << 1) | side;
-    }
-
-    private static void writeLe32(byte[] dest, int offset, int v)
-    {
-        dest[offset] = (byte) v;
-        dest[offset + 1] = (byte) (v >> 8);
-        dest[offset + 2] = (byte) (v >> 16);
-        dest[offset + 3] = (byte) (v >> 24);
-    }
-
-    private static int appendChecksum(int checksum, Bytes bytes)
-    {
-        ByteReader br = new ByteReader(bytes);
-        while (!br.eof())
-            checksum += br.read8();
-        return checksum;
-    }
-
     private final String filename;
     private final int typeByte;
     private final boolean alignWithIndex;
     private final ConfigProto config;
-
     /* The 688-byte file header. */
     private final byte[] fileheader = new byte[Scp.SCP_HEADER_SIZE];
     private final Bytes trackdata = new Bytes(0);
@@ -94,6 +72,27 @@ public class ScpFluxSink extends FluxSink
         Logger.logf("SCP: writing " + (((flags & Scp.SCP_FLAG_96TPI) != 0) ? 96 : 48) + " tpi " +
                 ((minHead == maxHead) ? "single sided" : "double sided") + " file containing " +
                 (fileheader[7] - fileheader[6] + 1) + " tracks");
+    }
+
+    private static int strackno(int track, int side)
+    {
+        return (track << 1) | side;
+    }
+
+    private static void writeLe32(byte[] dest, int offset, int v)
+    {
+        dest[offset] = (byte) v;
+        dest[offset + 1] = (byte) (v >> 8);
+        dest[offset + 2] = (byte) (v >> 16);
+        dest[offset + 3] = (byte) (v >> 24);
+    }
+
+    private static int appendChecksum(int checksum, Bytes bytes)
+    {
+        ByteReader br = new ByteReader(bytes);
+        while (!br.eof())
+            checksum += br.read8();
+        return checksum;
     }
 
     @Override

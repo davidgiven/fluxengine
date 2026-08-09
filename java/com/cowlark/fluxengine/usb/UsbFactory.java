@@ -14,11 +14,11 @@ import java.util.Map;
 public final class UsbFactory
 {
 
+    private static final Cache<ConfigProto, UsbDevice> cache = CacheBuilder.newBuilder().build();
+
     private UsbFactory()
     {
     }
-
-    private static final Cache<ConfigProto, UsbDevice> cache = CacheBuilder.newBuilder().build();
 
     /* Connects a USB device, reusing a previously connected device for the
      * same configuration. This is the Java equivalent of the C++ global

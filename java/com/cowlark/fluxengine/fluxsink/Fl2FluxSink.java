@@ -10,6 +10,7 @@ import com.cowlark.fluxengine.external.FluxFileVersion;
 import com.cowlark.fluxengine.external.FluxMagic;
 import com.cowlark.fluxengine.external.TrackFluxProto;
 import com.google.protobuf.ByteString;
+import org.apache.commons.lang3.tuple.Pair;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,7 +18,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * A flux sink which writes an FL2 flux file, ported from
@@ -42,6 +42,20 @@ public class Fl2FluxSink extends FluxSink
         } catch (IOException e)
         {
             throw new FluxEngineException("cannot open output file");
+        }
+    }
+
+    private static void saveFl2File(String filename, FluxFileProto.Builder proto)
+    {
+        proto.setMagic(FluxMagic.MAGIC.getNumber());
+        proto.setVersion(FluxFileVersion.VERSION_2);
+
+        try
+        {
+            Files.write(Path.of(filename), proto.build().toByteArray());
+        } catch (IOException e)
+        {
+            throw new FluxEngineException("unable to write output file '" + filename + "'");
         }
     }
 
@@ -72,19 +86,5 @@ public class Fl2FluxSink extends FluxSink
         proto.setFormatType(config.getLayout().getFormatType());
 
         saveFl2File(filename, proto);
-    }
-
-    private static void saveFl2File(String filename, FluxFileProto.Builder proto)
-    {
-        proto.setMagic(FluxMagic.MAGIC.getNumber());
-        proto.setVersion(FluxFileVersion.VERSION_2);
-
-        try
-        {
-            Files.write(Path.of(filename), proto.build().toByteArray());
-        } catch (IOException e)
-        {
-            throw new FluxEngineException("unable to write output file '" + filename + "'");
-        }
     }
 }

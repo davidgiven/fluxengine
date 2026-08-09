@@ -1,7 +1,6 @@
 package com.cowlark.fluxengine.fluxsink;
 
 import com.cowlark.fluxengine.config.ConfigProto;
-import com.cowlark.fluxengine.config.FluxSourceSinkType;
 import com.cowlark.fluxengine.core.FluxEngineException;
 
 /**
@@ -16,8 +15,7 @@ public abstract class FluxSinkFactory
         return create(config, config.getFluxSink());
     }
 
-    public static FluxSinkFactory create(
-            ConfigProto config, FluxSinkProto sinkConfig)
+    public static FluxSinkFactory create(ConfigProto config, FluxSinkProto sinkConfig)
     {
         switch (sinkConfig.getType())
         {
@@ -44,14 +42,14 @@ public abstract class FluxSinkFactory
         }
     }
 
-    public static Fl2FluxSinkFactory createFl2FluxSinkFactory(
-            Fl2FluxSinkProto config, ConfigProto fullConfig)
+    public static Fl2FluxSinkFactory createFl2FluxSinkFactory(Fl2FluxSinkProto config,
+                                                              ConfigProto fullConfig)
     {
         return new Fl2FluxSinkFactory(config.getFilename(), fullConfig);
     }
 
-    public static Fl2FluxSinkFactory createFl2FluxSinkFactory(
-            String filename, ConfigProto fullConfig)
+    public static Fl2FluxSinkFactory createFl2FluxSinkFactory(String filename,
+                                                              ConfigProto fullConfig)
     {
         return new Fl2FluxSinkFactory(filename, fullConfig);
     }

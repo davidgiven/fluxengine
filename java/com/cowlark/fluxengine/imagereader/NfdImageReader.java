@@ -8,8 +8,8 @@ import com.cowlark.fluxengine.core.Logger;
 import com.cowlark.fluxengine.data.Geometry;
 import com.cowlark.fluxengine.data.Image;
 import com.cowlark.fluxengine.data.Sector;
-import com.cowlark.fluxengine.ibm.IbmEncoderProto;
 import com.cowlark.fluxengine.external.FormatType;
+import com.cowlark.fluxengine.ibm.IbmEncoderProto;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -81,9 +81,10 @@ public class NfdImageReader extends ImageReader
 
             for (int sectorInTrack = 0; sectorInTrack < 26; sectorInTrack++)
             {
-                ByteReader sectorHeaderReader = new ByteReader(data.slice(
-                        0x120 + track * 26 * 16 + sectorInTrack * 16,
-                        16));
+                ByteReader sectorHeaderReader =
+                        new ByteReader(data.slice(
+                                0x120 + track * 26 * 16 + sectorInTrack * 16,
+                                16));
                 int cyl = sectorHeaderReader.seek(0).read8();
                 int head = sectorHeaderReader.seek(1).read8();
                 int sectorId = sectorHeaderReader.seek(2).read8();

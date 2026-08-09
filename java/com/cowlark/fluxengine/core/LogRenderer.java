@@ -68,7 +68,8 @@ public abstract class LogRenderer
                 indent();
             }
             stream.print(message);
-            space = !message.isEmpty() && Character.isWhitespace(message.charAt(message.length() - 1));
+            space = !message.isEmpty() &&
+                    Character.isWhitespace(message.charAt(message.length() - 1));
             return this;
         }
 
@@ -81,7 +82,8 @@ public abstract class LogRenderer
             lineLen = message.length();
             header = true;
             newline = true;
-            space = !message.isEmpty() && Character.isWhitespace(message.charAt(message.length() - 1));
+            space = !message.isEmpty() &&
+                    Character.isWhitespace(message.charAt(message.length() - 1));
             return this;
         }
 

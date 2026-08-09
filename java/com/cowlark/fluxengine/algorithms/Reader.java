@@ -36,16 +36,6 @@ import java.util.Map;
  */
 public final class Reader
 {
-    static enum ReadResult
-    {
-        GOOD_READ, BAD_AND_CAN_RETRY, BAD_AND_CAN_NOT_RETRY
-    }
-
-    static enum BadSectorsState
-    {
-        HAS_NO_BAD_SECTORS, HAS_BAD_SECTORS
-    }
-
     private Reader()
     {
     }
@@ -277,12 +267,6 @@ public final class Reader
         return s;
     }
 
-    static class CombinationResult
-    {
-        BadSectorsState result;
-        List<Sector> sectors;
-    }
-
     static CombinationResult combineRecordAndSectors(List<Track> tracks,
                                                      Decoder decoder,
                                                      LogicalTrackLayout ltl)
@@ -318,12 +302,6 @@ public final class Reader
                 cr.result = BadSectorsState.HAS_BAD_SECTORS;
 
         return cr;
-    }
-
-    static class ReadGroupResult
-    {
-        ReadResult result;
-        List<Sector> combinedSectors;
     }
 
     static ReadGroupResult readGroup(DiskLayout diskLayout,
@@ -438,6 +416,28 @@ public final class Reader
                 retriesRemaining--;
             }
         }
+    }
+
+    static enum ReadResult
+    {
+        GOOD_READ, BAD_AND_CAN_RETRY, BAD_AND_CAN_NOT_RETRY
+    }
+
+    static enum BadSectorsState
+    {
+        HAS_NO_BAD_SECTORS, HAS_BAD_SECTORS
+    }
+
+    static class CombinationResult
+    {
+        BadSectorsState result;
+        List<Sector> sectors;
+    }
+
+    static class ReadGroupResult
+    {
+        ReadResult result;
+        List<Sector> combinedSectors;
     }
 
 }
