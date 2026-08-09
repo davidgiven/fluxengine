@@ -28,7 +28,7 @@ public class HardwareFluxSource extends FluxSource
     }
 
     @Override
-    public FluxSourceIterator readFlux(int track, int head)
+    public FluxSourceIterator readFlux(FluxReadParameters parameters)
     {
         return new FluxSourceIterator()
         {
@@ -41,14 +41,13 @@ public class HardwareFluxSource extends FluxSource
             @Override
             public Fluxmap next()
             {
-                device.seek(track);
+                device.seek(parameters.cylinder());
 
                 Bytes data = device.read(
-                        head,
-                        config.getDrive().getSyncWithIndex(),
-                        config.getDrive().getRevolutions() *
-                                config.getDrive().getRotationalPeriodMs() * 1e6,
-                        config.getDrive().getHardSectorThresholdNs());
+                        parameters.head(),
+                        parameters.syncWithIndex(),
+                        parameters.readTimeNs(),
+                        parameters.hardSectorThresholdNs());
                 Fluxmap fluxmap = new Fluxmap();
                 fluxmap.appendBytes(data);
                 return fluxmap;

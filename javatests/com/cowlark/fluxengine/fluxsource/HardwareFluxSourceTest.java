@@ -93,8 +93,7 @@ public class HardwareFluxSourceTest
 
     private static ConfigProto config()
     {
-        return new ConfigBuilder()
-                .set("usb.serial", "test-serial")
+        return new ConfigBuilder().set("usb.serial", "test-serial")
                 .set("drive.sync_with_index", "true")
                 .set("drive.revolutions", "3")
                 .set("drive.rotational_period_ms", "200")
@@ -139,7 +138,13 @@ public class HardwareFluxSourceTest
         device.readResult = Bytes.of(0x01, 0x02, 0x03, 0x04);
         HardwareFluxSource source = new HardwareFluxSource(config(), device);
 
-        FluxSourceIterator iterator = source.readFlux(17, 1);
+        FluxSourceIterator iterator = source.readFlux(FluxReadParameters.builder()
+                .setCylinder(17)
+                .setHead(1)
+                .setSyncWithIndex(true)
+                .setReadTimeNs(3 * 200 * 1e6)
+                .setHardSectorThresholdNs(1000)
+                .build());
 
         assertThat(iterator.hasNext()).isTrue();
         Fluxmap fluxmap = iterator.next();

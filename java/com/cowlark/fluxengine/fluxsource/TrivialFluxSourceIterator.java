@@ -9,15 +9,13 @@ import com.cowlark.fluxengine.data.Fluxmap;
 public class TrivialFluxSourceIterator implements FluxSourceIterator
 {
     private final TrivialFluxSource fluxSource;
-    private final int cylinder;
-    private final int head;
+    private final FluxReadParameters parameters;
     private boolean done;
 
-    public TrivialFluxSourceIterator(TrivialFluxSource fluxSource, int cylinder, int head)
+    public TrivialFluxSourceIterator(TrivialFluxSource fluxSource, FluxReadParameters parameters)
     {
         this.fluxSource = fluxSource;
-        this.cylinder = cylinder;
-        this.head = head;
+        this.parameters = parameters;
     }
 
     @Override
@@ -30,6 +28,6 @@ public class TrivialFluxSourceIterator implements FluxSourceIterator
     public Fluxmap next()
     {
         done = true;
-        return fluxSource.readSingleFlux(cylinder, head);
+        return fluxSource.readSingleFlux(parameters);
     }
 }

@@ -3,6 +3,7 @@ package com.cowlark.fluxengine.algorithms;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.cowlark.fluxengine.data.CylinderHead;
+import com.cowlark.fluxengine.fluxsource.FluxReadParameters;
 import com.cowlark.fluxengine.fluxsource.FluxSource;
 import com.cowlark.fluxengine.fluxsource.FluxSourceIterator;
 import org.junit.Test;
@@ -15,7 +16,7 @@ public class CommonTest
     private static class RecordingFluxSource extends FluxSource
     {
         @Override
-        public FluxSourceIterator readFlux(int cylinder, int head)
+        public FluxSourceIterator readFlux(FluxReadParameters parameters)
         {
             return null;
         }
@@ -28,7 +29,7 @@ public class CommonTest
         FluxSource fluxSource = new FluxSource()
         {
             @Override
-            public FluxSourceIterator readFlux(int cylinder, int head)
+            public FluxSourceIterator readFlux(FluxReadParameters parameters)
             {
                 reads[0]++;
                 return new FluxSourceIterator()
@@ -50,9 +51,12 @@ public class CommonTest
 
         Common.FluxSourceIteratorHolder holder = new Common.FluxSourceIteratorHolder(fluxSource);
 
-        FluxSourceIterator it1 = holder.getIterator(1, 0);
-        FluxSourceIterator it2 = holder.getIterator(1, 0);
-        FluxSourceIterator it3 = holder.getIterator(2, 1);
+        FluxSourceIterator it1 = holder.getIterator(FluxReadParameters.builder()
+                .setCylinder(1).setHead(0).build());
+        FluxSourceIterator it2 = holder.getIterator(FluxReadParameters.builder()
+                .setCylinder(1).setHead(0).build());
+        FluxSourceIterator it3 = holder.getIterator(FluxReadParameters.builder()
+                .setCylinder(2).setHead(1).build());
 
         assertThat(reads[0]).isEqualTo(2);
         assertThat(it1).isSameInstanceAs(it2);

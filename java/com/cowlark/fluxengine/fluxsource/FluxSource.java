@@ -62,7 +62,7 @@ public abstract class FluxSource implements AutoCloseable
     }
 
     /* Read flux from a given cylinder and head. */
-    public abstract FluxSourceIterator readFlux(int cylinder, int head);
+    public abstract FluxSourceIterator readFlux(FluxReadParameters parameters);
 
     /* Recalibrates; seeks to cylinder 0 and ensures the head is in the right
      * place. */

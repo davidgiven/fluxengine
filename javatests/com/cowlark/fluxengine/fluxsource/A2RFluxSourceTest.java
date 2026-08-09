@@ -82,12 +82,14 @@ public class A2RFluxSourceTest
                 .setFilename(path.toString())
                 .build());
 
-        FluxSourceIterator iterator = source.readFlux(0, 0);
+        FluxSourceIterator iterator =
+                source.readFlux(FluxReadParameters.builder().setCylinder(0).setHead(0).build());
         assertThat(iterator.hasNext()).isTrue();
         Bytes expected = Bytes.of(0x40, 0xad, 0xad, 0xad);
         assertThat(iterator.next().rawBytes().toByteArray()).isEqualTo(expected.toByteArray());
         assertThat(iterator.hasNext()).isFalse();
-        assertThat(source.readFlux(1, 0)).isInstanceOf(EmptyFluxSourceIterator.class);
+        assertThat(source.readFlux(FluxReadParameters.builder().setCylinder(1).setHead(0).build())).isInstanceOf(
+                EmptyFluxSourceIterator.class);
 
         ConfigBuilder configBuilder = new ConfigBuilder().set("usb.serial", "test-serial");
         source.adjustConfig(configBuilder);

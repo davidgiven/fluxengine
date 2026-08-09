@@ -20,6 +20,7 @@ import com.cowlark.fluxengine.data.Sector;
 import com.cowlark.fluxengine.data.Track;
 import com.cowlark.fluxengine.fluxsink.FluxSink;
 import com.cowlark.fluxengine.fluxsink.FluxSinkFactory;
+import com.cowlark.fluxengine.fluxsource.FluxReadParameters;
 import com.cowlark.fluxengine.fluxsource.FluxSourceIterator;
 import com.cowlark.fluxengine.imagewriter.ImageWriter;
 import java.util.ArrayList;
@@ -39,8 +40,30 @@ public class ReadOperation extends Operation
         super(configProto);
     }
 
-    static CombinationResult combineRecordAndSectors(List<Track> tracks,
-                                                     LogicalTrackLayout ltl)
+
+    enum ReadResult
+    {
+        GOOD_READ, BAD_AND_CAN_RETRY, BAD_AND_CAN_NOT_RETRY
+    }
+
+    enum BadSectorsState
+    {
+        HAS_NO_BAD_SECTORS, HAS_BAD_SECTORS
+    }
+
+    static class CombinationResult
+    {
+        BadSectorsState result;
+        List<Sector> sectors;
+    }
+
+    static class ReadGroupResult
+    {
+        ReadResult result;
+        List<Sector> combinedSectors;
+    }
+
+    static CombinationResult combineRecordAndSectors(List<Track> tracks, LogicalTrackLayout ltl)
     {
         CombinationResult cr = new CombinationResult();
         cr.result = BadSectorsState.HAS_NO_BAD_SECTORS;
@@ -110,7 +133,15 @@ public class ReadOperation extends Operation
             Logger.log(new BeginReadOperationLogMessage(physicalCylinder, physicalHead));
 
             FluxSourceIterator fluxSourceIterator =
-                    fluxSourceIteratorHolder.getIterator(physicalCylinder, physicalHead);
+                    fluxSourceIteratorHolder.getIterator(FluxReadParameters.builder()
+                            .setCylinder(physicalCylinder)
+                            .setHead(physicalHead)
+                            .setSyncWithIndex(getConfig().getDrive().getSyncWithIndex())
+                            .setReadTimeNs(getConfig().getDrive().getRevolutions() *
+                                    getDiskRotationalPeriodNs())
+                            .setHardSectorThresholdNs(getConfig().getDrive()
+                                    .getHardSectorThresholdNs())
+                            .build());
             if (!fluxSourceIterator.hasNext())
                 continue;
 
@@ -391,27 +422,4 @@ public class ReadOperation extends Operation
 
         return disk;
     }
-
-    enum ReadResult
-    {
-        GOOD_READ, BAD_AND_CAN_RETRY, BAD_AND_CAN_NOT_RETRY
-    }
-
-    enum BadSectorsState
-    {
-        HAS_NO_BAD_SECTORS, HAS_BAD_SECTORS
-    }
-
-    static class CombinationResult
-    {
-        BadSectorsState result;
-        List<Sector> sectors;
-    }
-
-    static class ReadGroupResult
-    {
-        ReadResult result;
-        List<Sector> combinedSectors;
-    }
-
 }

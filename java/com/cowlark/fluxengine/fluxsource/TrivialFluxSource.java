@@ -9,10 +9,10 @@ import com.cowlark.fluxengine.data.Fluxmap;
 public abstract class TrivialFluxSource extends FluxSource
 {
     @Override
-    public FluxSourceIterator readFlux(int cylinder, int head)
+    public FluxSourceIterator readFlux(FluxReadParameters parameters)
     {
-        return new TrivialFluxSourceIterator(this, cylinder, head);
+        return new TrivialFluxSourceIterator(this, parameters);
     }
 
-    public abstract Fluxmap readSingleFlux(int cylinder, int head);
+    public abstract Fluxmap readSingleFlux(FluxReadParameters parameters);
 }

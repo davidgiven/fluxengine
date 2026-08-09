@@ -54,9 +54,9 @@ public class KryofluxFluxSource extends TrivialFluxSource
     }
 
     @Override
-    public Fluxmap readSingleFlux(int cylinder, int head)
+    public Fluxmap readSingleFlux(FluxReadParameters parameters)
     {
-        return Kryoflux.readStream(path, cylinder, head);
+        return Kryoflux.readStream(path, parameters.cylinder(), parameters.head());
     }
 
     @Override

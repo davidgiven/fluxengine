@@ -29,9 +29,10 @@ public class KryofluxFluxSourceTest
                 KryofluxFluxSourceProto.newBuilder().setDirectory(dir.toString()).build();
         KryofluxFluxSource source = new KryofluxFluxSource(config);
 
-        assertThat(source.readSingleFlux(80, 0)
-                .rawBytes()
-                .toByteArray()).isEqualTo(new byte[]{(byte) 0x8f});
+        assertThat(source.readSingleFlux(FluxReadParameters.builder()
+                .setCylinder(80)
+                .setHead(0)
+                .build()).rawBytes().toByteArray()).isEqualTo(new byte[]{(byte) 0x8f});
 
         ConfigBuilder configBuilder = new ConfigBuilder().set("usb.serial", "test-serial");
         source.adjustConfig(configBuilder);

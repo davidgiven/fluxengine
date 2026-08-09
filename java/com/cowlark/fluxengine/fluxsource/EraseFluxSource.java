@@ -26,7 +26,7 @@ public class EraseFluxSource extends TrivialFluxSource
     }
 
     @Override
-    public Fluxmap readSingleFlux(int cylinder, int head)
+    public Fluxmap readSingleFlux(FluxReadParameters parameters)
     {
         return null;
     }

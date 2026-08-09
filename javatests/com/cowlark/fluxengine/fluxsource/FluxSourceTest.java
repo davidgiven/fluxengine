@@ -42,7 +42,7 @@ public class FluxSourceTest
         FluxSource source = FluxSource.create(config);
 
         assertThat(source).isInstanceOf(EraseFluxSource.class);
-        assertThat(source.readFlux(0, 0).next()).isNull();
+        assertThat(source.readFlux(new FluxReadParameters(0, 0)).next()).isNull();
 
         ConfigBuilder configBuilder = new ConfigBuilder().set("usb.serial", "test-serial");
         source.adjustConfig(configBuilder);
@@ -55,13 +55,13 @@ public class FluxSourceTest
         TrivialFluxSource source = new TrivialFluxSource()
         {
             @Override
-            public Fluxmap readSingleFlux(int cylinder, int head)
+            public Fluxmap readSingleFlux(FluxReadParameters parameters)
             {
                 return new Fluxmap();
             }
         };
 
-        FluxSourceIterator iterator = source.readFlux(0, 0);
+        FluxSourceIterator iterator = source.readFlux(new FluxReadParameters(0, 0));
 
         assertThat(iterator.hasNext()).isTrue();
         iterator.next();

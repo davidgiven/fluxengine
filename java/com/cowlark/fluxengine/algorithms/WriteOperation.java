@@ -9,6 +9,7 @@ import com.cowlark.fluxengine.data.Fluxmap;
 import com.cowlark.fluxengine.data.Image;
 import com.cowlark.fluxengine.data.LogicalTrackLayout;
 import com.cowlark.fluxengine.fluxsink.FluxSink;
+import com.cowlark.fluxengine.fluxsource.FluxReadParameters;
 import com.cowlark.fluxengine.fluxsource.FluxSourceIterator;
 import java.util.Collection;
 import java.util.List;
@@ -199,7 +200,10 @@ public class WriteOperation extends ReadOperation
         writeTracks(
                 ltl -> {
                     FluxSourceIterator iterator =
-                            getFluxSource().readFlux(ltl.physicalCylinder, ltl.physicalHead);
+                            getFluxSource().readFlux(FluxReadParameters.builder()
+                                    .setCylinder(ltl.physicalCylinder)
+                                    .setHead(ltl.physicalHead)
+                                    .build());
                     if (!iterator.hasNext())
                         return null;
                     return iterator.next();

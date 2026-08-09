@@ -14,6 +14,7 @@ import com.cowlark.fluxengine.data.CylinderHead;
 import com.cowlark.fluxengine.data.DiskLayout;
 import com.cowlark.fluxengine.fluxsink.FluxSink;
 import com.cowlark.fluxengine.fluxsink.FluxSinkFactory;
+import com.cowlark.fluxengine.fluxsource.FluxReadParameters;
 import com.cowlark.fluxengine.fluxsource.FluxSource;
 import com.cowlark.fluxengine.fluxsource.FluxSourceIterator;
 import com.google.common.collect.ImmutableList;
@@ -82,7 +83,10 @@ public class ConvertCommand implements Command
             for (CylinderHead physicalLocation : diskLayout.physicalLocations)
             {
                 FluxSourceIterator fi =
-                        fluxSource.readFlux(physicalLocation.cylinder(), physicalLocation.head());
+                        fluxSource.readFlux(FluxReadParameters.builder()
+                                .setCylinder(physicalLocation.cylinder())
+                                .setHead(physicalLocation.head())
+                                .build());
                 while (fi.hasNext())
                     fluxSink.addFlux(physicalLocation, fi.next());
             }

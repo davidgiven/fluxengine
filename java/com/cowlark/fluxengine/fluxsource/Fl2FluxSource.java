@@ -114,11 +114,12 @@ public class Fl2FluxSource extends FluxSource
     }
 
     @Override
-    public FluxSourceIterator readFlux(int track, int head)
+    public FluxSourceIterator readFlux(FluxReadParameters parameters)
     {
         for (TrackFluxProto trackFlux : proto.getTrackList())
         {
-            if (trackFlux.getTrack() == track && trackFlux.getHead() == head)
+            if (trackFlux.getTrack() == parameters.cylinder() &&
+                    trackFlux.getHead() == parameters.head())
                 return new Fl2FluxSourceIterator(trackFlux);
         }
 

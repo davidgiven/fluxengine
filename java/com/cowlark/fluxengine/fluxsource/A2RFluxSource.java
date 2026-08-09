@@ -114,13 +114,14 @@ public class A2RFluxSource extends FluxSource
     }
 
     @Override
-    public FluxSourceIterator readFlux(int track, int head)
+    public FluxSourceIterator readFlux(FluxReadParameters parameters)
     {
         switch (version)
         {
             case 2:
             {
-                A2Rv2Flux entry = v2data.get(new CylinderHead(track, head));
+                A2Rv2Flux entry =
+                        v2data.get(new CylinderHead(parameters.cylinder(), parameters.head()));
                 if (entry != null)
                     return new A2RFluxSourceIterator(entry.flux, entry.index);
                 else

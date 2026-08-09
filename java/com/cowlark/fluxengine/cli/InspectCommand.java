@@ -22,6 +22,7 @@ import com.cowlark.fluxengine.data.Locations;
 import com.cowlark.fluxengine.decoders.DecoderProto;
 import com.cowlark.fluxengine.decoders.FluxDecoder;
 import com.cowlark.fluxengine.external.FmMfm;
+import com.cowlark.fluxengine.fluxsource.FluxReadParameters;
 import com.cowlark.fluxengine.fluxsource.FluxSource;
 import com.cowlark.fluxengine.fluxsource.FluxSourceIterator;
 import com.google.common.collect.ImmutableList;
@@ -179,7 +180,11 @@ public class InspectCommand implements Command
         if (tracks.size() != 1)
             throw new FluxEngineException("you must specify exactly one track");
         CylinderHead ch = tracks.get(0);
-        FluxSourceIterator iterator = fluxSource.readFlux(ch.cylinder(), ch.head());
+        FluxSourceIterator iterator =
+                fluxSource.readFlux(FluxReadParameters.builder()
+                        .setCylinder(ch.cylinder())
+                        .setHead(ch.head())
+                        .build());
         Fluxmap fluxmap = iterator.next();
 
         System.out.printf(

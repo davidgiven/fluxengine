@@ -43,11 +43,13 @@ public class Fl2FluxSourceTest
                 .setFilename(path.toString())
                 .build());
 
-        FluxSourceIterator iterator = source.readFlux(0, 0);
+        FluxSourceIterator iterator =
+                source.readFlux(FluxReadParameters.builder().setCylinder(0).setHead(0).build());
         assertThat(iterator.hasNext()).isTrue();
         assertThat(iterator.next()).isNotNull();
         assertThat(iterator.hasNext()).isFalse();
-        assertThat(source.readFlux(1, 0)).isInstanceOf(EmptyFluxSourceIterator.class);
+        assertThat(source.readFlux(FluxReadParameters.builder().setCylinder(1).setHead(0).build())).isInstanceOf(
+                EmptyFluxSourceIterator.class);
 
         ConfigBuilder configBuilder = new ConfigBuilder().set("usb.serial", "test-serial");
         source.adjustConfig(configBuilder);
@@ -75,7 +77,8 @@ public class Fl2FluxSourceTest
                 .setFilename(path.toString())
                 .build());
 
-        FluxSourceIterator iterator = source.readFlux(0, 0);
+        FluxSourceIterator iterator =
+                source.readFlux(FluxReadParameters.builder().setCylinder(0).setHead(0).build());
         assertThat(iterator.hasNext()).isTrue();
         iterator.next();
         assertThat(iterator.hasNext()).isTrue();
