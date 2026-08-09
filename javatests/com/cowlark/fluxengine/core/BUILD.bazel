@@ -84,3 +84,13 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "SupplierOfAutocloseableTest",
+    srcs = ["SupplierOfAutocloseableTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/core",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)

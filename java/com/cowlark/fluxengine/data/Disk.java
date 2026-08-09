@@ -18,7 +18,7 @@ public class Disk
     public Image image = null;
 
     /* 0 if the period is unknown (e.g. if this Disk was made from an image). */
-    public double rotationalPeriod = 0;
+    public double rotationalPeriodNs = 0;
 
     public Disk()
     {

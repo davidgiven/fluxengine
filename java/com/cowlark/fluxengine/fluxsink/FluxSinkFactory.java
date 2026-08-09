@@ -6,7 +6,7 @@ import com.cowlark.fluxengine.core.FluxEngineException;
 /**
  * Factory for creating flux sinks, ported from lib/fluxsink/fluxsink.h.
  */
-public abstract class FluxSinkFactory
+public abstract class FluxSinkFactory implements AutoCloseable
 {
     public static FluxSinkFactory create(ConfigProto config)
     {
@@ -52,6 +52,11 @@ public abstract class FluxSinkFactory
                                                               ConfigProto fullConfig)
     {
         return new Fl2FluxSinkFactory(filename, fullConfig);
+    }
+
+    @Override
+    public void close() throws Exception
+    {
     }
 
     /* Creates a writer object. */

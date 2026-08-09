@@ -1,5 +1,6 @@
 package com.cowlark.fluxengine.algorithms;
 
+import com.cowlark.fluxengine.algorithms.Common.FluxSourceIteratorHolder;
 import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.core.LogMessage.BeginOperationLogMessage;
 import com.cowlark.fluxengine.core.LogMessage.BeginReadOperationLogMessage;
@@ -10,7 +11,6 @@ import com.cowlark.fluxengine.core.Logger;
 import com.cowlark.fluxengine.core.Utils;
 import com.cowlark.fluxengine.data.CylinderHead;
 import com.cowlark.fluxengine.data.Disk;
-import com.cowlark.fluxengine.data.DiskLayout;
 import com.cowlark.fluxengine.data.Fluxmap;
 import com.cowlark.fluxengine.data.Image;
 import com.cowlark.fluxengine.data.LogicalLocation;
@@ -18,10 +18,8 @@ import com.cowlark.fluxengine.data.LogicalTrackLayout;
 import com.cowlark.fluxengine.data.PhysicalTrackLayout;
 import com.cowlark.fluxengine.data.Sector;
 import com.cowlark.fluxengine.data.Track;
-import com.cowlark.fluxengine.decoders.Decoder;
 import com.cowlark.fluxengine.fluxsink.FluxSink;
 import com.cowlark.fluxengine.fluxsink.FluxSinkFactory;
-import com.cowlark.fluxengine.fluxsource.FluxSource;
 import com.cowlark.fluxengine.fluxsource.FluxSourceIterator;
 import com.cowlark.fluxengine.imagewriter.ImageWriter;
 import java.util.ArrayList;
@@ -34,38 +32,173 @@ import java.util.Map;
 /**
  * Disk read/write algorithms, ported from lib/algorithms/readerwriter.cc.
  */
-public final class Reader
+public class ReadOperation extends Operation
 {
-    private Reader()
+    public ReadOperation(ConfigProto configProto)
     {
+        super(configProto);
     }
 
-    public static void readDiskCommand(ConfigProto config,
-                                       DiskLayout diskLayout,
-                                       FluxSource fluxSource,
-                                       Decoder decoder,
-                                       Disk disk)
+    static CombinationResult combineRecordAndSectors(List<Track> tracks,
+                                                     LogicalTrackLayout ltl)
+    {
+        CombinationResult cr = new CombinationResult();
+        cr.result = BadSectorsState.HAS_NO_BAD_SECTORS;
+        List<Sector> trackSectors = new ArrayList<>();
+
+        /* Add the sectors which were there. */
+
+        for (Track track : tracks)
+            trackSectors.addAll(track.allSectors);
+
+        /* Add the sectors which should be there. */
+
+        for (int sectorId : ltl.diskSectorOrder)
+        {
+            Sector sector =
+                    new Sector(new LogicalLocation(ltl.logicalCylinder, ltl.logicalHead, sectorId));
+
+            sector.status = Sector.Status.MISSING;
+            sector.physicalLocation = new CylinderHead(ltl.physicalCylinder, ltl.physicalHead);
+            trackSectors.add(sector);
+        }
+
+        /* Deduplicate. */
+
+        cr.sectors = collectSectors(trackSectors);
+        if (cr.sectors.isEmpty())
+            cr.result = BadSectorsState.HAS_BAD_SECTORS;
+        for (Sector sector : cr.sectors)
+            if (sector.status != Sector.Status.OK)
+                cr.result = BadSectorsState.HAS_BAD_SECTORS;
+
+        return cr;
+    }
+
+    private ReadGroupResult readGroup(FluxSourceIteratorHolder fluxSourceIteratorHolder,
+                                      LogicalTrackLayout ltl,
+                                      List<Track> tracks)
+    {
+        ReadGroupResult rgr = new ReadGroupResult();
+        rgr.result = ReadResult.BAD_AND_CAN_NOT_RETRY;
+
+        /* Before doing the read, look to see if we already have the necessary
+         * sectors. */
+
+        {
+            CombinationResult cr = combineRecordAndSectors(tracks, ltl);
+            rgr.combinedSectors = cr.sectors;
+            if (cr.result == BadSectorsState.HAS_NO_BAD_SECTORS)
+            {
+                /* We have all necessary sectors, so can stop here. */
+                rgr.result = ReadResult.GOOD_READ;
+                if (getConfig().getDecoder().getSkipUnnecessaryTracks())
+                    return rgr;
+            }
+        }
+
+        for (int offset = 0; offset < ltl.groupSize; offset += getDiskLayout().headWidth)
+        {
+            int physicalCylinder = ltl.physicalCylinder + offset;
+            int physicalHead = ltl.physicalHead;
+            PhysicalTrackLayout ptl = getDiskLayout().layoutByPhysicalLocation.get(new CylinderHead(
+                    physicalCylinder,
+                    physicalHead));
+
+            /* Do the physical read. */
+
+            Logger.log(new BeginReadOperationLogMessage(physicalCylinder, physicalHead));
+
+            FluxSourceIterator fluxSourceIterator =
+                    fluxSourceIteratorHolder.getIterator(physicalCylinder, physicalHead);
+            if (!fluxSourceIterator.hasNext())
+                continue;
+
+            Fluxmap fluxmap = fluxSourceIterator.next();
+            Logger.log(new EndReadOperationLogMessage());
+            Logger.logf("%d ms in %d bytes", (int) (fluxmap.duration() / 1e6), fluxmap.bytes());
+
+            Track flux = getDecoder().decodeToSectors(fluxmap, ptl);
+            flux.normalisedSectors = collectSectors(flux.allSectors);
+            tracks.add(flux);
+
+            /* Decode what we've got so far. */
+
+            CombinationResult cr = combineRecordAndSectors(tracks, ltl);
+            rgr.combinedSectors = cr.sectors;
+            if (cr.result == BadSectorsState.HAS_NO_BAD_SECTORS)
+            {
+                /* We have all necessary sectors, so can stop here. */
+                rgr.result = ReadResult.GOOD_READ;
+                if (getConfig().getDecoder().getSkipUnnecessaryTracks())
+                    break;
+            } else if (fluxSourceIterator.hasNext())
+            {
+                /* The flux source claims it can do more reads, so mark this
+                 * group as being retryable. */
+                rgr.result = ReadResult.BAD_AND_CAN_RETRY;
+            }
+        }
+
+        return rgr;
+    }
+
+    private void readAndDecodeTrack(LogicalTrackLayout ltl,
+                                    List<Track> tracks,
+                                    List<Sector> combinedSectors)
+    {
+        FluxSourceIteratorHolder fluxSourceIteratorHolder =
+                new FluxSourceIteratorHolder(getFluxSource());
+        int retriesRemaining = getConfig().getDecoder().getRetries();
+        for (; ; )
+        {
+            ReadGroupResult rgr = readGroup(fluxSourceIteratorHolder, ltl, tracks);
+            combinedSectors.clear();
+            combinedSectors.addAll(rgr.combinedSectors);
+            if (rgr.result == ReadResult.GOOD_READ)
+                break;
+            if (rgr.result == ReadResult.BAD_AND_CAN_NOT_RETRY)
+            {
+                Logger.logf("no more data; giving up");
+                break;
+            }
+
+            if (retriesRemaining == 0)
+            {
+                Logger.logf("giving up");
+                break;
+            }
+
+            if (getFluxSource().isHardware())
+            {
+                adjustTrackOnError(ltl.physicalCylinder);
+                Logger.logf("retrying; %d retries remaining", retriesRemaining);
+                retriesRemaining--;
+            }
+        }
+    }
+
+    public void run(Disk disk)
     {
         FluxSinkFactory outputFluxSinkFactory = null;
-        if (config.getDecoder().hasCopyFluxTo())
+        if (getConfig().getDecoder().hasCopyFluxTo())
             outputFluxSinkFactory =
-                    FluxSinkFactory.create(config, config.getDecoder().getCopyFluxTo());
+                    FluxSinkFactory.create(getConfig(), getConfig().getDecoder().getCopyFluxTo());
 
         Map<CylinderHead, List<Track>> tracksByLogicalLocation = new HashMap<>();
         for (Map.Entry<CylinderHead, Track> entry : disk.tracksByPhysicalLocation.entries())
         {
             Track track = entry.getValue();
             tracksByLogicalLocation.computeIfAbsent(
-                    new CylinderHead(track.ltl.logicalCylinder, track.ltl.logicalHead),
+                    new CylinderHead(
+                            track.ltl.logicalCylinder,
+                            track.ltl.logicalHead),
                     k -> new ArrayList<>()).add(track);
         }
 
         Logger.log(new BeginOperationLogMessage("Reading and decoding disk"));
 
-        if (fluxSource.isHardware())
-            disk.rotationalPeriod = Common.measureDiskRotation(config);
-        else
-            disk.rotationalPeriod = Common.getRotationalPeriodFromConfig(config);
+        disk.rotationalPeriodNs = getDiskRotationalPeriodNs();
 
         try (FluxSink outputFluxSink = outputFluxSinkFactory != null ?
                 outputFluxSinkFactory.create() :
@@ -73,12 +206,12 @@ public final class Reader
         {
             int index = 0;
             for (Map.Entry<CylinderHead, LogicalTrackLayout> entry :
-                    diskLayout.layoutByLogicalLocation.entrySet())
+                    getDiskLayout().layoutByLogicalLocation.entrySet())
             {
                 CylinderHead logicalLocation = entry.getKey();
                 LogicalTrackLayout ltl = entry.getValue();
                 Logger.log(new OperationProgressLogMessage(
-                        index * 100 / diskLayout.layoutByLogicalLocation.size()));
+                        index * 100 / getDiskLayout().layoutByLogicalLocation.size()));
                 index++;
 
                 Common.testForEmergencyStop();
@@ -87,14 +220,7 @@ public final class Reader
                         logicalLocation,
                         k -> new ArrayList<>());
                 List<Sector> trackSectors = new ArrayList<>();
-                readAndDecodeTrack(
-                        config,
-                        diskLayout,
-                        fluxSource,
-                        decoder,
-                        ltl,
-                        trackFluxes,
-                        trackSectors);
+                readAndDecodeTrack(ltl, trackFluxes, trackSectors);
 
                 /* Replace all tracks on the disk by the new combined set. */
 
@@ -125,7 +251,7 @@ public final class Reader
                                 data.fluxmap);
                 }
 
-                if (config.getDecoder().getDumpRecords())
+                if (getConfig().getDecoder().getDumpRecords())
                 {
                     List<com.cowlark.fluxengine.data.Record> sortedRecords = new ArrayList<>();
                     for (Track data : trackFluxes)
@@ -144,7 +270,7 @@ public final class Reader
                     }
                 }
 
-                if (config.getDecoder().getDumpSectors())
+                if (getConfig().getDecoder().getDumpSectors())
                 {
                     List<Sector> sectors = collectSectors(trackSectors, false);
                     sectors.sort(Comparator.comparing((Sector s) -> s.location.logicalCylinder())
@@ -181,21 +307,6 @@ public final class Reader
             disk.image = new Image();
 
         Logger.log(new EndOperationLogMessage("Read complete"));
-    }
-
-    public static void readDiskCommand(ConfigProto config,
-                                       DiskLayout diskLayout,
-                                       FluxSource fluxSource,
-                                       Decoder decoder,
-                                       ImageWriter writer)
-    {
-        Disk disk = new Disk();
-        readDiskCommand(config, diskLayout, fluxSource, decoder, disk);
-
-        writer.printMap(disk.image);
-        if (config.getDecoder().hasWriteCsvTo())
-            writer.writeCsv(disk.image, config.getDecoder().getWriteCsvTo());
-        writer.writeImage(disk.image);
     }
 
     /* Given a set of sectors, deduplicates them sensibly (e.g. if there is a
@@ -267,163 +378,26 @@ public final class Reader
         return s;
     }
 
-    static CombinationResult combineRecordAndSectors(List<Track> tracks,
-                                                     Decoder decoder,
-                                                     LogicalTrackLayout ltl)
+    public Disk run()
     {
-        CombinationResult cr = new CombinationResult();
-        cr.result = BadSectorsState.HAS_NO_BAD_SECTORS;
-        List<Sector> trackSectors = new ArrayList<>();
+        Disk disk = new Disk();
+        run(disk);
 
-        /* Add the sectors which were there. */
+        ImageWriter writer = getImageWriter();
+        writer.printMap(disk.image);
+        if (getConfig().getDecoder().hasWriteCsvTo())
+            writer.writeCsv(disk.image, getConfig().getDecoder().getWriteCsvTo());
+        writer.writeImage(disk.image);
 
-        for (Track track : tracks)
-            trackSectors.addAll(track.allSectors);
-
-        /* Add the sectors which should be there. */
-
-        for (int sectorId : ltl.diskSectorOrder)
-        {
-            Sector sector =
-                    new Sector(new LogicalLocation(ltl.logicalCylinder, ltl.logicalHead, sectorId));
-
-            sector.status = Sector.Status.MISSING;
-            sector.physicalLocation = new CylinderHead(ltl.physicalCylinder, ltl.physicalHead);
-            trackSectors.add(sector);
-        }
-
-        /* Deduplicate. */
-
-        cr.sectors = collectSectors(trackSectors);
-        if (cr.sectors.isEmpty())
-            cr.result = BadSectorsState.HAS_BAD_SECTORS;
-        for (Sector sector : cr.sectors)
-            if (sector.status != Sector.Status.OK)
-                cr.result = BadSectorsState.HAS_BAD_SECTORS;
-
-        return cr;
+        return disk;
     }
 
-    static ReadGroupResult readGroup(DiskLayout diskLayout,
-                                     Common.FluxSourceIteratorHolder fluxSourceIteratorHolder,
-                                     LogicalTrackLayout ltl,
-                                     List<Track> tracks,
-                                     Decoder decoder,
-                                     ConfigProto config)
-    {
-        ReadGroupResult rgr = new ReadGroupResult();
-        rgr.result = ReadResult.BAD_AND_CAN_NOT_RETRY;
-
-        /* Before doing the read, look to see if we already have the necessary
-         * sectors. */
-
-        {
-            CombinationResult cr = combineRecordAndSectors(tracks, decoder, ltl);
-            rgr.combinedSectors = cr.sectors;
-            if (cr.result == BadSectorsState.HAS_NO_BAD_SECTORS)
-            {
-                /* We have all necessary sectors, so can stop here. */
-                rgr.result = ReadResult.GOOD_READ;
-                if (config.getDecoder().getSkipUnnecessaryTracks())
-                    return rgr;
-            }
-        }
-
-        for (int offset = 0; offset < ltl.groupSize; offset += diskLayout.headWidth)
-        {
-            int physicalCylinder = ltl.physicalCylinder + offset;
-            int physicalHead = ltl.physicalHead;
-            PhysicalTrackLayout ptl = diskLayout.layoutByPhysicalLocation.get(new CylinderHead(
-                    physicalCylinder,
-                    physicalHead));
-
-            /* Do the physical read. */
-
-            Logger.log(new BeginReadOperationLogMessage(physicalCylinder, physicalHead));
-
-            FluxSourceIterator fluxSourceIterator =
-                    fluxSourceIteratorHolder.getIterator(physicalCylinder, physicalHead);
-            if (!fluxSourceIterator.hasNext())
-                continue;
-
-            Fluxmap fluxmap = fluxSourceIterator.next();
-            Logger.log(new EndReadOperationLogMessage());
-            Logger.logf("%d ms in %d bytes", (int) (fluxmap.duration() / 1e6), fluxmap.bytes());
-
-            Track flux = decoder.decodeToSectors(fluxmap, ptl);
-            flux.normalisedSectors = collectSectors(flux.allSectors);
-            tracks.add(flux);
-
-            /* Decode what we've got so far. */
-
-            CombinationResult cr = combineRecordAndSectors(tracks, decoder, ltl);
-            rgr.combinedSectors = cr.sectors;
-            if (cr.result == BadSectorsState.HAS_NO_BAD_SECTORS)
-            {
-                /* We have all necessary sectors, so can stop here. */
-                rgr.result = ReadResult.GOOD_READ;
-                if (config.getDecoder().getSkipUnnecessaryTracks())
-                    break;
-            } else if (fluxSourceIterator.hasNext())
-            {
-                /* The flux source claims it can do more reads, so mark this
-                 * group as being retryable. */
-                rgr.result = ReadResult.BAD_AND_CAN_RETRY;
-            }
-        }
-
-        return rgr;
-    }
-
-    private static void readAndDecodeTrack(ConfigProto config,
-                                           DiskLayout diskLayout,
-                                           FluxSource fluxSource,
-                                           Decoder decoder,
-                                           LogicalTrackLayout ltl,
-                                           List<Track> tracks,
-                                           List<Sector> combinedSectors)
-    {
-        if (fluxSource.isHardware())
-            Common.measureDiskRotation(config);
-
-        Common.FluxSourceIteratorHolder fluxSourceIteratorHolder =
-                new Common.FluxSourceIteratorHolder(fluxSource);
-        int retriesRemaining = config.getDecoder().getRetries();
-        for (; ; )
-        {
-            ReadGroupResult rgr =
-                    readGroup(diskLayout, fluxSourceIteratorHolder, ltl, tracks, decoder, config);
-            combinedSectors.clear();
-            combinedSectors.addAll(rgr.combinedSectors);
-            if (rgr.result == ReadResult.GOOD_READ)
-                break;
-            if (rgr.result == ReadResult.BAD_AND_CAN_NOT_RETRY)
-            {
-                Logger.logf("no more data; giving up");
-                break;
-            }
-
-            if (retriesRemaining == 0)
-            {
-                Logger.logf("giving up");
-                break;
-            }
-
-            if (fluxSource.isHardware())
-            {
-                Common.adjustTrackOnError(fluxSource, ltl.physicalCylinder, config);
-                Logger.logf("retrying; %d retries remaining", retriesRemaining);
-                retriesRemaining--;
-            }
-        }
-    }
-
-    static enum ReadResult
+    enum ReadResult
     {
         GOOD_READ, BAD_AND_CAN_RETRY, BAD_AND_CAN_NOT_RETRY
     }
 
-    static enum BadSectorsState
+    enum BadSectorsState
     {
         HAS_NO_BAD_SECTORS, HAS_BAD_SECTORS
     }

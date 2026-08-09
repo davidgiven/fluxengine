@@ -16,14 +16,24 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
-public class ReaderTest
+public class ReadOperationTest
 {
     private static LogicalTrackLayout makeLtl()
     {
         ImmutableList<Integer> order = ImmutableList.of(0, 1, 2);
         return new LogicalTrackLayout(
-                0, 0, 1, 0, 0, 3, 256, order, order, order,
-                ImmutableMap.of(0, 0, 1, 1, 2, 2), ImmutableMap.of(0, 0, 1, 1, 2, 2));
+                0,
+                0,
+                1,
+                0,
+                0,
+                3,
+                256,
+                order,
+                order,
+                order,
+                ImmutableMap.of(0, 0, 1, 1, 2, 2),
+                ImmutableMap.of(0, 0, 1, 1, 2, 2));
     }
 
     private static Sector makeSector(int sectorId, Sector.Status status)
@@ -43,7 +53,7 @@ public class ReaderTest
         sectors.add(makeSector(1, Sector.Status.OK));
         sectors.add(makeSector(2, Sector.Status.BAD_CHECKSUM));
 
-        List<Sector> result = Reader.collectSectors(sectors, true);
+        List<Sector> result = ReadOperation.collectSectors(sectors, true);
 
         assertThat(result).hasSize(3);
         assertThat(result.get(0).status).isEqualTo(Sector.Status.OK);
@@ -58,7 +68,7 @@ public class ReaderTest
         sectors.add(makeSector(0, Sector.Status.MISSING));
         sectors.add(makeSector(0, Sector.Status.OK));
 
-        List<Sector> result = Reader.collectSectors(sectors);
+        List<Sector> result = ReadOperation.collectSectors(sectors);
 
         assertThat(result).hasSize(1);
         assertThat(result.get(0).status).isEqualTo(Sector.Status.OK);
@@ -73,13 +83,13 @@ public class ReaderTest
         b.data = Bytes.of(2);
 
         /* collapseConflicts=false keeps both as CONFLICT. */
-        List<Sector> result = Reader.collectSectors(List.of(a, b), false);
+        List<Sector> result = ReadOperation.collectSectors(List.of(a, b), false);
         assertThat(result).hasSize(2);
         assertThat(result.get(0).status).isEqualTo(Sector.Status.CONFLICT);
         assertThat(result.get(1).status).isEqualTo(Sector.Status.CONFLICT);
 
         /* collapseConflicts=true collapses to a single CONFLICT. */
-        List<Sector> collapsed = Reader.collectSectors(List.of(a, b), true);
+        List<Sector> collapsed = ReadOperation.collectSectors(List.of(a, b), true);
         assertThat(collapsed).hasSize(1);
         assertThat(collapsed.get(0).status).isEqualTo(Sector.Status.CONFLICT);
     }
@@ -92,7 +102,7 @@ public class ReaderTest
         Sector b = makeSector(0, Sector.Status.OK);
         b.data = Bytes.of(1);
 
-        List<Sector> result = Reader.collectSectors(List.of(a, b), false);
+        List<Sector> result = ReadOperation.collectSectors(List.of(a, b), false);
 
         assertThat(result).hasSize(1);
         assertThat(result.get(0).status).isEqualTo(Sector.Status.OK);
@@ -106,18 +116,18 @@ public class ReaderTest
         track.allSectors = new ArrayList<>();
         track.allSectors.add(makeSector(0, Sector.Status.OK));
 
-        Reader.CombinationResult cr = Reader.combineRecordAndSectors(
-                List.of(track), null, makeLtl());
+        ReadOperation.CombinationResult cr =
+                ReadOperation.combineRecordAndSectors(List.of(track), makeLtl());
 
-        assertThat(cr.result).isEqualTo(Reader.BadSectorsState.HAS_BAD_SECTORS);
+        assertThat(cr.result).isEqualTo(ReadOperation.BadSectorsState.HAS_BAD_SECTORS);
         assertThat(cr.sectors).hasSize(3);
 
-        Sector s0 = cr.sectors.stream()
-                .filter(s -> s.location.logicalSector() == 0).findFirst().get();
-        Sector s1 = cr.sectors.stream()
-                .filter(s -> s.location.logicalSector() == 1).findFirst().get();
-        Sector s2 = cr.sectors.stream()
-                .filter(s -> s.location.logicalSector() == 2).findFirst().get();
+        Sector s0 =
+                cr.sectors.stream().filter(s -> s.location.logicalSector() == 0).findFirst().get();
+        Sector s1 =
+                cr.sectors.stream().filter(s -> s.location.logicalSector() == 1).findFirst().get();
+        Sector s2 =
+                cr.sectors.stream().filter(s -> s.location.logicalSector() == 2).findFirst().get();
         assertThat(s0.status).isEqualTo(Sector.Status.OK);
         assertThat(s1.status).isEqualTo(Sector.Status.MISSING);
         assertThat(s2.status).isEqualTo(Sector.Status.MISSING);
@@ -132,10 +142,10 @@ public class ReaderTest
         track.allSectors.add(makeSector(1, Sector.Status.OK));
         track.allSectors.add(makeSector(2, Sector.Status.OK));
 
-        Reader.CombinationResult cr = Reader.combineRecordAndSectors(
-                List.of(track), null, makeLtl());
+        ReadOperation.CombinationResult cr =
+                ReadOperation.combineRecordAndSectors(List.of(track), makeLtl());
 
-        assertThat(cr.result).isEqualTo(Reader.BadSectorsState.HAS_NO_BAD_SECTORS);
+        assertThat(cr.result).isEqualTo(ReadOperation.BadSectorsState.HAS_NO_BAD_SECTORS);
         assertThat(cr.sectors).hasSize(3);
         for (Sector sector : cr.sectors)
             assertThat(sector.status).isEqualTo(Sector.Status.OK);
@@ -144,10 +154,10 @@ public class ReaderTest
     @Test
     public void combineRecordAndSectorsEmptyTrackIsBad()
     {
-        Reader.CombinationResult cr = Reader.combineRecordAndSectors(
-                List.of(), null, makeLtl());
+        ReadOperation.CombinationResult cr =
+                ReadOperation.combineRecordAndSectors(List.of(), makeLtl());
 
-        assertThat(cr.result).isEqualTo(Reader.BadSectorsState.HAS_BAD_SECTORS);
+        assertThat(cr.result).isEqualTo(ReadOperation.BadSectorsState.HAS_BAD_SECTORS);
         assertThat(cr.sectors).hasSize(3);
         for (Sector sector : cr.sectors)
             assertThat(sector.status).isEqualTo(Sector.Status.MISSING);

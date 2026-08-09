@@ -8,7 +8,7 @@ import com.cowlark.fluxengine.data.Image;
  * Reads sector images from disk, ported from
  * lib/imagereader/imagereader.{h,cc}.
  */
-public abstract class ImageReader
+public abstract class ImageReader implements AutoCloseable
 {
     protected final ImageReaderProto config;
     protected final ConfigProto fullConfig;
@@ -66,6 +66,11 @@ public abstract class ImageReader
             default:
                 throw new FluxEngineException("bad input file config");
         }
+    }
+
+    @Override
+    public void close() throws Exception
+    {
     }
 
     /* Returns any extra config the image might want to contribute. */

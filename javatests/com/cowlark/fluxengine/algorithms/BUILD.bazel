@@ -3,17 +3,28 @@ load("@rules_java//java:defs.bzl", "java_test")
 package(default_visibility = ["//visibility:public"])
 
 java_test(
-    name = "WriterTest",
-    srcs = ["WriterTest.java"],
+    name = "ReadOperationTest",
+    srcs = ["ReadOperationTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/algorithms",
+        "//java/com/cowlark/fluxengine/config:config_java_proto",
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/data",
+        "@maven//:com_google_guava_guava",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "WriteOperationTest",
+    srcs = ["WriteOperationTest.java"],
     deps = [
         "//java/com/cowlark/fluxengine/algorithms",
         "//java/com/cowlark/fluxengine/config",
         "//java/com/cowlark/fluxengine/config:config_java_proto",
         "//java/com/cowlark/fluxengine/core",
         "//java/com/cowlark/fluxengine/data",
-        "//java/com/cowlark/fluxengine/encoders",
-        "//java/com/cowlark/fluxengine/fluxsink",
-        "//java/com/cowlark/fluxengine/fluxsource",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],
@@ -29,21 +40,6 @@ java_test(
         "//java/com/cowlark/fluxengine/core",
         "//java/com/cowlark/fluxengine/data",
         "//java/com/cowlark/fluxengine/fluxsource",
-        "@maven//:com_google_truth_truth",
-        "@maven//:junit_junit",
-    ],
-)
-
-java_test(
-    name = "ReaderTest",
-    srcs = ["ReaderTest.java"],
-    deps = [
-        "//java/com/cowlark/fluxengine/algorithms",
-        "//java/com/cowlark/fluxengine/config:config_java_proto",
-        "//java/com/cowlark/fluxengine/core",
-        "//java/com/cowlark/fluxengine/data",
-        "//java/com/cowlark/fluxengine/decoders",
-        "@maven//:com_google_guava_guava",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],

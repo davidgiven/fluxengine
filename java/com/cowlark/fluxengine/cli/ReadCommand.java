@@ -2,18 +2,13 @@ package com.cowlark.fluxengine.cli;
 
 import static com.cowlark.fluxengine.config.FluxSourceSinkType.FLUXTYPE_DRIVE;
 
-import com.cowlark.fluxengine.algorithms.Reader;
-import com.cowlark.fluxengine.arch.Arch;
+import com.cowlark.fluxengine.algorithms.ReadOperation;
 import com.cowlark.fluxengine.config.ConfigBuilder;
 import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.core.FluxEngineException;
 import com.cowlark.fluxengine.core.flags.FlagGroup;
 import com.cowlark.fluxengine.core.flags.StringFlag;
 import com.cowlark.fluxengine.core.flags.ValueFlag;
-import com.cowlark.fluxengine.data.DiskLayout;
-import com.cowlark.fluxengine.decoders.Decoder;
-import com.cowlark.fluxengine.fluxsource.FluxSource;
-import com.cowlark.fluxengine.imagewriter.ImageWriter;
 import com.google.common.collect.ImmutableList;
 
 /**
@@ -61,10 +56,15 @@ public class ReadCommand implements Command
         if (config.getDecoder().getCopyFluxTo().getType() == FLUXTYPE_DRIVE)
             throw new FluxEngineException("you cannot copy flux to a hardware device");
 
-        DiskLayout diskLayout = new DiskLayout(config);
-        FluxSource fluxSource = FluxSource.create(config);
-        Decoder decoder = Arch.createDecoder(config);
-        ImageWriter writer = ImageWriter.create(config);
-        Reader.readDiskCommand(config, diskLayout, fluxSource, decoder, writer);
+        try
+        {
+            try (ReadOperation operation = new ReadOperation(config))
+            {
+                operation.run();
+            }
+        } catch (Exception e)
+        {
+            throw new RuntimeException(e);
+        }
     }
 }

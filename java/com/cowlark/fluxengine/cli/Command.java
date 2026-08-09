@@ -81,7 +81,13 @@ public interface Command
             Supplier<? extends Command> supplier = commands.get(args.get(index));
             if (supplier != null)
             {
-                supplier.get().run(ImmutableList.copyOf(args.subList(index + 1, args.size())));
+                try
+                {
+                    supplier.get().run(ImmutableList.copyOf(args.subList(index + 1, args.size())));
+                } catch (Exception e)
+                {
+                    throw new RuntimeException(e);
+                }
                 return true;
             }
         }
@@ -96,6 +102,6 @@ public interface Command
 
     String getHelp();
 
-    void run(ImmutableList<String> args);
+    void run(ImmutableList<String> args) throws Exception;
 
 }

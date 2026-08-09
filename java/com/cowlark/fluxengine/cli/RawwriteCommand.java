@@ -2,7 +2,7 @@ package com.cowlark.fluxengine.cli;
 
 import static com.cowlark.fluxengine.config.FluxSourceSinkType.FLUXTYPE_DRIVE;
 
-import com.cowlark.fluxengine.algorithms.Writer;
+import com.cowlark.fluxengine.algorithms.WriteOperation;
 import com.cowlark.fluxengine.config.ConfigBuilder;
 import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.core.FluxEngineException;
@@ -10,9 +10,6 @@ import com.cowlark.fluxengine.core.flags.ActionFlag;
 import com.cowlark.fluxengine.core.flags.FlagGroup;
 import com.cowlark.fluxengine.core.flags.StringFlag;
 import com.cowlark.fluxengine.core.flags.ValueFlag;
-import com.cowlark.fluxengine.data.DiskLayout;
-import com.cowlark.fluxengine.fluxsink.FluxSinkFactory;
-import com.cowlark.fluxengine.fluxsource.FluxSource;
 import com.google.common.collect.ImmutableList;
 
 /**
@@ -53,7 +50,7 @@ public class RawwriteCommand implements Command
     }
 
     @Override
-    public void run(ImmutableList<String> args)
+    public void run(ImmutableList<String> args) throws Exception
     {
         ConfigBuilder builder = new ConfigBuilder().fromFlags(args, flags);
         if (sourceFluxFlag.isSet())
@@ -67,10 +64,9 @@ public class RawwriteCommand implements Command
         if (config.getFluxSource().getType() == FLUXTYPE_DRIVE)
             throw new FluxEngineException("you can't use rawwrite to read from hardware");
 
-        FluxSource fluxSource = FluxSource.create(config);
-        FluxSinkFactory fluxSinkFactory = FluxSinkFactory.create(config);
-        DiskLayout diskLayout = new DiskLayout(config);
-
-        Writer.writeRawDiskCommand(config, diskLayout, fluxSource, fluxSinkFactory);
+        try (WriteOperation operation = new WriteOperation(config))
+        {
+            operation.writeRawDiskCommand();
+        }
     }
 }

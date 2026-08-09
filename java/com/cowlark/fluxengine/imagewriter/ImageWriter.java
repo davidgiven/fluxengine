@@ -15,13 +15,19 @@ import java.nio.file.Path;
  * Writes sector images to disk, ported from
  * lib/imagewriter/imagewriter.{h,cc}.
  */
-public abstract class ImageWriter
+public abstract class ImageWriter implements AutoCloseable
 {
     protected final ImageWriterProto config;
 
     public ImageWriter(ImageWriterProto config)
     {
         this.config = config;
+    }
+
+    @Override
+    public void close() throws Exception
+    {
+
     }
 
     public static ImageWriter create(ConfigProto config)

@@ -8,7 +8,7 @@ import com.cowlark.fluxengine.core.FluxEngineException;
 /**
  * A source of flux data, ported from lib/fluxsource/fluxsource.{h,cc}.
  */
-public abstract class FluxSource
+public abstract class FluxSource implements AutoCloseable
 {
     public static FluxSource create(ConfigProto config)
     {
@@ -49,6 +49,11 @@ public abstract class FluxSource
     private static FluxSource notImplemented(String name)
     {
         throw new FluxEngineException(name + " flux source is not implemented yet");
+    }
+
+    @Override
+    public void close() throws Exception
+    {
     }
 
     /* Adjusts the current configuration based on the contents of this flux source. */
