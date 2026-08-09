@@ -47,8 +47,7 @@ public class ConfigBuilder
     /* The groups which have had an option applied, so that applyDefaultOptions
      * knows not to apply their defaults. */
     private final Set<OptionGroupProto> appliedOptions = new HashSet<>();
-    private ConfigProto.Builder proto = ConfigProto.newBuilder()
-            .setFluxSource(FluxSourceProto.newBuilder().setType(FLUXTYPE_DRIVE).build());
+    private ConfigProto.Builder proto = Formats.get("_global_options").toBuilder();
 
     public ConfigBuilder()
     {
@@ -371,8 +370,9 @@ public class ConfigBuilder
                         checkOptionValid(optionProto);
                         appliedOptions.add(group);
 
+                        /* Default options should never override anything the user set. */
                         Logger.log(new OptionLogMessage("default option", optionProto));
-                        proto.mergeFrom(optionProto.getConfig());
+                        proto = optionProto.getConfig().toBuilder().mergeFrom(proto.build());
                     }
                 }
             }

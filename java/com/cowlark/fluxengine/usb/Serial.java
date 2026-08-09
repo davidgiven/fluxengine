@@ -67,7 +67,7 @@ public final class Serial
 
     public int readByte()
     {
-        return readBytes(1).getByte(0);
+        return readBytes(1).getByte(0) & 0xff;
     }
 
     public void writeBytes(byte[] data)

@@ -64,7 +64,7 @@ option_group {
 	
 	option {
 		name: "auto"
-		comment: 'Autodetect from hardware'
+		comment: 'Autodetect rotational speed from hardware'
 		set_by_default: true
 
 		config {

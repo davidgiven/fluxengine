@@ -5,6 +5,9 @@ import static com.cowlark.fluxengine.config.FluxSourceSinkType.FLUXTYPE_DRIVE;
 import com.cowlark.fluxengine.config.ConfigBuilder;
 import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.core.FluxEngineException;
+import com.cowlark.fluxengine.core.flags.FlagGroup;
+import com.cowlark.fluxengine.core.flags.StringFlag;
+import com.cowlark.fluxengine.core.flags.ValueFlag;
 import com.cowlark.fluxengine.usb.UsbDevice;
 import com.cowlark.fluxengine.usb.UsbFactory;
 import com.google.common.collect.ImmutableList;
@@ -14,6 +17,14 @@ import com.google.common.collect.ImmutableList;
  */
 public class RpmCommand implements Command
 {
+    private FlagGroup flags = new FlagGroup();
+    private ValueFlag<String> sourceFlag = StringFlag.builder()
+            .setGroup(flags)
+            .setName("--source")
+            .setName("-s")
+            .setHelpText("flux file to read from")
+            .build();
+
     @Override
     public String getHelp()
     {
@@ -23,7 +34,8 @@ public class RpmCommand implements Command
     @Override
     public void run(ImmutableList<String> args)
     {
-        ConfigProto config = new ConfigBuilder().fromFlags(args).build();
+        ConfigProto config =
+                new ConfigBuilder().fromFlags(args, flags).withFluxSource(sourceFlag.get()).build();
 
         if (config.getFluxSource().getType() != FLUXTYPE_DRIVE)
             throw new FluxEngineException("this only makes sense with a real disk drive");
