@@ -50,6 +50,7 @@ public final class UsbFactory
             case GREASEWEAZLE -> new GreaseweazleUsbDevice(
                     candidateDevice.serialPort,
                     config.getUsb().getGreaseweazle());
+            case FLUXENGINE -> new FluxEngineUsbDevice(candidateDevice.device);
             default -> throw new FluxEngineException("unsupported hardware device");
 
         };
