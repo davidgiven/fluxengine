@@ -4,6 +4,7 @@ import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.config.UsbFinder;
 import com.cowlark.fluxengine.config.UsbFinder.CandidateDevice;
 import com.cowlark.fluxengine.core.FluxEngineException;
+import com.cowlark.fluxengine.core.Logger;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import java.util.Map;
@@ -15,6 +16,10 @@ public final class UsbFactory
 {
 
     private static final Cache<ConfigProto, UsbDevice> cache = CacheBuilder.newBuilder().build();
+
+    /* The device factory; replaceable from tests to avoid touching real
+     * hardware. */
+    static java.util.function.Function<ConfigProto, UsbDevice> deviceFactory = UsbFactory::connect;
 
     private UsbFactory()
     {
@@ -36,7 +41,7 @@ public final class UsbFactory
                 entry.getValue().close();
             cache.invalidateAll();
 
-            device = connect(config);
+            device = deviceFactory.apply(config);
             cache.put(config, device);
         }
         return device;
@@ -45,6 +50,10 @@ public final class UsbFactory
     public static UsbDevice connect(ConfigProto config)
     {
         CandidateDevice candidateDevice = UsbFinder.selectDevice(config);
+        Logger.logf(
+                "using %s serial %s",
+                candidateDevice.type.getDeviceName(),
+                candidateDevice.serial);
         UsbDevice device = switch (candidateDevice.type)
         {
             case GREASEWEAZLE -> new GreaseweazleUsbDevice(

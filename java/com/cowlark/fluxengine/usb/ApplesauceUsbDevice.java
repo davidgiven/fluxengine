@@ -11,7 +11,6 @@ import com.cowlark.fluxengine.core.Logger;
 import com.cowlark.fluxengine.data.Fluxmap;
 import com.cowlark.fluxengine.data.FluxmapReader;
 import com.cowlark.fluxengine.decoders.DecoderProto;
-import com.fazecast.jSerialComm.SerialPort;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,23 +19,19 @@ import java.util.List;
  */
 class ApplesauceUsbDevice extends UsbDevice
 {
-    private final SerialPort serial;
+    private final Serial serial;
     private final ApplesauceProto config;
     private boolean connected;
 
     ApplesauceUsbDevice(String port, ApplesauceProto config)
     {
         this.config = config;
-        this.serial = SerialPort.getCommPort(port);
-        serial.setBaudRate(38400);
-        serial.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 0, 0);
-        if (!serial.openPort())
-            throw new FluxEngineException("Unable to open serial port " + port);
+        this.serial = new Serial(port, 9600);
 
         String s = sendrecv("?");
         if (!s.equals("Applesauce"))
-            throw new FluxEngineException(String.format("Applesauce device not responding " +
-                            "(expected 'Applesauce', got '%s')",
+            throw new FluxEngineException(String.format(
+                    "Applesauce device not responding " + "(expected 'Applesauce', got '%s')",
                     s));
 
         doCommand("client:v2");
@@ -131,8 +126,8 @@ class ApplesauceUsbDevice extends UsbDevice
     {
         if (config.getVerbose())
             System.out.println("> " + command);
-        writeLine(command);
-        String r = readLine();
+        serial.writeLine(command);
+        String r = serial.readLine();
         if (config.getVerbose())
             System.out.println("< " + r);
         return r;
@@ -152,7 +147,7 @@ class ApplesauceUsbDevice extends UsbDevice
     private String doCommandX(String command)
     {
         doCommand(command);
-        String r = readLine();
+        String r = serial.readLine();
         if (config.getVerbose())
             System.out.println("<< " + r);
         return r;
@@ -196,8 +191,8 @@ class ApplesauceUsbDevice extends UsbDevice
         try
         {
             double periodUs = Double.parseDouble(doCommandX("sync:?speed"));
-            writeByte('X');
-            String r = readLine();
+            serial.writeByte('X');
+            String r = serial.readLine();
             if (config.getVerbose())
                 System.out.println("<< " + r);
             return periodUs * 1e3;
@@ -223,8 +218,8 @@ class ApplesauceUsbDevice extends UsbDevice
             seed = ssRandNext(seed);
         }
         double startTime = getCurrentTime();
-        writeBytes(junk);
-        readLine();
+        serial.writeBytes(junk);
+        serial.readLine();
         double elapsedTime = getCurrentTime() - startTime;
 
         System.out.printf(
@@ -243,7 +238,7 @@ class ApplesauceUsbDevice extends UsbDevice
         doCommand(String.format("data:<%d", max));
 
         double startTime = getCurrentTime();
-        readBytes(max);
+        serial.readBytes(max);
         double elapsedTime = getCurrentTime() - startTime;
 
         System.out.printf(
@@ -283,7 +278,7 @@ class ApplesauceUsbDevice extends UsbDevice
 
         doCommand(String.format("data:<%d", bufferSize));
 
-        Bytes rawData = readBytes(bufferSize);
+        Bytes rawData = serial.readBytes(bufferSize);
         return applesauceReadDataToFluxEngine(rawData, tickSize, indexMarks);
     }
 
@@ -314,8 +309,8 @@ class ApplesauceUsbDevice extends UsbDevice
 
         Bytes asdata = fluxEngineToApplesauceWriteData(fldata);
         doCommand(String.format("data:>%d", asdata.size()));
-        writeBytes(asdata);
-        checkCommandResult(readLine());
+        serial.writeBytes(asdata);
+        checkCommandResult(serial.readLine());
         doCommand("disk:wcmd0,0");
         doCommand("disk:write");
     }
@@ -357,65 +352,7 @@ class ApplesauceUsbDevice extends UsbDevice
             sendrecv("disconnect");
         } finally
         {
-            serial.closePort();
+            serial.close();
         }
-    }
-
-    private void writeLine(String s)
-    {
-        writeBytes(s.getBytes());
-        writeByte('\n');
-    }
-
-    private String readLine()
-    {
-        StringBuilder sb = new StringBuilder();
-        for (; ; )
-        {
-            int b = readByte();
-            if (b == '\r')
-                continue;
-            if (b == '\n')
-                return sb.toString();
-            sb.append((char) b);
-        }
-    }
-
-    private int readByte()
-    {
-        return readBytes(1).getByte(0) & 0xff;
-    }
-
-    private Bytes readBytes(int count)
-    {
-        Bytes result = new Bytes(0);
-        ByteWriter bw = result.writer();
-        byte[] chunk = new byte[4096];
-        while (bw.pos() < count)
-        {
-            int read = serial.readBytes(chunk, Math.min(chunk.length, count - bw.pos()));
-            if (read < 0)
-                throw new FluxEngineException("serial read failed");
-            for (int i = 0; i < read; i++)
-                bw.write8(chunk[i] & 0xff);
-        }
-        return result;
-    }
-
-    private void writeByte(int b)
-    {
-        writeBytes(new byte[]{(byte) b});
-    }
-
-    private void writeBytes(byte[] data)
-    {
-        int written = serial.writeBytes(data, data.length);
-        if (written != data.length)
-            throw new FluxEngineException("serial write failed");
-    }
-
-    private void writeBytes(Bytes data)
-    {
-        writeBytes(data.toByteArray());
     }
 }

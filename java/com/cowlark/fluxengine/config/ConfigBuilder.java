@@ -24,6 +24,7 @@ import static com.cowlark.fluxengine.config.ImageReaderWriterType.IMAGETYPE_NFD;
 import static com.cowlark.fluxengine.config.ImageReaderWriterType.IMAGETYPE_NSI;
 import static com.cowlark.fluxengine.config.ImageReaderWriterType.IMAGETYPE_TD0;
 
+import com.cowlark.fluxengine.core.Logger;
 import com.cowlark.fluxengine.core.flags.FlagGroup;
 import com.cowlark.fluxengine.core.flags.Flags;
 import com.cowlark.fluxengine.data.Formats;
@@ -351,6 +352,7 @@ public class ConfigBuilder
         checkOptionValid(optionProto);
         if (option.group() != null)
             appliedOptions.add(option.group());
+        Logger.log(new OptionLogMessage("user option", optionProto));
         proto.mergeFrom(optionProto.getConfig());
     }
 
@@ -362,13 +364,15 @@ public class ConfigBuilder
         {
             if (!appliedOptions.contains(group))
             {
-                for (OptionProto option : group.getOptionList())
+                for (OptionProto optionProto : group.getOptionList())
                 {
-                    if (option.getSetByDefault())
+                    if (optionProto.getSetByDefault())
                     {
-                        checkOptionValid(option);
+                        checkOptionValid(optionProto);
                         appliedOptions.add(group);
-                        proto.mergeFrom(option.getConfig());
+
+                        Logger.log(new OptionLogMessage("default option", optionProto));
+                        proto.mergeFrom(optionProto.getConfig());
                     }
                 }
             }

@@ -115,12 +115,4 @@ public interface LogMessage
         }
     }
 
-    record OptionLogMessage(String message) implements LogMessage
-    {
-        @Override
-        public void render(LogRenderer r)
-        {
-            r.newline().add("OPTION:").add(message).newline();
-        }
-    }
 }

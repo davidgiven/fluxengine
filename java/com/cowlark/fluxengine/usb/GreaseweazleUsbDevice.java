@@ -36,7 +36,6 @@ import com.cowlark.fluxengine.core.ByteWriter;
 import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.core.FluxEngineException;
 import com.cowlark.fluxengine.external.GreaseweazleUtils;
-import com.fazecast.jSerialComm.SerialPort;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.time.Duration;
 
@@ -45,7 +44,7 @@ import java.time.Duration;
  */
 class GreaseweazleUsbDevice extends UsbDevice
 {
-    private final SerialPort serial;
+    private final Serial serial;
     private final GreaseweazleProto config;
     private Version version;
     private long clock;
@@ -54,11 +53,7 @@ class GreaseweazleUsbDevice extends UsbDevice
     GreaseweazleUsbDevice(String port, GreaseweazleProto config)
     {
         this.config = config;
-        this.serial = SerialPort.getCommPort(port);
-        serial.setBaudRate(BAUD_NORMAL);
-        serial.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 0, 0);
-        if (!serial.openPort())
-            throw new FluxEngineException("Unable to open serial port " + port);
+        this.serial = new Serial(port, BAUD_NORMAL);
 
         int version = getVersion();
         if (version >= 29)
@@ -129,7 +124,7 @@ class GreaseweazleUsbDevice extends UsbDevice
     {
         doCommand(CMD_GET_INFO, GETINFO_FIRMWARE);
 
-        ByteReader response = new ByteReader(readBytes(32));
+        ByteReader response = serial.readBytes(32).reader();
         response.seek(4);
         long freq = response.readLe32() & 0xffffffffL;
         clock = 1000000000L / freq;
@@ -140,7 +135,7 @@ class GreaseweazleUsbDevice extends UsbDevice
 
     private long read28()
     {
-        ByteReader buffer = new ByteReader(readBytes(4));
+        ByteReader buffer = new ByteReader(serial.readBytes(4));
         return (long) ((buffer.read8() & 0xfe) >> 1) | (long) (buffer.read8() & 0xfe) << 6 |
                 (long) (buffer.read8() & 0xfe) << 13 | (long) (buffer.read8() & 0xfe) << 20;
     }
@@ -162,12 +157,12 @@ class GreaseweazleUsbDevice extends UsbDevice
 
     private void doCommand(byte[] command)
     {
-        writeBytes(command);
+        serial.writeBytes(command);
 
-        Bytes buffer = readBytes(2);
+        Bytes buffer = serial.readBytes(2);
 
         if ((buffer.getByte(0) & 0xff) != (command[0] & 0xff))
-            throw new FluxEngineException(String.format(
+            throw new RetryableUsbException(String.format(
                     "command returned garbage (0x%x != 0x%x with status 0x%x)",
                     buffer.getByte(0),
                     command[0],
@@ -216,13 +211,13 @@ class GreaseweazleUsbDevice extends UsbDevice
         long secondIndex = -1;
         for (; ; )
         {
-            int b = readByte();
+            int b = serial.readByte();
             if (b == 0)
                 break;
 
             if (b == 255)
             {
-                switch (readByte())
+                switch (serial.readByte())
                 {
                     case FLUXOP_INDEX:
                     {
@@ -247,7 +242,7 @@ class GreaseweazleUsbDevice extends UsbDevice
                     ticksGw += b;
                 else
                 {
-                    long delta = 250 + (b - 250) * 255 + readByte() - 1;
+                    long delta = 250 + (b - 250) * 255 + serial.readByte() - 1;
                     ticksGw += delta;
                 }
             }
@@ -299,8 +294,8 @@ class GreaseweazleUsbDevice extends UsbDevice
             seed = ssRandNext(seed);
         }
         double startTime = getCurrentTime();
-        writeBytes(junk);
-        readBytes(1);
+        serial.writeBytes(junk);
+        serial.readBytes(1);
         double elapsedTime = getCurrentTime() - startTime;
 
         System.out.printf(
@@ -339,7 +334,7 @@ class GreaseweazleUsbDevice extends UsbDevice
         doCommand(cmd);
 
         double startTime = getCurrentTime();
-        readBytes(LEN);
+        serial.readBytes(LEN);
         double elapsedTime = getCurrentTime() - startTime;
 
         System.out.printf(
@@ -389,7 +384,7 @@ class GreaseweazleUsbDevice extends UsbDevice
         ByteWriter bw = new ByteWriter(buffer);
         for (; ; )
         {
-            int b = readByte();
+            int b = serial.readByte();
             if (b == 0)
                 break;
             bw.write8(b);
@@ -423,8 +418,8 @@ class GreaseweazleUsbDevice extends UsbDevice
                 break;
         }
         Bytes gwdata = GreaseweazleUtils.fluxEngineToGreaseweazle(fldata, clock);
-        writeBytes(gwdata);
-        readByte(); /* synchronise */
+        serial.writeBytes(gwdata);
+        serial.readByte(); /* synchronise */
 
         doCommand(CMD_GET_FLUX_STATUS);
     }
@@ -444,7 +439,7 @@ class GreaseweazleUsbDevice extends UsbDevice
         bw.write8(6);
         bw.writeLe32((int) (200e6 / clock));
         doCommand(cmd);
-        readByte(); /* synchronise */
+        serial.readByte(); /* synchronise */
 
         doCommand(CMD_GET_FLUX_STATUS);
     }
@@ -466,40 +461,7 @@ class GreaseweazleUsbDevice extends UsbDevice
     @Override
     public void close()
     {
-        serial.closePort();
-    }
-
-    private int readByte()
-    {
-        return readBytes(1).get(0) & 0xff;
-    }
-
-    private Bytes readBytes(int count)
-    {
-        Bytes result = new Bytes(0);
-        ByteWriter bw = new ByteWriter(result);
-        byte[] chunk = new byte[4096];
-        while (bw.pos() < count)
-        {
-            int read = serial.readBytes(chunk, Math.min(chunk.length, count - bw.pos()));
-            if (read < 0)
-                throw new FluxEngineException("serial read failed");
-            for (int i = 0; i < read; i++)
-                bw.write8(chunk[i] & 0xff);
-        }
-        return result;
-    }
-
-    private void writeBytes(byte[] data)
-    {
-        int written = serial.writeBytes(data, data.length);
-        if (written != data.length)
-            throw new FluxEngineException("serial write failed");
-    }
-
-    private void writeBytes(Bytes data)
-    {
-        writeBytes(data.toByteArray());
+        serial.close();
     }
 
     private enum Version
