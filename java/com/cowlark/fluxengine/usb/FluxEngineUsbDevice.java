@@ -169,7 +169,7 @@ class FluxEngineUsbDevice extends UsbDevice
             int len = Math.min(bytes.size() - ptr, MAX_TRANSFER);
             byte[] data = new byte[len];
             for (int i = 0; i < len; i++)
-                data[i] = bytes.getByte(ptr + i);
+                data[i] = (byte) bytes.getByte(ptr + i);
             try
             {
                 dataOut.syncSubmit(data);

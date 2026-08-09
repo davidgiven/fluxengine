@@ -84,14 +84,15 @@ public final class Bytes implements List<Byte>
     @Override
     public Byte get(int offset)
     {
-        return getByte(offset);
+        return (byte) getByte(offset);
     }
 
-    /* Fast, allocation-free byte access for hot paths (avoids Byte boxing). */
-    public byte getByte(int offset)
+    /* Fast, allocation-free byte access for hot paths (avoids Byte boxing).
+     * Returns the value as an unsigned int (0..255). */
+    public int getByte(int offset)
     {
         boundsCheck(offset);
-        return storage.data[low + offset];
+        return storage.data[low + offset] & 0xff;
     }
 
     @Override
@@ -104,12 +105,13 @@ public final class Bytes implements List<Byte>
         return old;
     }
 
-    /* Fast, allocation-free byte write for hot paths (avoids Byte boxing). */
-    public void setByte(int offset, byte value)
+    /* Fast, allocation-free byte write for hot paths (avoids Byte boxing).
+     * Accepts an unsigned int (0..255). */
+    public void setByte(int offset, int value)
     {
         boundsCheck(offset);
         detach();
-        storage.data[low + offset] = value;
+        storage.data[low + offset] = (byte) value;
     }
 
     public byte[] toByteArray()
@@ -138,7 +140,7 @@ public final class Bytes implements List<Byte>
     {
         Object[] result = new Object[size()];
         for (int i = 0; i < size(); i++)
-            result[i] = getByte(i);
+            result[i] = (byte) getByte(i);
         return result;
     }
 
@@ -150,7 +152,7 @@ public final class Bytes implements List<Byte>
         if (a.length < n)
             a = (T[]) Arrays.copyOf(a, n, a.getClass());
         for (int i = 0; i < n; i++)
-            a[i] = (T) Byte.valueOf(getByte(i));
+            a[i] = (T) Byte.valueOf((byte) getByte(i));
         if (a.length > n)
             a[n] = null;
         return a;
@@ -541,7 +543,7 @@ public final class Bytes implements List<Byte>
         boolean changed = false;
         for (int i = size() - 1; i >= 0; i--)
         {
-            if (c.contains(getByte(i)))
+            if (c.contains((byte) getByte(i)))
             {
                 remove(i);
                 changed = true;
@@ -556,7 +558,7 @@ public final class Bytes implements List<Byte>
         boolean changed = false;
         for (int i = size() - 1; i >= 0; i--)
         {
-            if (!c.contains(getByte(i)))
+            if (!c.contains((byte) getByte(i)))
             {
                 remove(i);
                 changed = true;
