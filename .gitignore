@@ -6,6 +6,10 @@ bazel-bin
 .project
 .idea/
 .ijwb/
+nbproject/
+build.xml
+.classpath
+manifest.mf
 /.ninja*
 /brother120tool
 /brother120tool-*
@@ -17,3 +21,4 @@ bazel-bin
 /compile_commands.json
 /doc/disk-_global_options.md
 
+/nbproject/private/
