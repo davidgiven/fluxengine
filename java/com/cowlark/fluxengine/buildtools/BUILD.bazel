@@ -4,7 +4,10 @@ package(default_visibility = ["//visibility:public"])
 
 java_library(
     name = "buildtools",
-    srcs = glob(["*.java"]),
+    srcs = glob(
+        ["*.java"],
+        exclude = ["EncodeDecodeTest.java"],
+    ),
     deps = [
         "//java/com/cowlark/fluxengine/config:config_java_proto",
         "@com_google_protobuf//java/core",
@@ -15,4 +18,13 @@ java_binary(
     name = "protoencode",
     main_class = "com.cowlark.fluxengine.buildtools.ProtoEncode",
     runtime_deps = [":buildtools"],
+)
+
+java_library(
+    name = "encodedecodetest",
+    srcs = ["EncodeDecodeTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/cli",
+        "@maven//:com_google_guava_guava",
+    ],
 )

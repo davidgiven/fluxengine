@@ -1,3 +1,5 @@
+load("//:corpus.bzl", "define_corpus_tests")
+
 package(default_visibility = ["//visibility:public"])
 
 # Root aliases for running/building the application
@@ -9,4 +11,12 @@ alias(
 alias(
     name = "fluxengine_native",
     actual = "//java/com/cowlark/fluxengine:fluxengine_native",
+)
+
+# Encode/decode round-trip tests, ported from the corpus tests in build.py.
+CORPUS_TESTS = define_corpus_tests()
+
+test_suite(
+    name = "corpus",
+    tests = CORPUS_TESTS,
 )
