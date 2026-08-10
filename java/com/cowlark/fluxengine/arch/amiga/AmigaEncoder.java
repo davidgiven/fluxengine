@@ -18,13 +18,12 @@ import java.util.List;
  */
 public class AmigaEncoder extends Encoder
 {
-    private final ConfigProto fullConfig;
     private final AmigaEncoderProto config;
     private final boolean[] lastBit = new boolean[1];
 
-    public AmigaEncoder(ConfigProto config)
+    public AmigaEncoder(ConfigProto config, double diskRotationalPeriodNs)
     {
-        this.fullConfig = config;
+        super(diskRotationalPeriodNs);
         this.config = config.getEncoder().getAmiga();
     }
 
@@ -139,10 +138,7 @@ public class AmigaEncoder extends Encoder
         Fluxmap fluxmap = new Fluxmap();
         fluxmap.appendBits(
                 bits,
-                (long) calculatePhysicalClockPeriod(
-                        fullConfig,
-                        config.getClockRateUs() * 1e3,
-                        200e6));
+                (long) calculatePhysicalClockPeriodNs(config.getClockRateUs() * 1e3, 200e6));
         return fluxmap;
     }
 }

@@ -20,7 +20,7 @@ enum SupportStatus
   UNSUPPORTED = 0; DINOSAUR = 1; UNICORN = 2;
 }
 
-// NEXT_TAG: 27
+// NEXT_TAG: 28
 message ConfigProto
 {
   option(recurse) = false;
@@ -45,6 +45,7 @@ message ConfigProto
   optional UsbProto usb = 15;
 
   optional string tracks = 16;
+  optional bool verify_writes = 27 [(help) = "verify writes where possible", default = true];
 
   optional FilesystemProto filesystem = 18;
 

@@ -15,8 +15,7 @@ import org.junit.runners.JUnit4;
 public class FluxDecoderTest
 {
     private static final int CLOCK_TICKS = 1000;
-    private static final double CLOCK_NS =
-            CLOCK_TICKS * 1000000000.0 / 12000000.0;
+    private static final double CLOCK_NS = CLOCK_TICKS * 1000000000.0 / 12000000.0;
 
     private static Bytes roundTrip(Bytes data)
     {
@@ -25,7 +24,7 @@ public class FluxDecoderTest
 
         /* ...write it out as flux... */
         Fluxmap map = new Fluxmap();
-        map.appendBits(encoded, CLOCK_TICKS);
+        map.appendBits(encoded, CLOCK_NS);
         FluxmapReader reader = new FluxmapReader(map, DecoderProto.getDefaultInstance());
         FluxDecoder decoder = new FluxDecoder(reader, CLOCK_NS, DecoderProto.getDefaultInstance());
 
@@ -53,7 +52,7 @@ public class FluxDecoderTest
         Fluxmap map = new Fluxmap();
         map.appendBits(
                 java.util.Arrays.asList(true, true, true, true, true, true, true, true),
-                CLOCK_TICKS);
+                CLOCK_NS);
         FluxmapReader reader = new FluxmapReader(map, DecoderProto.getDefaultInstance());
         FluxDecoder decoder = new FluxDecoder(reader, CLOCK_NS, DecoderProto.getDefaultInstance());
 
@@ -72,7 +71,7 @@ public class FluxDecoderTest
         /* The initial leading-zeroes state (tell().zeroes() == 0) makes the
          * first readBit return true. */
         Fluxmap map = new Fluxmap();
-        map.appendBits(java.util.Arrays.asList(true), CLOCK_TICKS);
+        map.appendBits(java.util.Arrays.asList(true), CLOCK_NS);
         FluxmapReader reader = new FluxmapReader(map, DecoderProto.getDefaultInstance());
         FluxDecoder decoder = new FluxDecoder(reader, CLOCK_NS, DecoderProto.getDefaultInstance());
 

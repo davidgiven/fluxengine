@@ -180,20 +180,19 @@ public class InspectCommand implements Command
         if (tracks.size() != 1)
             throw new FluxEngineException("you must specify exactly one track");
         CylinderHead ch = tracks.get(0);
-        FluxSourceIterator iterator =
-                fluxSource.readFlux(FluxReadParameters.builder()
-                        .setCylinder(ch.cylinder())
-                        .setHead(ch.head())
-                        .build());
+        FluxSourceIterator iterator = fluxSource.readFlux(FluxReadParameters.builder()
+                .setCylinder(ch.cylinder())
+                .setHead(ch.head())
+                .build());
         Fluxmap fluxmap = iterator.next();
 
         System.out.printf(
                 "0x%x bytes of data in %.3fms%n",
                 fluxmap.bytes(),
-                fluxmap.duration() / 1e6);
+                fluxmap.durationNs() / 1e6);
         System.out.printf(
                 "Required USB bandwidth: %dkB/s%n",
-                (int) (fluxmap.bytes() / 1024.0 / (fluxmap.duration() / 1e9)));
+                (int) (fluxmap.bytes() / 1024.0 / (fluxmap.durationNs() / 1e9)));
 
         FluxmapReader fmr = new FluxmapReader(fluxmap, DecoderProto.getDefaultInstance());
         double clockPeriod = guessClock(fluxmap, fmr);

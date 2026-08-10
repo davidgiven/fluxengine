@@ -102,35 +102,40 @@ public final class Arch
 
     public static Encoder createEncoder(ConfigProto config)
     {
+        return createEncoder(config, config.getDrive().getRotationalPeriodMs() * 1e6);
+    }
+
+    public static Encoder createEncoder(ConfigProto config, double diskRotationalPeriodNs)
+    {
         if (!config.hasEncoder())
             throw new FluxEngineException("no encoder configured");
 
         switch (config.getEncoder().getFormatCase())
         {
             case AGAT:
-                return new AgatEncoder(config);
+                return new AgatEncoder(config, diskRotationalPeriodNs);
             case AMIGA:
-                return new AmigaEncoder(config);
+                return new AmigaEncoder(config, diskRotationalPeriodNs);
             case APPLE2:
-                return new Apple2Encoder(config);
+                return new Apple2Encoder(config, diskRotationalPeriodNs);
             case BROTHER:
-                return new BrotherEncoder(config);
+                return new BrotherEncoder(config, diskRotationalPeriodNs);
             case C64:
-                return new Commodore64Encoder(config);
+                return new Commodore64Encoder(config, diskRotationalPeriodNs);
             case IBM:
-                return new IbmEncoder(config);
+                return new IbmEncoder(config, diskRotationalPeriodNs);
             case MACINTOSH:
-                return new MacintoshEncoder(config);
+                return new MacintoshEncoder(config, diskRotationalPeriodNs);
             case MICROPOLIS:
-                return new MicropolisEncoder(config);
+                return new MicropolisEncoder(config, diskRotationalPeriodNs);
             case NORTHSTAR:
-                return new NorthstarEncoder(config);
+                return new NorthstarEncoder(config, diskRotationalPeriodNs);
             case TARTU:
-                return new TartuEncoder(config);
+                return new TartuEncoder(config, diskRotationalPeriodNs);
             case TIDS990:
-                return new Tids990Encoder(config);
+                return new Tids990Encoder(config, diskRotationalPeriodNs);
             case VICTOR9K:
-                return new Victor9kEncoder(config);
+                return new Victor9kEncoder(config, diskRotationalPeriodNs);
             default:
                 throw new FluxEngineException("no encoder specified");
         }

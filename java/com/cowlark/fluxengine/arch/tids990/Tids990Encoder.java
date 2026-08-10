@@ -20,15 +20,14 @@ import java.util.List;
  */
 public class Tids990Encoder extends Encoder
 {
-    private final ConfigProto fullConfig;
     private final Tids990EncoderProto config;
     private final boolean[] lastBit = new boolean[1];
     private Bits bits;
     private Bits.Cursor cursor;
 
-    public Tids990Encoder(ConfigProto config)
+    public Tids990Encoder(ConfigProto config, double diskRotationalPeriodNs)
     {
-        this.fullConfig = config;
+        super(diskRotationalPeriodNs);
         this.config = config.getEncoder().getTids990();
     }
 
@@ -136,8 +135,7 @@ public class Tids990Encoder extends Encoder
         Fluxmap fluxmap = new Fluxmap();
         fluxmap.appendBits(
                 bits,
-                (long) calculatePhysicalClockPeriod(
-                        fullConfig,
+                (long) calculatePhysicalClockPeriodNs(
                         clockRateUs * 1e3,
                         config.getRotationalPeriodMs() * 1e6));
         return fluxmap;

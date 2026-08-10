@@ -89,12 +89,11 @@ public class MacintoshEncoder extends Encoder
         ENCODE_DATA_GCR[0x3f] = 0xff;
     }
 
-    private final ConfigProto fullConfig;
     private final MacintoshEncoderProto config;
 
-    public MacintoshEncoder(ConfigProto config)
+    public MacintoshEncoder(ConfigProto config, double diskRotationalPeriodNs)
     {
-        this.fullConfig = config;
+        super(diskRotationalPeriodNs);
         this.config = config.getEncoder().getMacintosh();
     }
 
@@ -305,9 +304,7 @@ public class MacintoshEncoder extends Encoder
         bits.fillBitmapTo(cursor, bits.size(), new boolean[]{true, false});
 
         Fluxmap fluxmap = new Fluxmap();
-        fluxmap.appendBits(
-                bits,
-                (long) calculatePhysicalClockPeriod(fullConfig, clockRateUs * 1e3, 200e6));
+        fluxmap.appendBits(bits, (long) calculatePhysicalClockPeriodNs(clockRateUs * 1e3, 200e6));
         return fluxmap;
     }
 }

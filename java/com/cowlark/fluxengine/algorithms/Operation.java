@@ -40,7 +40,8 @@ public abstract class Operation implements AutoCloseable
                 new SupplierOfAutocloseable(() -> FluxSinkFactory.create(configProto));
         usbDeviceSupplier = new SupplierOfAutocloseable(() -> UsbFactory.connect(configProto));
         decoderSupplier = Suppliers.memoize(() -> Arch.createDecoder(configProto));
-        encoderSupplier = Suppliers.memoize(() -> Arch.createEncoder(configProto));
+        encoderSupplier = Suppliers.memoize(() -> Arch.createEncoder(
+                configProto, getDiskRotationalPeriodNs()));
         imageWriterSupplier = new SupplierOfAutocloseable(() -> ImageWriter.create(configProto));
         imageReaderSupplier = new SupplierOfAutocloseable(() -> ImageReader.create(configProto));
     }

@@ -15,6 +15,13 @@ import java.util.List;
  */
 public abstract class Encoder
 {
+    private final double diskRotationalPeriodNs;
+
+    public Encoder(double diskRotationalPeriodNs)
+    {
+        this.diskRotationalPeriodNs = diskRotationalPeriodNs;
+    }
+
     public static Encoder create(ConfigProto config)
     {
         throw new FluxEngineException("encoders are not implemented yet");
@@ -49,15 +56,13 @@ public abstract class Encoder
 
     public abstract Fluxmap encode(LogicalTrackLayout ltl, List<Sector> sectors, Image image);
 
-    public double calculatePhysicalClockPeriod(ConfigProto config,
-                                               double targetClockPeriod,
-                                               double targetRotationalPeriod)
+    public double calculatePhysicalClockPeriodNs(double targetClockPeriodNs,
+                                                 double targetRotationalPeriodNs)
     {
-        double currentRotationalPeriod = config.getDrive().getRotationalPeriodMs() * 1e6;
-        if (currentRotationalPeriod == 0)
+        if (diskRotationalPeriodNs == 0)
             throw new FluxEngineException(
-                    "you must set --drive.rotational_period_ms as it can't be " + "autodetected");
+                    "you must set --drive.rotational_period_ms as it can't be autodetected");
 
-        return targetClockPeriod * (currentRotationalPeriod / targetRotationalPeriod);
+        return targetClockPeriodNs * (diskRotationalPeriodNs / targetRotationalPeriodNs);
     }
 }

@@ -64,7 +64,7 @@ public class RawWriteOperation extends ReadOperation
                                 fluxSink.addFlux(physicalCylinder, physicalHead, fluxmap);
                                 Logger.logf(
                                         "writing %d ms in %d bytes",
-                                        (int) (fluxmap.duration() / 1e6),
+                                        (int) (fluxmap.durationNs() / 1e6),
                                         fluxmap.bytes());
                             }
                         } else

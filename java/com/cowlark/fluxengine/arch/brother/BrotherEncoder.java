@@ -136,12 +136,11 @@ public class BrotherEncoder extends Encoder
         ENCODE_DATA_GCR[31] = 0xfb;
     }
 
-    private final ConfigProto fullConfig;
     private final BrotherEncoderProto config;
 
-    public BrotherEncoder(ConfigProto config)
+    public BrotherEncoder(ConfigProto config, double diskRotationalPeriodNs)
     {
-        this.fullConfig = config;
+        super(diskRotationalPeriodNs);
         this.config = config.getEncoder().getBrother();
     }
 

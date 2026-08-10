@@ -18,15 +18,14 @@ import java.util.List;
  */
 public class AgatEncoder extends Encoder
 {
-    private final ConfigProto fullConfig;
     private final AgatEncoderProto config;
     private final boolean[] lastBit = new boolean[1];
     private Bits bits;
     private Bits.Cursor cursor;
 
-    public AgatEncoder(ConfigProto config)
+    public AgatEncoder(ConfigProto config, double diskRotationalPeriodNs)
     {
-        this.fullConfig = config;
+        super(diskRotationalPeriodNs);
         this.config = config.getEncoder().getAgat();
     }
 
@@ -107,8 +106,7 @@ public class AgatEncoder extends Encoder
 
         Fluxmap fluxmap = new Fluxmap();
         fluxmap.appendBits(
-                bits, (long) calculatePhysicalClockPeriod(
-                        fullConfig,
+                bits, (long) calculatePhysicalClockPeriodNs(
                         config.getTargetClockPeriodUs() * 1e3,
                         config.getTargetRotationalPeriodMs() * 1e6));
         return fluxmap;

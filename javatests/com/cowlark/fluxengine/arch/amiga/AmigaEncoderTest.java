@@ -32,7 +32,7 @@ public class AmigaEncoderTest
     public void encodeProducesPulses()
     {
         ConfigProto config = makeConfig();
-        AmigaEncoder encoder = new AmigaEncoder(config);
+        AmigaEncoder encoder = new AmigaEncoder(config, 200 * 1e6);
 
         Image image = new Image();
         Sector sector = image.put(0, 0, 0);
@@ -50,7 +50,7 @@ public class AmigaEncoderTest
     public void encodeRejectsBadSectorSize()
     {
         ConfigProto config = makeConfig();
-        AmigaEncoder encoder = new AmigaEncoder(config);
+        AmigaEncoder encoder = new AmigaEncoder(config, 200 * 1e6);
 
         Image image = new Image();
         Sector sector = image.put(0, 0, 0);

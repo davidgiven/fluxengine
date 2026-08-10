@@ -8,7 +8,6 @@ import com.cowlark.fluxengine.core.flags.FlagGroup;
 import com.cowlark.fluxengine.core.flags.StringFlag;
 import com.cowlark.fluxengine.core.flags.ValueFlag;
 import com.cowlark.fluxengine.data.Image;
-import com.cowlark.fluxengine.fluxsource.FluxSource;
 import com.google.common.collect.ImmutableList;
 
 /**
@@ -47,15 +46,18 @@ public class WriteCommand implements Command
     @Override
     public void run(ImmutableList<String> args) throws Exception
     {
-        var configProto = new ConfigBuilder().fromFlags(args, flags)
+        ConfigProto configProto = new ConfigBuilder().fromFlags(args, flags)
                 .withImageReader(sourceImageFlag.get())
                 .withFluxSink(destFluxFlag.get())
+                .withFluxSource(destFluxFlag.get()) /* for verification */.set(
+                        "verify_writes",
+                        Boolean.toString(verify))
                 .build();
 
         try (WriteOperation operation = new WriteOperation(configProto))
         {
-            //                    Image image = operation.getImageReader().readImage();
-            //
+            Image image = operation.getImageReader().readImage();
+            operation.writeDiskCommand(image);
             //                    FluxSource verificationFluxSource = null;
             //                    if (configProto.hasDecoder() && operation.getFluxSinkFactory()
             //                    .isHardware() && verify)

@@ -23,6 +23,11 @@ public class EncoderTest
 {
     private static final class TestEncoder extends Encoder
     {
+        TestEncoder(double diskRotationalPeriodNs)
+        {
+            super(diskRotationalPeriodNs);
+        }
+
         @Override
         public Fluxmap encode(LogicalTrackLayout ltl, List<Sector> sectors, Image image)
         {
@@ -33,9 +38,7 @@ public class EncoderTest
     @Test
     public void createThrowsNotImplemented()
     {
-        ConfigProto config = new ConfigBuilder()
-                .set("usb.serial", "test-serial")
-                .build();
+        ConfigProto config = new ConfigBuilder().set("usb.serial", "test-serial").build();
 
         assertThrows(FluxEngineException.class, () -> Encoder.create(config));
     }
@@ -45,15 +48,17 @@ public class EncoderTest
     {
         /* A single-track, single-side disk with sectors 0 and 1. */
         DiskLayout layout = new DiskLayout(1, 1, 2, 256);
-        LogicalTrackLayout ltl = layout.layoutByLogicalLocation.get(
-                new com.cowlark.fluxengine.data.CylinderHead(0, 0));
+        LogicalTrackLayout ltl =
+                layout.layoutByLogicalLocation.get(new com.cowlark.fluxengine.data.CylinderHead(
+                        0,
+                        0));
         assertThat(ltl).isNotNull();
 
         Image image = new Image();
         image.put(0, 0, 0);
         image.put(0, 0, 1);
 
-        TestEncoder encoder = new TestEncoder();
+        TestEncoder encoder = new TestEncoder(200 * 1e6);
 
         ImmutableList<Sector> sectors = encoder.collectSectors(ltl, image);
 
@@ -66,44 +71,34 @@ public class EncoderTest
     public void collectSectorsMissingSectorThrows()
     {
         DiskLayout layout = new DiskLayout(1, 1, 2, 256);
-        LogicalTrackLayout ltl = layout.layoutByLogicalLocation.get(
-                new com.cowlark.fluxengine.data.CylinderHead(0, 0));
+        LogicalTrackLayout ltl =
+                layout.layoutByLogicalLocation.get(new com.cowlark.fluxengine.data.CylinderHead(
+                        0,
+                        0));
 
         Image image = new Image();
         image.put(0, 0, 0); /* sector 1 missing */
 
-        TestEncoder encoder = new TestEncoder();
+        TestEncoder encoder = new TestEncoder(200 * 1e6);
 
-        assertThrows(
-                FluxEngineException.class,
-                () -> encoder.collectSectors(ltl, image));
+        assertThrows(FluxEngineException.class, () -> encoder.collectSectors(ltl, image));
     }
 
     @Test
-    public void calculatePhysicalClockPeriod()
+    public void calculatePhysicalClockPeriodNs()
     {
-        ConfigProto config = new ConfigBuilder()
-                .set("usb.serial", "test-serial")
-                .set("drive.rotational_period_ms", "200")
-                .build();
+        TestEncoder encoder = new TestEncoder(200 * 1e6);
 
-        TestEncoder encoder = new TestEncoder();
-
-        assertThat(encoder.calculatePhysicalClockPeriod(config, 4000, 200e6))
-                .isEqualTo(4000.0);
+        assertThat(encoder.calculatePhysicalClockPeriodNs(4000, 200e6)).isEqualTo(4000.0);
     }
 
     @Test
-    public void calculatePhysicalClockPeriodUnsetThrows()
+    public void calculatePhysicalClockPeriodNsUnsetThrows()
     {
-        ConfigProto config = new ConfigBuilder()
-                .set("usb.serial", "test-serial")
-                .build();
-
-        TestEncoder encoder = new TestEncoder();
+        TestEncoder encoder = new TestEncoder(0);
 
         assertThrows(
                 FluxEngineException.class,
-                () -> encoder.calculatePhysicalClockPeriod(config, 4000, 200e6));
+                () -> encoder.calculatePhysicalClockPeriodNs(4000, 200e6));
     }
 }

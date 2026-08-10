@@ -40,14 +40,13 @@ public class Commodore64Encoder extends Encoder
         ENCODE_DATA_GCR[0xf] = 0x15;
     }
 
-    private final ConfigProto fullConfig;
     private final Commodore64EncoderProto config;
     private int formatByte1;
     private int formatByte2;
 
-    public Commodore64Encoder(ConfigProto config)
+    public Commodore64Encoder(ConfigProto config, double diskRotationalPeriodNs)
     {
-        this.fullConfig = config;
+        super(diskRotationalPeriodNs);
         this.config = config.getEncoder().getC64();
     }
 
@@ -152,9 +151,7 @@ public class Commodore64Encoder extends Encoder
         bits.fillBitmapTo(cursor, bits.size(), new boolean[]{true, false});
 
         Fluxmap fluxmap = new Fluxmap();
-        fluxmap.appendBits(
-                bits,
-                (long) calculatePhysicalClockPeriod(fullConfig, clockRateUs * 1e3, 200e6));
+        fluxmap.appendBits(bits, (long) calculatePhysicalClockPeriodNs(clockRateUs * 1e3, 200e6));
         return fluxmap;
     }
 

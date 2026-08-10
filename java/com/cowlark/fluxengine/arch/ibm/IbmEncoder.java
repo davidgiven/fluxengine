@@ -56,15 +56,14 @@ public class IbmEncoder extends Encoder
      */
     private static final int MFM_RECORD_SEPARATOR = 0x4489;
     private static final int MFM_RECORD_SEPARATOR_BYTE = 0xa1;
-    private final ConfigProto fullConfig;
     private final IbmEncoderProto config;
     private final boolean[] lastBit = new boolean[1];
     private Bits bits;
     private Bits.Cursor cursor;
 
-    public IbmEncoder(ConfigProto config)
+    public IbmEncoder(ConfigProto config, double diskRotationalPeriodNs)
     {
-        this.fullConfig = config;
+        super(diskRotationalPeriodNs);
         this.config = config.getEncoder().getIbm();
     }
 
@@ -131,11 +130,11 @@ public class IbmEncoder extends Encoder
         IbmEncoderProto.TrackdataProto trackdata =
                 getEncoderTrackData(ltl.logicalCylinder, ltl.logicalHead);
 
-        double clockRateUs = trackdata.getTargetClockPeriodUs();
+        double clockRateNs = trackdata.getTargetClockPeriodUs() * 1000.0;
         if (!trackdata.getUseFm())
-            clockRateUs /= 2.0;
+            clockRateNs /= 2.0;
         int bitsPerRevolution =
-                (int) ((trackdata.getTargetRotationalPeriodMs() * 1000.0) / clockRateUs);
+                (int) ((trackdata.getTargetRotationalPeriodMs() * 1e6) / clockRateNs);
         bits = new Bits(bitsPerRevolution);
         cursor = new Bits.Cursor(0);
 
@@ -254,9 +253,9 @@ public class IbmEncoder extends Encoder
 
         Fluxmap fluxmap = new Fluxmap();
         fluxmap.appendBits(
-                bits, (long) calculatePhysicalClockPeriod(
-                        fullConfig,
-                        clockRateUs * 1e3,
+                bits,
+                (long) calculatePhysicalClockPeriodNs(
+                        clockRateNs,
                         trackdata.getTargetRotationalPeriodMs() * 1e6));
         return fluxmap;
     }

@@ -98,9 +98,9 @@ public class ReadOperation extends Operation
         return cr;
     }
 
-    private ReadGroupResult readGroup(FluxSourceIteratorHolder fluxSourceIteratorHolder,
-                                      LogicalTrackLayout ltl,
-                                      List<Track> tracks)
+    protected ReadGroupResult readGroup(FluxSourceIteratorHolder fluxSourceIteratorHolder,
+                                        LogicalTrackLayout ltl,
+                                        List<Track> tracks)
     {
         ReadGroupResult rgr = new ReadGroupResult();
         rgr.result = ReadResult.BAD_AND_CAN_NOT_RETRY;
@@ -147,7 +147,7 @@ public class ReadOperation extends Operation
 
             Fluxmap fluxmap = fluxSourceIterator.next();
             Logger.log(new EndReadOperationLogMessage());
-            Logger.logf("%d ms in %d bytes", (int) (fluxmap.duration() / 1e6), fluxmap.bytes());
+            Logger.logf("%d ms in %d bytes", (int) (fluxmap.durationNs() / 1e6), fluxmap.bytes());
 
             Track flux = getDecoder().decodeToSectors(fluxmap, ptl);
             flux.normalisedSectors = collectSectors(flux.allSectors);
@@ -274,9 +274,7 @@ public class ReadOperation extends Operation
         {
             Track track = entry.getValue();
             tracksByLogicalLocation.computeIfAbsent(
-                    new CylinderHead(
-                            track.ltl.logicalCylinder,
-                            track.ltl.logicalHead),
+                    new CylinderHead(track.ltl.logicalCylinder, track.ltl.logicalHead),
                     k -> new ArrayList<>()).add(track);
         }
 

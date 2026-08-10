@@ -27,12 +27,11 @@ public class NorthstarEncoder extends Encoder
     private static final int GAP1_FILL_BYTE = 0x4F;
     private static final int GAP2_FILL_BYTE = 0x4F;
 
-    private final ConfigProto fullConfig;
     private final NorthstarEncoderProto config;
 
-    public NorthstarEncoder(ConfigProto config)
+    public NorthstarEncoder(ConfigProto config, double diskRotationalPeriodNs)
     {
-        this.fullConfig = config;
+        super(diskRotationalPeriodNs);
         this.config = config.getEncoder().getNorthstar();
     }
 
@@ -155,8 +154,7 @@ public class NorthstarEncoder extends Encoder
         Fluxmap fluxmap = new Fluxmap();
         fluxmap.appendBits(
                 bits,
-                (long) calculatePhysicalClockPeriod(
-                        fullConfig,
+                (long) calculatePhysicalClockPeriodNs(
                         clockRateUs * 1e3,
                         config.getRotationalPeriodMs() * 1e6));
         return fluxmap;

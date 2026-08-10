@@ -86,13 +86,12 @@ public class Apple2Encoder extends Encoder
         ENCODE_DATA_GCR[0x3f] = 0xff;
     }
 
-    private final ConfigProto fullConfig;
     private final Apple2EncoderProto config;
     private int volumeId = 254;
 
-    public Apple2Encoder(ConfigProto config)
+    public Apple2Encoder(ConfigProto config, double diskRotationalPeriodNs)
     {
-        this.fullConfig = config;
+        super(diskRotationalPeriodNs);
         this.config = config.getEncoder().getApple2();
     }
 
@@ -122,8 +121,8 @@ public class Apple2Encoder extends Encoder
 
         Fluxmap fluxmap = new Fluxmap();
         fluxmap.appendBits(
-                bits, (long) calculatePhysicalClockPeriod(
-                        fullConfig,
+                bits,
+                (long) calculatePhysicalClockPeriodNs(
                         config.getClockPeriodUs() * 1e3,
                         config.getRotationalPeriodMs() * 1e6));
         return fluxmap;

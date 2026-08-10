@@ -44,7 +44,7 @@ public class Fluxmap
 
     /* The duration of the fluxmap in nanoseconds, ported from
      * lib/data/fluxmap.h Fluxmap::duration(). */
-    public double duration()
+    public double durationNs()
     {
         return ticks * NS_PER_TICK;
     }
@@ -117,20 +117,21 @@ public class Fluxmap
         return appendBytes(Bytes.of(b));
     }
 
-    public Fluxmap appendBits(List<Boolean> bits, long clockTicks)
+    public Fluxmap appendBits(List<Boolean> bits, double clockNs)
     {
-        long nowTicks = ticks;
+        double nowTicks = durationNs() / NS_PER_TICK;
+        double clockTicks = clockNs / NS_PER_TICK;
         for (boolean bit : bits)
         {
             nowTicks += clockTicks;
             if (bit)
             {
-                int deltaTicks = (int) (nowTicks - ticks);
+                int deltaTicks = (int) nowTicks - ticks;
                 appendInterval(deltaTicks);
                 appendPulse();
             }
         }
-        int deltaTicks = (int) (nowTicks - ticks);
+        int deltaTicks = (int) nowTicks - ticks;
         if (deltaTicks != 0)
             appendInterval(deltaTicks);
         return this;

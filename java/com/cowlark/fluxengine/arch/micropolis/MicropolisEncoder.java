@@ -20,12 +20,11 @@ import java.util.List;
  */
 public class MicropolisEncoder extends Encoder
 {
-    private final ConfigProto fullConfig;
     private final MicropolisEncoderProto config;
 
-    public MicropolisEncoder(ConfigProto config)
+    public MicropolisEncoder(ConfigProto config, double diskRotationalPeriodNs)
     {
-        this.fullConfig = config;
+        super(diskRotationalPeriodNs);
         this.config = config.getEncoder().getMicropolis();
     }
 
@@ -53,8 +52,7 @@ public class MicropolisEncoder extends Encoder
             throw new FluxEngineException("track data mismatched length");
 
         Fluxmap fluxmap = new Fluxmap();
-        long clockPeriod = (long) calculatePhysicalClockPeriod(
-                fullConfig,
+        long clockPeriod = (long) calculatePhysicalClockPeriodNs(
                 config.getClockPeriodUs() * 1e3,
                 config.getRotationalPeriodMs() * 1e6);
         int pos = 0;

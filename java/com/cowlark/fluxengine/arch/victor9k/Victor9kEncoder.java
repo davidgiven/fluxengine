@@ -40,13 +40,12 @@ public class Victor9kEncoder extends Encoder
         ENCODE_DATA_GCR[0xf] = 0x15;
     }
 
-    private final ConfigProto fullConfig;
     private final Victor9kEncoderProto config;
     private final boolean[] lastBit = new boolean[1];
 
-    public Victor9kEncoder(ConfigProto config)
+    public Victor9kEncoder(ConfigProto config, double diskRotationalPeriodNs)
     {
-        this.fullConfig = config;
+        super(diskRotationalPeriodNs);
         this.config = config.getEncoder().getVictor9K();
     }
 
@@ -192,8 +191,7 @@ public class Victor9kEncoder extends Encoder
         int bitsPerRevolution =
                 (int) ((trackdata.getRotationalPeriodMs() * 1e3) / trackdata.getClockPeriodUs());
         Bits bits = new Bits(bitsPerRevolution);
-        long clockPeriod = (long) calculatePhysicalClockPeriod(
-                fullConfig,
+        long clockPeriod = (long) calculatePhysicalClockPeriodNs(
                 trackdata.getClockPeriodUs() * 1e3,
                 trackdata.getRotationalPeriodMs() * 1e6);
         Bits.Cursor cursor = new Bits.Cursor(0);

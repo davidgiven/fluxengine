@@ -20,16 +20,15 @@ import java.util.List;
  */
 public class TartuEncoder extends Encoder
 {
-    private final ConfigProto fullConfig;
     private final TartuEncoderProto config;
     private final boolean[] lastBit = new boolean[1];
     private double clockRateUs;
     private Bits bits;
     private Bits.Cursor cursor;
 
-    public TartuEncoder(ConfigProto config)
+    public TartuEncoder(ConfigProto config, double diskRotationalPeriodNs)
     {
-        this.fullConfig = config;
+        super(diskRotationalPeriodNs);
         this.config = config.getEncoder().getTartu();
     }
 
@@ -110,8 +109,7 @@ public class TartuEncoder extends Encoder
         Fluxmap fluxmap = new Fluxmap();
         fluxmap.appendBits(
                 bits,
-                (long) calculatePhysicalClockPeriod(
-                        fullConfig,
+                (long) calculatePhysicalClockPeriodNs(
                         clockRateUs * 1e3,
                         config.getTargetRotationalPeriodMs() * 1e6));
         return fluxmap;
