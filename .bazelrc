@@ -1,4 +1,5 @@
 common --java_language_version=21
+common --java_runtime_version=remotejdk_21
 
 # Tools built in the exec configuration also need Java 21 (for records etc.).
 common --tool_java_language_version=21
