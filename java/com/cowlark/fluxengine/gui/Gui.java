@@ -1,30 +1,29 @@
 package com.cowlark.fluxengine.gui;
 
-import javafx.application.Application;
-import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.layout.StackPane;
-import javafx.stage.Stage;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
 
 /**
  * The FluxEngine GUI, ported from src/gui/main.cc.
  */
-public class Gui extends Application
+public class Gui
 {
     public static void main(String[] args)
     {
-        launch(Gui.class, args);
+        SwingUtilities.invokeLater(Gui::createAndShowGui);
     }
 
-    @Override
-    public void start(Stage stage)
+    private static void createAndShowGui()
     {
-        Label label = new Label("FluxEngine");
-        StackPane root = new StackPane(label);
-        Scene scene = new Scene(root, 800, 600);
+        JFrame frame = new JFrame("FluxEngine");
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-        stage.setTitle("FluxEngine");
-        stage.setScene(scene);
-        stage.show();
+        JLabel label = new JLabel("FluxEngine", JLabel.CENTER);
+        frame.getContentPane().add(label);
+        frame.setSize(800, 600);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
     }
 }

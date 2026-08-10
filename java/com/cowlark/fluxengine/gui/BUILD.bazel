@@ -5,12 +5,4 @@ package(default_visibility = ["//visibility:public"])
 java_library(
     name = "gui",
     srcs = glob(["*.java"]),
-    deps = [
-        "@maven//:org_openjfx_javafx_base",
-        "@maven//:org_openjfx_javafx_base_linux",
-        "@maven//:org_openjfx_javafx_controls",
-        "@maven//:org_openjfx_javafx_controls_linux",
-        "@maven//:org_openjfx_javafx_graphics",
-        "@maven//:org_openjfx_javafx_graphics_linux",
-    ],
 )
