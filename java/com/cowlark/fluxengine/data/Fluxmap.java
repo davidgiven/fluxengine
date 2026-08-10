@@ -5,10 +5,10 @@ import static com.cowlark.fluxengine.external.FluxEngine.F_BIT_PULSE;
 import static com.cowlark.fluxengine.external.FluxEngine.F_DESYNC;
 import static com.cowlark.fluxengine.external.FluxEngine.NS_PER_TICK;
 
+import com.cowlark.fluxengine.core.Bits;
 import com.cowlark.fluxengine.core.ByteWriter;
 import com.cowlark.fluxengine.core.Bytes;
 import com.google.common.collect.ImmutableList;
-import java.util.List;
 
 /**
  * A stream of flux transitions, ported from lib/data/fluxmap.{h,cc}.
@@ -117,7 +117,7 @@ public class Fluxmap
         return appendBytes(Bytes.of(b));
     }
 
-    public Fluxmap appendBits(List<Boolean> bits, double clockNs)
+    public Fluxmap appendBits(Bits bits, double clockNs)
     {
         double nowTicks = durationNs() / NS_PER_TICK;
         double clockTicks = clockNs / NS_PER_TICK;

@@ -98,6 +98,16 @@ public final class Bits extends AbstractList<Boolean>
         modCount++;
     }
 
+    /* Returns a new Bits containing the bits from fromIndex (inclusive) to
+     * toIndex (exclusive). */
+    public Bits subBits(int fromIndex, int toIndex)
+    {
+        Bits result = new Bits(toIndex - fromIndex);
+        for (int i = fromIndex; i < toIndex; i++)
+            result.setBit(i - fromIndex, getBit(i));
+        return result;
+    }
+
     /* Returns a new Bits with the bits in reverse order. */
     public Bits reverseBits()
     {

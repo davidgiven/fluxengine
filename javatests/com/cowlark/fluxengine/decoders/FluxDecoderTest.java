@@ -49,10 +49,11 @@ public class FluxDecoderTest
     {
         /* A pulse at every cell boundary reads back as an unbroken run of
          * trues. */
+        Bits inputBits = new Bits();
+        for (int i = 0; i < 8; i++)
+            inputBits.add(true);
         Fluxmap map = new Fluxmap();
-        map.appendBits(
-                java.util.Arrays.asList(true, true, true, true, true, true, true, true),
-                CLOCK_NS);
+        map.appendBits(inputBits, CLOCK_NS);
         FluxmapReader reader = new FluxmapReader(map, DecoderProto.getDefaultInstance());
         FluxDecoder decoder = new FluxDecoder(reader, CLOCK_NS, DecoderProto.getDefaultInstance());
 
@@ -70,8 +71,10 @@ public class FluxDecoderTest
     {
         /* The initial leading-zeroes state (tell().zeroes() == 0) makes the
          * first readBit return true. */
+        Bits inputBits = new Bits();
+        inputBits.add(true);
         Fluxmap map = new Fluxmap();
-        map.appendBits(java.util.Arrays.asList(true), CLOCK_NS);
+        map.appendBits(inputBits, CLOCK_NS);
         FluxmapReader reader = new FluxmapReader(map, DecoderProto.getDefaultInstance());
         FluxDecoder decoder = new FluxDecoder(reader, CLOCK_NS, DecoderProto.getDefaultInstance());
 

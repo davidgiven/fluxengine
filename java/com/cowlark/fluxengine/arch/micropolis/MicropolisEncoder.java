@@ -59,7 +59,7 @@ public class MicropolisEncoder extends Encoder
         for (int i = 1; i < indexes.size(); i++)
         {
             int end = indexes.get(i);
-            fluxmap.appendBits(bits.subList(pos, end), clockPeriod);
+            fluxmap.appendBits(bits.subBits(pos, end), clockPeriod);
             fluxmap.appendIndex();
             pos = end;
         }
