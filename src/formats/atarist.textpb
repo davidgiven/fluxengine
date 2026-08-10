@@ -50,6 +50,11 @@ decoder {
 	}
 }
 
+image_writer {
+	filename: "atarist.st"
+	type: IMAGETYPE_IMG
+}
+
 layout {
 	format_type: FORMATTYPE_80TRACK
 }
