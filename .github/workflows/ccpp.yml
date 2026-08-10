@@ -31,6 +31,7 @@ jobs:
     - name: Build with Bazel
       run: |
         cd fluxengine
+        bazel test //...
         bazel build //:all
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
@@ -58,6 +59,7 @@ jobs:
     - name: Build with Bazel
       run: |
         cd fluxengine
+        bazel test //...
         bazel build //:all
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
@@ -91,6 +93,11 @@ jobs:
     - name: Build with Bazel
       run: |
         cd fluxengine
+        bazel test //... `
+            --action_env=PATH `
+            --action_env=INCLUDE `
+            --action_env=LIB `
+            --action_env=LIBPATH
         bazel build //:all `
             --action_env=PATH `
             --action_env=INCLUDE `
