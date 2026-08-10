@@ -5,4 +5,7 @@ package(default_visibility = ["//visibility:public"])
 java_library(
     name = "gui",
     srcs = glob(["*.java"]),
+    deps = [
+        "@maven//:com_formdev_flatlaf",
+    ],
 )
