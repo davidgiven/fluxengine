@@ -11,6 +11,18 @@
     "queryAllDeclaredMethods": true
   },
   {
+    "name": "com.formdev.flatlaf.FlatLightLaf",
+    "allDeclaredConstructors": true,
+    "allDeclaredFields": true,
+    "queryAllDeclaredMethods": true
+  },
+  {
+    "name": "com.formdev.flatlaf.UIDefaultsLoader",
+    "allDeclaredConstructors": true,
+    "allDeclaredFields": true,
+    "queryAllDeclaredMethods": true
+  },
+  {
     "name": "com.sun.javafx.tk.quantum.QuantumToolkit",
     "allDeclaredConstructors": true,
     "allDeclaredFields": true,

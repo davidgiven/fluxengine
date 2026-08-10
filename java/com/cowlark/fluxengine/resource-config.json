@@ -11,6 +11,12 @@
         "pattern": "\\Qorg/usb4java/linux-x86-64/libusb4java.so\\E"
       },
       {
+        "pattern": "\\Qcom/formdev/flatlaf/\\E.*"
+      },
+      {
+        "pattern": "\\QMETA-INF/services/\\E.*"
+      },
+      {
         "pattern": "\\Qformats/\\E.*"
       }
     ]

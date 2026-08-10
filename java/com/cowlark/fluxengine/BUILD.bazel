@@ -16,6 +16,7 @@ native_image(
         "--no-fallback",
         "-O2",
         "-H:IncludeResources=(javax.usb.properties|org/usb4java/.*/libusb4java\\..*|.*/libjSerialComm.*|.*/jSerialComm.dll)",
+        "-Djava.awt.headless=false",
     ],
     jar = ":fluxengine_deploy.jar",
     jni_config = ["jni-config.json"],
