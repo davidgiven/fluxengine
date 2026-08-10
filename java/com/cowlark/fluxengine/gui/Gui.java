@@ -1,6 +1,7 @@
 package com.cowlark.fluxengine.gui;
 
-import com.formdev.flatlaf.FlatLightLaf;
+import com.formdev.flatlaf.FlatDarkLaf;
+import com.google.common.collect.ImmutableList;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
@@ -12,21 +13,12 @@ import javax.swing.WindowConstants;
  */
 public class Gui
 {
-    public static void main(String[] args)
+    public void run(ImmutableList<String> args) throws Exception
     {
+        UIManager.setLookAndFeel(new FlatDarkLaf());
         SwingUtilities.invokeLater(() -> {
-            setupLookAndFeel();
             createAndShowGui();
         });
-    }
-
-    private static void setupLookAndFeel()
-    {
-        try {
-            UIManager.setLookAndFeel(new FlatLightLaf());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     private static void createAndShowGui()

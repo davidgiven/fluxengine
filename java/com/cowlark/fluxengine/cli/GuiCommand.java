@@ -12,8 +12,8 @@ public class GuiCommand implements Command
     }
 
     @Override
-    public void run(ImmutableList<String> args)
+    public void run(ImmutableList<String> args) throws Exception
     {
-        Gui.main(args.toArray(new String[0]));
+        new Gui().run(args);
     }
 }
