@@ -1,6 +1,5 @@
 package com.cowlark.fluxengine.buildtools;
 
-import com.cowlark.fluxengine.core.FluxEngineException;
 import com.google.protobuf.Message;
 import com.google.protobuf.TextFormat;
 import java.io.IOException;
@@ -46,7 +45,7 @@ public final class ProtoEncode
         {
             System.err.println("couldn't open file: " + e.getMessage());
             System.exit(1);
-        } catch (FluxEngineException e)
+        } catch (RuntimeException e)
         {
             System.err.println(e.getMessage());
             System.exit(1);
@@ -64,7 +63,7 @@ public final class ProtoEncode
             TextFormat.merge(processed, builder);
         } catch (TextFormat.ParseException e)
         {
-            throw new FluxEngineException("cannot parse text proto: " + e.getMessage());
+            throw new RuntimeException("cannot parse text proto: " + e.getMessage());
         }
         return builder.build().toByteArray();
     }
@@ -133,7 +132,7 @@ public final class ProtoEncode
         } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException |
                  InvocationTargetException | ClassCastException e)
         {
-            throw new FluxEngineException("cannot create builder for " + protoClass + ": " + e);
+            throw new RuntimeException("cannot create builder for " + protoClass + ": " + e);
         }
     }
 }
