@@ -60,7 +60,7 @@ public class ReadCommand implements Command
         {
             try (ReadOperation operation = new ReadOperation(config))
             {
-                operation.run();
+                operation.read();
             }
         } catch (Exception e)
         {

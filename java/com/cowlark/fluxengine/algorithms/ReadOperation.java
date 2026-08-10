@@ -209,7 +209,60 @@ public class ReadOperation extends Operation
         }
     }
 
-    public void run(Disk disk)
+    /* Given a set of sectors, deduplicates them sensibly (e.g. if there is a
+     * good and bad version of the same sector, the bad version is dropped). */
+    static List<Sector> collectSectors(List<Sector> trackSectors, boolean collapseConflicts)
+    {
+        Map<LogicalLocation, List<Sector>> sectors = new LinkedHashMap<>();
+        for (Sector sector : trackSectors)
+            sectors.computeIfAbsent(sector.location, k -> new ArrayList<>()).add(sector);
+
+        List<Sector> sectorSet = new ArrayList<>();
+        for (Map.Entry<LogicalLocation, List<Sector>> entry : sectors.entrySet())
+        {
+            List<Sector> bucket = entry.getValue();
+            Sector newSector = bucket.get(0);
+            for (int i = 1; i < bucket.size(); i++)
+            {
+                Sector right = bucket.get(i);
+                if ((newSector.status == Sector.Status.OK) && (right.status == Sector.Status.OK) &&
+                        (!newSector.data.equals(right.data)))
+                {
+                    if (!collapseConflicts)
+                    {
+                        Sector s = new Sector(right);
+                        s.status = Sector.Status.CONFLICT;
+                        sectorSet.add(s);
+                    }
+                    Sector s = new Sector(newSector);
+                    s.status = Sector.Status.CONFLICT;
+                    newSector = s;
+                    continue;
+                }
+                if (newSector.status == Sector.Status.CONFLICT)
+                    continue;
+                if (right.status == Sector.Status.CONFLICT)
+                {
+                    newSector = right;
+                    continue;
+                }
+                if (newSector.status == Sector.Status.OK)
+                    continue;
+                if (right.status == Sector.Status.OK)
+                    newSector = right;
+            }
+            sectorSet.add(newSector);
+        }
+
+        return sectorSet;
+    }
+
+    static List<Sector> collectSectors(List<Sector> trackSectors)
+    {
+        return collectSectors(trackSectors, true);
+    }
+
+    public void read(Disk disk)
     {
         FluxSinkFactory outputFluxSinkFactory = null;
         if (getConfig().getDecoder().hasCopyFluxTo())
@@ -340,79 +393,10 @@ public class ReadOperation extends Operation
         Logger.log(new EndOperationLogMessage("Read complete"));
     }
 
-    /* Given a set of sectors, deduplicates them sensibly (e.g. if there is a
-     * good and bad version of the same sector, the bad version is dropped). */
-    static List<Sector> collectSectors(List<Sector> trackSectors, boolean collapseConflicts)
-    {
-        Map<LogicalLocation, List<Sector>> sectors = new LinkedHashMap<>();
-        for (Sector sector : trackSectors)
-            sectors.computeIfAbsent(sector.location, k -> new ArrayList<>()).add(sector);
-
-        List<Sector> sectorSet = new ArrayList<>();
-        for (Map.Entry<LogicalLocation, List<Sector>> entry : sectors.entrySet())
-        {
-            List<Sector> bucket = entry.getValue();
-            Sector newSector = bucket.get(0);
-            for (int i = 1; i < bucket.size(); i++)
-            {
-                Sector right = bucket.get(i);
-                if ((newSector.status == Sector.Status.OK) && (right.status == Sector.Status.OK) &&
-                        (!newSector.data.equals(right.data)))
-                {
-                    if (!collapseConflicts)
-                    {
-                        Sector s = copySector(right);
-                        s.status = Sector.Status.CONFLICT;
-                        sectorSet.add(s);
-                    }
-                    Sector s = copySector(newSector);
-                    s.status = Sector.Status.CONFLICT;
-                    newSector = s;
-                    continue;
-                }
-                if (newSector.status == Sector.Status.CONFLICT)
-                    continue;
-                if (right.status == Sector.Status.CONFLICT)
-                {
-                    newSector = right;
-                    continue;
-                }
-                if (newSector.status == Sector.Status.OK)
-                    continue;
-                if (right.status == Sector.Status.OK)
-                    newSector = right;
-            }
-            sectorSet.add(newSector);
-        }
-
-        return sectorSet;
-    }
-
-    static List<Sector> collectSectors(List<Sector> trackSectors)
-    {
-        return collectSectors(trackSectors, true);
-    }
-
-    private static Sector copySector(Sector sector)
-    {
-        Sector s = new Sector(sector.location);
-        s.status = sector.status;
-        s.position = sector.position;
-        s.clockNs = sector.clockNs;
-        s.headerStartTimeNs = sector.headerStartTimeNs;
-        s.headerEndTimeNs = sector.headerEndTimeNs;
-        s.dataStartTimeNs = sector.dataStartTimeNs;
-        s.dataEndTimeNs = sector.dataEndTimeNs;
-        s.physicalLocation = sector.physicalLocation;
-        s.data = sector.data;
-        s.records = sector.records;
-        return s;
-    }
-
-    public Disk run()
+    public Disk read()
     {
         Disk disk = new Disk();
-        run(disk);
+        read(disk);
 
         ImageWriter writer = getImageWriter();
         writer.printMap(disk.image);

@@ -28,6 +28,21 @@ public class Sector
         this.location = location;
     }
 
+    public Sector(Sector other)
+    {
+        this.location = other.location;
+        this.status = other.status;
+        this.position = other.position;
+        this.clockNs = other.clockNs;
+        this.headerStartTimeNs = other.headerStartTimeNs;
+        this.headerEndTimeNs = other.headerEndTimeNs;
+        this.dataStartTimeNs = other.dataStartTimeNs;
+        this.dataEndTimeNs = other.dataEndTimeNs;
+        this.physicalLocation = other.physicalLocation;
+        this.data = other.data;
+        this.records = other.records;
+    }
+
     public static String statusToString(Status status)
     {
         switch (status)
