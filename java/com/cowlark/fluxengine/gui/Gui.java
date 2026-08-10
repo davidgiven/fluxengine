@@ -23,12 +23,8 @@ public class Gui
 
     private static void createAndShowGui()
     {
-        JFrame frame = new JFrame("FluxEngine");
+        JFrame frame = new NewJFrame();
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-
-        JLabel label = new JLabel("FluxEngine", JLabel.CENTER);
-        frame.getContentPane().add(label);
-        frame.setSize(800, 600);
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }
