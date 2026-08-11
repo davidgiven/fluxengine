@@ -32,7 +32,7 @@ jobs:
         run: |
           cd fluxengine
           bazel test //...
-          bazel build //:fluxengine //:fluxengine_deb //:fluxengine_rpm //:fluxengine_appimage
+          bazel build //:fluxengine //:fluxengine_deb //:fluxengine_rpm //:fluxengine_app_image
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
