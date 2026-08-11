@@ -24,6 +24,7 @@ Useful commands:
 - `bazel run //java/com/cowlark/fluxengine:fluxengine -- <args>` (JVM binary)
 - `bazel build //:fluxengine_deb //:fluxengine_rpm` (jpackage .deb/.rpm installers; root
   aliases `//:fluxengine`, `//:fluxengine_deb`, and `//:fluxengine_rpm` exist)
+- `bazel build //:fluxengine_app_image` (jpackage app-image, produced as a tar file)
 
 ## Gotchas
 
@@ -40,7 +41,8 @@ Useful commands:
   `jpackage_rpm` rules in `jpackage.bzl` (which use the configured Java toolchain's
   `jpackage`). Because `rpmbuild` writes to `/var/tmp` and read-only sandbox paths by
   default, the rules stage everything under a writable `workdir/` and, for rpm, point
-  rpmbuild's `_tmppath`/`_builddir` etc. at it via a `~/.rpmmacros` file.
+  rpmbuild's `_tmppath`/`_builddir` etc. at it via a `~/.rpmmacros` file. The
+  `jpackage_app_image` rule produces the raw app-image directory as a tar file.
 
 ## Lombok builders
 

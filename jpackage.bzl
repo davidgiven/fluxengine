@@ -74,6 +74,58 @@ EOF
 
     return [DefaultInfo(files = depset([out]))]
 
+def _jpackage_app_image_impl(ctx):
+    # Locate jpackage via the configured Java toolchain's runtime, so the rule
+    # works with whatever JDK Bazel is using (e.g. remotejdk_21).
+    java_runtime = ctx.toolchains["@bazel_tools//tools/jdk:toolchain_type"].java.java_runtime
+    jpackage_path = java_runtime.java_home + "/bin/jpackage"
+
+    jar = ctx.file.jar
+    out = ctx.actions.declare_file(ctx.attr.package_name + "_" + ctx.attr.app_version + ".tar")
+
+    # jpackage --type app-image writes a directory (with a jlink runtime image
+    # and the app launcher) and chmods files in it. Do the scratch work in a
+    # plain directory under the execroot (which is writable in the sandbox),
+    # then tar the result up. The sandbox input jar is a symlink to a read-only
+    # file, so dereference it (cp -L) and make the copy writable.
+    ctx.actions.run_shell(
+        outputs = [out],
+        inputs = [jar],
+        tools = [java_runtime.files],
+        use_default_shell_env = True,
+        command = """
+            rm -rf workdir
+            mkdir -p workdir/input workdir/tmp workdir/dest workdir/home
+            cp -L "{jar}" workdir/input/
+            chmod u+w workdir/input/*
+            TMPDIR="$(pwd)/workdir/tmp"
+            HOME="$(pwd)/workdir/home"
+            export TMPDIR HOME
+            "{jpackage}" -J-Djava.io.tmpdir="$(pwd)/workdir/tmp" --type app-image \
+                --name "{name}" \
+                --app-version "{app_version}" \
+                --input "$(pwd)/workdir/input" \
+                --main-jar "{main_jar}" \
+                --main-class "{main_class}" \
+                --dest "$(pwd)/workdir/dest"
+            tar cf "{out}" -C "$(pwd)/workdir/dest" "{name}"
+            rm -rf workdir
+        """.format(
+            jpackage = jpackage_path,
+            name = ctx.attr.name,
+            package_name = ctx.attr.package_name,
+            app_version = ctx.attr.app_version,
+            jar = jar.path,
+            main_jar = jar.basename,
+            main_class = ctx.attr.main_class,
+            out = out.path,
+        ),
+        mnemonic = "JpackageAppImage",
+        progress_message = "Building app image %s" % ctx.label.name,
+    )
+
+    return [DefaultInfo(files = depset([out]))]
+
 _jpackage_attrs = {
     "jar": attr.label(
         mandatory = True,
@@ -107,5 +159,11 @@ jpackage_rpm = rule(
         _jpackage_attrs,
         package_type = attr.string(default = "rpm", values = ["deb", "rpm"]),
     ),
+    toolchains = ["@bazel_tools//tools/jdk:toolchain_type"],
+)
+
+jpackage_app_image = rule(
+    implementation = _jpackage_app_image_impl,
+    attrs = dict(_jpackage_attrs),
     toolchains = ["@bazel_tools//tools/jdk:toolchain_type"],
 )

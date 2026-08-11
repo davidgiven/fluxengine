@@ -1,5 +1,5 @@
 load("@rules_java//java:defs.bzl", "java_binary")
-load("//:jpackage.bzl", "jpackage_deb", "jpackage_rpm")
+load("//:jpackage.bzl", "jpackage_app_image", "jpackage_deb", "jpackage_rpm")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -20,6 +20,14 @@ jpackage_deb(
 
 jpackage_rpm(
     name = "fluxengine_rpm",
+    jar = ":fluxengine_deploy.jar",
+    main_class = "com.cowlark.fluxengine.cli.Main",
+    package_name = "fluxengine",
+    app_version = "1.0.0",
+)
+
+jpackage_app_image(
+    name = "fluxengine_app_image",
     jar = ":fluxengine_deploy.jar",
     main_class = "com.cowlark.fluxengine.cli.Main",
     package_name = "fluxengine",
