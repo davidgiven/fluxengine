@@ -15,7 +15,8 @@ jpackage(
     package_name = "fluxengine",
     app_version = "1.0.0",
     jar = ":fluxengine_deploy.jar",
-    main_class = "com.cowlark.fluxengine.gui.Gui",
+    main_class = "com.cowlark.fluxengine.cli.Main",
+    extra_launchers = [":fluxengine-gui.properties"],
     package_type = "deb",
     tags = ["manual"],
 )
@@ -25,7 +26,8 @@ jpackage(
     package_name = "fluxengine",
     app_version = "1.0.0",
     jar = ":fluxengine_deploy.jar",
-    main_class = "com.cowlark.fluxengine.gui.Gui",
+    main_class = "com.cowlark.fluxengine.cli.Main",
+    extra_launchers = [":fluxengine-gui.properties"],
     package_type = "rpm",
     tags = ["manual"],
 )
@@ -39,7 +41,8 @@ jpackage(
     package_name = "fluxengine",
     app_version = "1.0.0",
     jar = ":fluxengine_deploy.jar",
-    main_class = "com.cowlark.fluxengine.gui.Gui",
+    main_class = "com.cowlark.fluxengine.cli.Main",
+    extra_launchers = [":fluxengine-gui.properties"],
     package_type = select({
         "@platforms//os:windows": "msi",
         "//conditions:default": "unsupported",
@@ -52,7 +55,8 @@ jpackage(
     package_name = "fluxengine",
     app_version = "1.0.0",
     jar = ":fluxengine_deploy.jar",
-    main_class = "com.cowlark.fluxengine.gui.Gui",
+    main_class = "com.cowlark.fluxengine.cli.Main",
+    extra_launchers = [":fluxengine-gui.properties"],
     package_type = select({
         "@platforms//os:osx": "dmg",
         "//conditions:default": "unsupported",
@@ -65,6 +69,7 @@ jpackage_app_image(
     package_name = "fluxengine",
     app_version = "1.0.0",
     jar = ":fluxengine_deploy.jar",
-    main_class = "com.cowlark.fluxengine.gui.Gui",
+    main_class = "com.cowlark.fluxengine.cli.Main",
+    extra_launchers = [":fluxengine-gui.properties"],
     tags = ["manual"],
 )
