@@ -9,11 +9,6 @@ alias(
 )
 
 alias(
-    name = "fluxengine_native",
-    actual = "//java/com/cowlark/fluxengine:fluxengine_native",
-)
-
-alias(
     name = "fluxengine_deb",
     actual = "//java/com/cowlark/fluxengine:fluxengine_deb",
 )

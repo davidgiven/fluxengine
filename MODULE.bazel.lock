@@ -188,19 +188,6 @@
   },
   "selectedYankedVersions": {},
   "moduleExtensions": {
-    "//:graalvm_extension.bzl%graalvm_ext": {
-      "general": {
-        "bzlTransitiveDigest": "j3Qz7w1ruIOY8oFfCFAgWWjr/ev5O+1F8Jebvo5QHGo=",
-        "usagesDigest": "iUXd/3jCJaegO0Dllj33xgb8pqISEwNiOB/aoc6/sBQ=",
-        "recordedInputs": [],
-        "generatedRepoSpecs": {
-          "graalvm": {
-            "repoRuleId": "@@//:graalvm_repository.bzl%graalvm_repository",
-            "attributes": {}
-          }
-        }
-      }
-    },
     "@@pybind11_bazel+//:internal_configure.bzl%internal_configure_extension": {
       "general": {
         "bzlTransitiveDigest": "NRXra7941UfmNUyIxnLt82V5hULluVGL2nBsijTl4j4=",
