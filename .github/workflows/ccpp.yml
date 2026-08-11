@@ -31,7 +31,7 @@ jobs:
       - name: Build with Bazel
         run: |
           cd fluxengine
-          bazel test //... --test_output=all
+          bazel test //... --test_output=errors
           bazel build //:fluxengine //:fluxengine_deb //:fluxengine_rpm //:fluxengine_app_image
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -59,7 +59,7 @@ jobs:
       - name: Build with Bazel
         run: |
           cd fluxengine
-          bazel test //... --test_output=all
+          bazel test //... --test_output=errors
           bazel build //:fluxengine //:fluxengine_dmg
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -95,7 +95,7 @@ jobs:
           $ErrorActionPreference = 'Stop'
           $PSNativeCommandUseErrorActionPreference = $true
           cd fluxengine
-          bazel test //... --test_output=all `
+          bazel test //... --test_output=errors `
               --action_env=PATH `
               --action_env=INCLUDE `
               --action_env=LIB `
