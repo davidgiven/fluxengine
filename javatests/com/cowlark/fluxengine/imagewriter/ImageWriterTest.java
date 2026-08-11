@@ -20,6 +20,10 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class ImageWriterTest
 {
+    @org.junit.Rule
+    public final org.junit.rules.TestRule loggerRule =
+            com.cowlark.fluxengine.testing.TestHelpers.loggerRule();
+
     @Test
     public void createUnportedTypeThrows()
     {

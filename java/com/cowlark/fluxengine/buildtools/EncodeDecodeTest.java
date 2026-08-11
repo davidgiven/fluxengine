@@ -3,6 +3,8 @@ package com.cowlark.fluxengine.buildtools;
 import com.cowlark.fluxengine.cli.Command;
 import com.cowlark.fluxengine.cli.ReadCommand;
 import com.cowlark.fluxengine.cli.WriteCommand;
+import com.cowlark.fluxengine.core.LogRenderer;
+import com.cowlark.fluxengine.core.Logger;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -26,6 +28,8 @@ public class EncodeDecodeTest
 {
     public static void main(String[] args) throws Exception
     {
+        Logger.setLogger(LogRenderer.create(System.out)::add);
+
         String format = args[0];
         String ext = args[1];
         ImmutableList<String> flags =

@@ -18,6 +18,10 @@ import java.nio.file.Path;
 @RunWith(JUnit4.class)
 public class Fl2FluxSinkTest
 {
+    @org.junit.Rule
+    public final org.junit.rules.TestRule loggerRule =
+            com.cowlark.fluxengine.testing.TestHelpers.loggerRule();
+
     private static ConfigProto makeConfig()
     {
         return new ConfigBuilder()

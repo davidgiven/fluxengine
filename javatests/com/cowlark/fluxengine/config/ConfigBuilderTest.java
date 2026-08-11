@@ -16,6 +16,10 @@ import java.nio.file.Path;
 @RunWith(JUnit4.class)
 public class ConfigBuilderTest
 {
+    @org.junit.Rule
+    public final org.junit.rules.TestRule loggerRule =
+            com.cowlark.fluxengine.testing.TestHelpers.loggerRule();
+
     /* ConfigBuilder defaults to a drive flux source, which makes build()
      * select a USB device; stub the serial so no hardware is needed. */
     private static ConfigBuilder builder()

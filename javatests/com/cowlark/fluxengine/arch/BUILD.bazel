@@ -6,6 +6,7 @@ java_test(
     name = "ArchEncoderTest",
     srcs = ["ArchEncoderTest.java"],
     deps = [
+        "//javatests/com/cowlark/fluxengine/testing",
         "//java/com/cowlark/fluxengine/arch",
         "//java/com/cowlark/fluxengine/config",
         "//java/com/cowlark/fluxengine/config:config_java_proto",

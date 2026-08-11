@@ -4,8 +4,12 @@ package(default_visibility = ["//visibility:public"])
 
 java_library(
     name = "testing",
-    srcs = ["TestHelpers.java"],
+    srcs = [
+        "LoggerRule.java",
+        "TestHelpers.java",
+    ],
     deps = [
         "//java/com/cowlark/fluxengine/core",
+        "@maven//:junit_junit",
     ],
 )

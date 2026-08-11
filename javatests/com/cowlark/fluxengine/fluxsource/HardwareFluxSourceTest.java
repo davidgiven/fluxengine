@@ -15,6 +15,10 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class HardwareFluxSourceTest
 {
+    @org.junit.Rule
+    public final org.junit.rules.TestRule loggerRule =
+            com.cowlark.fluxengine.testing.TestHelpers.loggerRule();
+
     private static class FakeUsbDevice extends UsbDevice
     {
         int seekedTo = -1;

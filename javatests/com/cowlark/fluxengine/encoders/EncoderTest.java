@@ -21,6 +21,10 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class EncoderTest
 {
+    @org.junit.Rule
+    public final org.junit.rules.TestRule loggerRule =
+            com.cowlark.fluxengine.testing.TestHelpers.loggerRule();
+
     private static final class TestEncoder extends Encoder
     {
         TestEncoder(double diskRotationalPeriodNs)

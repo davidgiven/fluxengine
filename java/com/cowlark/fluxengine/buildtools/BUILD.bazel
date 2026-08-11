@@ -25,6 +25,7 @@ java_library(
     srcs = ["EncodeDecodeTest.java"],
     deps = [
         "//java/com/cowlark/fluxengine/cli",
+        "//java/com/cowlark/fluxengine/core",
         "@maven//:com_google_guava_guava",
     ],
 )

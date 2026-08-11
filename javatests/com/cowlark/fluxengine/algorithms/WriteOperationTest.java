@@ -12,6 +12,10 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class WriteOperationTest
 {
+    @org.junit.Rule
+    public final org.junit.rules.TestRule loggerRule =
+            com.cowlark.fluxengine.testing.TestHelpers.loggerRule();
+
     private static ConfigProto makeConfig()
     {
         return new ConfigBuilder().set("usb.serial", "test-serial")

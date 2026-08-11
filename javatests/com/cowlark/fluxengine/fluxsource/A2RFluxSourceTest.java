@@ -17,6 +17,10 @@ import java.nio.file.Path;
 @RunWith(JUnit4.class)
 public class A2RFluxSourceTest
 {
+    @org.junit.Rule
+    public final org.junit.rules.TestRule loggerRule =
+            com.cowlark.fluxengine.testing.TestHelpers.loggerRule();
+
     /* Builds an A2R file containing a single track 0/0, encoded as a 3.5"
      * disk with two short intervals. */
     private static Path writeTempFile() throws IOException

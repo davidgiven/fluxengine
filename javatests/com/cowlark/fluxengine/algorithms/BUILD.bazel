@@ -20,11 +20,25 @@ java_test(
     name = "WriteOperationTest",
     srcs = ["WriteOperationTest.java"],
     deps = [
+        "//javatests/com/cowlark/fluxengine/testing",
         "//java/com/cowlark/fluxengine/algorithms",
         "//java/com/cowlark/fluxengine/config",
         "//java/com/cowlark/fluxengine/config:config_java_proto",
         "//java/com/cowlark/fluxengine/core",
         "//java/com/cowlark/fluxengine/data",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "FluxOperationFactoryTest",
+    srcs = ["FluxOperationFactoryTest.java"],
+    deps = [
+        "//javatests/com/cowlark/fluxengine/testing",
+        "//java/com/cowlark/fluxengine/algorithms",
+        "//java/com/cowlark/fluxengine/core",
+        "@maven//:io_reactivex_rxjava3_rxjava",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],

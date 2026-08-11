@@ -18,6 +18,10 @@ import java.nio.file.Path;
 @RunWith(JUnit4.class)
 public class Fl2FluxSourceTest
 {
+    @org.junit.Rule
+    public final org.junit.rules.TestRule loggerRule =
+            com.cowlark.fluxengine.testing.TestHelpers.loggerRule();
+
     private static Path writeTemp(FluxFileProto file) throws IOException
     {
         Path path = Files.createTempFile("flux", ".fl2");

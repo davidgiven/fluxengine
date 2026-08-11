@@ -6,6 +6,7 @@ java_test(
     name = "A2RFluxSourceTest",
     srcs = ["A2RFluxSourceTest.java"],
     deps = [
+        "//javatests/com/cowlark/fluxengine/testing",
         "//java/com/cowlark/fluxengine/config",
         "//java/com/cowlark/fluxengine/config:config_java_proto",
         "//java/com/cowlark/fluxengine/core",
@@ -23,6 +24,7 @@ java_test(
     name = "Fl2FluxSourceTest",
     srcs = ["Fl2FluxSourceTest.java"],
     deps = [
+        "//javatests/com/cowlark/fluxengine/testing",
         "//java/com/cowlark/fluxengine/config",
         "//java/com/cowlark/fluxengine/config:config_java_proto",
         "//java/com/cowlark/fluxengine/core",
@@ -40,6 +42,7 @@ java_test(
     name = "ScpFluxSourceTest",
     srcs = ["ScpFluxSourceTest.java"],
     deps = [
+        "//javatests/com/cowlark/fluxengine/testing",
         "//java/com/cowlark/fluxengine/config",
         "//java/com/cowlark/fluxengine/config:config_java_proto",
         "//java/com/cowlark/fluxengine/core",
@@ -58,6 +61,7 @@ java_test(
     name = "HardwareFluxSourceTest",
     srcs = ["HardwareFluxSourceTest.java"],
     deps = [
+        "//javatests/com/cowlark/fluxengine/testing",
         "//java/com/cowlark/fluxengine/config",
         "//java/com/cowlark/fluxengine/config:config_java_proto",
         "//java/com/cowlark/fluxengine/core",
@@ -75,6 +79,7 @@ java_test(
     name = "KryofluxFluxSourceTest",
     srcs = ["KryofluxFluxSourceTest.java"],
     deps = [
+        "//javatests/com/cowlark/fluxengine/testing",
         "//java/com/cowlark/fluxengine/config",
         "//java/com/cowlark/fluxengine/config:config_java_proto",
         "//java/com/cowlark/fluxengine/core",

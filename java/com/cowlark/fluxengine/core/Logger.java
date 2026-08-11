@@ -8,8 +8,10 @@ import java.util.function.Consumer;
  */
 public final class Logger
 {
-    private static Consumer<? super LogMessage> loggerImpl =
-            new DefaultLogRenderer(System.out)::add;
+    private static final ThreadLocal<Consumer<? super LogMessage>> loggerImpl =
+            ThreadLocal.withInitial(() -> message -> {
+                throw new IllegalStateException("logging from a thread with no logger set");
+            });
 
     private Logger()
     {
@@ -22,11 +24,16 @@ public final class Logger
 
     public static void log(LogMessage message)
     {
-        loggerImpl.accept(message);
+        loggerImpl.get().accept(message);
     }
 
     public static void setLogger(Consumer<? super LogMessage> callback)
     {
-        loggerImpl = callback;
+        loggerImpl.set(callback);
+    }
+
+    public static Consumer<? super LogMessage> getLogger()
+    {
+        return loggerImpl.get();
     }
 }

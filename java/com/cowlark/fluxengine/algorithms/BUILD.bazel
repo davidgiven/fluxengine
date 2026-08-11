@@ -21,6 +21,7 @@ java_library(
         "//java/com/cowlark/fluxengine/usb",
         "@com_google_protobuf//java/core",
         "@maven//:com_google_guava_guava",
+        "@maven//:io_reactivex_rxjava3_rxjava",
         "@maven//:org_apache_commons_commons_lang3",
     ],
 )

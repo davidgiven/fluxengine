@@ -12,6 +12,10 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class UsbFactoryTest
 {
+    @org.junit.Rule
+    public final org.junit.rules.TestRule loggerRule =
+            com.cowlark.fluxengine.testing.TestHelpers.loggerRule();
+
     private static class FakeUsbDevice extends UsbDevice
     {
         int closed = 0;
