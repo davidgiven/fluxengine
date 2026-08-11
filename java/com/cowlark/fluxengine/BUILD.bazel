@@ -1,5 +1,5 @@
 load("@rules_java//java:defs.bzl", "java_binary")
-load("//:jpackage.bzl", "jpackage_app_image", "jpackage_deb", "jpackage_rpm")
+load("//:jpackage.bzl", "jpackage", "jpackage_app_image")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -10,20 +10,50 @@ java_binary(
     runtime_deps = ["//java/com/cowlark/fluxengine/cli"],
 )
 
-jpackage_deb(
+jpackage(
     name = "fluxengine_deb",
     jar = ":fluxengine_deploy.jar",
     main_class = "com.cowlark.fluxengine.cli.Main",
     package_name = "fluxengine",
     app_version = "1.0.0",
+    package_type = "deb",
 )
 
-jpackage_rpm(
+jpackage(
     name = "fluxengine_rpm",
     jar = ":fluxengine_deploy.jar",
     main_class = "com.cowlark.fluxengine.cli.Main",
     package_name = "fluxengine",
     app_version = "1.0.0",
+    package_type = "rpm",
+)
+
+# MSI and DMG installers can only be built on their native platforms
+# (jpackage can't cross-compile), so select() picks the package type per
+# platform; on other platforms it's "unsupported", which produces an empty
+# target so `bazel build //java/...` still works everywhere.
+jpackage(
+    name = "fluxengine_msi",
+    jar = ":fluxengine_deploy.jar",
+    main_class = "com.cowlark.fluxengine.cli.Main",
+    package_name = "fluxengine",
+    app_version = "1.0.0",
+    package_type = select({
+        "@platforms//os:windows": "msi",
+        "//conditions:default": "unsupported",
+    }),
+)
+
+jpackage(
+    name = "fluxengine_dmg",
+    jar = ":fluxengine_deploy.jar",
+    main_class = "com.cowlark.fluxengine.cli.Main",
+    package_name = "fluxengine",
+    app_version = "1.0.0",
+    package_type = select({
+        "@platforms//os:osx": "dmg",
+        "//conditions:default": "unsupported",
+    }),
 )
 
 jpackage_app_image(

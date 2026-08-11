@@ -1,8 +1,8 @@
 name: C/C++ CI
 
-on: [push]
+on: [ push ]
 
-concurrency: 
+concurrency:
   group: environment-${{ github.head_ref }}
   cancel-in-progress: true
 
@@ -12,100 +12,100 @@ jobs:
     strategy:
       matrix:
         variant:
-        - debian12
-        - debian13
-        - fedora42
-        - fedora43
-        - fedora43.nooptionaldeps
+          - debian12
+          - debian13
+          - fedora42
+          - fedora43
+          - fedora43.nooptionaldeps
     steps:
-    - uses: actions/checkout@v4
-      with:
-        repository: 'davidgiven/fluxengine'
-        path: 'fluxengine'
-    - uses: actions/checkout@v4
-      with:
-        repository: 'davidgiven/fluxengine-testdata'
-        path: 'fluxengine-testdata'
-    - name: Setup Bazel
-      uses: bazel-contrib/setup-bazel@0.19.0
-    - name: Build with Bazel
-      run: |
-        cd fluxengine
-        bazel test //...
-        bazel build //:all
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: ${{ github.event.repository.name }}.${{ github.sha }}.bazel.artifacts
-        path: |
-          fluxengine/bazel-bin/**
+      - uses: actions/checkout@v4
+        with:
+          repository: 'davidgiven/fluxengine'
+          path: 'fluxengine'
+      - uses: actions/checkout@v4
+        with:
+          repository: 'davidgiven/fluxengine-testdata'
+          path: 'fluxengine-testdata'
+      - name: Setup Bazel
+        uses: bazel-contrib/setup-bazel@0.19.0
+      - name: Build with Bazel
+        run: |
+          cd fluxengine
+          bazel test //...
+          bazel build //:fluxengine //:fluxengine_deb //:fluxengine_rpm //:fluxengine_appimage
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ github.event.repository.name }}.${{ github.sha }}.bazel.artifacts
+          path: |
+            fluxengine/bazel-bin/**
 
   build-macos-current:
     strategy:
       matrix:
-        runs-on: [macos-15, macos-15-intel]
+        runs-on: [ macos-15, macos-15-intel ]
     runs-on: ${{ matrix.runs-on }}
     steps:
-    - uses: actions/checkout@v4
-      with:
-        repository: 'davidgiven/fluxengine'
-        path: 'fluxengine'
-    - uses: actions/checkout@v4
-      with:
-        repository: 'davidgiven/fluxengine-testdata'
-        path: 'fluxengine-testdata'
-    - name: Setup Bazel
-      uses: bazel-contrib/setup-bazel@0.19.0
-    - name: Build with Bazel
-      run: |
-        cd fluxengine
-        bazel test //...
-        bazel build //:all
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: ${{ github.event.repository.name }}.${{ github.sha }}.bazel.artifacts.${{ runner.arch }}
-        path: |
-          fluxengine/bazel-bin/**
+      - uses: actions/checkout@v4
+        with:
+          repository: 'davidgiven/fluxengine'
+          path: 'fluxengine'
+      - uses: actions/checkout@v4
+        with:
+          repository: 'davidgiven/fluxengine-testdata'
+          path: 'fluxengine-testdata'
+      - name: Setup Bazel
+        uses: bazel-contrib/setup-bazel@0.19.0
+      - name: Build with Bazel
+        run: |
+          cd fluxengine
+          bazel test //...
+          bazel build //:fluxengine //:fluxengine_dmg
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ github.event.repository.name }}.${{ github.sha }}.bazel.artifacts.${{ runner.arch }}
+          path: |
+            fluxengine/bazel-bin/**
 
   build-windows:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v4
-      with:
-        repository: 'davidgiven/fluxengine'
-        path: 'fluxengine'
+      - uses: actions/checkout@v4
+        with:
+          repository: 'davidgiven/fluxengine'
+          path: 'fluxengine'
 
-    - uses: actions/checkout@v4
-      with:
-        repository: 'davidgiven/fluxengine-testdata'
-        path: 'fluxengine-testdata'
+      - uses: actions/checkout@v4
+        with:
+          repository: 'davidgiven/fluxengine-testdata'
+          path: 'fluxengine-testdata'
 
-    - name: Setup Bazel
-      uses: bazel-contrib/setup-bazel@0.19.0
+      - name: Setup Bazel
+        uses: bazel-contrib/setup-bazel@0.19.0
 
-    - name: Set up MSVC Developer Environment
-      uses: ilammy/msvc-dev-cmd@v1
-      with:
-        arch: x64
+      - name: Set up MSVC Developer Environment
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
 
-    - name: Build with Bazel
-      run: |
-        cd fluxengine
-        bazel test //... `
-            --action_env=PATH `
-            --action_env=INCLUDE `
-            --action_env=LIB `
-            --action_env=LIBPATH
-        bazel build //:all `
-            --action_env=PATH `
-            --action_env=INCLUDE `
-            --action_env=LIB `
-            --action_env=LIBPATH
+      - name: Build with Bazel
+        run: |
+          cd fluxengine
+          bazel test //... `
+              --action_env=PATH `
+              --action_env=INCLUDE `
+              --action_env=LIB `
+              --action_env=LIBPATH
+          bazel build //:fluxengine //:fluxengine_msi `
+              --action_env=PATH `
+              --action_env=INCLUDE `
+              --action_env=LIB `
+              --action_env=LIBPATH
 
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: ${{ github.event.repository.name }}.${{ github.sha }}.bazel.artifacts.windows
-        path: fluxengine/bazel-bin/**
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ github.event.repository.name }}.${{ github.sha }}.bazel.artifacts.windows
+          path: fluxengine/bazel-bin/**

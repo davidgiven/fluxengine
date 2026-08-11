@@ -1,3 +1,5 @@
+_JPACKAGE_TYPES = ["deb", "rpm", "msi", "dmg", "unsupported"]
+
 def _jpackage_impl(ctx):
     # Locate jpackage via the configured Java toolchain's runtime, so the rule
     # works with whatever JDK Bazel is using (e.g. remotejdk_21).
@@ -5,7 +7,19 @@ def _jpackage_impl(ctx):
     jpackage_path = java_runtime.java_home + "/bin/jpackage"
 
     package_type = ctx.attr.package_type
-    extension = "deb" if package_type == "deb" else "rpm"
+    if package_type == "unsupported":
+        # Not the platform this installer targets (jpackage can't cross
+        # compile); produce an empty target so `bazel build //java/...` still
+        # works everywhere. Trying to actually use the output on the wrong
+        # platform will just find nothing.
+        return [DefaultInfo()]
+
+    extension = {
+        "deb": "deb",
+        "rpm": "rpm",
+        "msi": "msi",
+        "dmg": "dmg",
+    }[package_type]
 
     jar = ctx.file.jar
     out = ctx.actions.declare_file(ctx.attr.package_name + "_" + ctx.attr.app_version + "." + extension)
@@ -48,7 +62,6 @@ EOF
             export TMPDIR HOME
             "{jpackage}" -J-Djava.io.tmpdir="$(pwd)/workdir/tmp" --type {package_type} \
                 --name "{name}" \
-                --linux-package-name "{package_name}" \
                 --app-version "{app_version}" \
                 --input "$(pwd)/workdir/input" \
                 --main-jar "{main_jar}" \
@@ -61,7 +74,6 @@ EOF
             package_type = package_type,
             extension = extension,
             name = ctx.attr.name,
-            package_name = ctx.attr.package_name,
             app_version = ctx.attr.app_version,
             jar = jar.path,
             main_jar = jar.basename,
@@ -113,7 +125,6 @@ def _jpackage_app_image_impl(ctx):
         """.format(
             jpackage = jpackage_path,
             name = ctx.attr.name,
-            package_name = ctx.attr.package_name,
             app_version = ctx.attr.app_version,
             jar = jar.path,
             main_jar = jar.basename,
@@ -136,34 +147,34 @@ _jpackage_attrs = {
     ),
     "package_name": attr.string(
         mandatory = True,
-        doc = "The Linux package name; also used for the output filename.",
+        doc = "The package name; also used for the output filename.",
     ),
     "app_version": attr.string(
         mandatory = True,
         doc = "Application version, e.g. '1.0.0'.",
     ),
+    "package_type": attr.string(
+        mandatory = True,
+        values = _JPACKAGE_TYPES,
+        doc = "The jpackage package type: deb/rpm (Linux), msi (Windows), dmg (macOS). " +
+              "Use select() so this is only set to the matching platform.",
+    ),
 }
 
-jpackage_deb = rule(
+jpackage = rule(
     implementation = _jpackage_impl,
-    attrs = dict(
-        _jpackage_attrs,
-        package_type = attr.string(default = "deb", values = ["deb", "rpm"]),
-    ),
-    toolchains = ["@bazel_tools//tools/jdk:toolchain_type"],
-)
-
-jpackage_rpm = rule(
-    implementation = _jpackage_impl,
-    attrs = dict(
-        _jpackage_attrs,
-        package_type = attr.string(default = "rpm", values = ["deb", "rpm"]),
-    ),
+    attrs = dict(_jpackage_attrs),
     toolchains = ["@bazel_tools//tools/jdk:toolchain_type"],
 )
 
 jpackage_app_image = rule(
     implementation = _jpackage_app_image_impl,
-    attrs = dict(_jpackage_attrs),
+    attrs = dict(
+        {
+            k: v
+            for k, v in _jpackage_attrs.items()
+            if k != "package_type"
+        },
+    ),
     toolchains = ["@bazel_tools//tools/jdk:toolchain_type"],
 )

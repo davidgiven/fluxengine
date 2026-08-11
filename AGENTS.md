@@ -25,6 +25,8 @@ Useful commands:
 - `bazel build //:fluxengine_deb //:fluxengine_rpm` (jpackage .deb/.rpm installers; root
   aliases `//:fluxengine`, `//:fluxengine_deb`, and `//:fluxengine_rpm` exist)
 - `bazel build //:fluxengine_app_image` (jpackage app-image, produced as a tar file)
+- `bazel build //:fluxengine_msi //:fluxengine_dmg` (Windows MSI / macOS DMG installers,
+  only buildable on their native platforms)
 
 ## Gotchas
 
@@ -37,12 +39,17 @@ Useful commands:
   resource (`resources = ["//java:javax.usb.properties"]`) by the usb library. Bazel's
   resource jarring strips the leading `java/`, so it lands at the jar root. Do not move it
   into the package directory.
-- The `.deb` and `.rpm` installers are built with jpackage via the `jpackage_deb` and
-  `jpackage_rpm` rules in `jpackage.bzl` (which use the configured Java toolchain's
-  `jpackage`). Because `rpmbuild` writes to `/var/tmp` and read-only sandbox paths by
-  default, the rules stage everything under a writable `workdir/` and, for rpm, point
-  rpmbuild's `_tmppath`/`_builddir` etc. at it via a `~/.rpmmacros` file. The
-  `jpackage_app_image` rule produces the raw app-image directory as a tar file.
+- The `.deb` and `.rpm` installers are built with jpackage via the `jpackage` rule in
+  `jpackage.bzl` (which uses the configured Java toolchain's `jpackage`). Because `rpmbuild`
+  writes to `/var/tmp` and read-only sandbox paths by default, the rule stages everything
+  under a writable `workdir/` and, for rpm, points rpmbuild's `_tmppath`/`_builddir` etc. at
+  it via a `~/.rpmmacros` file. The `jpackage_app_image` rule produces the raw app-image
+  directory as a tar file.
+- The MSI (`//:fluxengine_msi`) and DMG (`//:fluxengine_dmg`) targets use `select()` to set
+  the jpackage `package_type` per platform (`@platforms//os:windows` → `msi`,
+  `@platforms//os:osx` → `dmg`); jpackage can't cross-compile, so on any other platform the
+  type is `unsupported`, which makes the rule produce an empty target (so `bazel build
+  //java/...` still works everywhere).
 
 ## Lombok builders
 

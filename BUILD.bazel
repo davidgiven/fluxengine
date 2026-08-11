@@ -23,6 +23,16 @@ alias(
     actual = "//java/com/cowlark/fluxengine:fluxengine_app_image",
 )
 
+alias(
+    name = "fluxengine_msi",
+    actual = "//java/com/cowlark/fluxengine:fluxengine_msi",
+)
+
+alias(
+    name = "fluxengine_dmg",
+    actual = "//java/com/cowlark/fluxengine:fluxengine_dmg",
+)
+
 # Encode/decode round-trip tests, ported from the corpus tests in build.py.
 CORPUS_TESTS = define_corpus_tests()
 
