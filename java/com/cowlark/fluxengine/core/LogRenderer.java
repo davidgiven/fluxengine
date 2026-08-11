@@ -64,7 +64,7 @@ public abstract class LogRenderer
             lineLen += message.length();
             if (lineLen >= 80)
             {
-                stream.println();
+                stream.print('\n');
                 indent();
             }
             stream.print(message);
@@ -77,7 +77,7 @@ public abstract class LogRenderer
         public LogRenderer header(String message)
         {
             if (!newline)
-                stream.println();
+                stream.print('\n');
             stream.print(message);
             lineLen = message.length();
             header = true;
@@ -104,7 +104,7 @@ public abstract class LogRenderer
             if (!header)
             {
                 if (!newline)
-                    stream.println();
+                    stream.print('\n');
 
                 lineLen = 0;
                 header = false;
