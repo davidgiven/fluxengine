@@ -17,6 +17,7 @@ jpackage(
     package_name = "fluxengine",
     app_version = "1.0.0",
     package_type = "deb",
+    tags = ["manual"],
 )
 
 jpackage(
@@ -26,6 +27,7 @@ jpackage(
     package_name = "fluxengine",
     app_version = "1.0.0",
     package_type = "rpm",
+    tags = ["manual"],
 )
 
 # MSI and DMG installers can only be built on their native platforms
@@ -42,6 +44,7 @@ jpackage(
         "@platforms//os:windows": "msi",
         "//conditions:default": "unsupported",
     }),
+    tags = ["manual"],
 )
 
 jpackage(
@@ -54,6 +57,7 @@ jpackage(
         "@platforms//os:osx": "dmg",
         "//conditions:default": "unsupported",
     }),
+    tags = ["manual"],
 )
 
 jpackage_app_image(
@@ -62,4 +66,5 @@ jpackage_app_image(
     main_class = "com.cowlark.fluxengine.cli.Main",
     package_name = "fluxengine",
     app_version = "1.0.0",
+    tags = ["manual"],
 )

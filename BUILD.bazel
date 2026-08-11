@@ -11,26 +11,31 @@ alias(
 alias(
     name = "fluxengine_deb",
     actual = "//java/com/cowlark/fluxengine:fluxengine_deb",
+    tags = ["manual"],
 )
 
 alias(
     name = "fluxengine_rpm",
     actual = "//java/com/cowlark/fluxengine:fluxengine_rpm",
+    tags = ["manual"],
 )
 
 alias(
     name = "fluxengine_app_image",
     actual = "//java/com/cowlark/fluxengine:fluxengine_app_image",
+    tags = ["manual"],
 )
 
 alias(
     name = "fluxengine_msi",
     actual = "//java/com/cowlark/fluxengine:fluxengine_msi",
+    tags = ["manual"],
 )
 
 alias(
     name = "fluxengine_dmg",
     actual = "//java/com/cowlark/fluxengine:fluxengine_dmg",
+    tags = ["manual"],
 )
 
 # Encode/decode round-trip tests, ported from the corpus tests in build.py.
