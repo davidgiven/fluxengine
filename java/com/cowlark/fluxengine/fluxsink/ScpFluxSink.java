@@ -3,6 +3,10 @@ package com.cowlark.fluxengine.fluxsink;
 import static com.cowlark.fluxengine.external.FluxEngine.F_BIT_INDEX;
 import static com.cowlark.fluxengine.external.FluxEngine.F_BIT_PULSE;
 import static com.cowlark.fluxengine.external.FluxEngine.NS_PER_TICK;
+import static com.cowlark.fluxengine.external.Scp.SCP_FLAG_96TPI;
+import static com.cowlark.fluxengine.external.Scp.SCP_FLAG_INDEXED;
+import static com.cowlark.fluxengine.external.Scp.SCP_HEADER_SIZE;
+import static com.cowlark.fluxengine.external.Scp.SCP_TRACK_SIZE;
 
 import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.core.ByteReader;
@@ -31,7 +35,7 @@ public class ScpFluxSink extends FluxSink
     private final boolean alignWithIndex;
     private final ConfigProto config;
     /* The 688-byte file header. */
-    private final byte[] fileheader = new byte[Scp.SCP_HEADER_SIZE];
+    private final byte[] fileheader = new byte[SCP_HEADER_SIZE];
     private final Bytes trackdata = new Bytes(0);
 
     public ScpFluxSink(String filename, int typeByte, boolean alignWithIndex, ConfigProto config)
@@ -55,11 +59,11 @@ public class ScpFluxSink extends FluxSink
         fileheader[4] = (byte) typeByte;
         fileheader[6] = (byte) Scp.strackno(minCylinder, minHead);
         fileheader[7] = (byte) Scp.strackno(maxCylinder, maxHead);
-        int flags = Scp.SCP_FLAG_INDEXED;
+        int flags = SCP_FLAG_INDEXED;
         if (config.getDrive().getDriveType() == DriveType.DRIVETYPE_APPLE2)
             throw new FluxEngineException("you can't write Apple II flux images to SCP files yet");
         if (config.getDrive().getDriveType() != DriveType.DRIVETYPE_40TRACK)
-            flags |= Scp.SCP_FLAG_96TPI;
+            flags |= SCP_FLAG_96TPI;
         fileheader[8] = (byte) flags;
         fileheader[9] = 0; /* cell width */
         if ((minHead == 0) && (maxHead == 0))
@@ -69,7 +73,7 @@ public class ScpFluxSink extends FluxSink
         else
             fileheader[10] = 0;
 
-        Logger.logf("SCP: writing " + (((flags & Scp.SCP_FLAG_96TPI) != 0) ? 96 : 48) + " tpi " +
+        Logger.logf("SCP: writing " + (((flags & SCP_FLAG_96TPI) != 0) ? 96 : 48) + " tpi " +
                 ((minHead == maxHead) ? "single sided" : "double sided") + " file containing " +
                 (fileheader[7] - fileheader[6] + 1) + " tracks");
     }
@@ -104,7 +108,7 @@ public class ScpFluxSink extends FluxSink
             return;
         }
         /* ScpTrack: 'TRK' id, strack, then 5 revolution records. */
-        byte[] trackHeader = new byte[Scp.SCP_TRACK_SIZE];
+        byte[] trackHeader = new byte[SCP_TRACK_SIZE];
         trackHeader[0] = 'T';
         trackHeader[1] = 'R';
         trackHeader[2] = 'K';
@@ -144,7 +148,7 @@ public class ScpFluxSink extends FluxSink
                 if (revolution >= 0)
                 {
                     int revOffset = 4 + revolution * 12;
-                    writeLe32(trackHeader, revOffset + 8, startOffset + Scp.SCP_TRACK_SIZE);
+                    writeLe32(trackHeader, revOffset + 8, startOffset + SCP_TRACK_SIZE);
                     writeLe32(trackHeader, revOffset + 4, (fluxdataWriter.pos() - startOffset) / 2);
                     writeLe32(trackHeader, revOffset, (int) (revTicks * NS_PER_TICK / 25));
                 }
@@ -169,7 +173,7 @@ public class ScpFluxSink extends FluxSink
         }
 
         fileheader[5] = (byte) revolution;
-        writeLe32(fileheader, 16 + strack * 4, trackdataWriter.pos() + Scp.SCP_HEADER_SIZE);
+        writeLe32(fileheader, 16 + strack * 4, trackdataWriter.pos() + SCP_HEADER_SIZE);
         trackdataWriter.write(trackHeader);
         trackdataWriter.write(fluxdata);
     }

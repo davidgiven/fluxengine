@@ -1,6 +1,7 @@
 package com.cowlark.fluxengine.fluxsource;
 
 import static com.cowlark.fluxengine.external.FluxEngine.NS_PER_TICK;
+import static com.cowlark.fluxengine.external.Scp.SCP_FLAG_96TPI;
 
 import com.cowlark.fluxengine.config.ConfigBuilder;
 import com.cowlark.fluxengine.config.ConfigProto;
@@ -72,15 +73,14 @@ public class ScpFluxSource extends TrivialFluxSource
                 chs.add(new CylinderHead(cylinder, head));
 
         ConfigProto.Builder builder = ConfigProto.newBuilder();
-        builder.getDriveBuilder().setDriveType(
-                (flags & Scp.SCP_FLAG_96TPI) != 0 ?
+        builder.getDriveBuilder()
+                .setDriveType((flags & SCP_FLAG_96TPI) != 0 ?
                         DriveType.DRIVETYPE_80TRACK :
                         DriveType.DRIVETYPE_40TRACK);
         builder.getDriveBuilder().setTracks(Locations.convertCylinderHeadsToString(chs));
         extraConfig = builder.build();
 
-        Logger.logf("SCP tracks %d-%d, heads %d-%d",
-                startTrack, endTrack, startSide, endSide);
+        Logger.logf("SCP tracks %d-%d, heads %d-%d", startTrack, endTrack, startSide, endSide);
         Logger.logf("SCP sample resolution: %d ns", (int) resolution);
     }
 
