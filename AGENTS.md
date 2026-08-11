@@ -90,17 +90,6 @@ Useful commands:
   value (int/uint/long/float/double/bool/enum) as needed. Unknown paths and bad values throw
   `ConfigException`.
 
-## Dependency injection (Dagger)
-
-- The Dagger annotation processor lives in the `wiring` package
-  (`java/com/cowlark/fluxengine/wiring/BUILD.bazel`), which defines `dagger_plugin` and
-  exports it via `exported_plugins` on the `wiring`/`dagger` targets. Any library that
-  depends on `//java/com/cowlark/fluxengine/wiring` gets Dagger annotation processing
-  automatically.
-- `FluxEngineComponent` is the single `@Component`. It exposes accessors for the CLI
-  commands. Classes are injectable via `@Inject` constructors; there are no module
-  bindings for own classes unless needed.
-
 ## CLI
 
 - Commands live in `com.cowlark.fluxengine.cli` and implement the `Command` interface
