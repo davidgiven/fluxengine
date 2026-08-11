@@ -12,20 +12,20 @@ java_binary(
 
 jpackage(
     name = "fluxengine_deb",
-    jar = ":fluxengine_deploy.jar",
-    main_class = "com.cowlark.fluxengine.cli.Main",
     package_name = "fluxengine",
     app_version = "1.0.0",
+    jar = ":fluxengine_deploy.jar",
+    main_class = "com.cowlark.fluxengine.gui.Gui",
     package_type = "deb",
     tags = ["manual"],
 )
 
 jpackage(
     name = "fluxengine_rpm",
-    jar = ":fluxengine_deploy.jar",
-    main_class = "com.cowlark.fluxengine.cli.Main",
     package_name = "fluxengine",
     app_version = "1.0.0",
+    jar = ":fluxengine_deploy.jar",
+    main_class = "com.cowlark.fluxengine.gui.Gui",
     package_type = "rpm",
     tags = ["manual"],
 )
@@ -36,10 +36,10 @@ jpackage(
 # target so `bazel build //java/...` still works everywhere.
 jpackage(
     name = "fluxengine_msi",
-    jar = ":fluxengine_deploy.jar",
-    main_class = "com.cowlark.fluxengine.cli.Main",
     package_name = "fluxengine",
     app_version = "1.0.0",
+    jar = ":fluxengine_deploy.jar",
+    main_class = "com.cowlark.fluxengine.gui.Gui",
     package_type = select({
         "@platforms//os:windows": "msi",
         "//conditions:default": "unsupported",
@@ -49,10 +49,10 @@ jpackage(
 
 jpackage(
     name = "fluxengine_dmg",
-    jar = ":fluxengine_deploy.jar",
-    main_class = "com.cowlark.fluxengine.cli.Main",
     package_name = "fluxengine",
     app_version = "1.0.0",
+    jar = ":fluxengine_deploy.jar",
+    main_class = "com.cowlark.fluxengine.gui.Gui",
     package_type = select({
         "@platforms//os:osx": "dmg",
         "//conditions:default": "unsupported",
@@ -62,9 +62,9 @@ jpackage(
 
 jpackage_app_image(
     name = "fluxengine_app_image",
-    jar = ":fluxengine_deploy.jar",
-    main_class = "com.cowlark.fluxengine.cli.Main",
     package_name = "fluxengine",
     app_version = "1.0.0",
+    jar = ":fluxengine_deploy.jar",
+    main_class = "com.cowlark.fluxengine.gui.Gui",
     tags = ["manual"],
 )

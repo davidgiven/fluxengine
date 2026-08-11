@@ -66,6 +66,7 @@ EOF
                 --input "$(pwd)/workdir/input" \
                 --main-jar "{main_jar}" \
                 --main-class "{main_class}" \
+                --jlink-options "--strip-debug --no-header-files --no-man-pages --strip-native-commands" \
                 --dest "$(pwd)/workdir/dest"
             cp workdir/dest/*.{extension} "{out}"
             rm -rf workdir
@@ -93,7 +94,7 @@ def _jpackage_app_image_impl(ctx):
     jpackage_path = java_runtime.java_home + "/bin/jpackage"
 
     jar = ctx.file.jar
-    out = ctx.actions.declare_file(ctx.attr.package_name + "_" + ctx.attr.app_version + ".tar")
+    out = ctx.actions.declare_file(ctx.attr.package_name + "_" + ctx.attr.app_version + ".tar.xz")
 
     # jpackage --type app-image writes a directory (with a jlink runtime image
     # and the app launcher) and chmods files in it. Do the scratch work in a
@@ -119,12 +120,13 @@ def _jpackage_app_image_impl(ctx):
                 --input "$(pwd)/workdir/input" \
                 --main-jar "{main_jar}" \
                 --main-class "{main_class}" \
+                --jlink-options "--strip-debug --no-header-files --no-man-pages --strip-native-commands" \
                 --dest "$(pwd)/workdir/dest"
             # jpackage leaves the runtime files read-only (Windows sets the +R
             # attribute), which makes tar fail with "Cannot open: Permission
             # denied". Make everything writable before taring.
             chmod -R u+w "$(pwd)/workdir/dest"
-            tar cf "{out}" -C "$(pwd)/workdir/dest" "{name}"
+            tar cJf "{out}" -C "$(pwd)/workdir/dest" "{name}"
             rm -rf workdir
         """.format(
             jpackage = jpackage_path,

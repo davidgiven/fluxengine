@@ -92,6 +92,8 @@ jobs:
 
       - name: Build with Bazel
         run: |
+          $ErrorActionPreference = 'Stop'
+          $PSNativeCommandUseErrorActionPreference = $true
           cd fluxengine
           bazel test //... `
               --action_env=PATH `
