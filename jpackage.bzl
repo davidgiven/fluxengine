@@ -120,6 +120,10 @@ def _jpackage_app_image_impl(ctx):
                 --main-jar "{main_jar}" \
                 --main-class "{main_class}" \
                 --dest "$(pwd)/workdir/dest"
+            # jpackage leaves the runtime files read-only (Windows sets the +R
+            # attribute), which makes tar fail with "Cannot open: Permission
+            # denied". Make everything writable before taring.
+            chmod -R u+w "$(pwd)/workdir/dest"
             tar cf "{out}" -C "$(pwd)/workdir/dest" "{name}"
             rm -rf workdir
         """.format(
