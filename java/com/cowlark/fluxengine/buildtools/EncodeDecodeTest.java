@@ -28,8 +28,8 @@ public class EncodeDecodeTest
     {
         String format = args[0];
         String ext = args[1];
-        ImmutableList<String> flags = ImmutableList.copyOf(
-                java.util.Arrays.asList(args).subList(2, args.length));
+        ImmutableList<String> flags =
+                ImmutableList.copyOf(java.util.Arrays.asList(args).subList(2, args.length));
 
         Path dir = Files.createTempDirectory("encodedecodetest");
         Path srcFile = dir.resolve("src.img");
@@ -38,19 +38,17 @@ public class EncodeDecodeTest
 
         writeRandomImage(srcFile);
 
-        run(new WriteCommand(),
-                ImmutableList.<String>builder()
-                        .add("-c", format, "-i", srcFile.toString(),
-                                "-d", fluxFile.toString())
+        run(
+                new WriteCommand(), ImmutableList.<String>builder()
+                        .add("-c", format, "-i", srcFile.toString(), "-d", fluxFile.toString())
                         .add("--drive.rotational_period_ms=200")
                         .add("--no-verify")
                         .addAll(flags)
                         .build());
 
-        run(new ReadCommand(),
-                ImmutableList.<String>builder()
-                        .add("-c", format, "-s", fluxFile.toString(),
-                                "-o", destFile.toString())
+        run(
+                new ReadCommand(), ImmutableList.<String>builder()
+                        .add("-c", format, "-s", fluxFile.toString(), "-o", destFile.toString())
                         .add("--drive.rotational_period_ms=200")
                         .addAll(flags)
                         .build());
@@ -69,20 +67,22 @@ public class EncodeDecodeTest
             raf.setLength(destSize);
         }
 
-        if (Files.mismatch(srcFile, destFile) != -1)
+        long firstDifference = Files.mismatch(srcFile, destFile);
+        if (firstDifference != -1)
         {
-            System.err.println("Comparison failed!");
+            System.err.printf("Comparison failed at offset %d!\n", firstDifference);
             System.err.println("Run this to repeat:");
-            System.err.println("bazel run //java/com/cowlark/fluxengine/buildtools:encodedecodetest_bin -- "
-                    + String.join(" ", args));
+            System.err.println(
+                    "bazel run //java/com/cowlark/fluxengine/buildtools:encodedecodetest_bin -- " +
+                            String.join(" ", args));
             System.exit(1);
         }
     }
 
-    private static void run(Command command,
-                            ImmutableList<String> args) throws Exception
+    private static void run(Command command, ImmutableList<String> args) throws Exception
     {
-        System.out.printf("fluxengine %s %s%n",
+        System.out.printf(
+                "fluxengine %s %s%n",
                 command instanceof WriteCommand ? "write" : "read",
                 String.join(" ", args));
         command.run(args);

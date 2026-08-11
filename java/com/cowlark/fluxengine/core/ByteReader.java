@@ -69,7 +69,7 @@ public final class ByteReader implements Iterator<Byte>
     public int read8()
     {
         checkReadable(1);
-        return bytes.getByte(pos++) & 0xff;
+        return bytes.getByte(pos++);
     }
 
     public int readBe16()

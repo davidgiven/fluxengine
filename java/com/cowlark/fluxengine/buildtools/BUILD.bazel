@@ -28,3 +28,9 @@ java_library(
         "@maven//:com_google_guava_guava",
     ],
 )
+
+java_binary(
+    name = "encodedecodetest_bin",
+    main_class = "com.cowlark.fluxengine.buildtools.EncodeDecodeTest",
+    runtime_deps = [":encodedecodetest"],
+)

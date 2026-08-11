@@ -1,5 +1,10 @@
 package com.cowlark.fluxengine.arch.macintosh;
 
+import static com.cowlark.fluxengine.arch.macintosh.Macintosh.MAC_DATA_RECORD;
+import static com.cowlark.fluxengine.arch.macintosh.Macintosh.MAC_ENCODED_SECTOR_LENGTH;
+import static com.cowlark.fluxengine.arch.macintosh.Macintosh.MAC_SECTOR_LENGTH;
+import static com.cowlark.fluxengine.arch.macintosh.Macintosh.MAC_SECTOR_RECORD;
+
 import com.cowlark.fluxengine.core.ByteReader;
 import com.cowlark.fluxengine.core.ByteWriter;
 import com.cowlark.fluxengine.core.Bytes;
@@ -15,10 +20,8 @@ import com.cowlark.fluxengine.decoders.DecoderProto;
  */
 public class MacintoshDecoder extends Decoder
 {
-    private static final FluxPattern SECTOR_RECORD_PATTERN =
-            new FluxPattern(24, Macintosh.MAC_SECTOR_RECORD);
-    private static final FluxPattern DATA_RECORD_PATTERN =
-            new FluxPattern(24, Macintosh.MAC_DATA_RECORD);
+    private static final FluxPattern SECTOR_RECORD_PATTERN = new FluxPattern(24, MAC_SECTOR_RECORD);
+    private static final FluxPattern DATA_RECORD_PATTERN = new FluxPattern(24, MAC_DATA_RECORD);
     private static final FluxMatchers ANY_RECORD_PATTERN =
             FluxMatchers.of(SECTOR_RECORD_PATTERN, DATA_RECORD_PATTERN);
 
@@ -175,7 +178,7 @@ public class MacintoshDecoder extends Decoder
         ByteWriter bw = new ByteWriter(output);
         ByteReader br = input.iterator();
 
-        int lookupLen = Macintosh.MAC_SECTOR_LENGTH / 3;
+        int lookupLen = MAC_SECTOR_LENGTH / 3;
 
         int[] b1 = new int[lookupLen + 1];
         int[] b2 = new int[lookupLen + 1];
@@ -206,7 +209,7 @@ public class MacintoshDecoder extends Decoder
             if ((c1 & 0x0100) != 0)
                 c1++;
 
-            int val = b1[count] ^ c1;
+            int val = (b1[count] ^ c1) & 0xFF;
             c3 += val;
             if ((c1 & 0x0100) != 0)
             {
@@ -215,7 +218,7 @@ public class MacintoshDecoder extends Decoder
             }
             bw.write8(val);
 
-            val = b2[count] ^ c3;
+            val = (b2[count] ^ c3) & 0xFF;
             c2 += val;
             if (c3 > 0xFF)
             {
@@ -227,7 +230,7 @@ public class MacintoshDecoder extends Decoder
             if (output.size() == 524)
                 break;
 
-            val = b3[count] ^ c2;
+            val = (b3[count] ^ c2) & 0xFF;
             c1 += val;
             if (c2 > 0xFF)
             {
@@ -270,21 +273,21 @@ public class MacintoshDecoder extends Decoder
     @Override
     protected void decodeSectorRecord()
     {
-        if (readRaw24() != Macintosh.MAC_SECTOR_RECORD)
+        if (readRaw24() != MAC_SECTOR_RECORD)
             return;
 
         /* Read header. */
 
         Bytes header = readRawBits(7 * 8).toBytes().slice(0, 7);
 
-        int encodedTrack = decodeDataGcr(header.getByte(0) & 0xff);
+        int encodedTrack = decodeDataGcr(header.getByte(0));
         if (encodedTrack != (ltl.logicalCylinder & 0x3f))
             return;
 
-        int encodedSector = decodeDataGcr(header.getByte(1) & 0xff);
-        int encodedSide = decodeDataGcr(header.getByte(2) & 0xff);
-        int formatByte = decodeDataGcr(header.getByte(3) & 0xff);
-        int wantedsum = decodeDataGcr(header.getByte(4) & 0xff);
+        int encodedSector = decodeDataGcr(header.getByte(1));
+        int encodedSide = decodeDataGcr(header.getByte(2));
+        int formatByte = decodeDataGcr(header.getByte(3));
+        int wantedsum = decodeDataGcr(header.getByte(4));
 
         if (encodedSector > 11)
             return;
@@ -301,17 +304,17 @@ public class MacintoshDecoder extends Decoder
     @Override
     protected void decodeDataRecord()
     {
-        if (readRaw24() != Macintosh.MAC_DATA_RECORD)
+        if (readRaw24() != MAC_DATA_RECORD)
             return;
 
         /* Read data. */
 
         readRawBits(8); /* skip spare byte */
-        Bytes inputbuffer = readRawBits(Macintosh.MAC_ENCODED_SECTOR_LENGTH * 8).toBytes()
-                .slice(0, Macintosh.MAC_ENCODED_SECTOR_LENGTH);
+        Bytes inputbuffer = readRawBits(MAC_ENCODED_SECTOR_LENGTH * 8).toBytes()
+                .slice(0, MAC_ENCODED_SECTOR_LENGTH);
 
         for (int i = 0; i < inputbuffer.size(); i++)
-            inputbuffer.setByte(i, (byte) decodeDataGcr(inputbuffer.getByte(i) & 0xff));
+            inputbuffer.setByte(i, decodeDataGcr(inputbuffer.getByte(i)));
 
         Sector.Status[] status = {Sector.Status.BAD_CHECKSUM};
         sector.status = status[0];

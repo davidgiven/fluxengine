@@ -376,6 +376,7 @@ public class ReadOperation extends Operation
                 }
 
                 /* track can't be modified below this point. */
+                Logger.log(new TrackReadLogMessage(trackFluxes, trackSectors));
 
                 List<Sector> allSectors = new ArrayList<>();
                 for (Sector sector : disk.sectorsByPhysicalLocation.values())
