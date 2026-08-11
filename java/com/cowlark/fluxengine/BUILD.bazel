@@ -1,4 +1,5 @@
 load("@rules_java//java:defs.bzl", "java_binary")
+load("//:jpackage.bzl", "jpackage_deb", "jpackage_rpm")
 load("//:native_image.bzl", "native_image")
 
 package(default_visibility = ["//visibility:public"])
@@ -8,6 +9,22 @@ java_binary(
     jvm_flags = ["--enable-native-access=ALL-UNNAMED"],
     main_class = "com.cowlark.fluxengine.cli.Main",
     runtime_deps = ["//java/com/cowlark/fluxengine/cli"],
+)
+
+jpackage_deb(
+    name = "fluxengine_deb",
+    jar = ":fluxengine_deploy.jar",
+    main_class = "com.cowlark.fluxengine.cli.Main",
+    package_name = "fluxengine",
+    app_version = "1.0.0",
+)
+
+jpackage_rpm(
+    name = "fluxengine_rpm",
+    jar = ":fluxengine_deploy.jar",
+    main_class = "com.cowlark.fluxengine.cli.Main",
+    package_name = "fluxengine",
+    app_version = "1.0.0",
 )
 
 native_image(
