@@ -53,8 +53,8 @@ public class ScpFluxSink extends FluxSink
         fileheader[2] = 'P';
         fileheader[3] = 0x18; /* Version 1.8 of the spec */
         fileheader[4] = (byte) typeByte;
-        fileheader[6] = (byte) strackno(minCylinder, minHead);
-        fileheader[7] = (byte) strackno(maxCylinder, maxHead);
+        fileheader[6] = (byte) Scp.strackno(minCylinder, minHead);
+        fileheader[7] = (byte) Scp.strackno(maxCylinder, maxHead);
         int flags = Scp.SCP_FLAG_INDEXED;
         if (config.getDrive().getDriveType() == DriveType.DRIVETYPE_APPLE2)
             throw new FluxEngineException("you can't write Apple II flux images to SCP files yet");
@@ -72,11 +72,6 @@ public class ScpFluxSink extends FluxSink
         Logger.logf("SCP: writing " + (((flags & Scp.SCP_FLAG_96TPI) != 0) ? 96 : 48) + " tpi " +
                 ((minHead == maxHead) ? "single sided" : "double sided") + " file containing " +
                 (fileheader[7] - fileheader[6] + 1) + " tracks");
-    }
-
-    private static int strackno(int track, int side)
-    {
-        return (track << 1) | side;
     }
 
     private static void writeLe32(byte[] dest, int offset, int v)
@@ -100,7 +95,7 @@ public class ScpFluxSink extends FluxSink
     {
         ByteWriter trackdataWriter = trackdata.writer();
         trackdataWriter.seekToEnd();
-        int strack = strackno(track, head);
+        int strack = Scp.strackno(track, head);
 
         if (strack >= 168)
         {

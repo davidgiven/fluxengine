@@ -30,7 +30,7 @@ public abstract class FluxSource implements AutoCloseable
             case FLUXTYPE_TEST_PATTERN:
                 return notImplemented("test pattern");
             case FLUXTYPE_SCP:
-                return notImplemented("scp");
+                return new ScpFluxSource(config.getScp());
             case FLUXTYPE_A2R:
                 return new A2RFluxSource(config.getA2R());
             case FLUXTYPE_CWF:

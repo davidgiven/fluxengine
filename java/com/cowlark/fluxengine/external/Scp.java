@@ -19,6 +19,21 @@ public final class Scp
     /* Size of a track header (the 'TRK' id plus 5 revolution records). */
     public static final int SCP_TRACK_SIZE = 4 + 5 * 12;
 
+    public static int trackno(int strack)
+    {
+        return strack >> 1;
+    }
+
+    public static int headno(int strack)
+    {
+        return strack & 1;
+    }
+
+    public static int strackno(int track, int side)
+    {
+        return (track << 1) | side;
+    }
+
     private Scp()
     {
     }
