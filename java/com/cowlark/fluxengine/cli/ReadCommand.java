@@ -2,7 +2,7 @@ package com.cowlark.fluxengine.cli;
 
 import static com.cowlark.fluxengine.config.FluxSourceSinkType.FLUXTYPE_DRIVE;
 
-import com.cowlark.fluxengine.algorithms.ReadWriteFluxRxOperation;
+import com.cowlark.fluxengine.algorithms.ReadWriteFluxOperation;
 import com.cowlark.fluxengine.config.ConfigBuilder;
 import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.core.FluxEngineException;
@@ -42,7 +42,7 @@ public class ReadCommand implements Command
         return "Reads a disk, producing a sector image.";
     }
 
-    private class ReadRxOperation extends ReadWriteFluxRxOperation
+    private class ReadOperation extends ReadWriteFluxOperation
     {
         @Override
         public void run()
@@ -67,7 +67,7 @@ public class ReadCommand implements Command
             throw new FluxEngineException("you cannot copy flux to a hardware device");
 
         LogRenderer renderer = LogRenderer.create(System.out);
-        new ReadRxOperation().setConfig(config).create().blockingSubscribe(
+        new ReadOperation().setConfig(config).create().blockingSubscribe(
                 renderer::add, e -> {
                     System.err.println("Failed!");
                     e.printStackTrace();

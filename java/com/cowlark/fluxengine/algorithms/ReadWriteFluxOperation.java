@@ -42,7 +42,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public abstract class ReadWriteFluxRxOperation extends FluxRxOperation<ReadWriteFluxRxOperation>
+public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFluxOperation>
 {
     private double diskRotationalPeriodNs;
     private Supplier<DiskLayout> diskLayoutSupplier;
@@ -413,9 +413,7 @@ public abstract class ReadWriteFluxRxOperation extends FluxRxOperation<ReadWrite
         {
             Track track = entry.getValue();
             tracksByLogicalLocation.computeIfAbsent(
-                    new CylinderHead(
-                            track.ltl.logicalCylinder,
-                            track.ltl.logicalHead),
+                    new CylinderHead(track.ltl.logicalCylinder, track.ltl.logicalHead),
                     k -> new ArrayList<>()).add(track);
         }
 

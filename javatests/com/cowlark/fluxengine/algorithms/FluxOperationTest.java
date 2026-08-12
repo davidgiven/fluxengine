@@ -23,13 +23,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @RunWith(JUnit4.class)
-public class FluxRxOperationTest
+public class FluxOperationTest
 {
     @Rule public final TestRule loggerRule = TestHelpers.loggerRule();
 
     /* A harness whose run() blocks on a semaphore until the test releases it,
      * then logs a message. */
-    private static class Harness extends FluxRxOperation<Harness>
+    private static class Harness extends FluxOperation<Harness>
     {
         final Semaphore gate = new Semaphore(0);
         final CountDownLatch started = new CountDownLatch(1);
@@ -160,7 +160,7 @@ public class FluxRxOperationTest
     @Test
     public void failingOperationDeliversErrorAndCleansUpLogger() throws Exception
     {
-        class TestFluxRxOperation extends FluxRxOperation<TestFluxRxOperation>
+        class TestFluxOperation extends FluxOperation<TestFluxOperation>
         {
             @Override
             public void run()
@@ -169,7 +169,7 @@ public class FluxRxOperationTest
             }
         }
 
-        TestFluxRxOperation failing = new TestFluxRxOperation();
+        TestFluxOperation failing = new TestFluxOperation();
         List<Throwable> errors = new ArrayList<>();
         CountDownLatch done = new CountDownLatch(1);
         Disposable subscription = failing.create().subscribe(
@@ -226,10 +226,11 @@ public class FluxRxOperationTest
             }
         };
 
-        Disposable subscription = harness.create().subscribe(m -> {
-        }, t -> {
-        }, () -> {
-        });
+        Disposable subscription = harness.create().subscribe(
+                m -> {
+                }, t -> {
+                }, () -> {
+                });
 
         assertThat(harness.disposed.await(5, TimeUnit.SECONDS)).isTrue();
         assertThat(harness.disposeCount.get()).isEqualTo(1);

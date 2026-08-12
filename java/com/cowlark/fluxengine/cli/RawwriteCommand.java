@@ -2,7 +2,7 @@ package com.cowlark.fluxengine.cli;
 
 import static com.cowlark.fluxengine.config.FluxSourceSinkType.FLUXTYPE_DRIVE;
 
-import com.cowlark.fluxengine.algorithms.ReadWriteFluxRxOperation;
+import com.cowlark.fluxengine.algorithms.ReadWriteFluxOperation;
 import com.cowlark.fluxengine.config.ConfigBuilder;
 import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.core.FluxEngineException;
@@ -37,7 +37,7 @@ public class RawwriteCommand implements Command
         return "Writes a flux file to a disk. Warning: you can't use this to copy disks.";
     }
 
-    private class RawwriteRxOperation extends ReadWriteFluxRxOperation
+    private class RawwriteOperation extends ReadWriteFluxOperation
     {
         @Override
         public void run()
@@ -58,7 +58,7 @@ public class RawwriteCommand implements Command
             throw new FluxEngineException("you can't use rawwrite to read from hardware");
 
         LogRenderer renderer = LogRenderer.create(System.out);
-        new RawwriteRxOperation().setConfig(config).create().blockingSubscribe(
+        new RawwriteOperation().setConfig(config).create().blockingSubscribe(
                 renderer::add, e -> {
                     System.err.println("Failed!");
                     e.printStackTrace();

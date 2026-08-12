@@ -1,6 +1,6 @@
 package com.cowlark.fluxengine.cli;
 
-import com.cowlark.fluxengine.algorithms.ReadWriteFluxRxOperation;
+import com.cowlark.fluxengine.algorithms.ReadWriteFluxOperation;
 import com.cowlark.fluxengine.config.ConfigBuilder;
 import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.core.LogRenderer;
@@ -44,7 +44,7 @@ public class WriteCommand implements Command
         return "Writes a sector image to a disk.";
     }
 
-    private class WriteRxOperation extends ReadWriteFluxRxOperation
+    private class WriteOperation extends ReadWriteFluxOperation
     {
         @Override
         public void run()
@@ -66,7 +66,7 @@ public class WriteCommand implements Command
                 .build();
 
         LogRenderer renderer = LogRenderer.create(System.out);
-        new WriteRxOperation().setConfig(config).create().blockingSubscribe(
+        new WriteOperation().setConfig(config).create().blockingSubscribe(
                 renderer::add, e -> {
                     System.err.println("Failed!");
                     e.printStackTrace();

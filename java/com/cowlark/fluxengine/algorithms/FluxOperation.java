@@ -12,7 +12,7 @@ import java.util.function.Consumer;
  * Runs an operation once on its own worker thread, multicasting its log
  * messages to all subscribers via a {@link PublishSubject}.
  */
-public abstract class FluxRxOperation<T extends FluxRxOperation<T>> implements Runnable
+public abstract class FluxOperation<T extends FluxOperation<T>> implements Runnable
 {
     /* Serialises all operations across the whole program: only one may run at
      * a time, because the hardware doesn't cope with concurrent access. */
@@ -21,11 +21,11 @@ public abstract class FluxRxOperation<T extends FluxRxOperation<T>> implements R
     protected ConfigProto configProto = null;
     private boolean disposed = false;
 
-    protected FluxRxOperation()
+    protected FluxOperation()
     {
     }
 
-    public FluxRxOperation<T> setConfig(ConfigProto config)
+    public FluxOperation<T> setConfig(ConfigProto config)
     {
         this.configProto = config;
         return this;
