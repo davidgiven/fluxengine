@@ -55,4 +55,14 @@ public class Disk
             }
         }
     }
+
+    /* Creates a copy of the given disk, so that the copy doesn't see the
+     * original get mutated later. */
+    public Disk(Disk disk)
+    {
+        tracksByPhysicalLocation.putAll(disk.tracksByPhysicalLocation);
+        sectorsByPhysicalLocation.putAll(disk.sectorsByPhysicalLocation);
+        image = disk.image;
+        rotationalPeriodNs = disk.rotationalPeriodNs;
+    }
 }

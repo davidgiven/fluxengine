@@ -2,7 +2,7 @@ package com.cowlark.fluxengine.core;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import com.cowlark.fluxengine.core.LogMessage.BeginReadOperationLogMessage;
+import com.cowlark.fluxengine.algorithms.BeginReadOperationLogMessage;
 import com.cowlark.fluxengine.core.LogMessage.ErrorLogMessage;
 import com.cowlark.fluxengine.core.LogMessage.StringMessage;
 import java.io.ByteArrayOutputStream;

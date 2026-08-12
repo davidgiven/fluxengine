@@ -2,12 +2,12 @@ package com.cowlark.fluxengine.core;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import com.cowlark.fluxengine.algorithms.BeginReadOperationLogMessage;
+import com.cowlark.fluxengine.algorithms.BeginWriteOperationLogMessage;
+import com.cowlark.fluxengine.algorithms.EndSpeedOperationLogMessage;
 import com.cowlark.fluxengine.config.OptionLogMessage;
 import com.cowlark.fluxengine.config.OptionProto;
-import com.cowlark.fluxengine.core.LogMessage.BeginReadOperationLogMessage;
-import com.cowlark.fluxengine.core.LogMessage.BeginWriteOperationLogMessage;
 import com.cowlark.fluxengine.core.LogMessage.EmergencyStopMessage;
-import com.cowlark.fluxengine.core.LogMessage.EndSpeedOperationLogMessage;
 import com.cowlark.fluxengine.core.LogMessage.ErrorLogMessage;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;

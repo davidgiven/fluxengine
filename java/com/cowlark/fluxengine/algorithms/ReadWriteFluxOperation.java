@@ -116,8 +116,8 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
         {
             UsbDevice device = UsbFactory.reconnect(configProto);
 
-            Logger.log(new LogMessage.BeginOperationLogMessage("Measuring drive rotational speed"));
-            Logger.log(new LogMessage.BeginSpeedOperationLogMessage());
+            Logger.log(new BeginOperationLogMessage("Measuring drive rotational speed"));
+            Logger.log(new BeginSpeedOperationLogMessage());
 
             int retries = 5;
             do
@@ -126,13 +126,13 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
                         device.getRotationalPeriod(configProto.getDrive().getHardSectorCount());
                 retries--;
             } while ((diskRotationalPeriodNs == 0) && (retries > 0));
-            Logger.log(new LogMessage.EndOperationLogMessage(""));
+            Logger.log(new EndOperationLogMessage(""));
         }
 
         if (diskRotationalPeriodNs == 0)
             throw new FluxEngineException("Failed\nIs a disk in the drive?");
 
-        Logger.log(new LogMessage.EndSpeedOperationLogMessage(diskRotationalPeriodNs));
+        Logger.log(new EndSpeedOperationLogMessage(diskRotationalPeriodNs));
         return diskRotationalPeriodNs;
     }
 
@@ -269,7 +269,7 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
 
             /* Do the physical read. */
 
-            Logger.log(new LogMessage.BeginReadOperationLogMessage(physicalCylinder, physicalHead));
+            Logger.log(new BeginReadOperationLogMessage(physicalCylinder, physicalHead));
 
             FluxSourceIterator fluxSourceIterator =
                     fluxSourceIteratorHolder.getIterator(FluxReadParameters.builder()
@@ -285,7 +285,7 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
                 continue;
 
             Fluxmap fluxmap = fluxSourceIterator.next();
-            Logger.log(new LogMessage.EndReadOperationLogMessage());
+            Logger.log(new EndReadOperationLogMessage());
             Logger.logf("%d ms in %d bytes", (int) (fluxmap.durationNs() / 1e6), fluxmap.bytes());
 
             Track flux = getDecoder().decodeToSectors(fluxmap, ptl);
@@ -417,7 +417,7 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
                     k -> new ArrayList<>()).add(track);
         }
 
-        Logger.log(new LogMessage.BeginOperationLogMessage("Reading and decoding disk"));
+        Logger.log(new BeginOperationLogMessage("Reading and decoding disk"));
 
         disk.rotationalPeriodNs = getDiskRotationalPeriodNs();
 
@@ -431,7 +431,7 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
             {
                 CylinderHead logicalLocation = entry.getKey();
                 LogicalTrackLayout ltl = entry.getValue();
-                Logger.log(new LogMessage.OperationProgressLogMessage(
+                Logger.log(new OperationProgressLogMessage(
                         index * 100 / getDiskLayout().layoutByLogicalLocation.size()));
                 index++;
 
@@ -522,13 +522,17 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
                     allSectors.add(sector);
                 allSectors = collectSectors(allSectors);
                 disk.image = new Image(allSectors);
+
+                /* Log a _copy_ of the disk structure so that the logger
+                 * doesn't see the disk get mutated in subsequent reads. */
+                Logger.log(new DiskReadLogMessage(new Disk(disk)));
             }
         }
 
         if (disk.image == null)
             disk.image = new Image();
 
-        Logger.log(new LogMessage.EndOperationLogMessage("Read complete"));
+        Logger.log(new EndOperationLogMessage("Read complete"));
     }
 
     public Disk readDisk()
@@ -549,7 +553,7 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
                              Predicate<LogicalTrackLayout> verifier,
                              List<CylinderHead> logicalLocations)
     {
-        Logger.log(new LogMessage.BeginOperationLogMessage("Encoding and writing to disk"));
+        Logger.log(new BeginOperationLogMessage("Encoding and writing to disk"));
 
         getDiskRotationalPeriodNs();
         try (FluxSink fluxSink = getFluxSinkFactory().create())
@@ -557,7 +561,7 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
             int index = 0;
             for (CylinderHead ch : logicalLocations)
             {
-                Logger.log(new LogMessage.OperationProgressLogMessage(
+                Logger.log(new OperationProgressLogMessage(
                         index * 100 / logicalLocations.size()));
                 index++;
 
@@ -573,7 +577,7 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
                         int physicalCylinder = ltl.physicalCylinder + offset;
                         int physicalHead = ltl.physicalHead;
 
-                        Logger.log(new LogMessage.BeginWriteOperationLogMessage(
+                        Logger.log(new BeginWriteOperationLogMessage(
                                 physicalCylinder,
                                 ltl.physicalHead));
 
@@ -603,7 +607,7 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
                             Logger.logf("erased");
                         }
 
-                        Logger.log(new LogMessage.EndWriteOperationLogMessage());
+                        Logger.log(new EndWriteOperationLogMessage());
                     }
 
                     if (verifier.test(ltl))
@@ -618,7 +622,7 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
             }
         }
 
-        Logger.log(new LogMessage.EndOperationLogMessage("Write complete"));
+        Logger.log(new EndOperationLogMessage("Write complete"));
     }
 
     public void rawWrite()
@@ -640,7 +644,7 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
                              Predicate<LogicalTrackLayout> verifier,
                              ImmutableSet<CylinderHead> logicalLocations)
     {
-        Logger.log(new LogMessage.BeginOperationLogMessage("Encoding and writing to disk"));
+        Logger.log(new BeginOperationLogMessage("Encoding and writing to disk"));
 
         getDiskRotationalPeriodNs();
         try (FluxSink fluxSink = getFluxSinkFactory().create())
@@ -648,7 +652,7 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
             int index = 0;
             for (CylinderHead ch : logicalLocations)
             {
-                Logger.log(new LogMessage.OperationProgressLogMessage(
+                Logger.log(new OperationProgressLogMessage(
                         index * 100 / logicalLocations.size()));
                 index++;
 
@@ -664,7 +668,7 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
                         int physicalCylinder = ltl.physicalCylinder + offset;
                         int physicalHead = ltl.physicalHead;
 
-                        Logger.log(new LogMessage.BeginWriteOperationLogMessage(
+                        Logger.log(new BeginWriteOperationLogMessage(
                                 physicalCylinder,
                                 ltl.physicalHead));
 
@@ -694,7 +698,7 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
                             Logger.logf("erased");
                         }
 
-                        Logger.log(new LogMessage.EndWriteOperationLogMessage());
+                        Logger.log(new EndWriteOperationLogMessage());
                     }
 
                     if (verifier.test(ltl))
@@ -709,7 +713,7 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
             }
         }
 
-        Logger.log(new LogMessage.EndOperationLogMessage("Write complete"));
+        Logger.log(new EndOperationLogMessage("Write complete"));
     }
 
     private void writeTracks(Image image, ImmutableSet<CylinderHead> chs)

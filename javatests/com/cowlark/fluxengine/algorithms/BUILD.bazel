@@ -3,8 +3,8 @@ load("@rules_java//java:defs.bzl", "java_test")
 package(default_visibility = ["//visibility:public"])
 
 java_test(
-    name = "ReadWriteFluxRxOperationTest",
-    srcs = ["ReadWriteFluxRxOperationTest.java"],
+    name = "ReadWriteFluxOperationTest",
+    srcs = ["ReadWriteFluxOperationTest.java"],
     deps = [
         "//javatests/com/cowlark/fluxengine/testing",
         "//java/com/cowlark/fluxengine/algorithms",
@@ -19,8 +19,8 @@ java_test(
 )
 
 java_test(
-    name = "FluxRxOperationTest",
-    srcs = ["FluxRxOperationTest.java"],
+    name = "FluxOperationTest",
+    srcs = ["FluxOperationTest.java"],
     deps = [
         "//javatests/com/cowlark/fluxengine/testing",
         "//java/com/cowlark/fluxengine/algorithms",

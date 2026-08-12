@@ -105,8 +105,8 @@ public abstract class Operation implements AutoCloseable
         {
             UsbDevice device = UsbFactory.reconnect(configProto);
 
-            Logger.log(new LogMessage.BeginOperationLogMessage("Measuring drive rotational speed"));
-            Logger.log(new LogMessage.BeginSpeedOperationLogMessage());
+            Logger.log(new BeginOperationLogMessage("Measuring drive rotational speed"));
+            Logger.log(new BeginSpeedOperationLogMessage());
 
             int retries = 5;
             do
@@ -115,13 +115,13 @@ public abstract class Operation implements AutoCloseable
                         device.getRotationalPeriod(configProto.getDrive().getHardSectorCount());
                 retries--;
             } while ((diskRotationalPeriodNs == 0) && (retries > 0));
-            Logger.log(new LogMessage.EndOperationLogMessage(""));
+            Logger.log(new EndOperationLogMessage(""));
         }
 
         if (diskRotationalPeriodNs == 0)
             throw new FluxEngineException("Failed\nIs a disk in the drive?");
 
-        Logger.log(new LogMessage.EndSpeedOperationLogMessage(diskRotationalPeriodNs));
+        Logger.log(new EndSpeedOperationLogMessage(diskRotationalPeriodNs));
         return diskRotationalPeriodNs;
     }
 
