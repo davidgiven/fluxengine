@@ -8,5 +8,7 @@ java_library(
     deps = [
         "@maven//:com_formdev_flatlaf",
         "@maven//:com_google_guava_guava",
+        "@maven//:io_github_globaltcad_sprouts",
+        "@maven//:io_github_globaltcad_swing_tree",
     ],
 )
