@@ -9,30 +9,33 @@ import com.cowlark.fluxengine.testing.TestHelpers;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TestRule;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TestRule;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @RunWith(JUnit4.class)
-public class FluxOperationFactoryTest
+public class FluxRxOperationTest
 {
     @Rule public final TestRule loggerRule = TestHelpers.loggerRule();
 
     /* A harness whose run() blocks on a semaphore until the test releases it,
      * then logs a message. */
-    private static class Harness extends FluxOperationFactory
+    private static class Harness extends FluxRxOperation<Harness>
     {
         final Semaphore gate = new Semaphore(0);
         final CountDownLatch started = new CountDownLatch(1);
         final CountDownLatch finished = new CountDownLatch(1);
+        final AtomicInteger disposeCount = new AtomicInteger();
+        final CountDownLatch disposed = new CountDownLatch(1);
         volatile Thread runThread;
 
         @Override
@@ -50,6 +53,13 @@ public class FluxOperationFactoryTest
             Logger.log(new StringMessage("hello"));
             finished.countDown();
         }
+
+        @Override
+        protected void onDispose()
+        {
+            disposeCount.incrementAndGet();
+            disposed.countDown();
+        }
     }
 
     @Test
@@ -61,20 +71,22 @@ public class FluxOperationFactoryTest
         List<LogMessage> first = new ArrayList<>();
         List<LogMessage> second = new ArrayList<>();
         CountDownLatch done = new CountDownLatch(2);
-        Disposable firstSubscription = observable.subscribe(m -> {
-            synchronized (first)
-            {
-                first.add(m);
-            }
-        }, t -> {
-        }, done::countDown);
-        Disposable secondSubscription = observable.subscribe(m -> {
-            synchronized (second)
-            {
-                second.add(m);
-            }
-        }, t -> {
-        }, done::countDown);
+        Disposable firstSubscription = observable.subscribe(
+                m -> {
+                    synchronized (first)
+                    {
+                        first.add(m);
+                    }
+                }, t -> {
+                }, done::countDown);
+        Disposable secondSubscription = observable.subscribe(
+                m -> {
+                    synchronized (second)
+                    {
+                        second.add(m);
+                    }
+                }, t -> {
+                }, done::countDown);
 
         harness.gate.release();
 
@@ -148,22 +160,24 @@ public class FluxOperationFactoryTest
     @Test
     public void failingOperationDeliversErrorAndCleansUpLogger() throws Exception
     {
-        FluxOperationFactory failing = new FluxOperationFactory()
+        class TestFluxRxOperation extends FluxRxOperation<TestFluxRxOperation>
         {
             @Override
             public void run()
             {
                 throw new RuntimeException("boom");
             }
-        };
+        }
 
+        TestFluxRxOperation failing = new TestFluxRxOperation();
         List<Throwable> errors = new ArrayList<>();
         CountDownLatch done = new CountDownLatch(1);
-        Disposable subscription = failing.create().subscribe(m -> {
-        }, t -> {
-            errors.add(t);
-            done.countDown();
-        }, done::countDown);
+        Disposable subscription = failing.create().subscribe(
+                m -> {
+                }, t -> {
+                    errors.add(t);
+                    done.countDown();
+                }, done::countDown);
 
         assertThat(done.await(5, TimeUnit.SECONDS)).isTrue();
         assertThat(errors).hasSize(1);
@@ -185,5 +199,72 @@ public class FluxOperationFactoryTest
 
         assertThat(probed.await(5, TimeUnit.SECONDS)).isTrue();
         assertThat(loggerThrows.get()).isTrue();
+    }
+
+    @Test
+    public void operationIsDisposedWhenItCompletes() throws Exception
+    {
+        Harness harness = new Harness();
+        harness.create().subscribe();
+
+        harness.gate.release();
+
+        assertThat(harness.finished.await(5, TimeUnit.SECONDS)).isTrue();
+        assertThat(harness.disposed.await(5, TimeUnit.SECONDS)).isTrue();
+        assertThat(harness.disposeCount.get()).isEqualTo(1);
+    }
+
+    @Test
+    public void operationIsDisposedWhenItFails() throws Exception
+    {
+        Harness harness = new Harness()
+        {
+            @Override
+            public void run()
+            {
+                throw new RuntimeException("boom");
+            }
+        };
+
+        Disposable subscription = harness.create().subscribe(m -> {
+        }, t -> {
+        }, () -> {
+        });
+
+        assertThat(harness.disposed.await(5, TimeUnit.SECONDS)).isTrue();
+        assertThat(harness.disposeCount.get()).isEqualTo(1);
+    }
+
+    @Test
+    public void disposingSubscriptionDisposesOperation() throws Exception
+    {
+        Harness harness = new Harness();
+        Disposable subscription = harness.create().subscribe();
+
+        try
+        {
+            assertThat(harness.started.await(5, TimeUnit.SECONDS)).isTrue();
+
+            subscription.dispose();
+
+            assertThat(harness.disposed.await(5, TimeUnit.SECONDS)).isTrue();
+            assertThat(harness.disposeCount.get()).isEqualTo(1);
+        } finally
+        {
+            /* Always release the gate so a failed assertion doesn't leave a
+             * worker thread blocked. */
+            harness.gate.release();
+        }
+    }
+
+    @Test
+    public void disposeIsIdempotent()
+    {
+        Harness harness = new Harness();
+
+        harness.dispose();
+        harness.dispose();
+
+        assertThat(harness.disposeCount.get()).isEqualTo(1);
     }
 }

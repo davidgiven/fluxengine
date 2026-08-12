@@ -3,10 +3,12 @@ load("@rules_java//java:defs.bzl", "java_test")
 package(default_visibility = ["//visibility:public"])
 
 java_test(
-    name = "ReadOperationTest",
-    srcs = ["ReadOperationTest.java"],
+    name = "ReadWriteFluxRxOperationTest",
+    srcs = ["ReadWriteFluxRxOperationTest.java"],
     deps = [
+        "//javatests/com/cowlark/fluxengine/testing",
         "//java/com/cowlark/fluxengine/algorithms",
+        "//java/com/cowlark/fluxengine/config",
         "//java/com/cowlark/fluxengine/config:config_java_proto",
         "//java/com/cowlark/fluxengine/core",
         "//java/com/cowlark/fluxengine/data",
@@ -17,23 +19,8 @@ java_test(
 )
 
 java_test(
-    name = "WriteOperationTest",
-    srcs = ["WriteOperationTest.java"],
-    deps = [
-        "//javatests/com/cowlark/fluxengine/testing",
-        "//java/com/cowlark/fluxengine/algorithms",
-        "//java/com/cowlark/fluxengine/config",
-        "//java/com/cowlark/fluxengine/config:config_java_proto",
-        "//java/com/cowlark/fluxengine/core",
-        "//java/com/cowlark/fluxengine/data",
-        "@maven//:com_google_truth_truth",
-        "@maven//:junit_junit",
-    ],
-)
-
-java_test(
-    name = "FluxOperationFactoryTest",
-    srcs = ["FluxOperationFactoryTest.java"],
+    name = "FluxRxOperationTest",
+    srcs = ["FluxRxOperationTest.java"],
     deps = [
         "//javatests/com/cowlark/fluxengine/testing",
         "//java/com/cowlark/fluxengine/algorithms",

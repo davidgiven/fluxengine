@@ -2,22 +2,38 @@ package com.cowlark.fluxengine.algorithms;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import com.cowlark.fluxengine.config.ConfigBuilder;
+import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.core.Bytes;
+import com.cowlark.fluxengine.data.DiskLayout;
 import com.cowlark.fluxengine.data.LogicalLocation;
 import com.cowlark.fluxengine.data.LogicalTrackLayout;
 import com.cowlark.fluxengine.data.Sector;
 import com.cowlark.fluxengine.data.Track;
+import com.cowlark.fluxengine.testing.TestHelpers;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.util.ArrayList;
 import java.util.List;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
-public class ReadOperationTest
+public class ReadWriteFluxRxOperationTest
 {
+    @Rule public final TestRule loggerRule = TestHelpers.loggerRule();
+
+    private static class TestOperation extends ReadWriteFluxRxOperation
+    {
+        @Override
+        public void run()
+        {
+        }
+    }
+
     private static LogicalTrackLayout makeLtl()
     {
         ImmutableList<Integer> order = ImmutableList.of(0, 1, 2);
@@ -43,6 +59,18 @@ public class ReadOperationTest
         return sector;
     }
 
+    private static ConfigProto makeConfig()
+    {
+        return new ConfigBuilder().set("usb.serial", "test-serial")
+                .set("drive.rotational_period_ms", "200")
+                .set("layout.tracks", "1")
+                .set("layout.sides", "1")
+                .set("layout.layoutdata[0].sector_size", "256")
+                .set("layout.layoutdata[0].physical.start_sector", "0")
+                .set("layout.layoutdata[0].physical.count", "8")
+                .build();
+    }
+
     @Test
     public void collectSectorsDeduplicatesOkAndBad()
     {
@@ -53,7 +81,7 @@ public class ReadOperationTest
         sectors.add(makeSector(1, Sector.Status.OK));
         sectors.add(makeSector(2, Sector.Status.BAD_CHECKSUM));
 
-        List<Sector> result = ReadOperation.collectSectors(sectors, true);
+        List<Sector> result = ReadWriteFluxRxOperation.collectSectors(sectors, true);
 
         assertThat(result).hasSize(3);
         assertThat(result.get(0).status).isEqualTo(Sector.Status.OK);
@@ -68,7 +96,7 @@ public class ReadOperationTest
         sectors.add(makeSector(0, Sector.Status.MISSING));
         sectors.add(makeSector(0, Sector.Status.OK));
 
-        List<Sector> result = ReadOperation.collectSectors(sectors);
+        List<Sector> result = ReadWriteFluxRxOperation.collectSectors(sectors);
 
         assertThat(result).hasSize(1);
         assertThat(result.get(0).status).isEqualTo(Sector.Status.OK);
@@ -83,13 +111,13 @@ public class ReadOperationTest
         b.data = Bytes.of(2);
 
         /* collapseConflicts=false keeps both as CONFLICT. */
-        List<Sector> result = ReadOperation.collectSectors(List.of(a, b), false);
+        List<Sector> result = ReadWriteFluxRxOperation.collectSectors(List.of(a, b), false);
         assertThat(result).hasSize(2);
         assertThat(result.get(0).status).isEqualTo(Sector.Status.CONFLICT);
         assertThat(result.get(1).status).isEqualTo(Sector.Status.CONFLICT);
 
         /* collapseConflicts=true collapses to a single CONFLICT. */
-        List<Sector> collapsed = ReadOperation.collectSectors(List.of(a, b), true);
+        List<Sector> collapsed = ReadWriteFluxRxOperation.collectSectors(List.of(a, b), true);
         assertThat(collapsed).hasSize(1);
         assertThat(collapsed.get(0).status).isEqualTo(Sector.Status.CONFLICT);
     }
@@ -102,7 +130,7 @@ public class ReadOperationTest
         Sector b = makeSector(0, Sector.Status.OK);
         b.data = Bytes.of(1);
 
-        List<Sector> result = ReadOperation.collectSectors(List.of(a, b), false);
+        List<Sector> result = ReadWriteFluxRxOperation.collectSectors(List.of(a, b), false);
 
         assertThat(result).hasSize(1);
         assertThat(result.get(0).status).isEqualTo(Sector.Status.OK);
@@ -117,7 +145,7 @@ public class ReadOperationTest
         track.allSectors.add(makeSector(0, Sector.Status.OK));
 
         ReadOperation.CombinationResult cr =
-                ReadOperation.combineRecordAndSectors(List.of(track), makeLtl());
+                ReadWriteFluxRxOperation.combineRecordAndSectors(List.of(track), makeLtl());
 
         assertThat(cr.result).isEqualTo(ReadOperation.BadSectorsState.HAS_BAD_SECTORS);
         assertThat(cr.sectors).hasSize(3);
@@ -143,7 +171,7 @@ public class ReadOperationTest
         track.allSectors.add(makeSector(2, Sector.Status.OK));
 
         ReadOperation.CombinationResult cr =
-                ReadOperation.combineRecordAndSectors(List.of(track), makeLtl());
+                ReadWriteFluxRxOperation.combineRecordAndSectors(List.of(track), makeLtl());
 
         assertThat(cr.result).isEqualTo(ReadOperation.BadSectorsState.HAS_NO_BAD_SECTORS);
         assertThat(cr.sectors).hasSize(3);
@@ -155,11 +183,55 @@ public class ReadOperationTest
     public void combineRecordAndSectorsEmptyTrackIsBad()
     {
         ReadOperation.CombinationResult cr =
-                ReadOperation.combineRecordAndSectors(List.of(), makeLtl());
+                ReadWriteFluxRxOperation.combineRecordAndSectors(List.of(), makeLtl());
 
         assertThat(cr.result).isEqualTo(ReadOperation.BadSectorsState.HAS_BAD_SECTORS);
         assertThat(cr.sectors).hasSize(3);
         for (Sector sector : cr.sectors)
             assertThat(sector.status).isEqualTo(Sector.Status.MISSING);
+    }
+
+    @Test
+    public void getConfigReturnsConfiguredConfig()
+    {
+        ConfigProto config = makeConfig();
+        TestOperation operation = new TestOperation();
+        operation.setConfig(config);
+
+        assertThat(operation.getConfig()).isSameInstanceAs(config);
+    }
+
+    @Test
+    public void getDiskLayoutBuildsFromConfig()
+    {
+        TestOperation operation = new TestOperation();
+        operation.setConfig(makeConfig());
+        operation.init();
+
+        DiskLayout diskLayout = operation.getDiskLayout();
+
+        assertThat(diskLayout).isNotNull();
+        assertThat(diskLayout.logicalLocations).isNotEmpty();
+        assertThat(diskLayout.layoutByLogicalLocation.size()).isEqualTo(1);
+    }
+
+    @Test
+    public void getDiskLayoutIsMemoized()
+    {
+        TestOperation operation = new TestOperation();
+        operation.setConfig(makeConfig());
+        operation.init();
+
+        assertThat(operation.getDiskLayout()).isSameInstanceAs(operation.getDiskLayout());
+    }
+
+    @Test
+    public void disposeDoesNotThrowWhenNothingCreated()
+    {
+        TestOperation operation = new TestOperation();
+        operation.setConfig(makeConfig());
+        operation.init();
+
+        operation.dispose();
     }
 }

@@ -2,10 +2,11 @@ package com.cowlark.fluxengine.cli;
 
 import static com.cowlark.fluxengine.config.FluxSourceSinkType.FLUXTYPE_DRIVE;
 
-import com.cowlark.fluxengine.algorithms.ReadOperation;
+import com.cowlark.fluxengine.algorithms.ReadWriteFluxRxOperation;
 import com.cowlark.fluxengine.config.ConfigBuilder;
 import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.core.FluxEngineException;
+import com.cowlark.fluxengine.core.LogRenderer;
 import com.cowlark.fluxengine.core.flags.FlagGroup;
 import com.cowlark.fluxengine.core.flags.StringFlag;
 import com.cowlark.fluxengine.core.flags.ValueFlag;
@@ -41,6 +42,15 @@ public class ReadCommand implements Command
         return "Reads a disk, producing a sector image.";
     }
 
+    private class ReadRxOperation extends ReadWriteFluxRxOperation
+    {
+        @Override
+        public void run()
+        {
+            readDisk();
+        }
+    }
+
     @Override
     public void run(ImmutableList<String> args)
     {
@@ -56,15 +66,12 @@ public class ReadCommand implements Command
         if (config.getDecoder().getCopyFluxTo().getType() == FLUXTYPE_DRIVE)
             throw new FluxEngineException("you cannot copy flux to a hardware device");
 
-        try
-        {
-            try (ReadOperation operation = new ReadOperation(config))
-            {
-                operation.read();
-            }
-        } catch (Exception e)
-        {
-            throw new RuntimeException(e);
-        }
+        LogRenderer renderer = LogRenderer.create(System.out);
+        new ReadRxOperation().setConfig(config).create().blockingSubscribe(
+                renderer::add, e -> {
+                    System.err.println("Failed!");
+                    e.printStackTrace();
+                });
+        System.out.println("done.");
     }
 }
