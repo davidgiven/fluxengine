@@ -15,6 +15,7 @@ public class Gui
     public void run(ImmutableList<String> args) throws Exception
     {
         UIManager.setLookAndFeel(new FlatDarkLaf());
+        System.setProperty("apple.laf.useScreenMenuBar", "true");
         SwingUtilities.invokeLater(() -> {
             createAndShowGui();
         });
