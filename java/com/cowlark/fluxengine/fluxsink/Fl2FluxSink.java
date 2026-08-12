@@ -45,7 +45,7 @@ public class Fl2FluxSink extends FluxSink
         }
     }
 
-    private static void saveFl2File(String filename, FluxFileProto.Builder proto)
+    public static void saveFl2File(String filename, FluxFileProto.Builder proto)
     {
         proto.setMagic(FluxMagic.MAGIC.getNumber());
         proto.setVersion(FluxFileVersion.VERSION_2);

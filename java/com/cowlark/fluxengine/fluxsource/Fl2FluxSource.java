@@ -45,7 +45,7 @@ public class Fl2FluxSource extends FluxSource
         extraConfig = builder.build();
     }
 
-    private static FluxFileProto loadFl2File(String filename)
+    public static FluxFileProto loadFl2File(String filename)
     {
         Bytes data;
         try

@@ -17,9 +17,9 @@ public interface Command
 
     ImmutableMap<String, Supplier<? extends Command>> FLUXFILEABLES =
             ImmutableMap.<String, Supplier<? extends Command>>builder()
-                    .put("ls", stub("ls", "Lists the contents of a flux file."))
-                    .put("rm", stub("rm", "Removes flux from a flux file."))
-                    .put("cp", stub("cp", "Copies flux from one flux file to another."))
+                    .put("ls", FluxfileLsCommand::new)
+                    .put("rm", FluxfileRmCommand::new)
+                    .put("cp", FluxfileCpCommand::new)
                     .build();
 
     ImmutableMap<String, Supplier<? extends Command>> TESTABLES =

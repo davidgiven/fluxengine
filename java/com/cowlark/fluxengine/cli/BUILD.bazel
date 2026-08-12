@@ -18,6 +18,7 @@ java_library(
         "//java/com/cowlark/fluxengine/decoders:decoders_java_proto",
         "//java/com/cowlark/fluxengine/encoders",
         "//java/com/cowlark/fluxengine/external",
+        "//java/com/cowlark/fluxengine/external:fl2_java_proto",
         "//java/com/cowlark/fluxengine/fluxsink",
         "//java/com/cowlark/fluxengine/fluxsource",
         "//java/com/cowlark/fluxengine/gui",
