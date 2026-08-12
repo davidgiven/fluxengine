@@ -33,30 +33,43 @@ public class ConfigFlagGroup extends FlagGroup
         if (key.startsWith("--"))
         {
             String path = key.substring(2);
-            if (key.contains("."))
+            try
             {
-                /* Dots: setting a config key. */
+                /* This is a config key. */
+                builder.get(path);
                 return ActionFlag.builder()
                         .setGroup(this)
                         .setValueCallback(value -> builder.set(path, value))
                         .build();
-            } else
+            } catch (ProtoPathNotFoundException e)
             {
-                /* No dots: this is an option name; look it up (throws if
-                 * unknown). */
-                ConfigBuilder.OptionInfo option = builder.findOption(path);
-                if (option.usesValue())
-                    return ActionFlag.builder()
-                            .setGroup(this)
-                            .setValueCallback(arg -> builder.applyOption(option, arg))
-                            .build();
-                else
-                    return ActionFlag.builder()
-                            .setGroup(this)
-                            .setVoidCallback(() -> builder.applyOption(option, null))
-                            .build();
+                /* Not a config key. */
             }
         }
-        return super.findFlag(key);
+
+        /* Look for a registered flag (e.g. --config, --show-config). */
+        Flag flag = super.findFlag(key);
+        if (flag != null)
+            return flag;
+
+        if (key.startsWith("--"))
+        {
+            /* Not a config key or registered flag: this is an option name;
+             * look it up (throws if unknown). */
+            String path = key.substring(2);
+            ConfigBuilder.OptionInfo option = builder.findOption(path);
+            if (option.usesValue())
+                return ActionFlag.builder()
+                        .setGroup(this)
+                        .setValueCallback(arg -> builder.applyOption(option, arg))
+                        .build();
+            else
+                return ActionFlag.builder()
+                        .setGroup(this)
+                        .setVoidCallback(() -> builder.applyOption(option, null))
+                        .build();
+        }
+
+        return null;
     }
 }

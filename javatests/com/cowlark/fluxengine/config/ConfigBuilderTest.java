@@ -184,6 +184,34 @@ public class ConfigBuilderTest
     }
 
     @Test
+    public void fromFlagsConfigKeyWithoutDotSetsValue()
+    {
+        /* A config key which doesn't have a dot (e.g. --tracks) is also a
+         * config path, not an option. */
+        ConfigBuilder builder = builder();
+
+        builder.fromFlags(ImmutableList.of("--tracks=c0-80h0-1"), new FlagGroup());
+
+        assertThat(builder.build().getTracks()).isEqualTo("c0-80h0-1");
+    }
+
+    @Test
+    public void getReturnsConfigValue()
+    {
+        ConfigBuilder builder = builder().set("tracks", "c0-80h0-1");
+
+        assertThat(builder.get("tracks")).isEqualTo("c0-80h0-1");
+    }
+
+    @Test
+    public void getOnUnknownKeyThrows()
+    {
+        ConfigBuilder builder = builder();
+
+        assertThrows(ProtoPathNotFoundException.class, () -> builder.get("nosuchfield"));
+    }
+
+    @Test
     public void applyOptionIsCallable()
     {
         ConfigBuilder builder = builder().loadConfigFile("_global_options");

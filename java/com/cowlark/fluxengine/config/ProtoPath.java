@@ -28,7 +28,9 @@ public class ProtoPath
     }
 
     /* Resolves a dotted path against a message and returns the leaf value as
-     * a string, ported from lib/config/proto.cc's findProtoPath/get. */
+     * a string, ported from lib/config/proto.cc's findProtoPath/get. Throws a
+     * ProtoPathNotFoundException if the path doesn't correspond to a real
+     * config field. */
     public static String get(Message.Builder builder, String path)
     {
         List<PathComponent> components = parsePath(path);
@@ -57,20 +59,19 @@ public class ProtoPath
         if (field.isRepeated())
         {
             int index = requireIndex(component, field);
-            if (builder.getRepeatedFieldCount(field) <= index)
-                throw new ProtoPathNotFoundException(
-                        "could not find config field '" + field.getName() + "'");
-            Message element = (Message) builder.getRepeatedField(field, index);
-            elementBuilder = element.toBuilder();
+            if (builder.getRepeatedFieldCount(field) > index)
+                elementBuilder = ((Message) builder.getRepeatedField(field, index)).toBuilder();
+            else
+                elementBuilder = builder.newBuilderForField(field);
         } else
         {
             if (component.index() >= 0)
                 throw new ProtoPathNotFoundException("config field '" + component.name() +
                         "' is not repeated but an index is provided");
-            if (!builder.hasField(field))
-                throw new ProtoPathNotFoundException(
-                        "could not find config field '" + field.getName() + "'");
-            elementBuilder = ((Message) builder.getField(field)).toBuilder();
+            if (builder.hasField(field))
+                elementBuilder = ((Message) builder.getField(field)).toBuilder();
+            else
+                elementBuilder = builder.newBuilderForField(field);
         }
         return getRecursive(elementBuilder, path, pos + 1, originalPath);
     }
@@ -124,7 +125,7 @@ public class ProtoPath
         {
             Matcher matcher = PATH_COMPONENT.matcher(token);
             if (!matcher.matches())
-                throw new ConfigException("invalid config path '" + path + "'");
+                throw new ProtoPathNotFoundException("invalid config path '" + path + "'");
             String index = matcher.group(2);
             components.add(new PathComponent(
                     matcher.group(1),

@@ -280,6 +280,14 @@ public class ConfigBuilder
         return this;
     }
 
+    /* Returns the value of the config key at the given path, or throws a
+     * ProtoPathNotFoundException if it isn't a real config field, ported from
+     * Config::get. */
+    public String get(String key)
+    {
+        return ProtoPath.get(proto, key);
+    }
+
     /* Looks up an option by name, ported from Config::findOption. The group
      * value parameter of the C++ version is not needed here, so it takes a
      * key only. */
