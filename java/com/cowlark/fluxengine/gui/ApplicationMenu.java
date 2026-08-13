@@ -19,7 +19,7 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
-public class AppMenu
+public class ApplicationMenu
 {
     public static UI.MenuBar createMenu()
     {
@@ -68,7 +68,7 @@ public class AppMenu
 
             Object application = applicationClass.getMethod("getApplication").invoke(null);
             Object handler = java.lang.reflect.Proxy.newProxyInstance(
-                    AppMenu.class.getClassLoader(),
+                    ApplicationMenu.class.getClassLoader(),
                     new Class<?>[]{aboutHandlerClass},
                     (proxy, method, args) -> {
                         if (method.getName().equals("handleAbout"))
