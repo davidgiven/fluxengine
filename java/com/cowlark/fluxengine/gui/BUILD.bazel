@@ -1,14 +1,25 @@
-load("@rules_java//java:defs.bzl", "java_binary", "java_library")
+load("@rules_java//java:defs.bzl", "java_binary", "java_library", "java_plugin")
 
 package(default_visibility = ["//visibility:public"])
+
+java_plugin(
+    name = "lombok_plugin",
+    generates_api = True,
+    processor_class = "lombok.launch.AnnotationProcessorHider$AnnotationProcessor",
+    deps = ["@maven//:org_projectlombok_lombok"],
+)
 
 java_library(
     name = "gui",
     srcs = glob(["*.java"]),
+    plugins = [":lombok_plugin"],
     deps = [
+        "//java/com/cowlark/fluxengine/config:config_java_proto",
+        "//java/com/cowlark/fluxengine/data",
         "@maven//:com_formdev_flatlaf",
         "@maven//:com_google_guava_guava",
         "@maven//:io_github_globaltcad_sprouts",
         "@maven//:io_github_globaltcad_swing_tree",
+        "@maven//:org_projectlombok_lombok",
     ],
 )

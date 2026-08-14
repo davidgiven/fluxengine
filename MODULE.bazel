@@ -23,6 +23,10 @@ maven.install(
         "io.github.globaltcad:swing-tree:0.24.1",
         "io.reactivex.rxjava3:rxjava:3.1.10",
         "io.github.globaltcad:sprouts:2.7.0",
+        "org.mockito:mockito-core:5.23.0",
+        "net.bytebuddy:byte-buddy:1.17.7",
+        "net.bytebuddy:byte-buddy-agent:1.17.7",
+        "org.objenesis:objenesis:3.3",
     ],
     repositories = [
         "https://repo1.maven.org/maven2",

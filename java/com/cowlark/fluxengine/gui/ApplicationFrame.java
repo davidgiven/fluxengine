@@ -1,7 +1,6 @@
 package com.cowlark.fluxengine.gui;
 
 import static swingtree.UIFactoryMethods.button;
-import static swingtree.UIFactoryMethods.label;
 import static swingtree.UIFactoryMethods.of;
 import static swingtree.UIFactoryMethods.panel;
 import static swingtree.UIFactoryMethods.scrollPane;
@@ -18,15 +17,25 @@ import javax.swing.JFrame;
 
 public class ApplicationFrame extends JFrame
 {
-    private final ConfigurationPanel configurationPanel = new ConfigurationPanel();
-    private final VisualiserPanel visualiserPanel = new VisualiserPanel();
-    private final ImagePanel imagePanel = new ImagePanel();
-    private final LogPanel logPanel = new LogPanel();
-    private final SummaryPanel summaryPanel = new SummaryPanel();
-    private final StatusbarPanel statusbarPanel = new StatusbarPanel();
+    private final ConfigurationPanel configurationPanel;
+    private final VisualiserPanel visualiserPanel;
+    private final ImagePanel imagePanel;
+    private final LogPanel logPanel;
+    private final SummaryPanel summaryPanel;
+    private final StatusbarPanel statusbarPanel;
 
-    ApplicationFrame()
+    private final ImagerViewModel model;
+
+    ApplicationFrame(ImagerViewModel model)
     {
+        this.model = model;
+        statusbarPanel = new StatusbarPanel(model);
+        summaryPanel = new SummaryPanel();
+        logPanel = new LogPanel();
+        imagePanel = new ImagePanel();
+        visualiserPanel = new VisualiserPanel();
+        configurationPanel = new ConfigurationPanel(model);
+
         UI.of(this)
                 .withOnCloseOperation(UI.OnWindowClose.DISPOSE)
                 .onClose(it -> System.exit(0))
@@ -55,9 +64,11 @@ public class ApplicationFrame extends JFrame
                                                                 of(summaryPanel)).add(
                                                                 "growx",
                                                                 panel("wrap 3, alignx center").add(button(
-                                                                                "Read disk"))
-                                                                        .add(button("Reread disk"))
-                                                                        .add(button("Write disk"))))))))
+                                                                                "Read disk").onClick(model::onReadDisk))
+                                                                        .add(button("Reread disk").onClick(
+                                                                                model::onRereadDisk))
+                                                                        .add(button("Write disk").onClick(
+                                                                                model::onWriteDisk))))))))
                         .add("growx", statusbarPanel));
     }
 }
