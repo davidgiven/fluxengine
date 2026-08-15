@@ -53,7 +53,7 @@ public class ConfigurationPanel extends JPanel
                                 .set(From.VIEW, (String) it.get().getSelectedItem())))
                 .add("span 2, growx, wrap", namedSeparator("Device properties"))
                 .add(label("Device:"))
-                .add("growx, pushx", comboBox(new String[]{"1", "2"}));
+                .add("growx, pushx", comboBox("1", "2"));
     }
 
     private static UIForPanel<JPanel> namedSeparator(String label)

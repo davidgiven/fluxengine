@@ -130,31 +130,32 @@ public class FluxOperationTest
         first.create().subscribe();
         second.create().subscribe();
 
-        try
+        /* Both operations race for the lock, so either may acquire it first.
+         * Wait for whichever one does, then verify the other is still
+         * waiting. */
+        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+        while (first.started.getCount() == 1 && second.started.getCount() == 1)
         {
-            /* The first operation starts immediately. */
-            assertThat(first.started.await(5, TimeUnit.SECONDS)).isTrue();
-
-            /* Only one operation may run at a time: the second must wait
-             * until the first has finished. */
-            assertThat(second.started.await(100, TimeUnit.MILLISECONDS)).isFalse();
-
-            /* Releasing the first operation lets the second run, on its own
-             * thread. */
-            first.gate.release();
-            assertThat(second.started.await(5, TimeUnit.SECONDS)).isTrue();
-            assertThat(second.runThread).isNotEqualTo(first.runThread);
-
-            second.gate.release();
-            assertThat(first.finished.await(5, TimeUnit.SECONDS)).isTrue();
-            assertThat(second.finished.await(5, TimeUnit.SECONDS)).isTrue();
-        } finally
-        {
-            /* Always release both gates so a failed assertion doesn't leave
-             * worker threads blocked. */
-            first.gate.release();
-            second.gate.release();
+            if (System.nanoTime() >= deadline)
+                throw new AssertionError("neither operation started");
+            Thread.sleep(1);
         }
+
+        Harness running = first.started.getCount() == 0 ? first : second;
+        Harness waiting = running == first ? second : first;
+
+        /* Only one operation may run at a time: the other must wait. */
+        assertThat(waiting.started.getCount()).isEqualTo(1);
+
+        /* Releasing the running operation lets the other run, on its own
+         * thread. */
+        running.gate.release();
+        assertThat(waiting.started.await(5, TimeUnit.SECONDS)).isTrue();
+        assertThat(waiting.runThread).isNotEqualTo(running.runThread);
+
+        waiting.gate.release();
+        assertThat(running.finished.await(5, TimeUnit.SECONDS)).isTrue();
+        assertThat(waiting.finished.await(5, TimeUnit.SECONDS)).isTrue();
     }
 
     @Test
