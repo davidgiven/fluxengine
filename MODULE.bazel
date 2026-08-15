@@ -27,6 +27,7 @@ maven.install(
         "net.bytebuddy:byte-buddy:1.17.7",
         "net.bytebuddy:byte-buddy-agent:1.17.7",
         "org.objenesis:objenesis:3.3",
+        "org.slf4j:slf4j-nop:2.0.17",
     ],
     repositories = [
         "https://repo1.maven.org/maven2",

@@ -7,7 +7,10 @@ java_binary(
     name = "fluxengine",
     jvm_flags = ["--enable-native-access=ALL-UNNAMED"],
     main_class = "com.cowlark.fluxengine.cli.Main",
-    runtime_deps = ["//java/com/cowlark/fluxengine/cli"],
+    runtime_deps = [
+        "//java/com/cowlark/fluxengine/cli",
+        "@maven//:org_slf4j_slf4j_nop",
+    ],
 )
 
 jpackage(
