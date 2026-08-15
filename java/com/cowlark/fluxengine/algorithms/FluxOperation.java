@@ -5,12 +5,14 @@ import com.cowlark.fluxengine.core.LogMessage;
 import com.cowlark.fluxengine.core.Logger;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
-import io.reactivex.rxjava3.subjects.PublishSubject;
+import io.reactivex.rxjava3.subjects.ReplaySubject;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 /**
- * Runs an operation once on its own worker thread, multicasting its log
- * messages to all subscribers via a {@link PublishSubject}.
+ * Runs an operation once on its own worker thread, storing every log message
+ * it emits and replaying them to all subscribers, whether they subscribe
+ * before, during or after the operation runs.
  */
 public abstract class FluxOperation<T extends FluxOperation<T>> implements Runnable
 {
@@ -20,6 +22,7 @@ public abstract class FluxOperation<T extends FluxOperation<T>> implements Runna
 
     protected ConfigProto configProto = null;
     private boolean disposed = false;
+    private final AtomicBoolean started = new AtomicBoolean(false);
 
     protected FluxOperation()
     {
@@ -36,35 +39,48 @@ public abstract class FluxOperation<T extends FluxOperation<T>> implements Runna
         return configProto;
     }
 
-    /* Runs the given operation on its own fresh worker thread, forwarding the
-     * messages it logs to all subscribers of the returned Observable. The
-     * factory is disposed when the returned Observable terminates, so that any
-     * AutoCloseable resources it holds are released. */
+    /* Returns an Observable which runs the operation on its own fresh worker
+     * thread and delivers every message it logs. All messages are stored in a
+     * ReplaySubject, so any subscriber sees every message, no matter when it
+     * subscribes. The operation starts on the first subscription, and is
+     * disposed when the returned Observable terminates. */
     public Observable<LogMessage> create()
     {
-        PublishSubject<LogMessage> subject = PublishSubject.create();
+        ReplaySubject<LogMessage> subject = ReplaySubject.create();
 
-        Schedulers.newThread().scheduleDirect(() -> {
-            synchronized (lock)
+        return Observable.using(
+                () -> this,
+                op -> subject.doOnSubscribe(d -> schedule(subject)),
+                op -> op.dispose());
+    }
+
+    /* Starts the operation on a fresh worker thread, but only once, no matter
+     * how many subscribers there are. */
+    private void schedule(ReplaySubject<LogMessage> subject)
+    {
+        if (started.compareAndSet(false, true))
+            Schedulers.newThread().scheduleDirect(() -> execute(subject));
+    }
+
+    private void execute(ReplaySubject<LogMessage> subject)
+    {
+        synchronized (lock)
+        {
+            Consumer<? super LogMessage> oldLogger = Logger.getLogger();
+            Logger.setLogger(subject::onNext);
+            try
             {
-                Consumer<? super LogMessage> oldLogger = Logger.getLogger();
-                Logger.setLogger(subject::onNext);
-                try
-                {
-                    init();
-                    run();
-                    subject.onComplete();
-                } catch (Throwable t)
-                {
-                    subject.onError(t);
-                } finally
-                {
-                    Logger.setLogger(oldLogger);
-                }
+                init();
+                run();
+                subject.onComplete();
+            } catch (Throwable t)
+            {
+                subject.onError(t);
+            } finally
+            {
+                Logger.setLogger(oldLogger);
             }
-        });
-
-        return Observable.using(() -> this, op -> subject, op -> op.dispose());
+        }
     }
 
     /* Disposes the factory, releasing any AutoCloseable resources it holds.

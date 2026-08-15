@@ -31,7 +31,7 @@ public class ApplicationFrame extends JFrame
         this.model = model;
         statusbarPanel = new StatusbarPanel(model);
         summaryPanel = new SummaryPanel();
-        logPanel = new LogPanel();
+        logPanel = new LogPanel(model);
         imagePanel = new ImagePanel();
         visualiserPanel = new VisualiserPanel();
         configurationPanel = new ConfigurationPanel(model);
@@ -45,30 +45,36 @@ public class ApplicationFrame extends JFrame
                     frame.setLocationRelativeTo(null);
                 })
                 .add(panel("fill, wrap 1").add(
-                                "grow, push", splitPane(UI.Align.HORIZONTAL).add(
-                                        LEFT,
-                                        tabbedPane().add(tab("Configuration").add(scrollPane().add(of(
-                                                configurationPanel))))).add(
+                                "grow, push",
+                                splitPane(UI.Align.HORIZONTAL).add(
+                                        LEFT, tabbedPane().add(tab("Configuration").add(
+                                                scrollPane().add(of(configurationPanel))))).add(
                                         RIGHT,
                                         splitPane(UI.Align.VERTICAL).peek(pane -> pane.setResizeWeight(1.0))
                                                 .add(
-                                                        TOP,
-                                                        tabbedPane().add(tab("Visualiser").add(of(
-                                                                        visualiserPanel)))
+                                                        TOP, tabbedPane().add(
+                                                                        tab("Visualiser").add(of(visualiserPanel)))
                                                                 .add(tab("Image").add(of(imagePanel)))
                                                                 .add(tab("Log").add(of(logPanel))))
                                                 .add(
-                                                        BOTTOM,
-                                                        tabbedPane().add(tab("Summary").add(panel(
-                                                                "fillx, wrap 1, aligny center").add("growx, h 100!",
-                                                                of(summaryPanel)).add(
-                                                                "growx",
-                                                                panel("wrap 3, alignx center").add(button(
-                                                                                "Read disk").onClick(model::onReadDisk))
-                                                                        .add(button("Reread disk").onClick(
-                                                                                model::onRereadDisk))
-                                                                        .add(button("Write disk").onClick(
-                                                                                model::onWriteDisk))))))))
+                                                        BOTTOM, tabbedPane().add(tab("Summary").add(
+                                                                panel("fillx, wrap 1, aligny " +
+                                                                        "center").add(
+                                                                                "growx, h 100!",
+                                                                                of(summaryPanel))
+                                                                        .add(
+                                                                                "growx",
+                                                                                panel("wrap 3, " +
+                                                                                        "alignx " +
+                                                                                        "center").add(
+                                                                                                button("Read disk").onClick(
+                                                                                                        model::onReadDisk))
+                                                                                        .add(button(
+                                                                                                "Reread disk").onClick(
+                                                                                                model::onRereadDisk))
+                                                                                        .add(button(
+                                                                                                "Write disk").onClick(
+                                                                                                model::onWriteDisk))))))))
                         .add("growx", statusbarPanel));
     }
 }

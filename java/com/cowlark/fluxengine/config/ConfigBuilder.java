@@ -327,7 +327,13 @@ public class ConfigBuilder
         throw new ConfigException(String.format("option %s not found", name));
     }
 
-    public void applyOption(OptionInfo option, String value)
+    public ConfigBuilder applyOption(String key, String value)
+    {
+        applyOption(findOption(key), value);
+        return this;
+    }
+
+    public ConfigBuilder applyOption(OptionInfo option, String value)
     {
         OptionProto optionProto = option.option();
         if ((optionProto == null) && option.usesValue())
@@ -346,14 +352,12 @@ public class ConfigBuilder
 
             if (optionProto == null)
                 throw new InapplicableOptionException(
-                        "value %s is not valid for option %s; valid values are: %s",
-                        value,
-                        option.group().getName(),
-                        option.group()
-                                .getOptionList()
-                                .stream()
-                                .map(OptionProto::getName)
-                                .collect(java.util.stream.Collectors.joining(", ")));
+                        "value %s is not valid for option %s; valid values are: %s", value,
+                        option.group().getName(), option.group()
+                        .getOptionList()
+                        .stream()
+                        .map(OptionProto::getName)
+                        .collect(java.util.stream.Collectors.joining(", ")));
         }
 
         checkOptionValid(optionProto);
@@ -361,6 +365,8 @@ public class ConfigBuilder
             appliedOptions.add(option.group());
         Logger.log(new OptionLogMessage("user option", optionProto));
         proto.mergeFrom(optionProto.getConfig());
+
+        return this;
     }
 
     /* Applies the default option for every group which doesn't have one set,
@@ -418,10 +424,8 @@ public class ConfigBuilder
 
                 throw new InapplicableOptionException(
                         "option '%s' is inapplicable to this configuration " +
-                                "because %s=%s could not be met",
-                        optionProto.getName(),
-                        req.getKey(),
-                        ss.toString());
+                                "because %s=%s could not be met", optionProto.getName(),
+                        req.getKey(), ss.toString());
             }
         }
     }

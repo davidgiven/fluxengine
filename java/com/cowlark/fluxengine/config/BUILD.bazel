@@ -98,4 +98,7 @@ java_library(
         "@maven//:org_projectlombok_lombok",
         "@maven//:org_usb4java_usb4java_javax",
     ],
+    runtime_deps = [
+        "@maven//:org_slf4j_slf4j_simple",
+    ],
 )

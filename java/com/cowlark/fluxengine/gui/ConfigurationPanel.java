@@ -48,6 +48,7 @@ public class ConfigurationPanel extends JPanel
             .collect(toImmutableMap(Pair::first, Pair::second));
 
     private static final ImmutableList<Boolean> YES_NO = ImmutableList.of(false, true);
+    private static final ImmutableList<Integer> DRIVES = ImmutableList.of(0, 1);
 
     private static final ConfigProto GLOBAL_CONFIG = Formats.get("_global_options");
 
@@ -93,11 +94,11 @@ public class ConfigurationPanel extends JPanel
             Var<OptionProto> selected =
                     options.zoomTo(getOption(optionGroup), withOption(optionGroup));
 
-            panel = panel.add(LABEL_FORMAT, label(commentRenderer(optionGroup.getComment()))).add(
-                    SETTING_FORMAT,
-                    comboBox(
-                            selected, optionGroup.getOptionList(),
-                            ConfigurationPanel::optionRenderer));
+            panel = panel.add(LABEL_FORMAT, label(commentRenderer(optionGroup.getComment())))
+                    .add(SETTING_FORMAT,
+                            comboBox(selected,
+                                    optionGroup.getOptionList(),
+                                    ConfigurationPanel::optionRenderer));
         }
 
         for (OptionProto option : config.getOptionList())
@@ -106,8 +107,8 @@ public class ConfigurationPanel extends JPanel
                 continue;
 
             String optionName = option.getName();
-            Var<Boolean> selected = options.zoomTo(
-                    it -> it.containsKey(optionName), (parent, newValue) -> {
+            Var<Boolean> selected =
+                    options.zoomTo(it -> it.containsKey(optionName), (parent, newValue) -> {
                         if (newValue)
                             return parent.put(optionName, "");
                         else
@@ -115,8 +116,7 @@ public class ConfigurationPanel extends JPanel
                     });
 
             panel = panel.add(LABEL_FORMAT, label(commentRenderer(option.getComment())))
-                    .add(
-                            SETTING_FORMAT,
+                    .add(SETTING_FORMAT,
                             comboBox(selected, YES_NO, ConfigurationPanel::yesNoRenderer));
         }
 
@@ -162,14 +162,13 @@ public class ConfigurationPanel extends JPanel
     {
         panel = panel.add("span 2, growx, wrap", namedSeparator("Format properties"))
                 .add(LABEL_FORMAT, label("Format:"))
-                .add(
-                        SETTING_FORMAT, comboBox(
-                                model.getFormat(), ImmutableList.copyOf(formatData.keySet()),
-                                ConfigurationPanel::formatRenderer).onSelection(
-                                it -> model.getFormat()
-                                        .set(From.VIEW, (String) it.get().getSelectedItem())));
-        panel = emitOptions(
-                panel, model.getOptionsForFormat(model.getFormat().get()),
+                .add(SETTING_FORMAT,
+                        comboBox(model.getFormat(),
+                                ImmutableList.copyOf(formatData.keySet()),
+                                ConfigurationPanel::formatRenderer).onSelection(it -> model.getFormat()
+                                .set(From.VIEW, (String) it.get().getSelectedItem())));
+        panel = emitOptions(panel,
+                model.getOptionsForFormat(model.getFormat().get()),
                 formatData.getOrDefault(model.getFormat().get(), ConfigProto.getDefaultInstance()),
                 ImmutableSet.of());
         return panel;
@@ -182,11 +181,11 @@ public class ConfigurationPanel extends JPanel
         Set<OptionApplicabilityHint> applicabilities = new HashSet<>();
         applicabilities.add(ANY_SOURCESINK);
 
-        panel = panel.add(label("Device:")).add(
-                SETTING_FORMAT,
-                comboBox(
-                        model.getDevice(), List.copyOf(model.getDevices().keySet()),
-                        this::deviceRenderer));
+        panel = panel.add(label("Device:"))
+                .add(SETTING_FORMAT,
+                        comboBox(model.getDevice(),
+                                List.copyOf(model.getDevices().keySet()),
+                                this::deviceRenderer));
 
         switch (model.getDevice().get())
         {
@@ -198,6 +197,11 @@ public class ConfigurationPanel extends JPanel
             }
             default -> applicabilities.add(HARDWARE_SOURCESINK);
         }
+
+        if (applicabilities.contains(HARDWARE_SOURCESINK))
+            panel = panel.add(label("Drive:"))
+                    .add(SETTING_FORMAT,
+                            comboBox(model.getDrive(), DRIVES, ConfigurationPanel::driveRenderer));
 
         panel = emitOptions(panel, model.getOptionsForDevice(), GLOBAL_CONFIG, applicabilities);
         return panel;
@@ -263,6 +267,16 @@ public class ConfigurationPanel extends JPanel
                 else
                     yield String.format("%s: %s", candidate.type.getDeviceName(), candidate.serial);
             }
+        };
+    }
+
+    private static String driveRenderer(int drive)
+    {
+        return switch (drive)
+        {
+            case 0 -> "Drive 0";
+            case 1 -> "Drive 1";
+            default -> throw new RuntimeException("bad state");
         };
     }
 

@@ -15,6 +15,7 @@ public class PreferencesReaderWriter
     static final String DEVICE_OPTIONS = "device_options";
     static final String FORMAT = "format";
     static final String DEVICE = "device";
+    static final String DRIVE = "drive";
 
     static final String DEVICE_FLUXFILE = "fluxfile";
     static final String DEVICE_MANUAL = "manual";
@@ -62,14 +63,24 @@ public class PreferencesReaderWriter
         preferences.put(key, optionsString);
     }
 
-    String getPreference(String name, String defaultValue)
+    String getStringPreference(String name, String defaultValue)
     {
         return preferences.get(name, defaultValue);
     }
 
-    void setPreference(String name, String value)
+    void setStringPreference(String name, String value)
     {
         preferences.put(name, value);
+    }
+
+    int getIntegerPreference(String name, int defaultValue)
+    {
+        return preferences.getInt(name, defaultValue);
+    }
+
+    void setIntegerPreference(String name, int value)
+    {
+        preferences.putInt(name, value);
     }
 
     private static String encode(String value)

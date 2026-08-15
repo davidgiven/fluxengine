@@ -19,8 +19,7 @@ public class PreferencesReaderWriterTest
 
     private static Association<String, String> assoc(String... pairs)
     {
-        Association<String, String> result =
-                Association.betweenLinked(String.class, String.class);
+        Association<String, String> result = Association.betweenLinked(String.class, String.class);
         for (int i = 0; i < pairs.length; i += 2)
             result = result.put(pairs[i], pairs[i + 1]);
         return result;
@@ -42,18 +41,18 @@ public class PreferencesReaderWriterTest
         when(preferences.get("format_ibm", "")).thenReturn("tracks=c0-80&side=0");
         writer = new PreferencesReaderWriter(preferences);
 
-        assertThat(writer.getOptionsForFormat("ibm").toMap())
-                .isEqualTo(assoc("tracks", "c0-80", "side", "0").toMap());
+        assertThat(writer.getOptionsForFormat("ibm").toMap()).isEqualTo(assoc("tracks",
+                "c0-80",
+                "side",
+                "0").toMap());
     }
 
     @Test
     public void roundTripPreservesOptions()
     {
         writer = new PreferencesReaderWriter(preferences);
-        Association<String, String> options = assoc(
-                "density", "hd",
-                "cylinders", "0-79",
-                "rotational-period-ms", "200");
+        Association<String, String> options =
+                assoc("density", "hd", "cylinders", "0-79", "rotational-period-ms", "200");
 
         writer.setOptionsForFormat("ibm", options);
 
@@ -66,18 +65,17 @@ public class PreferencesReaderWriterTest
     public void roundTripEncodesSpecialCharacters()
     {
         writer = new PreferencesReaderWriter(preferences);
-        Association<String, String> options = assoc(
-                "comment", "hello world & goodbye",
-                "path", "a=b%c+d");
+        Association<String, String> options =
+                assoc("comment", "hello world & goodbye", "path", "a=b%c+d");
 
         writer.setOptionsForFormat("amiga", options);
 
         String stored = options.entrySet()
                 .stream()
                 .map(entry -> java.net.URLEncoder.encode(entry.first(),
-                        java.nio.charset.StandardCharsets.UTF_8) + "=" +
-                        java.net.URLEncoder.encode(entry.second(),
-                                java.nio.charset.StandardCharsets.UTF_8))
+                        java.nio.charset.StandardCharsets.UTF_8) + "=" + java.net.URLEncoder.encode(
+                        entry.second(),
+                        java.nio.charset.StandardCharsets.UTF_8))
                 .collect(java.util.stream.Collectors.joining("&"));
         when(preferences.get("format_amiga", "")).thenReturn(stored);
 
@@ -94,21 +92,21 @@ public class PreferencesReaderWriterTest
     }
 
     @Test
-    public void setPreferenceStoresValue()
+    public void setStringPreferenceStoresValue()
     {
         writer = new PreferencesReaderWriter(preferences);
 
-        writer.setPreference("last-format", "ibm");
+        writer.setStringPreference("last-format", "ibm");
 
         verify(preferences).put("last-format", "ibm");
     }
 
     @Test
-    public void getPreferenceReturnsDefaultWhenNotSet()
+    public void getStringPreferenceReturnsDefaultWhenNotSet()
     {
         when(preferences.get("missing", "default")).thenReturn("default");
         writer = new PreferencesReaderWriter(preferences);
 
-        assertThat(writer.getPreference("missing", "default")).isEqualTo("default");
+        assertThat(writer.getStringPreference("missing", "default")).isEqualTo("default");
     }
 }

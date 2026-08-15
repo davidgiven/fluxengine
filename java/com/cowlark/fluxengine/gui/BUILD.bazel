@@ -14,16 +14,22 @@ java_library(
     srcs = glob(["*.java"]),
     plugins = [":lombok_plugin"],
     deps = [
+        "//java/com/cowlark/fluxengine/algorithms",
         "//java/com/cowlark/fluxengine/config",
         "//java/com/cowlark/fluxengine/config:config_java_proto",
+        "//java/com/cowlark/fluxengine/core",
         "//java/com/cowlark/fluxengine/data",
         "//java/com/cowlark/fluxengine/usb",
         "@maven//:com_formdev_flatlaf",
         "@maven//:com_google_guava_guava",
         "@maven//:io_github_globaltcad_sprouts",
         "@maven//:io_github_globaltcad_swing_tree",
+        "@maven//:io_reactivex_rxjava3_rxjava",
         "@maven//:org_apache_commons_commons_lang3",
         "@maven//:org_jspecify_jspecify",
         "@maven//:org_projectlombok_lombok",
+    ],
+    runtime_deps = [
+        "@maven//:org_slf4j_slf4j_simple",
     ],
 )
