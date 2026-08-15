@@ -12,7 +12,12 @@ import java.util.stream.Collectors;
 
 public class PreferencesReaderWriter
 {
+    static final String DEVICE_OPTIONS = "device_options";
     static final String FORMAT = "format";
+    static final String DEVICE = "device";
+
+    static final String DEVICE_FLUXFILE = "fluxfile";
+    static final String DEVICE_MANUAL = "manual";
 
     private final Preferences preferences;
 
@@ -23,7 +28,17 @@ public class PreferencesReaderWriter
 
     Association<String, String> getOptionsForFormat(String format)
     {
-        String optionsString = preferences.get("format_" + format, "");
+        return getOptions("format_" + format);
+    }
+
+    void setOptionsForFormat(String format, Association<String, String> options)
+    {
+        setOptions("format_" + format, options);
+    }
+
+    Association<String, String> getOptions(String key)
+    {
+        String optionsString = preferences.get(key, "");
         Map<String, String> rawMap = Splitter.on('&')
                 .omitEmptyStrings()
                 .trimResults()
@@ -38,13 +53,13 @@ public class PreferencesReaderWriter
                 .collect(Association.collectorOf(String.class, String.class));
     }
 
-    void setOptionsForFormat(String format, Association<String, String> options)
+    void setOptions(String key, Association<String, String> options)
     {
         String optionsString = options.entrySet()
                 .stream()
                 .map(entry -> encode(entry.first()) + "=" + encode(entry.second()))
                 .collect(Collectors.joining("&"));
-        preferences.put("format_" + format, optionsString);
+        preferences.put(key, optionsString);
     }
 
     String getPreference(String name, String defaultValue)

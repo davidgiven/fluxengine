@@ -14,8 +14,10 @@ java_library(
     srcs = glob(["*.java"]),
     plugins = [":lombok_plugin"],
     deps = [
+        "//java/com/cowlark/fluxengine/config",
         "//java/com/cowlark/fluxengine/config:config_java_proto",
         "//java/com/cowlark/fluxengine/data",
+        "//java/com/cowlark/fluxengine/usb",
         "@maven//:com_formdev_flatlaf",
         "@maven//:com_google_guava_guava",
         "@maven//:io_github_globaltcad_sprouts",

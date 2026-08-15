@@ -4,12 +4,12 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.google.common.collect.ImmutableMap;
 import java.util.prefs.Preferences;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import sprouts.Association;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PreferencesReaderWriterTest
@@ -17,12 +17,21 @@ public class PreferencesReaderWriterTest
     @Mock private Preferences preferences;
     private PreferencesReaderWriter writer = null;
 
+    private static Association<String, String> assoc(String... pairs)
+    {
+        Association<String, String> result =
+                Association.betweenLinked(String.class, String.class);
+        for (int i = 0; i < pairs.length; i += 2)
+            result = result.put(pairs[i], pairs[i + 1]);
+        return result;
+    }
+
     @Test
     public void setOptionsForFormatEncodesIntoPreferences()
     {
         writer = new PreferencesReaderWriter(preferences);
 
-        writer.setOptionsForFormat("ibm", ImmutableMap.of("tracks", "c0-80", "side", "0"));
+        writer.setOptionsForFormat("ibm", assoc("tracks", "c0-80", "side", "0"));
 
         verify(preferences).put("format_ibm", "tracks=c0-80&side=0");
     }
@@ -33,15 +42,15 @@ public class PreferencesReaderWriterTest
         when(preferences.get("format_ibm", "")).thenReturn("tracks=c0-80&side=0");
         writer = new PreferencesReaderWriter(preferences);
 
-        assertThat(writer.getOptionsForFormat("ibm"))
-                .isEqualTo(ImmutableMap.of("tracks", "c0-80", "side", "0"));
+        assertThat(writer.getOptionsForFormat("ibm").toMap())
+                .isEqualTo(assoc("tracks", "c0-80", "side", "0").toMap());
     }
 
     @Test
     public void roundTripPreservesOptions()
     {
         writer = new PreferencesReaderWriter(preferences);
-        ImmutableMap<String, String> options = ImmutableMap.of(
+        Association<String, String> options = assoc(
                 "density", "hd",
                 "cylinders", "0-79",
                 "rotational-period-ms", "200");
@@ -50,14 +59,14 @@ public class PreferencesReaderWriterTest
 
         when(preferences.get("format_ibm", "")).thenReturn(
                 "density=hd&cylinders=0-79&rotational-period-ms=200");
-        assertThat(writer.getOptionsForFormat("ibm")).isEqualTo(options);
+        assertThat(writer.getOptionsForFormat("ibm").toMap()).isEqualTo(options.toMap());
     }
 
     @Test
     public void roundTripEncodesSpecialCharacters()
     {
         writer = new PreferencesReaderWriter(preferences);
-        ImmutableMap<String, String> options = ImmutableMap.of(
+        Association<String, String> options = assoc(
                 "comment", "hello world & goodbye",
                 "path", "a=b%c+d");
 
@@ -65,14 +74,14 @@ public class PreferencesReaderWriterTest
 
         String stored = options.entrySet()
                 .stream()
-                .map(entry -> java.net.URLEncoder.encode(entry.getKey(),
+                .map(entry -> java.net.URLEncoder.encode(entry.first(),
                         java.nio.charset.StandardCharsets.UTF_8) + "=" +
-                        java.net.URLEncoder.encode(entry.getValue(),
+                        java.net.URLEncoder.encode(entry.second(),
                                 java.nio.charset.StandardCharsets.UTF_8))
                 .collect(java.util.stream.Collectors.joining("&"));
         when(preferences.get("format_amiga", "")).thenReturn(stored);
 
-        assertThat(writer.getOptionsForFormat("amiga")).isEqualTo(options);
+        assertThat(writer.getOptionsForFormat("amiga").toMap()).isEqualTo(options.toMap());
     }
 
     @Test

@@ -4,6 +4,10 @@ import com.fazecast.jSerialComm.SerialPort;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.usb4java.javax.Services;
 import javax.usb.UsbDeviceDescriptor;
 import javax.usb.UsbException;
@@ -30,7 +34,7 @@ public class UsbFinder
         }
     }
 
-    public static ImmutableList<CandidateDevice> findUsbDevices()
+    public static synchronized ImmutableList<CandidateDevice> findUsbDevices()
     {
         ImmutableList.Builder<CandidateDevice> candidates = ImmutableList.builder();
         try
@@ -141,6 +145,8 @@ public class UsbFinder
         }
     }
 
+    @Accessors(chain = true)
+    @Data
     public static final class CandidateDevice
     {
         public DeviceType type;
