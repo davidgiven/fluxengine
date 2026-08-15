@@ -1,7 +1,11 @@
 package com.cowlark.fluxengine.gui;
 
+import sprouts.Association;
+import sprouts.Pair;
 import javax.swing.Action;
 import java.awt.event.ActionEvent;
+import java.util.function.Function;
+import java.util.stream.Collector;
 
 public class UiUtils
 {

@@ -1,9 +1,8 @@
 package com.cowlark.fluxengine.gui;
 
-import static com.google.common.collect.ImmutableMap.toImmutableMap;
-
 import com.google.common.base.Splitter;
-import com.google.common.collect.ImmutableMap;
+import sprouts.Association;
+import sprouts.Pair;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -22,7 +21,7 @@ public class PreferencesReaderWriter
         this.preferences = preferences;
     }
 
-    ImmutableMap<String, String> getOptionsForFormat(String format)
+    Association<String, String> getOptionsForFormat(String format)
     {
         String optionsString = preferences.get("format_" + format, "");
         Map<String, String> rawMap = Splitter.on('&')
@@ -32,17 +31,18 @@ public class PreferencesReaderWriter
                 .split(optionsString);
 
         // Decode URL-encoded keys and values
-        return rawMap.entrySet().stream().collect(toImmutableMap(
-                e -> URLDecoder.decode(e.getKey(), StandardCharsets.UTF_8),
-                e -> URLDecoder.decode(e.getValue(), StandardCharsets.UTF_8),
-                (existing, replacement) -> existing));
+        return rawMap.entrySet()
+                .stream()
+                .map(e -> Pair.of(URLDecoder.decode(e.getKey(), StandardCharsets.UTF_8),
+                        URLDecoder.decode(e.getValue(), StandardCharsets.UTF_8)))
+                .collect(Association.collectorOf(String.class, String.class));
     }
 
-    void setOptionsForFormat(String format, ImmutableMap<String, String> options)
+    void setOptionsForFormat(String format, Association<String, String> options)
     {
         String optionsString = options.entrySet()
                 .stream()
-                .map(entry -> encode(entry.getKey()) + "=" + encode(entry.getValue()))
+                .map(entry -> encode(entry.first()) + "=" + encode(entry.second()))
                 .collect(Collectors.joining("&"));
         preferences.put("format_" + format, optionsString);
     }
