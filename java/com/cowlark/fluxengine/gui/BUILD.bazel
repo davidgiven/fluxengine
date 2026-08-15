@@ -20,6 +20,8 @@ java_library(
         "@maven//:com_google_guava_guava",
         "@maven//:io_github_globaltcad_sprouts",
         "@maven//:io_github_globaltcad_swing_tree",
+        "@maven//:org_apache_commons_commons_lang3",
+        "@maven//:org_jspecify_jspecify",
         "@maven//:org_projectlombok_lombok",
     ],
 )
