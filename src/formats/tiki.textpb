@@ -121,6 +121,7 @@ option_group {
 	option {
 		name: "800"
 		comment: '800kB 80-track 10-sector DSDD'
+		set_by_default: true
 
 		config {
 			layout {

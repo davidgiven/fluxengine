@@ -328,6 +328,7 @@ option_group {
 	option {
 		name: "1224"
 		comment: '1224kB 80-track DSHD GCR'
+		set_by_default: true
 
 		config {
 			layout {

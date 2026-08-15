@@ -82,6 +82,7 @@ option_group {
 	option {
 		name: "780"
 		comment: '780kB 5.25" 80-track DSDD'
+		set_by_default: true
 
 		config {
 			layout {
