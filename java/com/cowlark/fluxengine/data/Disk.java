@@ -15,6 +15,7 @@ public class Disk
             ArrayListMultimap.create();
     public final ListMultimap<CylinderHead, Sector> sectorsByPhysicalLocation =
             ArrayListMultimap.create();
+    public DiskLayout diskLayout = null;
     public Image image = null;
 
     /* 0 if the period is unknown (e.g. if this Disk was made from an image). */
@@ -27,6 +28,7 @@ public class Disk
 
     public Disk(Image image, DiskLayout diskLayout)
     {
+        this.diskLayout = diskLayout;
         this.image = image;
 
         ListMultimap<CylinderHead, Sector> sectorsGroupedByTrack = ArrayListMultimap.create();
@@ -62,6 +64,7 @@ public class Disk
     {
         tracksByPhysicalLocation.putAll(disk.tracksByPhysicalLocation);
         sectorsByPhysicalLocation.putAll(disk.sectorsByPhysicalLocation);
+        diskLayout = disk.diskLayout;
         image = disk.image;
         rotationalPeriodNs = disk.rotationalPeriodNs;
     }

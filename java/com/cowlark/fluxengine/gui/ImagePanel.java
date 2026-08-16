@@ -4,7 +4,10 @@ import javax.swing.JPanel;
 
 public class ImagePanel extends JPanel
 {
-    public ImagePanel()
+    private final ImagerViewModel model;
+
+    public ImagePanel(ImagerViewModel model)
     {
+        this.model = model;
     }
 }

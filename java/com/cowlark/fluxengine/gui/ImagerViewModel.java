@@ -7,6 +7,7 @@ import static com.cowlark.fluxengine.gui.PreferencesReaderWriter.DRIVE;
 import static com.cowlark.fluxengine.gui.PreferencesReaderWriter.FORMAT;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 
+import com.cowlark.fluxengine.algorithms.DiskReadLogMessage;
 import com.cowlark.fluxengine.algorithms.ReadWriteFluxOperation;
 import com.cowlark.fluxengine.config.ConfigBuilder;
 import com.cowlark.fluxengine.config.UsbFinder;
@@ -45,6 +46,8 @@ public class ImagerViewModel
     @Getter private Var<Image> diskImage = Var.of(new Image());
     @Getter private Vars<LogMessage> logQueue = Vars.of(LogMessage.class);
     @Getter private Var<Disposable> currentOperation = Var.ofNull(Disposable.class);
+    @Getter private Var<Disk> disk = Var.of(new Disk());
+
     @Getter private Val<Boolean> busy =
             currentOperation.viewAs(Boolean.class, op -> op != null && !op.isDisposed());
 
@@ -141,7 +144,7 @@ public class ImagerViewModel
         currentOperation.set(new ReadOperation().setConfig(builder.build())
                 .create()
                 .observeOn(UiUtils.EDT)
-                .subscribe(m -> logQueue.add(m), e -> {
+                .subscribe(this::handleLogMessage, e -> {
                     logQueue.add(new ErrorLogMessage(e.getMessage()));
                     currentOperation.fireChange(From.VIEW_MODEL);
                 }, () -> currentOperation.fireChange(From.VIEW_MODEL)));
@@ -172,5 +175,19 @@ public class ImagerViewModel
             builder.applyOption(e.first(), e.second());
 
         return builder;
+    }
+
+    private void handleLogMessage(LogMessage message)
+    {
+        switch (message)
+        {
+            case DiskReadLogMessage m:
+                getDisk().set(From.VIEW_MODEL, m.disk());
+                break;
+
+            default:
+                break;
+        }
+        logQueue.add(message);
     }
 }

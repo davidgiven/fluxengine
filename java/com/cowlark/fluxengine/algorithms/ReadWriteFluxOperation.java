@@ -65,8 +65,7 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
                 new SupplierOfAutocloseable(() -> FluxSinkFactory.create(configProto));
         usbDeviceSupplier = new SupplierOfAutocloseable(() -> UsbFactory.connect(configProto));
         decoderSupplier = Suppliers.memoize(() -> Arch.createDecoder(configProto));
-        encoderSupplier = Suppliers.memoize(() -> Arch.createEncoder(
-                configProto,
+        encoderSupplier = Suppliers.memoize(() -> Arch.createEncoder(configProto,
                 getDiskRotationalPeriodNs()));
         imageWriterSupplier = new SupplierOfAutocloseable(() -> ImageWriter.create(configProto));
         imageReaderSupplier = new SupplierOfAutocloseable(() -> ImageReader.create(configProto));
@@ -237,9 +236,10 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
         return cr;
     }
 
-    protected ReadGroupResult readGroup(Common.FluxSourceIteratorHolder fluxSourceIteratorHolder,
-                                        LogicalTrackLayout ltl,
-                                        List<Track> tracks)
+    protected ReadGroupResult readGroup(
+            Common.FluxSourceIteratorHolder fluxSourceIteratorHolder,
+            LogicalTrackLayout ltl,
+            List<Track> tracks)
     {
         ReadGroupResult rgr = new ReadGroupResult();
         rgr.result = ReadResult.BAD_AND_CAN_NOT_RETRY;
@@ -313,9 +313,10 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
         return rgr;
     }
 
-    private void readAndDecodeTrack(LogicalTrackLayout ltl,
-                                    List<Track> tracks,
-                                    List<Sector> combinedSectors)
+    private void readAndDecodeTrack(
+            LogicalTrackLayout ltl,
+            List<Track> tracks,
+            List<Sector> combinedSectors)
     {
         Common.FluxSourceIteratorHolder fluxSourceIteratorHolder =
                 new Common.FluxSourceIteratorHolder(getFluxSource());
@@ -412,13 +413,13 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
         for (Map.Entry<CylinderHead, Track> entry : disk.tracksByPhysicalLocation.entries())
         {
             Track track = entry.getValue();
-            tracksByLogicalLocation.computeIfAbsent(
-                    new CylinderHead(track.ltl.logicalCylinder, track.ltl.logicalHead),
-                    k -> new ArrayList<>()).add(track);
+            tracksByLogicalLocation.computeIfAbsent(new CylinderHead(track.ltl.logicalCylinder,
+                    track.ltl.logicalHead), k -> new ArrayList<>()).add(track);
         }
 
         Logger.log(new BeginOperationLogMessage("Reading and decoding disk"));
 
+        disk.diskLayout = getDiskLayout();
         disk.rotationalPeriodNs = getDiskRotationalPeriodNs();
 
         try (FluxSink outputFluxSink = outputFluxSinkFactory != null ?
@@ -437,8 +438,7 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
 
                 Common.testForEmergencyStop();
 
-                List<Track> trackFluxes = tracksByLogicalLocation.computeIfAbsent(
-                        logicalLocation,
+                List<Track> trackFluxes = tracksByLogicalLocation.computeIfAbsent(logicalLocation,
                         k -> new ArrayList<>());
                 List<Sector> trackSectors = new ArrayList<>();
                 readAndDecodeTrack(ltl, trackFluxes, trackSectors);
@@ -446,15 +446,11 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
                 /* Replace all tracks on the disk by the new combined set. */
 
                 for (Track flux : trackFluxes)
-                    disk.tracksByPhysicalLocation.removeAll(new CylinderHead(
-                            flux.ptl.physicalCylinder,
+                    disk.tracksByPhysicalLocation.removeAll(new CylinderHead(flux.ptl.physicalCylinder,
                             flux.ptl.physicalHead));
                 for (Track flux : trackFluxes)
-                    disk.tracksByPhysicalLocation.put(
-                            new CylinderHead(
-                                    flux.ptl.physicalCylinder,
-                                    flux.ptl.physicalHead),
-                            flux);
+                    disk.tracksByPhysicalLocation.put(new CylinderHead(flux.ptl.physicalCylinder,
+                            flux.ptl.physicalHead), flux);
 
                 /* Likewise for sectors. */
 
@@ -466,8 +462,7 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
                 if (outputFluxSink != null)
                 {
                     for (Track data : trackFluxes)
-                        outputFluxSink.addFlux(
-                                data.ptl.physicalCylinder,
+                        outputFluxSink.addFlux(data.ptl.physicalCylinder,
                                 data.ptl.physicalHead,
                                 data.fluxmap);
                 }
@@ -482,8 +477,7 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
                     System.out.println("\nRaw (undecoded) records follow:\n");
                     for (com.cowlark.fluxengine.data.Record record : sortedRecords)
                     {
-                        System.out.printf(
-                                "I+%.2fus with %.2fus clock%n",
+                        System.out.printf("I+%.2fus with %.2fus clock%n",
                                 record.startTimeNs / 1000.0,
                                 record.clockNs / 1000.0);
                         Utils.hexdump(System.out, record.rawData);
@@ -549,9 +543,10 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
         return disk;
     }
 
-    private void writeTracks(Function<LogicalTrackLayout, Fluxmap> producer,
-                             Predicate<LogicalTrackLayout> verifier,
-                             List<CylinderHead> logicalLocations)
+    private void writeTracks(
+            Function<LogicalTrackLayout, Fluxmap> producer,
+            Predicate<LogicalTrackLayout> verifier,
+            List<CylinderHead> logicalLocations)
     {
         Logger.log(new BeginOperationLogMessage("Encoding and writing to disk"));
 
@@ -561,8 +556,7 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
             int index = 0;
             for (CylinderHead ch : logicalLocations)
             {
-                Logger.log(new OperationProgressLogMessage(
-                        index * 100 / logicalLocations.size()));
+                Logger.log(new OperationProgressLogMessage(index * 100 / logicalLocations.size()));
                 index++;
 
                 Common.testForEmergencyStop();
@@ -577,8 +571,7 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
                         int physicalCylinder = ltl.physicalCylinder + offset;
                         int physicalHead = ltl.physicalHead;
 
-                        Logger.log(new BeginWriteOperationLogMessage(
-                                physicalCylinder,
+                        Logger.log(new BeginWriteOperationLogMessage(physicalCylinder,
                                 ltl.physicalHead));
 
                         boolean erase = false;
@@ -590,8 +583,7 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
                             else
                             {
                                 fluxSink.addFlux(physicalCylinder, physicalHead, fluxmap);
-                                Logger.logf(
-                                        "writing %d ms in %d bytes",
+                                Logger.logf("writing %d ms in %d bytes",
                                         (int) (fluxmap.durationNs() / 1e6),
                                         fluxmap.bytes());
                             }
@@ -627,22 +619,21 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
 
     public void rawWrite()
     {
-        writeTracks(
-                ltl -> {
-                    FluxSourceIterator iterator =
-                            getFluxSource().readFlux(FluxReadParameters.builder()
-                                    .setCylinder(ltl.physicalCylinder)
-                                    .setHead(ltl.physicalHead)
-                                    .build());
-                    if (!iterator.hasNext())
-                        return null;
-                    return iterator.next();
-                }, ltl -> true, getDiskLayout().logicalLocations);
+        writeTracks(ltl -> {
+            FluxSourceIterator iterator = getFluxSource().readFlux(FluxReadParameters.builder()
+                    .setCylinder(ltl.physicalCylinder)
+                    .setHead(ltl.physicalHead)
+                    .build());
+            if (!iterator.hasNext())
+                return null;
+            return iterator.next();
+        }, ltl -> true, getDiskLayout().logicalLocations);
     }
 
-    private void writeTracks(Function<LogicalTrackLayout, Fluxmap> producer,
-                             Predicate<LogicalTrackLayout> verifier,
-                             ImmutableSet<CylinderHead> logicalLocations)
+    private void writeTracks(
+            Function<LogicalTrackLayout, Fluxmap> producer,
+            Predicate<LogicalTrackLayout> verifier,
+            ImmutableSet<CylinderHead> logicalLocations)
     {
         Logger.log(new BeginOperationLogMessage("Encoding and writing to disk"));
 
@@ -652,8 +643,7 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
             int index = 0;
             for (CylinderHead ch : logicalLocations)
             {
-                Logger.log(new OperationProgressLogMessage(
-                        index * 100 / logicalLocations.size()));
+                Logger.log(new OperationProgressLogMessage(index * 100 / logicalLocations.size()));
                 index++;
 
                 Common.testForEmergencyStop();
@@ -668,8 +658,7 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
                         int physicalCylinder = ltl.physicalCylinder + offset;
                         int physicalHead = ltl.physicalHead;
 
-                        Logger.log(new BeginWriteOperationLogMessage(
-                                physicalCylinder,
+                        Logger.log(new BeginWriteOperationLogMessage(physicalCylinder,
                                 ltl.physicalHead));
 
                         boolean erase = false;
@@ -681,8 +670,7 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
                             else
                             {
                                 fluxSink.addFlux(physicalCylinder, physicalHead, fluxmap);
-                                Logger.logf(
-                                        "writing %d ms in %d bytes",
+                                Logger.logf("writing %d ms in %d bytes",
                                         (int) (fluxmap.durationNs() / 1e6),
                                         fluxmap.bytes());
                             }
@@ -718,67 +706,62 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
 
     private void writeTracks(Image image, ImmutableSet<CylinderHead> chs)
     {
-        writeTracks(
-                ltl -> {
-                    ImmutableList<Sector> sectors = getEncoder().collectSectors(ltl, image);
-                    return getEncoder().encode(ltl, sectors, image);
-                }, ltl -> true, chs);
+        writeTracks(ltl -> {
+            ImmutableList<Sector> sectors = getEncoder().collectSectors(ltl, image);
+            return getEncoder().encode(ltl, sectors, image);
+        }, ltl -> true, chs);
     }
 
     private void writeTracksAndVerify(Image image, ImmutableSet<CylinderHead> chs)
     {
-        writeTracks(
-                ltl -> {
-                    List<Sector> sectors = getEncoder().collectSectors(ltl, image);
-                    return getEncoder().encode(ltl, sectors, image);
-                }, ltl -> {
-                    Common.FluxSourceIteratorHolder fluxSourceIteratorHolder =
-                            new Common.FluxSourceIteratorHolder(getFluxSource());
-                    List<Track> tracks = new ArrayList<>();
-                    ReadGroupResult rgr = readGroup(fluxSourceIteratorHolder, ltl, tracks);
+        writeTracks(ltl -> {
+            List<Sector> sectors = getEncoder().collectSectors(ltl, image);
+            return getEncoder().encode(ltl, sectors, image);
+        }, ltl -> {
+            Common.FluxSourceIteratorHolder fluxSourceIteratorHolder =
+                    new Common.FluxSourceIteratorHolder(getFluxSource());
+            List<Track> tracks = new ArrayList<>();
+            ReadGroupResult rgr = readGroup(fluxSourceIteratorHolder, ltl, tracks);
 
-                    if (rgr.result != ReadResult.GOOD_READ)
-                    {
-                        adjustTrackOnError(ltl.physicalCylinder);
-                        Logger.logf("bad read");
-                        return false;
-                    }
+            if (rgr.result != ReadResult.GOOD_READ)
+            {
+                adjustTrackOnError(ltl.physicalCylinder);
+                Logger.logf("bad read");
+                return false;
+            }
 
-                    Image wanted = new Image();
-                    for (Sector sector : getEncoder().collectSectors(ltl, image))
-                        wanted.put(
-                                sector.location.logicalCylinder(),
-                                sector.location.logicalHead(),
-                                sector.location.logicalSector()).data = sector.data;
+            Image wanted = new Image();
+            for (Sector sector : getEncoder().collectSectors(ltl, image))
+                wanted.put(sector.location.logicalCylinder(),
+                        sector.location.logicalHead(),
+                        sector.location.logicalSector()).data = sector.data;
 
-                    for (Sector sector : rgr.combinedSectors)
-                    {
-                        Sector s = wanted.get(
-                                sector.location.logicalCylinder(),
-                                sector.location.logicalHead(),
-                                sector.location.logicalSector());
-                        if (s == null)
-                        {
-                            Logger.logf("spurious sector on verify");
-                            return false;
-                        }
-                        if (!s.data.equals(sector.data.slice(0, s.data.size())))
-                        {
-                            Logger.logf("data mismatch on verify");
-                            return false;
-                        }
-                        wanted.erase(
-                                sector.location.logicalCylinder(),
-                                sector.location.logicalHead(),
-                                sector.location.logicalSector());
-                    }
-                    if (!wanted.empty())
-                    {
-                        Logger.logf("missing sector on verify");
-                        return false;
-                    }
-                    return true;
-                }, chs);
+            for (Sector sector : rgr.combinedSectors)
+            {
+                Sector s = wanted.get(sector.location.logicalCylinder(),
+                        sector.location.logicalHead(),
+                        sector.location.logicalSector());
+                if (s == null)
+                {
+                    Logger.logf("spurious sector on verify");
+                    return false;
+                }
+                if (!s.data.equals(sector.data.slice(0, s.data.size())))
+                {
+                    Logger.logf("data mismatch on verify");
+                    return false;
+                }
+                wanted.erase(sector.location.logicalCylinder(),
+                        sector.location.logicalHead(),
+                        sector.location.logicalSector());
+            }
+            if (!wanted.empty())
+            {
+                Logger.logf("missing sector on verify");
+                return false;
+            }
+            return true;
+        }, chs);
     }
 
     public void writeDisk(Image image, Collection<CylinderHead> physicalLocations)

@@ -28,3 +28,14 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "DiskChangeNotificationTest",
+    srcs = ["DiskChangeNotificationTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/data",
+        "@maven//:com_google_truth_truth",
+        "@maven//:io_github_globaltcad_sprouts",
+        "@maven//:junit_junit",
+    ],
+)

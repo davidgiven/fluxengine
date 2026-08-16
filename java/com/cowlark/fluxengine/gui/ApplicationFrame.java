@@ -30,10 +30,10 @@ public class ApplicationFrame extends JFrame
     {
         this.model = model;
         statusbarPanel = new StatusbarPanel(model);
-        summaryPanel = new SummaryPanel();
+        summaryPanel = new SummaryPanel(model);
         logPanel = new LogPanel(model);
-        imagePanel = new ImagePanel();
-        visualiserPanel = new VisualiserPanel();
+        imagePanel = new ImagePanel(model);
+        visualiserPanel = new VisualiserPanel(model);
         configurationPanel = new ConfigurationPanel(model);
 
         UI.of(this)
@@ -44,31 +44,30 @@ public class ApplicationFrame extends JFrame
                     frame.setSize(1280, 720);
                     frame.setLocationRelativeTo(null);
                 })
-                .add(panel("fill, wrap 1").add(
-                                "grow, push",
-                                splitPane(UI.Align.HORIZONTAL).add(
-                                        LEFT, tabbedPane().add(tab("Configuration").add(
-                                                scrollPane().add(of(configurationPanel))))).add(
-                                        RIGHT,
-                                        splitPane(UI.Align.VERTICAL).peek(pane -> pane.setResizeWeight(1.0))
-                                                .add(
-                                                        TOP, tabbedPane().add(
-                                                                        tab("Visualiser").add(of(visualiserPanel)))
-                                                                .add(tab("Image").add(of(imagePanel)))
-                                                                .add(tab("Log").add(of(logPanel))))
-                                                .add(
-                                                        BOTTOM, tabbedPane().add(tab("Summary").add(
-                                                                panel("fillx, wrap 1, aligny " +
-                                                                        "center").add(
+                .add(panel("fill, wrap 1").add("grow, push",
+                                splitPane(UI.Align.HORIZONTAL).add(LEFT,
+                                                tabbedPane().add(tab("Configuration").add(scrollPane().add(of(
+                                                        configurationPanel)))))
+                                        .add(RIGHT,
+                                                splitPane(UI.Align.VERTICAL).peek(pane -> pane.setResizeWeight(
+                                                                1.0))
+                                                        .add(TOP,
+                                                                tabbedPane().add(tab("Visualiser").add(of(
+                                                                                visualiserPanel)))
+                                                                        .add(tab("Image").add(of(imagePanel)))
+                                                                        .add(tab("Log").add(of(logPanel))))
+                                                        .add(BOTTOM,
+                                                                tabbedPane().add(tab("Summary").add(panel(
+                                                                        "fillx, wrap 1, aligny " +
+                                                                                "center").add(
                                                                                 "growx, h 100!",
                                                                                 of(summaryPanel))
-                                                                        .add(
-                                                                                "growx",
+                                                                        .add("growx",
                                                                                 panel("wrap 3, " +
                                                                                         "alignx " +
-                                                                                        "center").add(
-                                                                                                button("Read disk").onClick(
-                                                                                                        model::onReadDisk))
+                                                                                        "center").add(button(
+                                                                                                "Read disk").onClick(
+                                                                                                model::onReadDisk))
                                                                                         .add(button(
                                                                                                 "Reread disk").onClick(
                                                                                                 model::onRereadDisk))
