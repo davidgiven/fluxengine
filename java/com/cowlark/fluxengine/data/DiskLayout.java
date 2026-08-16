@@ -8,6 +8,7 @@ import com.cowlark.fluxengine.external.DriveType;
 import com.cowlark.fluxengine.external.FormatType;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import lombok.EqualsAndHashCode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -19,6 +20,7 @@ import java.util.Set;
 /**
  * The physical layout of the disk, ported from lib/data/layout.cc.
  */
+@EqualsAndHashCode
 public class DiskLayout
 {
     /* Logical size. */

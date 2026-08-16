@@ -22,36 +22,72 @@ import java.awt.Color;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.GridLayout;
+import java.util.HashMap;
 
 public class SummaryPanel extends JPanel
 {
     private final ImagerViewModel model;
     private final int smallFont;
+    private DiskLayout currentLayout;
+    private HashMap<CylinderHead, SummaryButton> physicalTrackButtons = new HashMap<>();
 
     public SummaryPanel(ImagerViewModel model)
     {
         this.model = model;
         smallFont = UIManager.getFont("Label.font").getSize() / 3;
 
-        Viewable.cast(model.getDisk()).onChange(From.ALL, it -> rebuildUi());
-        Viewable.cast(model.getDriveActivity()).onChange(From.ALL, it -> rebuildUi());
+        Viewable.cast(model.getDisk()).onChange(From.ALL, it -> diskChanged());
+        Viewable.cast(model.getDriveActivity()).onChange(From.ALL, it -> updateUi());
+
         rebuildUi();
+    }
+
+    private void diskChanged()
+    {
+        var newLayout = model.getDisk().get().diskLayout;
+        if ((currentLayout == null) || !currentLayout.equals(newLayout))
+        {
+            currentLayout = newLayout;
+            rebuildUi();
+        }
+        updateUi();
+    }
+
+    private void updateUi()
+    {
+        if (currentLayout == null)
+            return;
+
+        Disk disk = model.getDisk().get();
+        DriveActivity driveActivity = model.getDriveActivity().get();
+        for (int head = currentLayout.minPhysicalHead; head <= currentLayout.maxPhysicalHead;
+             head++)
+        {
+            for (int cylinder = currentLayout.minPhysicalCylinder;
+                 cylinder <= currentLayout.maxPhysicalCylinder; cylinder++)
+            {
+                SummaryButton button = physicalTrackButtons.get(new CylinderHead(cylinder, head));
+                if (button == null)
+                    continue;
+                button.setTrackAnalysis(analyseTrack(disk, driveActivity, cylinder, head));
+            }
+        }
+
+        revalidate();
+        repaint();
     }
 
     private void rebuildUi()
     {
         removeAll();
 
-        DiskLayout layout = model.getDisk().get().diskLayout;
-        if (layout != null)
+        if (currentLayout != null)
         {
+            physicalTrackButtons.clear();
             UIForPanel<SummaryPanel> ui = UI.of(this).withLayout(new GridLayout(6, 1, 1, 1));
             ui = addPhysicalView(ui);
-            ui = addLogicalView(ui);
+            //            ui = addLogicalView(ui);
         }
-
-        revalidate();
-        repaint();
     }
 
     private static class TrackAnalysis
@@ -59,6 +95,23 @@ public class SummaryPanel extends JPanel
         String tooltip;
         Color colour;
         String label;
+    }
+
+    private UIForPanel<SummaryPanel> addPhysicalView(UIForPanel<SummaryPanel> ui)
+    {
+        return ui.add(label("Physical layout (what your drive sees)").withHorizontalAlignment(
+                        HorizontalAlignment.CENTER))
+                .add(of(makeHeaderPanel(currentLayout.minPhysicalCylinder,
+                        currentLayout.maxPhysicalCylinder)))
+                .add(of(makeGridPanel(currentLayout.minPhysicalCylinder,
+                        currentLayout.maxPhysicalCylinder,
+                        currentLayout.minPhysicalHead,
+                        currentLayout.maxPhysicalHead,
+                        ((cylinder, head) -> {
+                            SummaryButton button = new SummaryButton();
+                            physicalTrackButtons.put(new CylinderHead(cylinder, head), button);
+                            return button;
+                        }))));
     }
 
     private ImmutableSet<Sector> findSectors(Disk disk, int physicalCylinder, int physicalHead)
@@ -110,24 +163,6 @@ public class SummaryPanel extends JPanel
         return result;
     }
 
-    private UIForPanel<SummaryPanel> addPhysicalView(UIForPanel<SummaryPanel> ui)
-    {
-        Disk disk = model.getDisk().get();
-        DiskLayout layout = disk.diskLayout;
-
-        return ui.add(label("Physical layout (what your drive sees)").withHorizontalAlignment(
-                        HorizontalAlignment.CENTER))
-                .add(of(makeHeaderPanel(layout.minPhysicalCylinder, layout.maxPhysicalCylinder)))
-                .add(of(makeGridPanel(layout.minPhysicalCylinder,
-                        layout.maxPhysicalCylinder,
-                        layout.minPhysicalHead,
-                        layout.maxPhysicalHead,
-                        ((cylinder, head) -> new SummaryButton(analyseTrack(disk,
-                                model.getDriveActivity().get(),
-                                cylinder,
-                                head))))));
-    }
-
     private UIForPanel<SummaryPanel> addLogicalView(UIForPanel<SummaryPanel> ui)
     {
         Disk disk = model.getDisk().get();
@@ -174,33 +209,41 @@ public class SummaryPanel extends JPanel
     /* A single cell of the summary grid. */
     private static class SummaryButton extends JButton
     {
-        private final TrackAnalysis analysis;
+        private TrackAnalysis analysis;
 
-        SummaryButton(TrackAnalysis analysis)
+        SummaryButton()
         {
             super("");
-            this.analysis = analysis;
             setBorderPainted(false);
             setContentAreaFilled(false);
             setFocusPainted(false);
             setOpaque(true);
+        }
+
+        void setTrackAnalysis(TrackAnalysis analysis)
+        {
+            this.analysis = analysis;
             setBackground(analysis.colour);
             setToolTipText(analysis.tooltip);
+            repaint();
         }
 
         @Override
         protected void paintComponent(Graphics g)
         {
-            g.setColor(analysis.colour);
-            g.fillRect(0, 0, getWidth(), getHeight());
-
-            if (!analysis.label.isEmpty())
+            if (analysis != null)
             {
-                g.setColor(getForeground());
-                FontMetrics metrics = g.getFontMetrics();
-                int x = (getWidth() - metrics.stringWidth(analysis.label)) / 2;
-                int y = (getHeight() - metrics.getHeight()) / 2 + metrics.getAscent();
-                g.drawString(analysis.label, x, y);
+                g.setColor(analysis.colour);
+                g.fillRect(0, 0, getWidth(), getHeight());
+
+                if (!analysis.label.isEmpty())
+                {
+                    g.setColor(getForeground());
+                    FontMetrics metrics = g.getFontMetrics();
+                    int x = (getWidth() - metrics.stringWidth(analysis.label)) / 2;
+                    int y = (getHeight() - metrics.getHeight()) / 2 + metrics.getAscent();
+                    g.drawString(analysis.label, x, y);
+                }
             }
         }
     }

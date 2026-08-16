@@ -197,4 +197,51 @@ public class DiskLayoutTest
                 .put(new LogicalLocation(1, 1, 3), 3840L)
                 .build());
     }
+
+    @Test
+    public void test_equality()
+    {
+        ConfigProto.Builder config1 = baseConfig(FORMATTYPE_80TRACK);
+        config1.getLayoutBuilder().setTracks(2).setSides(2);
+        addLayoutData(config1).setSectorSize(256)
+                .getPhysicalBuilder()
+                .setStartSector(0)
+                .setCount(4);
+
+        ConfigProto.Builder config2 = baseConfig(FORMATTYPE_80TRACK);
+        config2.getLayoutBuilder().setTracks(2).setSides(2);
+        addLayoutData(config2).setSectorSize(256)
+                .getPhysicalBuilder()
+                .setStartSector(0)
+                .setCount(4);
+
+        DiskLayout layout1 = new DiskLayout(config1.build());
+        DiskLayout layout2 = new DiskLayout(config2.build());
+
+        assertThat(layout1).isEqualTo(layout2);
+        assertThat(layout1.hashCode()).isEqualTo(layout2.hashCode());
+    }
+
+    @Test
+    public void test_inequality()
+    {
+        ConfigProto.Builder config1 = baseConfig(FORMATTYPE_80TRACK);
+        config1.getLayoutBuilder().setTracks(2).setSides(2);
+        addLayoutData(config1).setSectorSize(256)
+                .getPhysicalBuilder()
+                .setStartSector(0)
+                .setCount(4);
+
+        ConfigProto.Builder config2 = baseConfig(FORMATTYPE_80TRACK);
+        config2.getLayoutBuilder().setTracks(2).setSides(2);
+        addLayoutData(config2).setSectorSize(512)
+                .getPhysicalBuilder()
+                .setStartSector(0)
+                .setCount(4);
+
+        DiskLayout layout1 = new DiskLayout(config1.build());
+        DiskLayout layout2 = new DiskLayout(config2.build());
+
+        assertThat(layout1).isNotEqualTo(layout2);
+    }
 }

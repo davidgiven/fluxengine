@@ -2,10 +2,12 @@ package com.cowlark.fluxengine.data;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import lombok.EqualsAndHashCode;
 
 /**
  * The layout of a single logical track, ported from lib/data/layout.h.
  */
+@EqualsAndHashCode
 public class LogicalTrackLayout
 {
     /* Physical cylinder of the first element of the group. */

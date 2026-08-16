@@ -1,8 +1,11 @@
 package com.cowlark.fluxengine.data;
 
+import lombok.EqualsAndHashCode;
+
 /**
  * The layout of a single physical track, ported from lib/data/layout.h.
  */
+@EqualsAndHashCode
 public class PhysicalTrackLayout
 {
     /* Physical location of this track. */

@@ -18,7 +18,7 @@ public class SummaryPanelTest
     private ImagerViewModel model;
 
     @Test
-    public void addPhysicalViewAddsThreeComponents()
+    public void addPhysicalAndLogicalViews()
     {
         Disk disk = new Disk();
         disk.diskLayout = new DiskLayout(80, 2, 18, 512);
@@ -28,6 +28,6 @@ public class SummaryPanelTest
 
         SummaryPanel panel = new SummaryPanel(model);
 
-        assertThat(panel.getComponentCount()).isEqualTo(3);
+        assertThat(panel.getComponentCount()).isEqualTo(4);
     }
 }
