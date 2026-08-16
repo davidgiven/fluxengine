@@ -7,7 +7,11 @@ import static com.cowlark.fluxengine.gui.PreferencesReaderWriter.DRIVE;
 import static com.cowlark.fluxengine.gui.PreferencesReaderWriter.FORMAT;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 
+import com.cowlark.fluxengine.algorithms.BeginReadOperationLogMessage;
+import com.cowlark.fluxengine.algorithms.BeginWriteOperationLogMessage;
 import com.cowlark.fluxengine.algorithms.DiskReadLogMessage;
+import com.cowlark.fluxengine.algorithms.EndReadOperationLogMessage;
+import com.cowlark.fluxengine.algorithms.EndWriteOperationLogMessage;
 import com.cowlark.fluxengine.algorithms.ReadWriteFluxOperation;
 import com.cowlark.fluxengine.config.ConfigBuilder;
 import com.cowlark.fluxengine.config.UsbFinder;
@@ -17,6 +21,7 @@ import com.cowlark.fluxengine.core.LogMessage.ErrorLogMessage;
 import com.cowlark.fluxengine.core.Logger;
 import com.cowlark.fluxengine.data.Disk;
 import com.cowlark.fluxengine.data.Image;
+import com.cowlark.fluxengine.gui.DriveActivity.ActivityType;
 import com.google.common.collect.ImmutableMap;
 import io.reactivex.rxjava3.disposables.Disposable;
 import lombok.Getter;
@@ -47,6 +52,8 @@ public class ImagerViewModel
     @Getter private Vars<LogMessage> logQueue = Vars.of(LogMessage.class);
     @Getter private Var<Disposable> currentOperation = Var.ofNull(Disposable.class);
     @Getter private Var<Disk> disk = Var.of(new Disk());
+    @Getter private Var<DriveActivity> driveActivity =
+            Var.of(new DriveActivity(ActivityType.IDLE, 0, 0));
 
     @Getter private Val<Boolean> busy =
             currentOperation.viewAs(Boolean.class, op -> op != null && !op.isDisposed());
@@ -181,12 +188,27 @@ public class ImagerViewModel
     {
         switch (message)
         {
-            case DiskReadLogMessage m:
-                getDisk().set(From.VIEW_MODEL, m.disk());
-                break;
+            case DiskReadLogMessage m -> getDisk().set(From.VIEW_MODEL, m.disk());
 
-            default:
-                break;
+            case BeginReadOperationLogMessage m -> getDriveActivity().set(new DriveActivity(
+                    ActivityType.READING,
+                    m.track(),
+                    m.head()));
+
+            case BeginWriteOperationLogMessage m -> getDriveActivity().set(new DriveActivity(
+                    ActivityType.WRITING,
+                    m.track(),
+                    m.head()));
+
+            case EndReadOperationLogMessage ignored ->
+                    getDriveActivity().set(new DriveActivity(ActivityType.IDLE, 0, 0));
+
+            case EndWriteOperationLogMessage ignored ->
+                    getDriveActivity().set(new DriveActivity(ActivityType.IDLE, 0, 0));
+
+            default ->
+            {
+            }
         }
         logQueue.add(message);
     }

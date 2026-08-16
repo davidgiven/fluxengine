@@ -39,3 +39,19 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "SummaryPanelTest",
+    srcs = ["SummaryPanelTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/data",
+        "//java/com/cowlark/fluxengine/gui",
+        "@maven//:com_google_truth_truth",
+        "@maven//:io_github_globaltcad_sprouts",
+        "@maven//:junit_junit",
+        "@maven//:net_bytebuddy_byte_buddy",
+        "@maven//:net_bytebuddy_byte_buddy_agent",
+        "@maven//:org_mockito_mockito_core",
+        "@maven//:org_objenesis_objenesis",
+    ],
+)
