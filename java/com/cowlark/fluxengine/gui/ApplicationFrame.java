@@ -60,7 +60,7 @@ public class ApplicationFrame extends JFrame
                                                                 tabbedPane().add(tab("Summary").add(panel(
                                                                         "fillx, wrap 1, aligny " +
                                                                                 "center").add(
-                                                                                "growx, h 200!",
+                                                                                "growx, h 100pt!",
                                                                                 of(summaryPanel))
                                                                         .add("growx",
                                                                                 panel("wrap 3, " +

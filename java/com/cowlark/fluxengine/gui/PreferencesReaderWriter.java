@@ -27,6 +27,11 @@ public class PreferencesReaderWriter
         this.preferences = preferences;
     }
 
+    private static String encode(String value)
+    {
+        return URLEncoder.encode(value, StandardCharsets.UTF_8);
+    }
+
     Association<String, String> getOptionsForFormat(String format)
     {
         return getOptions("format_" + format);
@@ -81,10 +86,5 @@ public class PreferencesReaderWriter
     void setIntegerPreference(String name, int value)
     {
         preferences.putInt(name, value);
-    }
-
-    private static String encode(String value)
-    {
-        return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 }

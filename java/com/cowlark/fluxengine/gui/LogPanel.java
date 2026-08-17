@@ -8,7 +8,6 @@ import com.cowlark.fluxengine.core.LogRenderer;
 import com.cowlark.fluxengine.core.PrintingLogRenderer;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.disposables.Disposable;
-import sprouts.Var;
 import sprouts.Vars;
 import sprouts.Viewables;
 import javax.swing.JPanel;
@@ -75,7 +74,8 @@ public class LogPanel extends JPanel
      * Swing event thread. */
     public void observe(Observable<LogMessage> messages)
     {
-        Disposable disposable = messages.subscribe(
-                panel -> SwingUtilities.invokeLater(() -> printingLogRenderer.add(panel)));
+        Disposable disposable =
+                messages.subscribe(panel -> SwingUtilities.invokeLater(() -> printingLogRenderer.add(
+                        panel)));
     }
 }

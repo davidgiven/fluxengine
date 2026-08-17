@@ -421,6 +421,7 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
 
         disk.diskLayout = getDiskLayout();
         disk.rotationalPeriodNs = getDiskRotationalPeriodNs();
+        Logger.log(new DiskUpdateLogMessage(disk));
 
         try (FluxSink outputFluxSink = outputFluxSinkFactory != null ?
                 outputFluxSinkFactory.create() :
@@ -519,7 +520,7 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
 
                 /* Log a _copy_ of the disk structure so that the logger
                  * doesn't see the disk get mutated in subsequent reads. */
-                Logger.log(new DiskReadLogMessage(new Disk(disk)));
+                Logger.log(new DiskUpdateLogMessage(new Disk(disk)));
             }
         }
 

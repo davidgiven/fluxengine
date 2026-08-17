@@ -41,20 +41,16 @@ import java.util.function.Function;
 
 public class ConfigurationPanel extends JPanel
 {
+    private static final ImmutableList<Boolean> YES_NO = ImmutableList.of(false, true);
+    private static final ImmutableList<Integer> DRIVES = ImmutableList.of(0, 1);
+    private static final ConfigProto GLOBAL_CONFIG = Formats.get("_global_options");
+    private static final String LABEL_FORMAT = "wmax 100lp";
+    private static final String SETTING_FORMAT = "wmax 200lp, growx, pushx";
     private static ImmutableMap<String, ConfigProto> formatData = Formats.all()
             .stream()
             .map(it -> Pair.of(it, Formats.get(it)))
             .filter(p -> !p.second().getIsExtension())
             .collect(toImmutableMap(Pair::first, Pair::second));
-
-    private static final ImmutableList<Boolean> YES_NO = ImmutableList.of(false, true);
-    private static final ImmutableList<Integer> DRIVES = ImmutableList.of(0, 1);
-
-    private static final ConfigProto GLOBAL_CONFIG = Formats.get("_global_options");
-
-    private static final String LABEL_FORMAT = "wmax 100lp";
-    private static final String SETTING_FORMAT = "wmax 200lp, growx, pushx";
-
     private final ImagerViewModel model;
 
     public ConfigurationPanel(ImagerViewModel model)
@@ -64,6 +60,103 @@ public class ConfigurationPanel extends JPanel
         Viewable.cast(model.getFormat()).onChange(From.ALL, it -> rebuildUi());
         Viewable.cast(model.getDevice()).onChange(From.ALL, it -> rebuildUi());
         rebuildUi();
+    }
+
+    private static Function<Association<String, String>, OptionProto> getOption(OptionGroupProto optionGroup)
+    {
+        String optionGroupName = optionGroup.getName();
+        OptionProto defaultOption = findDefaultOption(optionGroup);
+        if (isNullOrEmpty(optionGroupName))
+            return assoc -> {
+                for (OptionProto option : optionGroup.getOptionList())
+                    if (assoc.containsKey(option.getName()))
+                        return option;
+                return defaultOption;
+            };
+        else
+            return it -> {
+                for (OptionProto option : optionGroup.getOptionList())
+                    if (option.getName().equals(optionGroupName))
+                        return option;
+                return defaultOption;
+            };
+    }
+
+    private static BiFunction<Association<String, String>, OptionProto, Association<String,
+            String>> withOption(
+            OptionGroupProto optionGroup)
+    {
+        String optionGroupName = optionGroup.getName();
+        if (isNullOrEmpty(optionGroupName))
+            return (parent, newOption) -> {
+                for (OptionProto option : optionGroup.getOptionList())
+                    parent = parent.remove(option.getName());
+                return parent.put(newOption.getName(), "");
+            };
+        else
+            return (parent, newOption) -> parent.put(optionGroupName, newOption.getName());
+    }
+
+    private static UIForPanel<JPanel> namedSeparator(String label)
+    {
+        return panel("fillx, insets 5 0").add("w 10!", separator())
+                .add(label(label))
+                .add("growx, pushx", separator());
+    }
+
+    private static OptionProto findDefaultOption(OptionGroupProto optionGroup)
+    {
+        for (OptionProto option : optionGroup.getOptionList())
+            if (option.getSetByDefault())
+                return option;
+        return null;
+    }
+
+    /* Returns true if the given applicability hints are all applicable for
+     * the current format. */
+    static <T> boolean testApplicability(
+            Set<T> enabledApplicabilities,
+            Collection<T> optionApplicabilities)
+    {
+        if (enabledApplicabilities.isEmpty())
+            return true;
+        if (optionApplicabilities.stream().noneMatch(enabledApplicabilities::contains))
+            return false;
+        return true;
+    }
+
+    private static String yesNoRenderer(boolean yesno)
+    {
+        return yesno ? "Yes" : "No";
+    }
+
+    private static String formatRenderer(String format)
+    {
+        return formatData.get(format).getShortname();
+    }
+
+    private static String optionRenderer(@Nullable OptionProto option)
+    {
+        return Optional.ofNullable(option)
+                .map(OptionProto::getComment)
+                .orElse("*** missing default ***");
+    }
+
+    private static String driveRenderer(int drive)
+    {
+        return switch (drive)
+        {
+            case 0 -> "Drive 0";
+            case 1 -> "Drive 1";
+            default -> throw new RuntimeException("bad state");
+        };
+    }
+
+    private static String commentRenderer(String comment)
+    {
+        if (comment.equals("$formats"))
+            return "Variant:";
+        return String.format("<html>%s:</html>", StringUtils.capitalize(comment));
     }
 
     /* Removes the existing UI and recreates it. */
@@ -123,41 +216,6 @@ public class ConfigurationPanel extends JPanel
         return panel;
     }
 
-    private static Function<Association<String, String>, OptionProto> getOption(OptionGroupProto optionGroup)
-    {
-        String optionGroupName = optionGroup.getName();
-        OptionProto defaultOption = findDefaultOption(optionGroup);
-        if (isNullOrEmpty(optionGroupName))
-            return assoc -> {
-                for (OptionProto option : optionGroup.getOptionList())
-                    if (assoc.containsKey(option.getName()))
-                        return option;
-                return defaultOption;
-            };
-        else
-            return it -> {
-                for (OptionProto option : optionGroup.getOptionList())
-                    if (option.getName().equals(optionGroupName))
-                        return option;
-                return defaultOption;
-            };
-    }
-
-    private static BiFunction<Association<String, String>, OptionProto, Association<String,
-            String>> withOption(
-            OptionGroupProto optionGroup)
-    {
-        String optionGroupName = optionGroup.getName();
-        if (isNullOrEmpty(optionGroupName))
-            return (parent, newOption) -> {
-                for (OptionProto option : optionGroup.getOptionList())
-                    parent = parent.remove(option.getName());
-                return parent.put(newOption.getName(), "");
-            };
-        else
-            return (parent, newOption) -> parent.put(optionGroupName, newOption.getName());
-    }
-
     private UIForPanel<ConfigurationPanel> buildFormatPane(UIForPanel<ConfigurationPanel> panel)
     {
         panel = panel.add("span 2, growx, wrap", namedSeparator("Format properties"))
@@ -207,51 +265,6 @@ public class ConfigurationPanel extends JPanel
         return panel;
     }
 
-    private static UIForPanel<JPanel> namedSeparator(String label)
-    {
-        return panel("fillx, insets 5 0").add("w 10!", separator())
-                .add(label(label))
-                .add("growx, pushx", separator());
-    }
-
-    private static OptionProto findDefaultOption(OptionGroupProto optionGroup)
-    {
-        for (OptionProto option : optionGroup.getOptionList())
-            if (option.getSetByDefault())
-                return option;
-        return null;
-    }
-
-    /* Returns true if the given applicability hints are all applicable for
-     * the current format. */
-    static <T> boolean testApplicability(
-            Set<T> enabledApplicabilities,
-            Collection<T> optionApplicabilities)
-    {
-        if (enabledApplicabilities.isEmpty())
-            return true;
-        if (optionApplicabilities.stream().noneMatch(enabledApplicabilities::contains))
-            return false;
-        return true;
-    }
-
-    private static String yesNoRenderer(boolean yesno)
-    {
-        return yesno ? "Yes" : "No";
-    }
-
-    private static String formatRenderer(String format)
-    {
-        return formatData.get(format).getShortname();
-    }
-
-    private static String optionRenderer(@Nullable OptionProto option)
-    {
-        return Optional.ofNullable(option)
-                .map(OptionProto::getComment)
-                .orElse("*** missing default ***");
-    }
-
     private String deviceRenderer(String device)
     {
         return switch (device)
@@ -268,22 +281,5 @@ public class ConfigurationPanel extends JPanel
                     yield String.format("%s: %s", candidate.type.getDeviceName(), candidate.serial);
             }
         };
-    }
-
-    private static String driveRenderer(int drive)
-    {
-        return switch (drive)
-        {
-            case 0 -> "Drive 0";
-            case 1 -> "Drive 1";
-            default -> throw new RuntimeException("bad state");
-        };
-    }
-
-    private static String commentRenderer(String comment)
-    {
-        if (comment.equals("$formats"))
-            return "Variant:";
-        return String.format("<html>%s:</html>", StringUtils.capitalize(comment));
     }
 }

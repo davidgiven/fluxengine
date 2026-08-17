@@ -28,6 +28,12 @@ public class SummaryPanelTest
 
         SummaryPanel panel = new SummaryPanel(model);
 
-        assertThat(panel.getComponentCount()).isEqualTo(4);
+        /* Physical label + header + 2 button rows, then logical label + 2
+         * button rows + header. Each header/button row spans 82 columns
+         * (2 indicators + 80 cylinders). */
+        int header = 82;
+        int buttonRow = 82;
+        int expected = 1 + header + 2 * buttonRow + 1 + 2 * buttonRow + header;
+        assertThat(panel.getComponentCount()).isEqualTo(expected);
     }
 }

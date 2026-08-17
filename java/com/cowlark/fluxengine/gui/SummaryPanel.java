@@ -1,27 +1,32 @@
 package com.cowlark.fluxengine.gui;
 
+import static com.cowlark.fluxengine.gui.UiUtils.getGraphics2D;
 import static swingtree.UI.label;
 import static swingtree.UI.of;
 
 import com.cowlark.fluxengine.data.CylinderHead;
 import com.cowlark.fluxengine.data.Disk;
 import com.cowlark.fluxengine.data.DiskLayout;
+import com.cowlark.fluxengine.data.LogicalTrackLayout;
+import com.cowlark.fluxengine.data.PhysicalTrackLayout;
 import com.cowlark.fluxengine.data.Sector;
 import com.cowlark.fluxengine.data.Sector.Status;
 import com.google.common.collect.ImmutableSet;
 import sprouts.From;
 import sprouts.Viewable;
-import swingtree.UI;
 import swingtree.UI.HorizontalAlignment;
 import swingtree.UI.VerticalAlignment;
 import swingtree.UIForPanel;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
-import java.awt.GridLayout;
+import java.awt.Graphics2D;
+import java.awt.Insets;
 import java.util.HashMap;
 
 public class SummaryPanel extends JPanel
@@ -30,6 +35,7 @@ public class SummaryPanel extends JPanel
     private final int smallFont;
     private DiskLayout currentLayout;
     private HashMap<CylinderHead, SummaryButton> physicalTrackButtons = new HashMap<>();
+    private HashMap<CylinderHead, SummaryButton> logicalTrackButtons = new HashMap<>();
 
     public SummaryPanel(ImagerViewModel model)
     {
@@ -39,6 +45,7 @@ public class SummaryPanel extends JPanel
         Viewable.cast(model.getDisk()).onChange(From.ALL, it -> diskChanged());
         Viewable.cast(model.getDriveActivity()).onChange(From.ALL, it -> updateUi());
 
+        currentLayout = model.getDisk().get().diskLayout;
         rebuildUi();
     }
 
@@ -73,6 +80,25 @@ public class SummaryPanel extends JPanel
             }
         }
 
+        for (int head = 0; head < currentLayout.numLogicalHeads; head++)
+        {
+            for (int cylinder = 0; cylinder < currentLayout.numLogicalCylinders; cylinder++)
+            {
+                CylinderHead lch = new CylinderHead(cylinder, head);
+                LogicalTrackLayout ptl = currentLayout.layoutByLogicalLocation.get(lch);
+                if (ptl == null)
+                    continue;
+
+                SummaryButton button = logicalTrackButtons.get(lch);
+                if (button == null)
+                    continue;
+                button.setTrackAnalysis(analyseTrack(disk,
+                        driveActivity,
+                        ptl.physicalCylinder,
+                        ptl.physicalHead));
+            }
+        }
+
         revalidate();
         repaint();
     }
@@ -84,34 +110,95 @@ public class SummaryPanel extends JPanel
         if (currentLayout != null)
         {
             physicalTrackButtons.clear();
-            UIForPanel<SummaryPanel> ui = UI.of(this).withLayout(new GridLayout(6, 1, 1, 1));
-            ui = addPhysicalView(ui);
-            //            ui = addLogicalView(ui);
+            logicalTrackButtons.clear();
+
+            int columns =
+                    currentLayout.maxPhysicalCylinder - currentLayout.minPhysicalCylinder + 1 + 2;
+            UIForPanel<SummaryPanel> ui = of(this).withLayout("wrap " + columns + ",gap 1 1,fill",
+                    "[sizegroup 1,grow,fill]",
+                    "grow,fill");
+
+            ui = ui.add("span " + columns + ", growx",
+                    label("Physical layout (what your drive sees)").withHorizontalAlignment(
+                            HorizontalAlignment.CENTER));
+            ui = addHeader(ui, VerticalAlignment.BOTTOM);
+            ui = addButtonRows(ui,
+                    currentLayout.minPhysicalHead,
+                    currentLayout.maxPhysicalHead,
+                    this::createPhysicalButton);
+
+            ui = ui.add("span " + columns + ", growx, gaptop 5pt",
+                    label("Logical layout (what's on the disk)").withHorizontalAlignment(
+                            HorizontalAlignment.CENTER));
+            ui = addButtonRows(ui,
+                    currentLayout.minPhysicalHead,
+                    currentLayout.maxPhysicalHead,
+                    this::createLogicalButton);
+            ui = addHeader(ui, VerticalAlignment.TOP);
         }
     }
 
-    private static class TrackAnalysis
+    private ButtonAndSpan createPhysicalButton(int cylinder, int head)
     {
-        String tooltip;
-        Color colour;
-        String label;
+        SummaryButton button = new SummaryButton();
+        physicalTrackButtons.put(new CylinderHead(cylinder, head), button);
+        return new ButtonAndSpan(button, 1);
     }
 
-    private UIForPanel<SummaryPanel> addPhysicalView(UIForPanel<SummaryPanel> ui)
+    private ButtonAndSpan createLogicalButton(int cylinder, int head)
     {
-        return ui.add(label("Physical layout (what your drive sees)").withHorizontalAlignment(
-                        HorizontalAlignment.CENTER))
-                .add(of(makeHeaderPanel(currentLayout.minPhysicalCylinder,
-                        currentLayout.maxPhysicalCylinder)))
-                .add(of(makeGridPanel(currentLayout.minPhysicalCylinder,
-                        currentLayout.maxPhysicalCylinder,
-                        currentLayout.minPhysicalHead,
-                        currentLayout.maxPhysicalHead,
-                        ((cylinder, head) -> {
-                            SummaryButton button = new SummaryButton();
-                            physicalTrackButtons.put(new CylinderHead(cylinder, head), button);
-                            return button;
-                        }))));
+        CylinderHead pch = new CylinderHead(cylinder, head);
+        PhysicalTrackLayout ptl = currentLayout.layoutByPhysicalLocation.get(pch);
+        if ((ptl == null) || (ptl.groupOffset != 0))
+            return new ButtonAndSpan(new JPanel(), 1);
+
+        SummaryButton button = new SummaryButton();
+        logicalTrackButtons.put(new CylinderHead(ptl.logicalTrackLayout.logicalCylinder,
+                ptl.logicalTrackLayout.logicalHead), button);
+        return new ButtonAndSpan(button, ptl.logicalTrackLayout.groupSize);
+    }
+
+    private UIForPanel<SummaryPanel> addHeader(
+            UIForPanel<SummaryPanel> ui,
+            VerticalAlignment verticalAlignment)
+    {
+        ui = ui.add(label("").withFontSize(smallFont));
+        for (int cylinder = currentLayout.minPhysicalCylinder;
+             cylinder <= currentLayout.maxPhysicalCylinder; cylinder++)
+            ui = ui.add(label(String.format("c%d", cylinder)).withHorizontalAlignment(
+                            HorizontalAlignment.CENTER)
+                    .withVerticalAlignment(verticalAlignment)
+                    .withFontSize(smallFont));
+        ui = ui.add(label("").withFontSize(smallFont));
+        return ui;
+    }
+
+    private UIForPanel<SummaryPanel> addButtonRows(
+            UIForPanel<SummaryPanel> ui,
+            int minHead,
+            int maxHead,
+            ButtonBuilder builder)
+    {
+        for (int head = minHead; head <= maxHead; head++)
+        {
+            ui = ui.add(label(String.format("h%d", head)).withFontSize(smallFont)
+                    .withPrefSize(0, smallFont)
+                    .withHorizontalAlignment(HorizontalAlignment.CENTER));
+
+            for (int cylinder = currentLayout.minPhysicalCylinder;
+                 cylinder <= currentLayout.maxPhysicalCylinder; )
+            {
+                ButtonAndSpan result = builder.create(cylinder, head);
+                ui = ui.add("span " + result.span() + ", growx, growy",
+                        of(result.button()).withMinSize(5, 5));
+                cylinder += result.span();
+            }
+
+            ui = ui.add(label(String.format("h%d", head)).withFontSize(smallFont)
+                    .withPrefSize(0, smallFont)
+                    .withHorizontalAlignment(HorizontalAlignment.CENTER));
+        }
+        return ui;
     }
 
     private ImmutableSet<Sector> findSectors(Disk disk, int physicalCylinder, int physicalHead)
@@ -129,7 +216,7 @@ public class SummaryPanel extends JPanel
     {
         ImmutableSet<Sector> sectors = findSectors(disk, physicalCylinder, physicalHead);
         TrackAnalysis result = new TrackAnalysis();
-        result.colour = getBackground();
+        result.colour = StatusColour.MISSING.getColour();
         result.tooltip = "No data";
         result.label = "";
         if (!sectors.isEmpty())
@@ -139,9 +226,9 @@ public class SummaryPanel extends JPanel
             int badSectors = totalSectors - goodSectors;
 
             if ((goodSectors == totalSectors) && (goodSectors != 0) && (totalSectors != 0))
-                result.colour = UiUtils.colorForStatus(Status.OK);
+                result.colour = StatusColour.OK.getColour();
             else
-                result.colour = UiUtils.colorForStatus(Status.BAD_CHECKSUM);
+                result.colour = StatusColour.BAD.getColour();
 
             result.tooltip = String.format(
                     "c%dh%d\n%d sectors read\n%d good sectors\n%d bad sectors",
@@ -163,47 +250,16 @@ public class SummaryPanel extends JPanel
         return result;
     }
 
-    private UIForPanel<SummaryPanel> addLogicalView(UIForPanel<SummaryPanel> ui)
+    interface ButtonBuilder
     {
-        Disk disk = model.getDisk().get();
-        DiskLayout layout = disk.diskLayout;
-
-        return ui.add(label("Logical layout (what's on the disk)").withHorizontalAlignment(
-                HorizontalAlignment.CENTER));
+        ButtonAndSpan create(int cylinder, int head);
     }
 
-    private JPanel makeHeaderPanel(int minCylinder, int maxCylinder)
+    private static class TrackAnalysis
     {
-        JPanel panel = new JPanel(new GridLayout(1, maxCylinder - minCylinder + 2, 1, 1));
-        UIForPanel<JPanel> ui = UI.of(panel).add(label("").withFontSize(smallFont));
-        for (int cylinder = minCylinder; cylinder <= maxCylinder; cylinder++)
-            ui = ui.add(label(String.format("c%d", cylinder)).withHorizontalAlignment(
-                            HorizontalAlignment.CENTER)
-                    .withVerticalAlignment(VerticalAlignment.BOTTOM)
-                    .withFontSize(smallFont));
-        return panel;
-    }
-
-    private JPanel makeGridPanel(
-            int minCylinder,
-            int maxCylinder,
-            int minHead,
-            int maxHead,
-            ButtonBuilder builder)
-    {
-        JPanel panel = new JPanel(new GridLayout(maxHead - minHead + 1,
-                maxCylinder - minCylinder + 2,
-                1,
-                1));
-        UIForPanel<JPanel> ui = UI.of(panel);
-        for (int head = minHead; head <= maxHead; head++)
-        {
-            ui = ui.add(label(String.format("h%d", head)).withFontSize(smallFont)
-                    .withHorizontalAlignment(HorizontalAlignment.CENTER));
-            for (int cylinder = minCylinder; cylinder <= maxCylinder; cylinder++)
-                ui = ui.add(of(builder.create(cylinder, head)).withMinSize(5, 5));
-        }
-        return panel;
+        String tooltip;
+        Color colour;
+        String label;
     }
 
     /* A single cell of the summary grid. */
@@ -218,12 +274,15 @@ public class SummaryPanel extends JPanel
             setContentAreaFilled(false);
             setFocusPainted(false);
             setOpaque(true);
+            setMargin(new Insets(0, 0, 0, 0));
+            setMinimumSize(new Dimension(10, 10));
+            setPreferredSize(new Dimension(15, 15));
+            setBackground(StatusColour.NOT_PRESENT.getColour());
         }
 
         void setTrackAnalysis(TrackAnalysis analysis)
         {
             this.analysis = analysis;
-            setBackground(analysis.colour);
             setToolTipText(analysis.tooltip);
             repaint();
         }
@@ -238,18 +297,18 @@ public class SummaryPanel extends JPanel
 
                 if (!analysis.label.isEmpty())
                 {
-                    g.setColor(getForeground());
-                    FontMetrics metrics = g.getFontMetrics();
+                    Graphics2D g2 = getGraphics2D(g);
+                    g2.setXORMode(Color.WHITE);
+                    FontMetrics metrics = g2.getFontMetrics();
                     int x = (getWidth() - metrics.stringWidth(analysis.label)) / 2;
                     int y = (getHeight() - metrics.getHeight()) / 2 + metrics.getAscent();
-                    g.drawString(analysis.label, x, y);
+                    g2.drawString(analysis.label, x, y);
                 }
             }
         }
     }
 
-    interface ButtonBuilder
+    record ButtonAndSpan(JComponent button, int span)
     {
-        SummaryButton create(int cylinder, int head);
     }
 }

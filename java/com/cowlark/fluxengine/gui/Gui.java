@@ -18,16 +18,6 @@ public class Gui
             new PreferencesReaderWriter(preferences);
     private ImagerViewModel model = new ImagerViewModel(preferencesReaderWriter);
 
-    public void run(ImmutableList<String> args) throws Exception
-    {
-        UIManager.setLookAndFeel(new FlatDarkLaf());
-        System.setProperty("apple.laf.useScreenMenuBar", "true");
-
-        SwingUtilities.invokeLater(() -> new ApplicationFrame(model).show());
-
-        EventProcessor.DECOUPLED.join();
-    }
-
     public static void main(String[] args)
     {
         try
@@ -37,5 +27,15 @@ public class Gui
         {
             throw new RuntimeException(e);
         }
+    }
+
+    public void run(ImmutableList<String> args) throws Exception
+    {
+        UIManager.setLookAndFeel(new FlatDarkLaf());
+        System.setProperty("apple.laf.useScreenMenuBar", "true");
+
+        SwingUtilities.invokeLater(() -> new ApplicationFrame(model).show());
+
+        EventProcessor.DECOUPLED.join();
     }
 }

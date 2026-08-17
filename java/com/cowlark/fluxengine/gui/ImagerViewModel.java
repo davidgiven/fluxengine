@@ -9,7 +9,7 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
 
 import com.cowlark.fluxengine.algorithms.BeginReadOperationLogMessage;
 import com.cowlark.fluxengine.algorithms.BeginWriteOperationLogMessage;
-import com.cowlark.fluxengine.algorithms.DiskReadLogMessage;
+import com.cowlark.fluxengine.algorithms.DiskUpdateLogMessage;
 import com.cowlark.fluxengine.algorithms.EndReadOperationLogMessage;
 import com.cowlark.fluxengine.algorithms.EndWriteOperationLogMessage;
 import com.cowlark.fluxengine.algorithms.ReadWriteFluxOperation;
@@ -188,7 +188,7 @@ public class ImagerViewModel
     {
         switch (message)
         {
-            case DiskReadLogMessage m -> getDisk().set(From.VIEW_MODEL, m.disk());
+            case DiskUpdateLogMessage m -> getDisk().set(From.VIEW_MODEL, m.disk());
 
             case BeginReadOperationLogMessage m -> getDriveActivity().set(new DriveActivity(
                     ActivityType.READING,
