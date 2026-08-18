@@ -5,52 +5,39 @@ import com.cowlark.fluxengine.config.UsbFinder;
 import com.cowlark.fluxengine.config.UsbFinder.CandidateDevice;
 import com.cowlark.fluxengine.core.FluxEngineException;
 import com.cowlark.fluxengine.core.Logger;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import java.util.Map;
+import com.cowlark.fluxengine.core.SupplierOfAutocloseable;
+import lombok.SneakyThrows;
 
 /**
  * USB device finder, ported from lib/usb/usbfinder.cc.
  */
-public final class UsbFactory
+public class UsbFactory implements AutoCloseable
 {
+    private final ConfigProto config;
+    private final SupplierOfAutocloseable<UsbDevice> deviceSupplier =
+            new SupplierOfAutocloseable<>(this::createConnection);
 
-    private static final Cache<ConfigProto, UsbDevice> cache = CacheBuilder.newBuilder().build();
-
-    /* The device factory; replaceable from tests to avoid touching real
-     * hardware. */
-    static java.util.function.Function<ConfigProto, UsbDevice> deviceFactory = UsbFactory::connect;
-
-    private UsbFactory()
+    public UsbFactory(ConfigProto config)
     {
+        this.config = config;
     }
 
-    /* Connects a USB device, reusing a previously connected device for the
-     * same configuration. This is the Java equivalent of the C++ global
-     * getUsb(). If a different configuration requires a new device, the
-     * previously cached device is evicted and closed. */
-    public static synchronized UsbDevice getConnection(ConfigProto config)
+    @Override
+    @SneakyThrows
+    public void close()
     {
-        UsbDevice device = cache.getIfPresent(config);
-        if (device == null)
-        {
-            /* Only one device is in use at a time, so any other cached device
-             * is being replaced. Close it before opening the new one, since
-             * they may share the same serial port. */
-            for (Map.Entry<ConfigProto, UsbDevice> entry : cache.asMap().entrySet())
-                entry.getValue().close();
-            cache.invalidateAll();
-
-            device = deviceFactory.apply(config);
-            cache.put(config, device);
-        }
-        return device;
+        deviceSupplier.close();
     }
 
-    public static UsbDevice connect(ConfigProto config)
+    public UsbDevice getConnection()
+    {
+        return deviceSupplier.get();
+    }
+
+    public UsbDevice createConnection()
     {
         CandidateDevice candidateDevice = UsbFinder.selectDevice(config);
-        Logger.logf("using %s serial %s",
+        Logger.logf("connecting to %s serial %s",
                 candidateDevice.type.getDeviceName(),
                 candidateDevice.serial);
         UsbDevice device = switch (candidateDevice.type)

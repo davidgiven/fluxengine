@@ -3,7 +3,6 @@ package com.cowlark.fluxengine.fluxsource;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyDouble;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.cowlark.fluxengine.config.ConfigBuilder;
@@ -12,7 +11,8 @@ import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.data.Fluxmap;
 import com.cowlark.fluxengine.testing.TestHelpers;
 import com.cowlark.fluxengine.usb.UsbDevice;
-import com.cowlark.fluxengine.usb.VoltageMeasurements;
+import com.cowlark.fluxengine.usb.UsbFactory;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
@@ -28,6 +28,7 @@ public class HardwareFluxSourceTest
     @Rule public final TestRule loggerRule = TestHelpers.loggerRule();
     @Rule public final MockitoRule mockitoRule = MockitoJUnit.rule();
 
+    @Mock private UsbFactory mockUsbFactory;
     @Mock private UsbDevice mockUsbDevice;
 
     private static ConfigProto config()
@@ -40,10 +41,16 @@ public class HardwareFluxSourceTest
                 .build();
     }
 
+    @Before
+    public void setup()
+    {
+        when(mockUsbFactory.getConnection()).thenReturn(mockUsbDevice);
+    }
+
     @Test
     public void isHardware()
     {
-        HardwareFluxSource source = new HardwareFluxSource(config(), mockUsbDevice);
+        HardwareFluxSource source = new HardwareFluxSource(config(), mockUsbFactory);
 
         assertThat(source.isHardware()).isTrue();
     }
@@ -53,7 +60,7 @@ public class HardwareFluxSourceTest
     {
         Bytes readResult = Bytes.of(0x01, 0x02, 0x03, 0x04);
         when(mockUsbDevice.read(any(), anyDouble())).thenReturn(readResult);
-        HardwareFluxSource source = new HardwareFluxSource(config(), mockUsbDevice);
+        HardwareFluxSource source = new HardwareFluxSource(config(), mockUsbFactory);
 
         FluxSourceIterator iterator = source.readFlux(FluxReadParameters.builder()
                 .setCylinder(17)

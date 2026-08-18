@@ -27,41 +27,6 @@ public class FluxOperationTest
 {
     @Rule public final TestRule loggerRule = TestHelpers.loggerRule();
 
-    /* A harness whose run() blocks on a semaphore until the test releases it,
-     * then logs a message. */
-    private static class Harness extends FluxOperation<Harness>
-    {
-        final Semaphore gate = new Semaphore(0);
-        final CountDownLatch started = new CountDownLatch(1);
-        final CountDownLatch finished = new CountDownLatch(1);
-        final AtomicInteger disposeCount = new AtomicInteger();
-        final CountDownLatch disposed = new CountDownLatch(1);
-        volatile Thread runThread;
-
-        @Override
-        public void run()
-        {
-            runThread = Thread.currentThread();
-            started.countDown();
-            try
-            {
-                gate.acquire();
-            } catch (InterruptedException e)
-            {
-                throw new RuntimeException(e);
-            }
-            Logger.log(new StringMessage("hello"));
-            finished.countDown();
-        }
-
-        @Override
-        protected void onDispose()
-        {
-            disposeCount.incrementAndGet();
-            disposed.countDown();
-        }
-    }
-
     @Test
     public void multipleSubscribersSeeSameOperation() throws Exception
     {
@@ -71,22 +36,20 @@ public class FluxOperationTest
         List<LogMessage> first = new ArrayList<>();
         List<LogMessage> second = new ArrayList<>();
         CountDownLatch done = new CountDownLatch(2);
-        Disposable firstSubscription = observable.subscribe(
-                m -> {
-                    synchronized (first)
-                    {
-                        first.add(m);
-                    }
-                }, t -> {
-                }, done::countDown);
-        Disposable secondSubscription = observable.subscribe(
-                m -> {
-                    synchronized (second)
-                    {
-                        second.add(m);
-                    }
-                }, t -> {
-                }, done::countDown);
+        Disposable firstSubscription = observable.subscribe(m -> {
+            synchronized (first)
+            {
+                first.add(m);
+            }
+        }, t -> {
+        }, done::countDown);
+        Disposable secondSubscription = observable.subscribe(m -> {
+            synchronized (second)
+            {
+                second.add(m);
+            }
+        }, t -> {
+        }, done::countDown);
 
         harness.gate.release();
 
@@ -173,12 +136,11 @@ public class FluxOperationTest
         TestFluxOperation failing = new TestFluxOperation();
         List<Throwable> errors = new ArrayList<>();
         CountDownLatch done = new CountDownLatch(1);
-        Disposable subscription = failing.create().subscribe(
-                m -> {
-                }, t -> {
-                    errors.add(t);
-                    done.countDown();
-                }, done::countDown);
+        Disposable subscription = failing.create().subscribe(m -> {
+        }, t -> {
+            errors.add(t);
+            done.countDown();
+        }, done::countDown);
 
         assertThat(done.await(5, TimeUnit.SECONDS)).isTrue();
         assertThat(errors).hasSize(1);
@@ -227,11 +189,10 @@ public class FluxOperationTest
             }
         };
 
-        Disposable subscription = harness.create().subscribe(
-                m -> {
-                }, t -> {
-                }, () -> {
-                });
+        Disposable subscription = harness.create().subscribe(m -> {
+        }, t -> {
+        }, () -> {
+        });
 
         assertThat(harness.disposed.await(5, TimeUnit.SECONDS)).isTrue();
         assertThat(harness.disposeCount.get()).isEqualTo(1);
@@ -268,5 +229,40 @@ public class FluxOperationTest
         harness.dispose();
 
         assertThat(harness.disposeCount.get()).isEqualTo(1);
+    }
+
+    /* A harness whose run() blocks on a semaphore until the test releases it,
+     * then logs a message. */
+    private static class Harness extends FluxOperation<Harness>
+    {
+        final Semaphore gate = new Semaphore(0);
+        final CountDownLatch started = new CountDownLatch(1);
+        final CountDownLatch finished = new CountDownLatch(1);
+        final AtomicInteger disposeCount = new AtomicInteger();
+        final CountDownLatch disposed = new CountDownLatch(1);
+        volatile Thread runThread;
+
+        @Override
+        public void run()
+        {
+            runThread = Thread.currentThread();
+            started.countDown();
+            try
+            {
+                gate.acquire();
+            } catch (InterruptedException e)
+            {
+                throw new RuntimeException(e);
+            }
+            Logger.log(new StringMessage("hello"));
+            finished.countDown();
+        }
+
+        @Override
+        protected void onDispose()
+        {
+            disposeCount.incrementAndGet();
+            disposed.countDown();
+        }
     }
 }

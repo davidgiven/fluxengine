@@ -1,7 +1,6 @@
 package com.cowlark.fluxengine.encoders;
 
 import static com.google.common.truth.Truth.assertThat;
-
 import static org.junit.Assert.assertThrows;
 
 import com.cowlark.fluxengine.config.ConfigBuilder;
@@ -13,31 +12,16 @@ import com.cowlark.fluxengine.data.Image;
 import com.cowlark.fluxengine.data.LogicalTrackLayout;
 import com.cowlark.fluxengine.data.Sector;
 import com.google.common.collect.ImmutableList;
-import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import java.util.List;
 
 @RunWith(JUnit4.class)
 public class EncoderTest
 {
-    @org.junit.Rule
-    public final org.junit.rules.TestRule loggerRule =
+    @org.junit.Rule public final org.junit.rules.TestRule loggerRule =
             com.cowlark.fluxengine.testing.TestHelpers.loggerRule();
-
-    private static final class TestEncoder extends Encoder
-    {
-        TestEncoder(double diskRotationalPeriodNs)
-        {
-            super(diskRotationalPeriodNs);
-        }
-
-        @Override
-        public Fluxmap encode(LogicalTrackLayout ltl, List<Sector> sectors, Image image)
-        {
-            return new Fluxmap();
-        }
-    }
 
     @Test
     public void createThrowsNotImplemented()
@@ -53,8 +37,7 @@ public class EncoderTest
         /* A single-track, single-side disk with sectors 0 and 1. */
         DiskLayout layout = new DiskLayout(1, 1, 2, 256);
         LogicalTrackLayout ltl =
-                layout.layoutByLogicalLocation.get(new com.cowlark.fluxengine.data.CylinderHead(
-                        0,
+                layout.layoutByLogicalLocation.get(new com.cowlark.fluxengine.data.CylinderHead(0,
                         0));
         assertThat(ltl).isNotNull();
 
@@ -76,8 +59,7 @@ public class EncoderTest
     {
         DiskLayout layout = new DiskLayout(1, 1, 2, 256);
         LogicalTrackLayout ltl =
-                layout.layoutByLogicalLocation.get(new com.cowlark.fluxengine.data.CylinderHead(
-                        0,
+                layout.layoutByLogicalLocation.get(new com.cowlark.fluxengine.data.CylinderHead(0,
                         0));
 
         Image image = new Image();
@@ -101,8 +83,21 @@ public class EncoderTest
     {
         TestEncoder encoder = new TestEncoder(0);
 
-        assertThrows(
-                FluxEngineException.class,
+        assertThrows(FluxEngineException.class,
                 () -> encoder.calculatePhysicalClockPeriodNs(4000, 200e6));
+    }
+
+    private static final class TestEncoder extends Encoder
+    {
+        TestEncoder(double diskRotationalPeriodNs)
+        {
+            super(diskRotationalPeriodNs);
+        }
+
+        @Override
+        public Fluxmap encode(LogicalTrackLayout ltl, List<Sector> sectors, Image image)
+        {
+            return new Fluxmap();
+        }
     }
 }

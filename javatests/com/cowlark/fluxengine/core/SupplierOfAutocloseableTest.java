@@ -3,25 +3,14 @@ package com.cowlark.fluxengine.core;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
-import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @RunWith(JUnit4.class)
 public class SupplierOfAutocloseableTest
 {
-    private static final class TestCloseable implements AutoCloseable
-    {
-        final AtomicInteger closes = new AtomicInteger();
-
-        @Override
-        public void close()
-        {
-            closes.incrementAndGet();
-        }
-    }
-
     @Test
     public void nullDelegateThrows()
     {
@@ -44,8 +33,7 @@ public class SupplierOfAutocloseableTest
     public void getMemoizesInstance()
     {
         AtomicInteger calls = new AtomicInteger();
-        SupplierOfAutocloseable<TestCloseable> supplier = new SupplierOfAutocloseable<>(() ->
-        {
+        SupplierOfAutocloseable<TestCloseable> supplier = new SupplierOfAutocloseable<>(() -> {
             calls.incrementAndGet();
             return new TestCloseable();
         });
@@ -63,8 +51,7 @@ public class SupplierOfAutocloseableTest
         SupplierOfAutocloseable<TestCloseable> supplier =
                 new SupplierOfAutocloseable<>(TestCloseable::new);
 
-        assertThrows(Exception.class, () ->
-        {
+        assertThrows(Exception.class, () -> {
             supplier.close();
             supplier.get();
         });
@@ -127,5 +114,16 @@ public class SupplierOfAutocloseableTest
 
         /* The instance is only closed once. */
         assertThat(delegate.closes.get()).isEqualTo(1);
+    }
+
+    private static final class TestCloseable implements AutoCloseable
+    {
+        final AtomicInteger closes = new AtomicInteger();
+
+        @Override
+        public void close()
+        {
+            closes.incrementAndGet();
+        }
     }
 }

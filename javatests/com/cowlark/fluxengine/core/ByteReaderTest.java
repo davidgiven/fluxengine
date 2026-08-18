@@ -45,8 +45,7 @@ public class ByteReaderTest
     @Test
     public void reads48()
     {
-        ByteReader reader = new ByteReader(Bytes.of(
-                0x01,
+        ByteReader reader = new ByteReader(Bytes.of(0x01,
                 0x02,
                 0x03,
                 0x04,
@@ -66,8 +65,7 @@ public class ByteReaderTest
     @Test
     public void reads64()
     {
-        ByteReader reader = new ByteReader(Bytes.of(
-                0x01,
+        ByteReader reader = new ByteReader(Bytes.of(0x01,
                 0x02,
                 0x03,
                 0x04,

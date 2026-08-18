@@ -6,12 +6,12 @@ java_test(
     name = "ReadWriteFluxOperationTest",
     srcs = ["ReadWriteFluxOperationTest.java"],
     deps = [
-        "//javatests/com/cowlark/fluxengine/testing",
         "//java/com/cowlark/fluxengine/algorithms",
         "//java/com/cowlark/fluxengine/config",
         "//java/com/cowlark/fluxengine/config:config_java_proto",
         "//java/com/cowlark/fluxengine/core",
         "//java/com/cowlark/fluxengine/data",
+        "//javatests/com/cowlark/fluxengine/testing",
         "@maven//:com_google_guava_guava",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
@@ -22,11 +22,11 @@ java_test(
     name = "FluxOperationTest",
     srcs = ["FluxOperationTest.java"],
     deps = [
-        "//javatests/com/cowlark/fluxengine/testing",
         "//java/com/cowlark/fluxengine/algorithms",
         "//java/com/cowlark/fluxengine/core",
-        "@maven//:io_reactivex_rxjava3_rxjava",
+        "//javatests/com/cowlark/fluxengine/testing",
         "@maven//:com_google_truth_truth",
+        "@maven//:io_reactivex_rxjava3_rxjava",
         "@maven//:junit_junit",
     ],
 )

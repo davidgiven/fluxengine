@@ -10,6 +10,13 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class ImageTest
 {
+    private static Sector makeSector(int cylinder, int head, int sector, int size)
+    {
+        Sector s = new Sector(new LogicalLocation(cylinder, head, sector));
+        s.data = new Bytes(size);
+        return s;
+    }
+
     @Test
     public void emptyImageHasNoSectors()
     {
@@ -57,9 +64,8 @@ public class ImageTest
     @Test
     public void constructorCalculatesGeometry()
     {
-        java.util.List<Sector> sectors = java.util.List.of(
-                makeSector(0, 0, 0, 256),
-                makeSector(1, 1, 3, 256));
+        java.util.List<Sector> sectors =
+                java.util.List.of(makeSector(0, 0, 0, 256), makeSector(1, 1, 3, 256));
 
         Image image = new Image(sectors);
 
@@ -97,17 +103,8 @@ public class ImageTest
         for (Sector sector : image)
         {
             assertThat(sector.physicalLocation).isNotNull();
-            assertThat(sector.physicalLocation.cylinder()).isEqualTo(
-                    sector.location.logicalCylinder());
-            assertThat(sector.physicalLocation.head()).isEqualTo(
-                    sector.location.logicalHead());
+            assertThat(sector.physicalLocation.cylinder()).isEqualTo(sector.location.logicalCylinder());
+            assertThat(sector.physicalLocation.head()).isEqualTo(sector.location.logicalHead());
         }
-    }
-
-    private static Sector makeSector(int cylinder, int head, int sector, int size)
-    {
-        Sector s = new Sector(new LogicalLocation(cylinder, head, sector));
-        s.data = new Bytes(size);
-        return s;
     }
 }

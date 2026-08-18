@@ -3,10 +3,10 @@ package com.cowlark.fluxengine.testing;
 import com.cowlark.fluxengine.core.LogMessage;
 import com.cowlark.fluxengine.core.LogRenderer;
 import com.cowlark.fluxengine.core.Logger;
-import java.util.function.Consumer;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
+import java.util.function.Consumer;
 
 /**
  * A JUnit rule which installs a stdout-rendering logger for the thread running

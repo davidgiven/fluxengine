@@ -17,8 +17,7 @@ import java.nio.file.Path;
 @RunWith(JUnit4.class)
 public class A2RFluxSourceTest
 {
-    @org.junit.Rule
-    public final org.junit.rules.TestRule loggerRule =
+    @org.junit.Rule public final org.junit.rules.TestRule loggerRule =
             com.cowlark.fluxengine.testing.TestHelpers.loggerRule();
 
     /* Builds an A2R file containing a single track 0/0, encoded as a 3.5"
@@ -92,8 +91,10 @@ public class A2RFluxSourceTest
         Bytes expected = Bytes.of(0x40, 0xad, 0xad, 0xad);
         assertThat(iterator.next().rawBytes().toByteArray()).isEqualTo(expected.toByteArray());
         assertThat(iterator.hasNext()).isFalse();
-        assertThat(source.readFlux(FluxReadParameters.builder().setCylinder(1).setHead(0).build())).isInstanceOf(
-                EmptyFluxSourceIterator.class);
+        assertThat(source.readFlux(FluxReadParameters.builder()
+                .setCylinder(1)
+                .setHead(0)
+                .build())).isInstanceOf(EmptyFluxSourceIterator.class);
 
         ConfigBuilder configBuilder = new ConfigBuilder().set("usb.serial", "test-serial");
         source.adjustConfig(configBuilder);

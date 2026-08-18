@@ -17,8 +17,9 @@ import java.util.function.Consumer;
 @RunWith(JUnit4.class)
 public class DiskLayoutTest
 {
-    private static DiskLayout diskLayout(com.cowlark.fluxengine.external.FormatType formatType,
-                                         Consumer<LayoutProto.LayoutdataProto.Builder> layoutData)
+    private static DiskLayout diskLayout(
+            com.cowlark.fluxengine.external.FormatType formatType,
+            Consumer<LayoutProto.LayoutdataProto.Builder> layoutData)
     {
         ConfigProto.Builder config = baseConfig(formatType);
         config.getLayoutBuilder().setTracks(78).setSides(2);
@@ -28,8 +29,7 @@ public class DiskLayoutTest
 
     private static LogicalTrackLayout logicalLayoutAt(DiskLayout diskLayout, int cylinder, int head)
     {
-        return diskLayout.layoutByPhysicalLocation.get(new CylinderHead(
-                cylinder,
+        return diskLayout.layoutByPhysicalLocation.get(new CylinderHead(cylinder,
                 head)).logicalTrackLayout;
     }
 
@@ -48,11 +48,10 @@ public class DiskLayoutTest
     @Test
     public void testPhysicalSectors()
     {
-        DiskLayout diskLayout = diskLayout(
-                FORMATTYPE_80TRACK, (track) -> {
-                    track.setSectorSize(256);
-                    track.getPhysicalBuilder().addSector(0).addSector(2).addSector(1).addSector(3);
-                });
+        DiskLayout diskLayout = diskLayout(FORMATTYPE_80TRACK, (track) -> {
+            track.setSectorSize(256);
+            track.getPhysicalBuilder().addSector(0).addSector(2).addSector(1).addSector(3);
+        });
 
         LogicalTrackLayout layout = logicalLayoutAt(diskLayout, 0, 0);
         assertThat(diskLayout.layoutByLogicalLocation.get(new CylinderHead(0, 0))).isSameInstanceAs(
@@ -65,16 +64,11 @@ public class DiskLayoutTest
     @Test
     public void testLogicalSectors()
     {
-        DiskLayout diskLayout = diskLayout(
-                FORMATTYPE_80TRACK, (track) -> {
-                    track.setSectorSize(256);
-                    track.getPhysicalBuilder().addSector(0).addSector(1).addSector(2).addSector(3);
-                    track.getFilesystemBuilder()
-                            .addSector(0)
-                            .addSector(2)
-                            .addSector(1)
-                            .addSector(3);
-                });
+        DiskLayout diskLayout = diskLayout(FORMATTYPE_80TRACK, (track) -> {
+            track.setSectorSize(256);
+            track.getPhysicalBuilder().addSector(0).addSector(1).addSector(2).addSector(3);
+            track.getFilesystemBuilder().addSector(0).addSector(2).addSector(1).addSector(3);
+        });
 
         LogicalTrackLayout layout = logicalLayoutAt(diskLayout, 0, 0);
         assertThat(diskLayout.layoutByLogicalLocation.get(new CylinderHead(0, 0))).isSameInstanceAs(
@@ -87,16 +81,11 @@ public class DiskLayoutTest
     @Test
     public void test_bothSectors()
     {
-        DiskLayout diskLayout = diskLayout(
-                FORMATTYPE_80TRACK, (track) -> {
-                    track.setSectorSize(256);
-                    track.getPhysicalBuilder().addSector(3).addSector(2).addSector(1).addSector(0);
-                    track.getFilesystemBuilder()
-                            .addSector(0)
-                            .addSector(2)
-                            .addSector(1)
-                            .addSector(3);
-                });
+        DiskLayout diskLayout = diskLayout(FORMATTYPE_80TRACK, (track) -> {
+            track.setSectorSize(256);
+            track.getPhysicalBuilder().addSector(3).addSector(2).addSector(1).addSector(0);
+            track.getFilesystemBuilder().addSector(0).addSector(2).addSector(1).addSector(3);
+        });
 
         LogicalTrackLayout layout = logicalLayoutAt(diskLayout, 0, 0);
         assertThat(diskLayout.layoutByLogicalLocation.get(new CylinderHead(0, 0))).isSameInstanceAs(
@@ -109,11 +98,10 @@ public class DiskLayoutTest
     @Test
     public void test_skew()
     {
-        DiskLayout diskLayout = diskLayout(
-                FORMATTYPE_80TRACK, (track) -> {
-                    track.setSectorSize(256);
-                    track.getPhysicalBuilder().setStartSector(0).setCount(12).setSkew(6);
-                });
+        DiskLayout diskLayout = diskLayout(FORMATTYPE_80TRACK, (track) -> {
+            track.setSectorSize(256);
+            track.getPhysicalBuilder().setStartSector(0).setCount(12).setSkew(6);
+        });
 
         LogicalTrackLayout layout = logicalLayoutAt(diskLayout, 0, 0);
         assertThat(layout.naturalSectorOrder).containsExactly(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11)
@@ -135,13 +123,11 @@ public class DiskLayoutTest
 
         DiskLayout diskLayout = new DiskLayout(config.build());
         assertThat(diskLayout.groupSize).isEqualTo(2);
-        assertThat(diskLayout.getLogicalBounds()).isEqualTo(new DiskLayout.LayoutBounds(
-                0,
+        assertThat(diskLayout.getLogicalBounds()).isEqualTo(new DiskLayout.LayoutBounds(0,
                 1,
                 0,
                 1));
-        assertThat(diskLayout.getPhysicalBounds()).isEqualTo(new DiskLayout.LayoutBounds(
-                0,
+        assertThat(diskLayout.getPhysicalBounds()).isEqualTo(new DiskLayout.LayoutBounds(0,
                 3,
                 0,
                 1));

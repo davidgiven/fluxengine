@@ -21,8 +21,7 @@ public class GreaseweazleUtilsTest
 
     private static Bytes encode28(int val)
     {
-        return Bytes.of(
-                1 | (val << 1) & 0xff,
+        return Bytes.of(1 | (val << 1) & 0xff,
                 1 | (val >> 6) & 0xff,
                 1 | (val >> 13) & 0xff,
                 1 | (val >> 20) & 0xff);

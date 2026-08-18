@@ -9,12 +9,12 @@ import com.cowlark.fluxengine.config.OptionLogMessage;
 import com.cowlark.fluxengine.config.OptionProto;
 import com.cowlark.fluxengine.core.LogMessage.EmergencyStopMessage;
 import com.cowlark.fluxengine.core.LogMessage.ErrorLogMessage;
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-import java.util.function.Consumer;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.util.function.Consumer;
 
 @RunWith(JUnit4.class)
 public class LogRendererTest
@@ -32,8 +32,7 @@ public class LogRendererTest
     @Test
     public void errorMessage()
     {
-        String output = render(
-                r -> r.add(new ErrorLogMessage("disk failed")));
+        String output = render(r -> r.add(new ErrorLogMessage("disk failed")));
 
         assertThat(output).isEqualTo("\n       Error: disk failed\n");
     }
@@ -41,8 +40,7 @@ public class LogRendererTest
     @Test
     public void emergencyStop()
     {
-        String output = render(
-                r -> r.add(new EmergencyStopMessage()));
+        String output = render(r -> r.add(new EmergencyStopMessage()));
 
         assertThat(output).isEqualTo("\n       Stop!\n");
     }
@@ -50,18 +48,15 @@ public class LogRendererTest
     @Test
     public void endSpeedOperation()
     {
-        String output = render(
-                r -> r.add(new EndSpeedOperationLogMessage(200e6)));
+        String output = render(r -> r.add(new EndSpeedOperationLogMessage(200e6)));
 
-        assertThat(output).isEqualTo(
-                "\n       Rotational period is 200.0ms (300.0rpm)\n");
+        assertThat(output).isEqualTo("\n       Rotational period is 200.0ms (300.0rpm)\n");
     }
 
     @Test
     public void readOperationHeader()
     {
-        String output = render(
-                r -> r.add(new BeginReadOperationLogMessage(3, 1)));
+        String output = render(r -> r.add(new BeginReadOperationLogMessage(3, 1)));
 
         assertThat(output).isEqualTo("\nR 3.1: ");
     }
@@ -69,8 +64,7 @@ public class LogRendererTest
     @Test
     public void writeOperationHeader()
     {
-        String output = render(
-                r -> r.add(new BeginWriteOperationLogMessage(3, 1)));
+        String output = render(r -> r.add(new BeginWriteOperationLogMessage(3, 1)));
 
         assertThat(output).isEqualTo("\nW 3.1: ");
     }
@@ -78,11 +72,8 @@ public class LogRendererTest
     @Test
     public void optionMessage()
     {
-        OptionProto option = OptionProto.newBuilder()
-                .setComment("high density")
-                .build();
-        String output = render(
-                r -> r.add(new OptionLogMessage("user option", option)));
+        OptionProto option = OptionProto.newBuilder().setComment("high density").build();
+        String output = render(r -> r.add(new OptionLogMessage("user option", option)));
 
         assertThat(output).isEqualTo("\n       OPTION: user option: high density\n");
     }
@@ -90,8 +81,7 @@ public class LogRendererTest
     @Test
     public void commaSeparates()
     {
-        String output = render(r ->
-        {
+        String output = render(r -> {
             r.add("one");
             r.comma();
             r.add("two");
@@ -103,8 +93,7 @@ public class LogRendererTest
     @Test
     public void addAfterNewlineIndents()
     {
-        String output = render(r ->
-        {
+        String output = render(r -> {
             r.add("one");
             r.newline();
             r.add("two");

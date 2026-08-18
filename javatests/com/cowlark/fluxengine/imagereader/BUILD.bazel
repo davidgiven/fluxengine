@@ -6,7 +6,6 @@ java_test(
     name = "ImageReaderTest",
     srcs = ["ImageReaderTest.java"],
     deps = [
-        "//javatests/com/cowlark/fluxengine/testing",
         "//java/com/cowlark/fluxengine/config",
         "//java/com/cowlark/fluxengine/config:common_java_proto",
         "//java/com/cowlark/fluxengine/config:config_java_proto",
@@ -14,6 +13,7 @@ java_test(
         "//java/com/cowlark/fluxengine/data",
         "//java/com/cowlark/fluxengine/imagereader",
         "//java/com/cowlark/fluxengine/imagereader:imagereader_java_proto",
+        "//javatests/com/cowlark/fluxengine/testing",
         "@com_google_protobuf//java/core",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",

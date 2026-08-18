@@ -18,8 +18,7 @@ import java.nio.file.Path;
 @RunWith(JUnit4.class)
 public class Fl2FluxSourceTest
 {
-    @org.junit.Rule
-    public final org.junit.rules.TestRule loggerRule =
+    @org.junit.Rule public final org.junit.rules.TestRule loggerRule =
             com.cowlark.fluxengine.testing.TestHelpers.loggerRule();
 
     private static Path writeTemp(FluxFileProto file) throws IOException
@@ -52,8 +51,10 @@ public class Fl2FluxSourceTest
         assertThat(iterator.hasNext()).isTrue();
         assertThat(iterator.next()).isNotNull();
         assertThat(iterator.hasNext()).isFalse();
-        assertThat(source.readFlux(FluxReadParameters.builder().setCylinder(1).setHead(0).build())).isInstanceOf(
-                EmptyFluxSourceIterator.class);
+        assertThat(source.readFlux(FluxReadParameters.builder()
+                .setCylinder(1)
+                .setHead(0)
+                .build())).isInstanceOf(EmptyFluxSourceIterator.class);
 
         ConfigBuilder configBuilder = new ConfigBuilder().set("usb.serial", "test-serial");
         source.adjustConfig(configBuilder);

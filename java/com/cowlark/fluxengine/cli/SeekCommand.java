@@ -10,7 +10,6 @@ import com.cowlark.fluxengine.core.flags.IntFlag;
 import com.cowlark.fluxengine.core.flags.StringFlag;
 import com.cowlark.fluxengine.core.flags.ValueFlag;
 import com.cowlark.fluxengine.usb.DriveSettings;
-import com.cowlark.fluxengine.usb.UsbDevice;
 import com.cowlark.fluxengine.usb.UsbFactory;
 import com.google.common.collect.ImmutableList;
 
@@ -48,9 +47,11 @@ public class SeekCommand implements Command
         if (config.getFluxSource().getType() != FLUXTYPE_DRIVE)
             throw new FluxEngineException("this only makes sense with a real disk drive");
 
-        UsbDevice device = UsbFactory.getConnection(config);
-        DriveSettings driveSettings = new DriveSettings(config);
-        driveSettings.seekPosition = track.get();
-        device.seek(driveSettings);
+        try (UsbFactory usbFactory = new UsbFactory(config))
+        {
+            DriveSettings driveSettings = new DriveSettings(config);
+            driveSettings.seekPosition = track.get();
+            usbFactory.getConnection().seek(driveSettings);
+        }
     }
 }

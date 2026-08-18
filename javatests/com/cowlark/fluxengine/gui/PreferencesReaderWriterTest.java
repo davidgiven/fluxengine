@@ -4,12 +4,12 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.prefs.Preferences;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import sprouts.Association;
+import java.util.prefs.Preferences;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PreferencesReaderWriterTest

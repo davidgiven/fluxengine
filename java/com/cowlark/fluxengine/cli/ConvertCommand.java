@@ -1,6 +1,5 @@
 package com.cowlark.fluxengine.cli;
 
-import static com.cowlark.fluxengine.config.FluxSourceSinkType.FLUXTYPE_DRIVE;
 import static com.cowlark.fluxengine.config.FluxSourceSinkType.FLUXTYPE_NOT_SET;
 
 import com.cowlark.fluxengine.config.ConfigBuilder;
@@ -17,7 +16,9 @@ import com.cowlark.fluxengine.fluxsink.FluxSinkFactory;
 import com.cowlark.fluxengine.fluxsource.FluxReadParameters;
 import com.cowlark.fluxengine.fluxsource.FluxSource;
 import com.cowlark.fluxengine.fluxsource.FluxSourceIterator;
+import com.cowlark.fluxengine.usb.UsbFactory;
 import com.google.common.collect.ImmutableList;
+import java.util.function.Supplier;
 
 /**
  * Converts a flux file from one format to another, modelled after
@@ -55,15 +56,16 @@ public class ConvertCommand implements Command
             builder.withFluxSink(destImageFlag.get());
         ConfigProto config = builder.build();
 
-        if ((config.getFluxSink().getType() == FLUXTYPE_DRIVE) ||
-                (config.getFluxSource().getType() == FLUXTYPE_DRIVE))
-            throw new FluxEngineException("you cannot read or write flux to a hardware device");
         if ((config.getFluxSink().getType() == FLUXTYPE_NOT_SET) ||
                 (config.getFluxSource().getType() == FLUXTYPE_NOT_SET))
             throw new FluxEngineException(
                     "you must specify both a source and destination flux filename");
 
-        FluxSource fluxSource = FluxSource.create(config);
+        Supplier<UsbFactory> notWithHardware = () -> {
+            throw new FluxEngineException("you can't use convert with a hardware device");
+        };
+
+        FluxSource fluxSource = FluxSource.create(config, notWithHardware);
 
         DiskLayout diskLayout = new DiskLayout(config);
         int minCylinder = diskLayout.minPhysicalCylinder;
@@ -76,7 +78,7 @@ public class ConvertCommand implements Command
                 minHead,
                 maxHead);
 
-        FluxSinkFactory fluxSinkFactory = FluxSinkFactory.create(config);
+        FluxSinkFactory fluxSinkFactory = FluxSinkFactory.create(config, notWithHardware);
         try (FluxSink fluxSink = fluxSinkFactory.create())
         {
             for (CylinderHead physicalLocation : diskLayout.physicalLocations)

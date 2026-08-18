@@ -33,18 +33,15 @@ public class KryofluxTest
         testConvert(Bytes.of(0x20, 0x20, 0x20, 0x20), Bytes.of(0x8f, 0x8f, 0x8f, 0x8f));
 
         /* One-and-a-half-byte intervals */
-        testConvert(
-                Bytes.of(0x20, 0x00, 0x10, 0x20, 0x01, 0x10, 0x20),
+        testConvert(Bytes.of(0x20, 0x00, 0x10, 0x20, 0x01, 0x10, 0x20),
                 Bytes.of(0x8f, 0x87, 0x8f, 0x3f, 0x3f, 0x89, 0x8f));
 
         /* Two-byte intervals */
-        testConvert(
-                Bytes.of(0x20, 0x0c, 0x00, 0x10, 0x20, 0x0c, 0x01, 0x10, 0x20),
+        testConvert(Bytes.of(0x20, 0x0c, 0x00, 0x10, 0x20, 0x0c, 0x01, 0x10, 0x20),
                 Bytes.of(0x8f, 0x87, 0x8f, 0x3f, 0x3f, 0x89, 0x8f));
 
         /* Overflow */
-        testConvert(
-                Bytes.of(0x20, 0x0b, 0x10, 0x20),
+        testConvert(Bytes.of(0x20, 0x0b, 0x10, 0x20),
                 Bytes.of(0x8f).concat(unsignedBytes(0x207)).concat(Bytes.of(0xa9, 0x8f)));
 
         /* Single-byte nop */
@@ -57,13 +54,11 @@ public class KryofluxTest
         testConvert(Bytes.of(0x20, 0x0a, 0xde, 0xad, 0x20), Bytes.of(0x8f, 0x8f));
 
         /* OOB block */
-        testConvert(
-                Bytes.of(
-                        0x20, /* data before */
-                        0x0d, /* OOB */
-                        0xaa, /* type byte */
-                        0x01, 0x00, /* size of payload, little-endian */
-                        0x55, /* payload */
-                        0x20  /* data continues */), Bytes.of(0x8f, 0x8f));
+        testConvert(Bytes.of(0x20, /* data before */
+                0x0d, /* OOB */
+                0xaa, /* type byte */
+                0x01, 0x00, /* size of payload, little-endian */
+                0x55, /* payload */
+                0x20  /* data continues */), Bytes.of(0x8f, 0x8f));
     }
 }

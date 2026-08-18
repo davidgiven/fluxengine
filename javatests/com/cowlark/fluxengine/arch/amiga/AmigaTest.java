@@ -10,19 +10,15 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class AmigaTest
 {
-    private static final Bytes TEST_DATA = Bytes.of(
-            0x52, /* 0101 0010 */
+    private static final Bytes TEST_DATA = Bytes.of(0x52, /* 0101 0010 */
             0xff, /* 1111 1111 */
             0x4a, /* 0100 1010 */
-            0x22  /* 0010 0010 */
-    );
+            0x22  /* 0010 0010 */);
 
-    private static final Bytes TEST_DATA_INTERLEAVED = Bytes.of(
-            0x1f, /* 0001 1111 */
+    private static final Bytes TEST_DATA_INTERLEAVED = Bytes.of(0x1f, /* 0001 1111 */
             0x35, /* 0011 0101 */
             0xcf, /* 1100 1111 */
-            0x80  /* 1000 0000 */
-    );
+            0x80  /* 1000 0000 */);
 
     @Test
     public void interleave()

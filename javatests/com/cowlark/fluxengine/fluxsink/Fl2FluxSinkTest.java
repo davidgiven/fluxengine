@@ -18,14 +18,12 @@ import java.nio.file.Path;
 @RunWith(JUnit4.class)
 public class Fl2FluxSinkTest
 {
-    @org.junit.Rule
-    public final org.junit.rules.TestRule loggerRule =
+    @org.junit.Rule public final org.junit.rules.TestRule loggerRule =
             com.cowlark.fluxengine.testing.TestHelpers.loggerRule();
 
     private static ConfigProto makeConfig()
     {
-        return new ConfigBuilder()
-                .set("usb.serial", "test-serial")
+        return new ConfigBuilder().set("usb.serial", "test-serial")
                 .set("drive.rotational_period_ms", "200")
                 .build();
     }
@@ -69,13 +67,12 @@ public class Fl2FluxSinkTest
     @Test
     public void factoryWiring()
     {
-        ConfigProto config = new ConfigBuilder()
-                .set("usb.serial", "test-serial")
+        ConfigProto config = new ConfigBuilder().set("usb.serial", "test-serial")
                 .set("flux_sink.type", "FLUXTYPE_FLUX")
                 .set("flux_sink.fl2.filename", "test.fl2")
                 .build();
 
-        FluxSinkFactory factory = FluxSinkFactory.create(config);
+        FluxSinkFactory factory = FluxSinkFactory.create(config, null);
 
         assertThat(factory).isInstanceOf(Fl2FluxSinkFactory.class);
         assertThat(factory.getPath()).isEqualTo("test.fl2");

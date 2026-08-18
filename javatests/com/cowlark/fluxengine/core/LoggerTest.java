@@ -5,13 +5,13 @@ import static com.google.common.truth.Truth.assertThat;
 import com.cowlark.fluxengine.algorithms.BeginReadOperationLogMessage;
 import com.cowlark.fluxengine.core.LogMessage.ErrorLogMessage;
 import com.cowlark.fluxengine.core.LogMessage.StringMessage;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
 public class LoggerTest

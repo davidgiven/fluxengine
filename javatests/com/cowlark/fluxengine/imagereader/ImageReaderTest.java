@@ -6,29 +6,26 @@ import static org.junit.Assert.assertThrows;
 import com.cowlark.fluxengine.config.ConfigBuilder;
 import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.config.ImageReaderWriterType;
-import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.core.FluxEngineException;
 import com.cowlark.fluxengine.data.Image;
 import com.cowlark.fluxengine.data.Sector;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 @RunWith(JUnit4.class)
 public class ImageReaderTest
 {
-    @org.junit.Rule
-    public final org.junit.rules.TestRule loggerRule =
+    @org.junit.Rule public final org.junit.rules.TestRule loggerRule =
             com.cowlark.fluxengine.testing.TestHelpers.loggerRule();
 
     @Test
     public void createD64ImageReader()
     {
-        ImageReaderProto config = ImageReaderProto.newBuilder()
-                .setType(ImageReaderWriterType.IMAGETYPE_D64)
-                .build();
+        ImageReaderProto config =
+                ImageReaderProto.newBuilder().setType(ImageReaderWriterType.IMAGETYPE_D64).build();
 
         assertThat(ImageReader.create(config)).isInstanceOf(D64ImageReader.class);
     }
@@ -36,20 +33,18 @@ public class ImageReaderTest
     @Test
     public void createImgImageReader()
     {
-        ImageReaderProto config = ImageReaderProto.newBuilder()
-                .setType(ImageReaderWriterType.IMAGETYPE_IMG)
-                .build();
+        ImageReaderProto config =
+                ImageReaderProto.newBuilder().setType(ImageReaderWriterType.IMAGETYPE_IMG).build();
 
-        assertThat(ImageReader.create(ConfigProto.getDefaultInstance(), config))
-                .isInstanceOf(ImgImageReader.class);
+        assertThat(ImageReader.create(ConfigProto.getDefaultInstance(), config)).isInstanceOf(
+                ImgImageReader.class);
     }
 
     @Test
     public void createNsiImageReader()
     {
-        ImageReaderProto config = ImageReaderProto.newBuilder()
-                .setType(ImageReaderWriterType.IMAGETYPE_NSI)
-                .build();
+        ImageReaderProto config =
+                ImageReaderProto.newBuilder().setType(ImageReaderWriterType.IMAGETYPE_NSI).build();
 
         assertThat(ImageReader.create(config)).isInstanceOf(NsiImageReader.class);
     }
@@ -57,9 +52,8 @@ public class ImageReaderTest
     @Test
     public void createTd0ImageReader()
     {
-        ImageReaderProto config = ImageReaderProto.newBuilder()
-                .setType(ImageReaderWriterType.IMAGETYPE_TD0)
-                .build();
+        ImageReaderProto config =
+                ImageReaderProto.newBuilder().setType(ImageReaderWriterType.IMAGETYPE_TD0).build();
 
         assertThat(ImageReader.create(config)).isInstanceOf(Td0ImageReader.class);
     }
@@ -77,9 +71,7 @@ public class ImageReaderTest
     @Test
     public void createNoReaderConfiguredThrows()
     {
-        ConfigProto config = new ConfigBuilder()
-                .set("usb.serial", "test-serial")
-                .build();
+        ConfigProto config = new ConfigBuilder().set("usb.serial", "test-serial").build();
 
         assertThrows(FluxEngineException.class, () -> ImageReader.create(config));
     }

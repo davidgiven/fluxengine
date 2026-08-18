@@ -102,8 +102,7 @@ public class ProtoPathTest
     @Test
     public void setRepeatedStringWithIndex()
     {
-        assertThat(set("documentation[2]", "hello").getDocumentationList()).containsExactly(
-                "",
+        assertThat(set("documentation[2]", "hello").getDocumentationList()).containsExactly("",
                 "",
                 "hello");
     }

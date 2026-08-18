@@ -13,15 +13,6 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class CommonTest
 {
-    private static class RecordingFluxSource extends FluxSource
-    {
-        @Override
-        public FluxSourceIterator readFlux(FluxReadParameters parameters)
-        {
-            return null;
-        }
-    }
-
     @Test
     public void fluxSourceIteratorHolderCaches()
     {
@@ -51,12 +42,12 @@ public class CommonTest
 
         Common.FluxSourceIteratorHolder holder = new Common.FluxSourceIteratorHolder(fluxSource);
 
-        FluxSourceIterator it1 = holder.getIterator(FluxReadParameters.builder()
-                .setCylinder(1).setHead(0).build());
-        FluxSourceIterator it2 = holder.getIterator(FluxReadParameters.builder()
-                .setCylinder(1).setHead(0).build());
-        FluxSourceIterator it3 = holder.getIterator(FluxReadParameters.builder()
-                .setCylinder(2).setHead(1).build());
+        FluxSourceIterator it1 =
+                holder.getIterator(FluxReadParameters.builder().setCylinder(1).setHead(0).build());
+        FluxSourceIterator it2 =
+                holder.getIterator(FluxReadParameters.builder().setCylinder(1).setHead(0).build());
+        FluxSourceIterator it3 =
+                holder.getIterator(FluxReadParameters.builder().setCylinder(2).setHead(1).build());
 
         assertThat(reads[0]).isEqualTo(2);
         assertThat(it1).isSameInstanceAs(it2);
@@ -68,5 +59,14 @@ public class CommonTest
     public void testForEmergencyStopDoesNotThrow()
     {
         Common.testForEmergencyStop();
+    }
+
+    private static class RecordingFluxSource extends FluxSource
+    {
+        @Override
+        public FluxSourceIterator readFlux(FluxReadParameters parameters)
+        {
+            return null;
+        }
     }
 }

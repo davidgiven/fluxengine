@@ -4,25 +4,27 @@ import com.cowlark.fluxengine.config.ConfigBuilder;
 import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.config.FluxSourceSinkType;
 import com.cowlark.fluxengine.core.FluxEngineException;
+import com.cowlark.fluxengine.usb.UsbFactory;
+import java.util.function.Supplier;
 
 /**
  * A source of flux data, ported from lib/fluxsource/fluxsource.{h,cc}.
  */
 public abstract class FluxSource implements AutoCloseable
 {
-    public static FluxSource create(ConfigProto config)
+    public static FluxSource create(ConfigProto config, Supplier<UsbFactory> usbFactorySupplier)
     {
         if (config.getFluxSource().getType() == FluxSourceSinkType.FLUXTYPE_DRIVE)
-            return new HardwareFluxSource(config);
-        return create(config.getFluxSource());
+            return new HardwareFluxSource(config, usbFactorySupplier.get());
+        return create(config.getFluxSource(), usbFactorySupplier);
     }
 
-    public static FluxSource create(FluxSourceProto config)
+    public static FluxSource create(FluxSourceProto config, Supplier<UsbFactory> usbFactorySupplier)
     {
         switch (config.getType())
         {
             case FLUXTYPE_DRIVE:
-                return notImplemented("drive");
+                return notImplemented("hardware");
             case FLUXTYPE_ERASE:
                 return new EraseFluxSource(config.getErase());
             case FLUXTYPE_KRYOFLUX:

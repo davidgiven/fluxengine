@@ -1,7 +1,6 @@
 package com.cowlark.fluxengine.imagewriter;
 
 import static com.google.common.truth.Truth.assertThat;
-
 import static org.junit.Assert.assertThrows;
 
 import com.cowlark.fluxengine.config.ConfigBuilder;
@@ -9,27 +8,24 @@ import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.config.ImageReaderWriterType;
 import com.cowlark.fluxengine.core.FluxEngineException;
 import com.cowlark.fluxengine.data.Image;
-import com.cowlark.fluxengine.data.LogicalLocation;
 import com.cowlark.fluxengine.data.Sector;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 @RunWith(JUnit4.class)
 public class ImageWriterTest
 {
-    @org.junit.Rule
-    public final org.junit.rules.TestRule loggerRule =
+    @org.junit.Rule public final org.junit.rules.TestRule loggerRule =
             com.cowlark.fluxengine.testing.TestHelpers.loggerRule();
 
     @Test
     public void createUnportedTypeThrows()
     {
-        ImageWriterProto config = ImageWriterProto.newBuilder()
-                .setType(ImageReaderWriterType.IMAGETYPE_LDBS)
-                .build();
+        ImageWriterProto config =
+                ImageWriterProto.newBuilder().setType(ImageReaderWriterType.IMAGETYPE_LDBS).build();
 
         assertThrows(FluxEngineException.class, () -> ImageWriter.create(config));
     }
@@ -37,9 +33,8 @@ public class ImageWriterTest
     @Test
     public void createD64ImageWriter()
     {
-        ImageWriterProto config = ImageWriterProto.newBuilder()
-                .setType(ImageReaderWriterType.IMAGETYPE_D64)
-                .build();
+        ImageWriterProto config =
+                ImageWriterProto.newBuilder().setType(ImageReaderWriterType.IMAGETYPE_D64).build();
 
         assertThat(ImageWriter.create(config)).isInstanceOf(D64ImageWriter.class);
     }
@@ -47,9 +42,8 @@ public class ImageWriterTest
     @Test
     public void createD88ImageWriter()
     {
-        ImageWriterProto config = ImageWriterProto.newBuilder()
-                .setType(ImageReaderWriterType.IMAGETYPE_D88)
-                .build();
+        ImageWriterProto config =
+                ImageWriterProto.newBuilder().setType(ImageReaderWriterType.IMAGETYPE_D88).build();
 
         assertThat(ImageWriter.create(config)).isInstanceOf(D88ImageWriter.class);
     }
@@ -67,9 +61,8 @@ public class ImageWriterTest
     @Test
     public void createImdImageWriter()
     {
-        ImageWriterProto config = ImageWriterProto.newBuilder()
-                .setType(ImageReaderWriterType.IMAGETYPE_IMD)
-                .build();
+        ImageWriterProto config =
+                ImageWriterProto.newBuilder().setType(ImageReaderWriterType.IMAGETYPE_IMD).build();
 
         assertThat(ImageWriter.create(config)).isInstanceOf(ImdImageWriter.class);
     }
@@ -77,9 +70,8 @@ public class ImageWriterTest
     @Test
     public void createNsiImageWriter()
     {
-        ImageWriterProto config = ImageWriterProto.newBuilder()
-                .setType(ImageReaderWriterType.IMAGETYPE_NSI)
-                .build();
+        ImageWriterProto config =
+                ImageWriterProto.newBuilder().setType(ImageReaderWriterType.IMAGETYPE_NSI).build();
 
         assertThat(ImageWriter.create(config)).isInstanceOf(NsiImageWriter.class);
     }
@@ -87,9 +79,8 @@ public class ImageWriterTest
     @Test
     public void createRawImageWriter()
     {
-        ImageWriterProto config = ImageWriterProto.newBuilder()
-                .setType(ImageReaderWriterType.IMAGETYPE_RAW)
-                .build();
+        ImageWriterProto config =
+                ImageWriterProto.newBuilder().setType(ImageReaderWriterType.IMAGETYPE_RAW).build();
 
         assertThat(ImageWriter.create(config)).isInstanceOf(RawImageWriter.class);
     }
@@ -97,8 +88,7 @@ public class ImageWriterTest
     @Test
     public void createImgImageWriterFromConfig()
     {
-        ConfigProto config = new ConfigBuilder()
-                .set("usb.serial", "test-serial")
+        ConfigProto config = new ConfigBuilder().set("usb.serial", "test-serial")
                 .withImageWriter("out.dsk")
                 .build();
 
@@ -118,9 +108,7 @@ public class ImageWriterTest
     @Test
     public void createNoWriterConfiguredThrows()
     {
-        ConfigProto config = new ConfigBuilder()
-                .set("usb.serial", "test-serial")
-                .build();
+        ConfigProto config = new ConfigBuilder().set("usb.serial", "test-serial").build();
 
         assertThrows(FluxEngineException.class, () -> ImageWriter.create(config));
     }
@@ -192,7 +180,6 @@ public class ImageWriterTest
         String contents = Files.readString(file);
         assertThat(contents).contains("\"Physical track\",\"Physical side\"");
         assertThat(contents).contains("\"Status\"");
-        assertThat(contents).contains(
-                "-1,-1,5,2,1,2000.0,1.0,2.0,3.0,4.0,1234,0,OK\n");
+        assertThat(contents).contains("-1,-1,5,2,1,2000.0,1.0,2.0,3.0,4.0,1234,0,OK\n");
     }
 }

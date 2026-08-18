@@ -3,7 +3,6 @@ package com.cowlark.fluxengine.fluxsink;
 import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.data.Fluxmap;
 import com.cowlark.fluxengine.usb.DriveSettings;
-import com.cowlark.fluxengine.usb.UsbDevice;
 import com.cowlark.fluxengine.usb.UsbFactory;
 
 /**
@@ -13,17 +12,12 @@ import com.cowlark.fluxengine.usb.UsbFactory;
 public class HardwareFluxSink extends FluxSink
 {
     private final ConfigProto config;
-    private final UsbDevice device;
+    private final UsbFactory usbFactory;
 
-    public HardwareFluxSink(ConfigProto config)
-    {
-        this(config, UsbFactory.getConnection(config));
-    }
-
-    HardwareFluxSink(ConfigProto config, UsbDevice device)
+    HardwareFluxSink(ConfigProto config, UsbFactory usbFactory)
     {
         this.config = config;
-        this.device = device;
+        this.usbFactory = usbFactory;
     }
 
     @Override
@@ -32,12 +26,12 @@ public class HardwareFluxSink extends FluxSink
         DriveSettings settings = new DriveSettings(config);
         settings.seekPosition = track;
         settings.side = side;
-        device.write(settings, fluxmap.rawBytes());
+        usbFactory.getConnection().write(settings, fluxmap.rawBytes());
     }
 
     @Override
     public void close()
     {
-        device.close();
+        usbFactory.close();
     }
 }

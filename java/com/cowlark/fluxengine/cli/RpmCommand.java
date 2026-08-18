@@ -9,7 +9,6 @@ import com.cowlark.fluxengine.core.flags.FlagGroup;
 import com.cowlark.fluxengine.core.flags.StringFlag;
 import com.cowlark.fluxengine.core.flags.ValueFlag;
 import com.cowlark.fluxengine.usb.DriveSettings;
-import com.cowlark.fluxengine.usb.UsbDevice;
 import com.cowlark.fluxengine.usb.UsbFactory;
 import com.google.common.collect.ImmutableList;
 
@@ -41,20 +40,22 @@ public class RpmCommand implements Command
         if (config.getFluxSource().getType() != FLUXTYPE_DRIVE)
             throw new FluxEngineException("this only makes sense with a real disk drive");
 
-        UsbDevice device = UsbFactory.getConnection(config);
-        DriveSettings driveSettings = new DriveSettings(config);
+        try (UsbFactory usbFactory = new UsbFactory(config))
+        {
+            DriveSettings driveSettings = new DriveSettings(config);
 
-        double periodNs = device.getRotationalPeriod(driveSettings);
-        if (periodNs != 0.0)
-            System.out.printf("Rotational period is %.0f ms (%.0f rpm)\n",
-                    periodNs / 1e6,
-                    60e9 / periodNs);
-        else
-            System.out.println("""
-                    No index pulses detected from the disk. Common causes of this are:
-                      - no drive is connected
-                      - the drive doesn't have an index sensor (e.g. BBC Micro drives)
-                      - the disk has no index holes (e.g. reversed flippy disks)
-                      - (most common) no disk is inserted in the drive!""");
+            double periodNs = usbFactory.getConnection().getRotationalPeriod(driveSettings);
+            if (periodNs != 0.0)
+                System.out.printf("Rotational period is %.0f ms (%.0f rpm)\n",
+                        periodNs / 1e6,
+                        60e9 / periodNs);
+            else
+                System.out.println("""
+                        No index pulses detected from the disk. Common causes of this are:
+                          - no drive is connected
+                          - the drive doesn't have an index sensor (e.g. BBC Micro drives)
+                          - the disk has no index holes (e.g. reversed flippy disks)
+                          - (most common) no disk is inserted in the drive!""");
+        }
     }
 }

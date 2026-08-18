@@ -22,8 +22,11 @@ public class TestBandwidthCommand implements Command
     {
         ConfigProto config = new ConfigBuilder().fromFlags(args).build();
 
-        UsbDevice device = UsbFactory.getConnection(config);
-        device.testBulkWrite();
-        device.testBulkRead();
+        try (UsbFactory usbFactory = new UsbFactory(config))
+        {
+            UsbDevice device = usbFactory.getConnection();
+            device.testBulkWrite();
+            device.testBulkRead();
+        }
     }
 }

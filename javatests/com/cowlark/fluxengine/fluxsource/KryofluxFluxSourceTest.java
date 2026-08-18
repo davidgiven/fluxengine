@@ -16,8 +16,7 @@ import java.util.stream.Collectors;
 @RunWith(JUnit4.class)
 public class KryofluxFluxSourceTest
 {
-    @org.junit.Rule
-    public final org.junit.rules.TestRule loggerRule =
+    @org.junit.Rule public final org.junit.rules.TestRule loggerRule =
             com.cowlark.fluxengine.testing.TestHelpers.loggerRule();
 
     @Rule public TemporaryFolder folder = new TemporaryFolder();

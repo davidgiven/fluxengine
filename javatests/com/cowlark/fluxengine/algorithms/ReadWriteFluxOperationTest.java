@@ -13,32 +13,23 @@ import com.cowlark.fluxengine.data.Track;
 import com.cowlark.fluxengine.testing.TestHelpers;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import java.util.ArrayList;
-import java.util.List;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import java.util.ArrayList;
+import java.util.List;
 
 @RunWith(JUnit4.class)
 public class ReadWriteFluxOperationTest
 {
     @Rule public final TestRule loggerRule = TestHelpers.loggerRule();
 
-    private static class TestOperation extends ReadWriteFluxOperation
-    {
-        @Override
-        public void run()
-        {
-        }
-    }
-
     private static LogicalTrackLayout makeLtl()
     {
         ImmutableList<Integer> order = ImmutableList.of(0, 1, 2);
-        return new LogicalTrackLayout(
-                0,
+        return new LogicalTrackLayout(0,
                 0,
                 1,
                 0,
@@ -233,5 +224,13 @@ public class ReadWriteFluxOperationTest
         operation.init();
 
         operation.dispose();
+    }
+
+    private static class TestOperation extends ReadWriteFluxOperation
+    {
+        @Override
+        public void run()
+        {
+        }
     }
 }

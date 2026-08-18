@@ -18,8 +18,7 @@ import java.nio.file.Path;
 @RunWith(JUnit4.class)
 public class ScpFluxSourceTest
 {
-    @org.junit.Rule
-    public final org.junit.rules.TestRule loggerRule =
+    @org.junit.Rule public final org.junit.rules.TestRule loggerRule =
             com.cowlark.fluxengine.testing.TestHelpers.loggerRule();
 
     /* Builds an SCP file containing a single track 0/0 (strack 0), encoded

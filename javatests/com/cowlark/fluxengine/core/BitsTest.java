@@ -144,7 +144,7 @@ public class BitsTest
         Bits bits = new Bits(4);
         Bits.Cursor cursor = new Bits.Cursor(0);
 
-        bits.fillBitmapTo(cursor, 4, new boolean[] {true, false});
+        bits.fillBitmapTo(cursor, 4, new boolean[]{true, false});
 
         assertThat(cursor.get()).isEqualTo(4);
         assertThat(bits.get(0)).isTrue();
@@ -159,7 +159,7 @@ public class BitsTest
         Bits bits = new Bits(10);
         Bits.Cursor cursor = new Bits.Cursor(3);
 
-        bits.fillBitmapTo(cursor, 7, new boolean[] {false, true});
+        bits.fillBitmapTo(cursor, 7, new boolean[]{false, true});
 
         assertThat(cursor.get()).isEqualTo(7);
         assertThat(bits.get(3)).isFalse();
@@ -175,7 +175,7 @@ public class BitsTest
         Bits bits = new Bits(5);
         Bits.Cursor cursor = new Bits.Cursor(0);
 
-        bits.fillBitmapTo(cursor, 5, new boolean[] {true});
+        bits.fillBitmapTo(cursor, 5, new boolean[]{true});
 
         assertThat(cursor.get()).isEqualTo(5);
         assertThat(bits.get(4)).isTrue();

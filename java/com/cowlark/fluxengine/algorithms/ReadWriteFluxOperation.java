@@ -48,7 +48,7 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
     private Supplier<DiskLayout> diskLayoutSupplier;
     private SupplierOfAutocloseable<FluxSource> fluxSourceSupplier;
     private SupplierOfAutocloseable<FluxSinkFactory> fluxSinkFactorySupplier;
-    private SupplierOfAutocloseable<UsbDevice> usbDeviceSupplier;
+    private SupplierOfAutocloseable<UsbFactory> usbFactorySupplier;
     private Supplier<Decoder> decoderSupplier;
     private Supplier<Encoder> encoderSupplier;
     private SupplierOfAutocloseable<ImageReader> imageReaderSupplier;
@@ -148,10 +148,12 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
         ConfigProto configProto = getConfig();
 
         diskLayoutSupplier = Suppliers.memoize(() -> new DiskLayout(configProto));
-        fluxSourceSupplier = new SupplierOfAutocloseable(() -> FluxSource.create(configProto));
-        fluxSinkFactorySupplier =
-                new SupplierOfAutocloseable(() -> FluxSinkFactory.create(configProto));
-        usbDeviceSupplier = new SupplierOfAutocloseable(() -> UsbFactory.connect(configProto));
+        usbFactorySupplier = new SupplierOfAutocloseable(() -> new UsbFactory(configProto));
+        fluxSourceSupplier = new SupplierOfAutocloseable(() -> FluxSource.create(configProto,
+                () -> usbFactorySupplier.get()));
+        fluxSinkFactorySupplier = new SupplierOfAutocloseable(() -> FluxSinkFactory.create(
+                configProto,
+                () -> usbFactorySupplier.get()));
         decoderSupplier = Suppliers.memoize(() -> Arch.createDecoder(configProto));
         encoderSupplier = Suppliers.memoize(() -> Arch.createEncoder(configProto,
                 getDiskRotationalPeriodNs()));
@@ -201,7 +203,7 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
         diskRotationalPeriodNs = configProto.getDrive().getRotationalPeriodMs() * 1e6;
         if (diskRotationalPeriodNs == 0)
         {
-            UsbDevice device = UsbFactory.getConnection(configProto);
+            UsbDevice device = usbFactorySupplier.get().getConnection();
 
             Logger.log(new BeginOperationLogMessage("Measuring drive rotational speed"));
             Logger.log(new BeginSpeedOperationLogMessage());
@@ -227,7 +229,7 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
     {
         closeResource(fluxSourceSupplier);
         closeResource(fluxSinkFactorySupplier);
-        closeResource(usbDeviceSupplier);
+        closeResource(usbFactorySupplier);
         closeResource(imageWriterSupplier);
         closeResource(imageReaderSupplier);
     }
@@ -256,7 +258,7 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
 
             case RECALIBRATE:
                 driveSettings.seekPosition = 0;
-                UsbFactory.getConnection(getConfig()).seek(driveSettings);
+                usbFactorySupplier.get().getConnection().seek(driveSettings);
                 break;
 
             case JIGGLE:
@@ -264,7 +266,7 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
                     driveSettings.seekPosition = baseTrack - 1;
                 else
                     driveSettings.seekPosition = baseTrack + 1;
-                UsbFactory.getConnection(getConfig()).seek(driveSettings);
+                usbFactorySupplier.get().getConnection().seek(driveSettings);
                 break;
         }
     }
@@ -386,8 +388,14 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
     {
         FluxSinkFactory outputFluxSinkFactory = null;
         if (getConfig().getDecoder().hasCopyFluxTo())
-            outputFluxSinkFactory =
-                    FluxSinkFactory.create(getConfig(), getConfig().getDecoder().getCopyFluxTo());
+        {
+            ConfigProto modifiedConfig = getConfig().toBuilder()
+                    .setFluxSink(getConfig().getDecoder().getCopyFluxTo())
+                    .build();
+            outputFluxSinkFactory = FluxSinkFactory.create(modifiedConfig, () -> {
+                throw new FluxEngineException("you can't copy flux to a hardware device");
+            });
+        }
 
         Map<CylinderHead, List<Track>> tracksByLogicalLocation = new HashMap<>();
         for (Map.Entry<CylinderHead, Track> entry : disk.tracksByPhysicalLocation.entries())

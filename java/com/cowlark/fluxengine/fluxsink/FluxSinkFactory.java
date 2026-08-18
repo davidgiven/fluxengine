@@ -2,25 +2,32 @@ package com.cowlark.fluxengine.fluxsink;
 
 import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.core.FluxEngineException;
+import com.cowlark.fluxengine.usb.UsbFactory;
+import java.util.function.Supplier;
 
 /**
  * Factory for creating flux sinks, ported from lib/fluxsink/fluxsink.h.
  */
 public abstract class FluxSinkFactory implements AutoCloseable
 {
-    public static FluxSinkFactory create(ConfigProto config)
+    public static FluxSinkFactory create(
+            ConfigProto config,
+            Supplier<UsbFactory> usbFactorySupplier)
     {
         if (!config.hasFluxSink())
             throw new FluxEngineException("no flux sink configured");
-        return create(config, config.getFluxSink());
+        return create(config, config.getFluxSink(), usbFactorySupplier);
     }
 
-    public static FluxSinkFactory create(ConfigProto config, FluxSinkProto sinkConfig)
+    public static FluxSinkFactory create(
+            ConfigProto config,
+            FluxSinkProto sinkConfig,
+            Supplier<UsbFactory> usbFactorySupplier)
     {
         switch (sinkConfig.getType())
         {
             case FLUXTYPE_DRIVE:
-                return new HardwareFluxSinkFactory(config);
+                return new HardwareFluxSinkFactory(config, usbFactorySupplier.get());
             case FLUXTYPE_A2R:
                 return new A2RFluxSinkFactory(sinkConfig.getA2R().getFilename(), config);
             case FLUXTYPE_AU:

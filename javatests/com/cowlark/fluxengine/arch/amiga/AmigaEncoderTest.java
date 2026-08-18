@@ -11,22 +11,20 @@ import com.cowlark.fluxengine.data.Fluxmap;
 import com.cowlark.fluxengine.data.Image;
 import com.cowlark.fluxengine.data.Sector;
 import com.google.common.collect.ImmutableList;
-import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import java.util.List;
 
 @RunWith(JUnit4.class)
 public class AmigaEncoderTest
 {
-    @org.junit.Rule
-    public final org.junit.rules.TestRule loggerRule =
+    @org.junit.Rule public final org.junit.rules.TestRule loggerRule =
             com.cowlark.fluxengine.testing.TestHelpers.loggerRule();
 
     private ConfigProto makeConfig()
     {
-        return new ConfigBuilder()
-                .set("usb.serial", "test-serial")
+        return new ConfigBuilder().set("usb.serial", "test-serial")
                 .set("drive.rotational_period_ms", "200")
                 .set("encoder.amiga.clock_rate_us", "2.0")
                 .build();
@@ -62,9 +60,8 @@ public class AmigaEncoderTest
 
         List<Sector> sectors = ImmutableList.of(sector);
 
-        FluxEngineException e = assertThrows(
-                FluxEngineException.class,
-                () -> encoder.encode(null, sectors, image));
+        FluxEngineException e =
+                assertThrows(FluxEngineException.class, () -> encoder.encode(null, sectors, image));
         assertThat(e.getMessage()).contains("unsupported sector size");
     }
 }

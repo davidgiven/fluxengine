@@ -42,8 +42,7 @@ public class SectorTest
     {
         for (Sector.Status status : Sector.Status.values())
         {
-            assertThat(Sector.stringToStatus(Sector.statusToString(status)))
-                    .isEqualTo(status);
+            assertThat(Sector.stringToStatus(Sector.statusToString(status))).isEqualTo(status);
         }
     }
 
@@ -52,8 +51,8 @@ public class SectorTest
     {
         assertThat(Sector.statusToString(Sector.Status.OK)).isEqualTo("OK");
         assertThat(Sector.statusToString(Sector.Status.MISSING)).isEqualTo("sector not found");
-        assertThat(Sector.statusToString(Sector.Status.DATA_MISSING))
-                .isEqualTo("present but no data found");
+        assertThat(Sector.statusToString(Sector.Status.DATA_MISSING)).isEqualTo(
+                "present but no data found");
     }
 
     @Test

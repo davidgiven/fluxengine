@@ -4,7 +4,6 @@ import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.data.Fluxmap;
 import com.cowlark.fluxengine.usb.DriveSettings;
-import com.cowlark.fluxengine.usb.UsbDevice;
 import com.cowlark.fluxengine.usb.UsbFactory;
 
 /**
@@ -14,18 +13,13 @@ import com.cowlark.fluxengine.usb.UsbFactory;
 public class HardwareFluxSource extends FluxSource
 {
     private final ConfigProto config;
-    private final UsbDevice device;
-
-    public HardwareFluxSource(ConfigProto config)
-    {
-        this(config, UsbFactory.getConnection(config));
-    }
+    private UsbFactory usbFactory;
 
     /* Package-private for testing. */
-    HardwareFluxSource(ConfigProto config, UsbDevice device)
+    HardwareFluxSource(ConfigProto config, UsbFactory usbFactory)
     {
         this.config = config;
-        this.device = device;
+        this.usbFactory = usbFactory;
     }
 
     @Override
@@ -46,7 +40,7 @@ public class HardwareFluxSource extends FluxSource
                 settings.seekPosition = parameters.cylinder();
                 settings.side = parameters.head();
 
-                Bytes data = device.read(settings, parameters.readTimeNs());
+                Bytes data = usbFactory.getConnection().read(settings, parameters.readTimeNs());
                 Fluxmap fluxmap = new Fluxmap();
                 fluxmap.appendBytes(data);
                 return fluxmap;

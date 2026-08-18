@@ -31,8 +31,7 @@ public class FlagsTest
                 .setHelpText("verbose")
                 .build();
 
-        Flags.parse(
-                ImmutableList.of("--config=foo", "-c", "bar", "--count", "7", "--verbose=true"),
+        Flags.parse(ImmutableList.of("--config=foo", "-c", "bar", "--count", "7", "--verbose=true"),
                 group);
 
         assertThat(config.get()).isEqualTo("bar");
@@ -85,8 +84,7 @@ public class FlagsTest
         StringFlag.builder().setGroup(group).setName("--foo").setHelpText("one").build();
         StringFlag.builder().setGroup(group).setName("--foo").setHelpText("two").build();
 
-        assertThrows(
-                IllegalStateException.class,
+        assertThrows(IllegalStateException.class,
                 () -> Flags.parse(ImmutableList.of("--foo=x"), group));
     }
 
@@ -94,8 +92,7 @@ public class FlagsTest
     public void unknownFlagThrows()
     {
         FlagGroup group = new FlagGroup();
-        assertThrows(
-                FluxEngineException.class,
+        assertThrows(FluxEngineException.class,
                 () -> Flags.parse(ImmutableList.of("--nope=x"), group));
     }
 
@@ -103,8 +100,7 @@ public class FlagsTest
     public void filenames()
     {
         FlagGroup group = new FlagGroup();
-        List<String> filenames = Flags.parseWithFilenames(
-                ImmutableList.of("one.dsk", "two.dsk"),
+        List<String> filenames = Flags.parseWithFilenames(ImmutableList.of("one.dsk", "two.dsk"),
                 name -> name.equals("one.dsk"),
                 group);
 
@@ -190,8 +186,7 @@ public class FlagsTest
                 .build();
 
         List<String> filenames =
-                Flags.parseWithFilenames(
-                        ImmutableList.of("--read-only", "image.dsk"),
+                Flags.parseWithFilenames(ImmutableList.of("--read-only", "image.dsk"),
                         unused -> false,
                         group);
 

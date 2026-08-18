@@ -13,32 +13,32 @@ public class ConfigurationPanelTest
     @Test
     public void emptyEnabledApplicabilitiesAlwaysApplicable()
     {
-        assertThat(ConfigurationPanel.testApplicability(
-                ImmutableSet.of(), ImmutableSet.of("a", "b"))).isTrue();
-        assertThat(ConfigurationPanel.testApplicability(
-                ImmutableSet.of(), ImmutableSet.of())).isTrue();
+        assertThat(ConfigurationPanel.testApplicability(ImmutableSet.of(),
+                ImmutableSet.of("a", "b"))).isTrue();
+        assertThat(ConfigurationPanel.testApplicability(ImmutableSet.of(),
+                ImmutableSet.of())).isTrue();
     }
 
     @Test
     public void matchingOptionApplicabilitiesIsApplicable()
     {
-        assertThat(ConfigurationPanel.testApplicability(
-                ImmutableSet.of("a", "b"), ImmutableSet.of("b", "c"))).isTrue();
-        assertThat(ConfigurationPanel.testApplicability(
-                ImmutableSet.of("a"), ImmutableSet.of("a"))).isTrue();
+        assertThat(ConfigurationPanel.testApplicability(ImmutableSet.of("a", "b"),
+                ImmutableSet.of("b", "c"))).isTrue();
+        assertThat(ConfigurationPanel.testApplicability(ImmutableSet.of("a"),
+                ImmutableSet.of("a"))).isTrue();
     }
 
     @Test
     public void nonMatchingOptionApplicabilitiesIsNotApplicable()
     {
-        assertThat(ConfigurationPanel.testApplicability(
-                ImmutableSet.of("a", "b"), ImmutableSet.of("c", "d"))).isFalse();
+        assertThat(ConfigurationPanel.testApplicability(ImmutableSet.of("a", "b"),
+                ImmutableSet.of("c", "d"))).isFalse();
     }
 
     @Test
     public void emptyOptionApplicabilitiesNotApplicableWhenEnabledSpecified()
     {
-        assertThat(ConfigurationPanel.testApplicability(
-                ImmutableSet.of("a"), ImmutableSet.of())).isFalse();
+        assertThat(ConfigurationPanel.testApplicability(ImmutableSet.of("a"),
+                ImmutableSet.of())).isFalse();
     }
 }

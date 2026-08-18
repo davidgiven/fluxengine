@@ -25,6 +25,7 @@ import com.cowlark.fluxengine.external.FmMfm;
 import com.cowlark.fluxengine.fluxsource.FluxReadParameters;
 import com.cowlark.fluxengine.fluxsource.FluxSource;
 import com.cowlark.fluxengine.fluxsource.FluxSourceIterator;
+import com.cowlark.fluxengine.usb.UsbFactory;
 import com.google.common.collect.ImmutableList;
 
 /**
@@ -174,151 +175,154 @@ public class InspectCommand implements Command
             builder.withFluxSource(sourceFluxFlag.get());
         ConfigProto config = builder.build();
 
-        FluxSource fluxSource = FluxSource.create(config);
-        ImmutableList<CylinderHead> tracks =
-                Locations.parseCylinderHeadsString(destTracksFlag.get());
-        if (tracks.size() != 1)
-            throw new FluxEngineException("you must specify exactly one track");
-        CylinderHead ch = tracks.get(0);
-        FluxSourceIterator iterator = fluxSource.readFlux(FluxReadParameters.builder()
-                .setCylinder(ch.cylinder())
-                .setHead(ch.head())
-                .build());
-        Fluxmap fluxmap = iterator.next();
-
-        System.out.printf("0x%x bytes of data in %.3fms%n",
-                fluxmap.bytes(),
-                fluxmap.durationNs() / 1e6);
-        System.out.printf("Required USB bandwidth: %dkB/s%n",
-                (int) (fluxmap.bytes() / 1024.0 / (fluxmap.durationNs() / 1e9)));
-
-        FluxmapReader fmr = new FluxmapReader(fluxmap, DecoderProto.getDefaultInstance());
-        double clockPeriod = guessClock(fluxmap, fmr);
-        System.out.printf("%.2f us clock detected.", clockPeriod / 1000.0);
-        System.out.flush();
-
-        fmr.seek((long) (seekFlag.get() * 1000000.0 / NS_PER_TICK));
-
-        if (dumpFluxFlag.get())
+        try (UsbFactory usbFactory = new UsbFactory(config))
         {
-            System.out.println("\n\nMagnetic flux follows (times in us):");
+            FluxSource fluxSource = FluxSource.create(config, () -> usbFactory);
+            ImmutableList<CylinderHead> tracks =
+                    Locations.parseCylinderHeadsString(destTracksFlag.get());
+            if (tracks.size() != 1)
+                throw new FluxEngineException("you must specify exactly one track");
+            CylinderHead ch = tracks.get(0);
+            FluxSourceIterator iterator = fluxSource.readFlux(FluxReadParameters.builder()
+                    .setCylinder(ch.cylinder())
+                    .setHead(ch.head())
+                    .build());
+            Fluxmap fluxmap = iterator.next();
 
-            int resolution = fluxmapResolutionFlag.get();
-            if (resolution == 0)
-                resolution = (int) (clockPeriod / 4);
+            System.out.printf("0x%x bytes of data in %.3fms%n",
+                    fluxmap.bytes(),
+                    fluxmap.durationNs() / 1e6);
+            System.out.printf("Required USB bandwidth: %dkB/s%n",
+                    (int) (fluxmap.bytes() / 1024.0 / (fluxmap.durationNs() / 1e9)));
 
-            double nextclock = clockPeriod;
+            FluxmapReader fmr = new FluxmapReader(fluxmap, DecoderProto.getDefaultInstance());
+            double clockPeriod = guessClock(fluxmap, fmr);
+            System.out.printf("%.2f us clock detected.", clockPeriod / 1000.0);
+            System.out.flush();
 
-            double now = fmr.tell().getDurationNs();
-            long ticks = (long) (now / NS_PER_TICK);
+            fmr.seek((long) (seekFlag.get() * 1000000.0 / NS_PER_TICK));
 
-            System.out.printf("%10.3f:-", ticks * US_PER_TICK);
-            double lasttransition = 0;
-            while (!fmr.eof())
+            if (dumpFluxFlag.get())
             {
-                FluxmapReader.EventResult r = fmr.findEvent(F_BIT_PULSE);
-                long thisTicks = r.ticks();
-                ticks += thisTicks;
+                System.out.println("\n\nMagnetic flux follows (times in us):");
 
-                double transition = ticks * NS_PER_TICK;
-                double next;
+                int resolution = fluxmapResolutionFlag.get();
+                if (resolution == 0)
+                    resolution = (int) (clockPeriod / 4);
 
-                boolean clocked = false;
+                double nextclock = clockPeriod;
 
-                boolean bannered = false;
-                for (; ; )
+                double now = fmr.tell().getDurationNs();
+                long ticks = (long) (now / NS_PER_TICK);
+
+                System.out.printf("%10.3f:-", ticks * US_PER_TICK);
+                double lasttransition = 0;
+                while (!fmr.eof())
                 {
-                    next = now + resolution;
-                    clocked = now >= nextclock;
-                    if (clocked)
-                        nextclock += clockPeriod;
-                    if (next >= transition)
-                        break;
+                    FluxmapReader.EventResult r = fmr.findEvent(F_BIT_PULSE);
+                    long thisTicks = r.ticks();
+                    ticks += thisTicks;
+
+                    double transition = ticks * NS_PER_TICK;
+                    double next;
+
+                    boolean clocked = false;
+
+                    boolean bannered = false;
+                    for (; ; )
+                    {
+                        next = now + resolution;
+                        clocked = now >= nextclock;
+                        if (clocked)
+                            nextclock += clockPeriod;
+                        if (next >= transition)
+                            break;
+                        if (!bannered)
+                        {
+                            System.out.printf("%n%10.3f:%c", next / 1000.0, clocked ? '-' : ' ');
+                            bannered = true;
+                        }
+                        now = next;
+                    }
+
+                    double length = transition - lasttransition;
                     if (!bannered)
                     {
                         System.out.printf("%n%10.3f:%c", next / 1000.0, clocked ? '-' : ' ');
                         bannered = true;
                     }
-                    now = next;
+                    System.out.printf("==== %06x %10.3f +%.3f = %.1f clocks",
+                            fmr.tell().bytes(),
+                            transition / 1000.0,
+                            length / 1000.0,
+                            length / clockPeriod);
+                    lasttransition = transition;
                 }
-
-                double length = transition - lasttransition;
-                if (!bannered)
-                {
-                    System.out.printf("%n%10.3f:%c", next / 1000.0, clocked ? '-' : ' ');
-                    bannered = true;
-                }
-                System.out.printf("==== %06x %10.3f +%.3f = %.1f clocks",
-                        fmr.tell().bytes(),
-                        transition / 1000.0,
-                        length / 1000.0,
-                        length / clockPeriod);
-                lasttransition = transition;
             }
-        }
 
-        if (dumpBitstreamFlag.get())
-        {
-            System.out.printf("\n\nAligned bitstream from %.3fms follows:%n",
-                    fmr.tell().getDurationNs() / 1000000.0);
-
-            FluxDecoder decoder = new FluxDecoder(fmr, clockPeriod, config.getDecoder());
-            while (!fmr.eof())
+            if (dumpBitstreamFlag.get())
             {
-                System.out.printf("%06x %10.3f : ",
-                        fmr.tell().bytes(),
-                        fmr.tell().getDurationNs() / 1000000.0);
-                for (int i = 0; i < 50; i++)
-                {
-                    if (fmr.eof())
-                        break;
-                    boolean b = decoder.readBit();
-                    System.out.print(b ? 'X' : '-');
-                }
-
-                System.out.println();
-            }
-        }
-
-        if (dumpRawFlag.isSet())
-        {
-            System.out.printf("\n\nRaw binary with offset %d from %.3fms follows:%n",
-                    dumpRawFlag.get(),
-                    fmr.tell().getDurationNs() / 1000000.0);
-
-            FluxDecoder decoder = new FluxDecoder(fmr, clockPeriod, config.getDecoder());
-            for (int i = 0; i < dumpRawFlag.get(); i++)
-                decoder.readBit();
-
-            while (!fmr.eof())
-            {
-                System.out.printf("%06x %10.3f : ",
-                        fmr.tell().bytes(),
+                System.out.printf("\n\nAligned bitstream from %.3fms follows:%n",
                         fmr.tell().getDurationNs() / 1000000.0);
 
-                Bytes bytes;
-                if (dumpMfmFmFlag.get())
-                    bytes = FmMfm.decodeFmMfm(decoder.readBits(32 * 8));
-                else
-                    bytes = decoder.readBits(16 * 8).toBytes();
-
-                for (int i = 0; i < 16; i++)
+                FluxDecoder decoder = new FluxDecoder(fmr, clockPeriod, config.getDecoder());
+                while (!fmr.eof())
                 {
-                    if (i >= bytes.size())
-                        break;
-                    System.out.printf("%02x ", bytes.getByte(i) & 0xff);
+                    System.out.printf("%06x %10.3f : ",
+                            fmr.tell().bytes(),
+                            fmr.tell().getDurationNs() / 1000000.0);
+                    for (int i = 0; i < 50; i++)
+                    {
+                        if (fmr.eof())
+                            break;
+                        boolean b = decoder.readBit();
+                        System.out.print(b ? 'X' : '-');
+                    }
+
+                    System.out.println();
                 }
-
-                System.out.println();
             }
-        }
-        System.out.println();
 
-        if (dumpBytecodesFlag.get())
-        {
-            System.out.println("Raw FluxEngine bytecodes follow:");
+            if (dumpRawFlag.isSet())
+            {
+                System.out.printf("\n\nRaw binary with offset %d from %.3fms follows:%n",
+                        dumpRawFlag.get(),
+                        fmr.tell().getDurationNs() / 1000000.0);
 
-            Utils.hexdump(System.out, fluxmap.rawBytes());
+                FluxDecoder decoder = new FluxDecoder(fmr, clockPeriod, config.getDecoder());
+                for (int i = 0; i < dumpRawFlag.get(); i++)
+                    decoder.readBit();
+
+                while (!fmr.eof())
+                {
+                    System.out.printf("%06x %10.3f : ",
+                            fmr.tell().bytes(),
+                            fmr.tell().getDurationNs() / 1000000.0);
+
+                    Bytes bytes;
+                    if (dumpMfmFmFlag.get())
+                        bytes = FmMfm.decodeFmMfm(decoder.readBits(32 * 8));
+                    else
+                        bytes = decoder.readBits(16 * 8).toBytes();
+
+                    for (int i = 0; i < 16; i++)
+                    {
+                        if (i >= bytes.size())
+                            break;
+                        System.out.printf("%02x ", bytes.getByte(i) & 0xff);
+                    }
+
+                    System.out.println();
+                }
+            }
+            System.out.println();
+
+            if (dumpBytecodesFlag.get())
+            {
+                System.out.println("Raw FluxEngine bytecodes follow:");
+
+                Utils.hexdump(System.out, fluxmap.rawBytes());
+            }
         }
     }
 }

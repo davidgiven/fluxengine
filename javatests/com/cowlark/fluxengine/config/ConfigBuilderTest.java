@@ -16,8 +16,7 @@ import java.nio.file.Path;
 @RunWith(JUnit4.class)
 public class ConfigBuilderTest
 {
-    @org.junit.Rule
-    public final org.junit.rules.TestRule loggerRule =
+    @org.junit.Rule public final org.junit.rules.TestRule loggerRule =
             com.cowlark.fluxengine.testing.TestHelpers.loggerRule();
 
     /* ConfigBuilder defaults to a drive flux source, which makes build()
@@ -58,8 +57,7 @@ public class ConfigBuilderTest
     @Test
     public void loadConfigFileMissingFileThrows()
     {
-        assertThrows(
-                ConfigException.class,
+        assertThrows(ConfigException.class,
                 () -> new ConfigBuilder().loadConfigFile("/nonexistent/config"));
     }
 
@@ -90,8 +88,8 @@ public class ConfigBuilderTest
         ConfigProto proto = builder().loadConfigFile("_global_options").build();
 
         assertThat(proto.getDrive().getTracks()).isEqualTo("c0-80h0-1");
-        assertThat(proto.getDrive().getDriveType())
-                .isEqualTo(com.cowlark.fluxengine.external.DriveType.DRIVETYPE_80TRACK);
+        assertThat(proto.getDrive()
+                .getDriveType()).isEqualTo(com.cowlark.fluxengine.external.DriveType.DRIVETYPE_80TRACK);
     }
 
     @Test
@@ -145,8 +143,7 @@ public class ConfigBuilderTest
     {
         ConfigBuilder builder = builder().loadConfigFile("_global_options");
 
-        assertThrows(
-                FluxEngineException.class,
+        assertThrows(FluxEngineException.class,
                 () -> builder.fromFlags(ImmutableList.of("--no-such-option"), new FlagGroup()));
     }
 
@@ -235,9 +232,7 @@ public class ConfigBuilderTest
         ConfigBuilder builder = builder().loadConfigFile("_global_options");
 
         ConfigBuilder.OptionInfo info = builder.findOption("drivetype");
-        assertThrows(
-                ConfigException.class,
-                () -> builder.applyOption(info, "bogus"));
+        assertThrows(ConfigException.class, () -> builder.applyOption(info, "bogus"));
     }
 
     @Test
@@ -257,7 +252,8 @@ public class ConfigBuilderTest
                 }
                 """);
 
-        ConfigBuilder builder = builder().loadConfigFile(file.toString()).set("usb.serial", "test-serial");
+        ConfigBuilder builder =
+                builder().loadConfigFile(file.toString()).set("usb.serial", "test-serial");
         ConfigBuilder.OptionInfo info = builder.findOption("needs_serial");
         builder.applyOption(info, null);
 
@@ -281,11 +277,10 @@ public class ConfigBuilderTest
                 }
                 """);
 
-        ConfigBuilder builder = builder().loadConfigFile(file.toString()).set("usb.serial", "other");
+        ConfigBuilder builder =
+                builder().loadConfigFile(file.toString()).set("usb.serial", "other");
         ConfigBuilder.OptionInfo info = builder.findOption("needs_serial");
-        assertThrows(
-                InapplicableOptionException.class,
-                () -> builder.applyOption(info, null));
+        assertThrows(InapplicableOptionException.class, () -> builder.applyOption(info, null));
     }
 
     @Test
@@ -318,8 +313,7 @@ public class ConfigBuilderTest
         Path file = Files.createTempFile("config", ".textproto");
         Files.writeString(file, "this is not a valid textproto\n");
 
-        assertThrows(
-                ConfigException.class,
+        assertThrows(ConfigException.class,
                 () -> new ConfigBuilder().loadConfigFile(file.toString()));
     }
 

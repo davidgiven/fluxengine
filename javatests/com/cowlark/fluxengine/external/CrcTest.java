@@ -12,7 +12,8 @@ public class CrcTest
 {
     /* The standard CRC check value: the result over the ASCII string
      * "123456789". */
-    private static final Bytes CHECK = Bytes.of(0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39);
+    private static final Bytes CHECK =
+            Bytes.of(0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39);
 
     @Test
     public void crc16()
