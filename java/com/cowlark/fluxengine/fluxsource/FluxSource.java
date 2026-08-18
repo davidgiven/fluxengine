@@ -64,17 +64,6 @@ public abstract class FluxSource implements AutoCloseable
     /* Read flux from a given cylinder and head. */
     public abstract FluxSourceIterator readFlux(FluxReadParameters parameters);
 
-    /* Recalibrates; seeks to cylinder 0 and ensures the head is in the right
-     * place. */
-    public void recalibrate()
-    {
-    }
-
-    /* Seeks to a given cylinder (without recalibrating). */
-    public void seek(int cylinder)
-    {
-    }
-
     /* Is this real hardware? If so, then flux can be read indefinitely (among
      * other things). */
     public boolean isHardware()

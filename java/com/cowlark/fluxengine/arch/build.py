@@ -1,9 +1,8 @@
 import sys
-from glob import glob
-from os.path import *
-
 from build.c import cxxlibrary
 from build.protobuf import proto, protocc, protolib
+from glob import glob
+from os.path import *
 
 archs = {basename(dirname(f)) for f in glob("arch/*/*.proto")}
 

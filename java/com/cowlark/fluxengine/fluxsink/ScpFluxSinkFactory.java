@@ -12,10 +12,11 @@ public class ScpFluxSinkFactory extends FluxSinkFactory
     private final boolean alignWithIndex;
     private final ConfigProto config;
 
-    public ScpFluxSinkFactory(String filename,
-                              int typeByte,
-                              boolean alignWithIndex,
-                              ConfigProto config)
+    public ScpFluxSinkFactory(
+            String filename,
+            int typeByte,
+            boolean alignWithIndex,
+            ConfigProto config)
     {
         this.filename = filename;
         this.typeByte = typeByte;

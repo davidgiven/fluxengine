@@ -38,8 +38,7 @@ public abstract class Encoder
 
         for (int sectorId : ltl.diskSectorOrder)
         {
-            Sector sector = getSector(
-                    new CylinderHead(ltl.logicalCylinder, ltl.logicalHead),
+            Sector sector = getSector(new CylinderHead(ltl.logicalCylinder, ltl.logicalHead),
                     image,
                     sectorId);
             if (sector == null)
@@ -56,8 +55,9 @@ public abstract class Encoder
 
     public abstract Fluxmap encode(LogicalTrackLayout ltl, List<Sector> sectors, Image image);
 
-    public double calculatePhysicalClockPeriodNs(double targetClockPeriodNs,
-                                                 double targetRotationalPeriodNs)
+    public double calculatePhysicalClockPeriodNs(
+            double targetClockPeriodNs,
+            double targetRotationalPeriodNs)
     {
         if (diskRotationalPeriodNs == 0)
             throw new FluxEngineException(

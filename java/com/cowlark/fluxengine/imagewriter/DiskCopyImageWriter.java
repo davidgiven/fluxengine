@@ -59,8 +59,7 @@ public class DiskCopyImageWriter extends ImageWriter
         final boolean isMfm = mfm;
 
         System.out.println("DC42: writing DiskCopy 4.2 image");
-        System.out.printf(
-                "DC42: %d tracks, %d sides, %d sectors, %d bytes per sector; %s%n",
+        System.out.printf("DC42: %d tracks, %d sides, %d sectors, %d bytes per sector; %s%n",
                 geometry.numCylinders,
                 geometry.numHeads,
                 geometry.numSectors,

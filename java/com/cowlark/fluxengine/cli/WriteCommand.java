@@ -44,6 +44,24 @@ public class WriteCommand implements Command
         return "Writes a sector image to a disk.";
     }
 
+    @Override
+    public void run(ImmutableList<String> args)
+    {
+        ConfigProto config = new ConfigBuilder().fromFlags(args, flags)
+                .withImageReader(sourceImageFlag.get())
+                .withFluxSink(destFluxFlag.get())
+                .withFluxSource(destFluxFlag.get()) /* for verification */.set("verify_writes",
+                        Boolean.toString(verify))
+                .build();
+
+        LogRenderer renderer = LogRenderer.create(System.out);
+        new WriteOperation().setConfig(config).create().blockingSubscribe(renderer::add, e -> {
+            System.err.println("Failed!");
+            e.printStackTrace();
+        });
+        System.out.println("done.");
+    }
+
     private class WriteOperation extends ReadWriteFluxOperation
     {
         @Override
@@ -52,25 +70,5 @@ public class WriteCommand implements Command
             Image image = getImageReader().readImage();
             writeDisk(image);
         }
-    }
-
-    @Override
-    public void run(ImmutableList<String> args)
-    {
-        ConfigProto config = new ConfigBuilder().fromFlags(args, flags)
-                .withImageReader(sourceImageFlag.get())
-                .withFluxSink(destFluxFlag.get())
-                .withFluxSource(destFluxFlag.get()) /* for verification */.set(
-                        "verify_writes",
-                        Boolean.toString(verify))
-                .build();
-
-        LogRenderer renderer = LogRenderer.create(System.out);
-        new WriteOperation().setConfig(config).create().blockingSubscribe(
-                renderer::add, e -> {
-                    System.err.println("Failed!");
-                    e.printStackTrace();
-                });
-        System.out.println("done.");
     }
 }

@@ -290,8 +290,7 @@ public class MacintoshEncoder extends Encoder
         Bits bits = new Bits(bitsPerRevolution);
         Bits.Cursor cursor = new Bits.Cursor(0);
 
-        bits.fillBitmapTo(
-                cursor,
+        bits.fillBitmapTo(cursor,
                 (int) (config.getPostIndexGapUs() / clockRateUs),
                 new boolean[]{true, false});
 

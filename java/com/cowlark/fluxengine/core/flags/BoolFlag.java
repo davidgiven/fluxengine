@@ -9,15 +9,15 @@ import java.util.function.Consumer;
 public class BoolFlag extends ValueFlag<Boolean>
 {
     @Builder(setterPrefix = "set")
-    private BoolFlag(FlagGroup group,
-                     @Singular List<String> names,
-                     String helpText,
-                     boolean defaultValue,
-                     Consumer<Boolean> callback)
+    private BoolFlag(
+            FlagGroup group,
+            @Singular List<String> names,
+            String helpText,
+            boolean defaultValue,
+            Consumer<Boolean> callback)
     {
-        super(
-                group, names, helpText, defaultValue, callback != null ? callback : unused -> {
-                });
+        super(group, names, helpText, defaultValue, callback != null ? callback : unused -> {
+        });
     }
 
     @Override

@@ -70,8 +70,7 @@ public class ConvertCommand implements Command
         int maxCylinder = diskLayout.maxPhysicalCylinder;
         int minHead = diskLayout.minPhysicalHead;
         int maxHead = diskLayout.maxPhysicalHead;
-        Logger.logf(
-                "CONVERT: seen cylinders %d..%d, heads %d..%d",
+        Logger.logf("CONVERT: seen cylinders %d..%d, heads %d..%d",
                 minCylinder,
                 maxCylinder,
                 minHead,
@@ -82,11 +81,10 @@ public class ConvertCommand implements Command
         {
             for (CylinderHead physicalLocation : diskLayout.physicalLocations)
             {
-                FluxSourceIterator fi =
-                        fluxSource.readFlux(FluxReadParameters.builder()
-                                .setCylinder(physicalLocation.cylinder())
-                                .setHead(physicalLocation.head())
-                                .build());
+                FluxSourceIterator fi = fluxSource.readFlux(FluxReadParameters.builder()
+                        .setCylinder(physicalLocation.cylinder())
+                        .setHead(physicalLocation.head())
+                        .build());
                 while (fi.hasNext())
                     fluxSink.addFlux(physicalLocation, fi.next());
             }

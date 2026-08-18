@@ -27,7 +27,6 @@ import java.util.List;
 public class ScpFluxSource extends TrivialFluxSource
 {
     private final Bytes data;
-    protected ConfigProto extraConfig;
     private final double resolution;
     private final int heads;
     private final int startTrack;
@@ -35,6 +34,7 @@ public class ScpFluxSource extends TrivialFluxSource
     private final int flags;
     private final int revolutions;
     private final int[] trackOffsets = new int[168];
+    protected ConfigProto extraConfig;
 
     public ScpFluxSource(ScpFluxSourceProto config)
     {
@@ -154,10 +154,5 @@ public class ScpFluxSource extends TrivialFluxSource
         }
 
         return fluxmap;
-    }
-
-    @Override
-    public void recalibrate()
-    {
     }
 }

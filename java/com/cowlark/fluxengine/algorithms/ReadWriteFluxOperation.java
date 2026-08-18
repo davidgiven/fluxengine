@@ -3,7 +3,6 @@ package com.cowlark.fluxengine.algorithms;
 import com.cowlark.fluxengine.arch.Arch;
 import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.core.FluxEngineException;
-import com.cowlark.fluxengine.core.LogMessage;
 import com.cowlark.fluxengine.core.Logger;
 import com.cowlark.fluxengine.core.SupplierOfAutocloseable;
 import com.cowlark.fluxengine.core.Utils;
@@ -26,6 +25,7 @@ import com.cowlark.fluxengine.fluxsource.FluxSource;
 import com.cowlark.fluxengine.fluxsource.FluxSourceIterator;
 import com.cowlark.fluxengine.imagereader.ImageReader;
 import com.cowlark.fluxengine.imagewriter.ImageWriter;
+import com.cowlark.fluxengine.usb.DriveSettings;
 import com.cowlark.fluxengine.usb.UsbDevice;
 import com.cowlark.fluxengine.usb.UsbFactory;
 import com.google.common.base.Supplier;
@@ -53,6 +53,94 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
     private Supplier<Encoder> encoderSupplier;
     private SupplierOfAutocloseable<ImageReader> imageReaderSupplier;
     private SupplierOfAutocloseable<ImageWriter> imageWriterSupplier;
+
+    static CombinationResult combineRecordAndSectors(List<Track> tracks, LogicalTrackLayout ltl)
+    {
+        CombinationResult cr = new CombinationResult();
+        cr.result = BadSectorsState.HAS_NO_BAD_SECTORS;
+        List<Sector> trackSectors = new ArrayList<>();
+
+        /* Add the sectors which were there. */
+
+        for (Track track : tracks)
+            trackSectors.addAll(track.allSectors);
+
+        /* Add the sectors which should be there. */
+
+        for (int sectorId : ltl.diskSectorOrder)
+        {
+            Sector sector =
+                    new Sector(new LogicalLocation(ltl.logicalCylinder, ltl.logicalHead, sectorId));
+
+            sector.status = Sector.Status.MISSING;
+            sector.physicalLocation = new CylinderHead(ltl.physicalCylinder, ltl.physicalHead);
+            trackSectors.add(sector);
+        }
+
+        /* Deduplicate. */
+
+        cr.sectors = collectSectors(trackSectors);
+        if (cr.sectors.isEmpty())
+            cr.result = BadSectorsState.HAS_BAD_SECTORS;
+        for (Sector sector : cr.sectors)
+            if (sector.status != Sector.Status.OK)
+                cr.result = BadSectorsState.HAS_BAD_SECTORS;
+
+        return cr;
+    }
+
+    /* Given a set of sectors, deduplicates them sensibly (e.g. if there is a
+     * good and bad version of the same sector, the bad version is dropped). */
+    static List<Sector> collectSectors(List<Sector> trackSectors, boolean collapseConflicts)
+    {
+        Map<LogicalLocation, List<Sector>> sectors = new LinkedHashMap<>();
+        for (Sector sector : trackSectors)
+            sectors.computeIfAbsent(sector.location, k -> new ArrayList<>()).add(sector);
+
+        List<Sector> sectorSet = new ArrayList<>();
+        for (Map.Entry<LogicalLocation, List<Sector>> entry : sectors.entrySet())
+        {
+            List<Sector> bucket = entry.getValue();
+            Sector newSector = bucket.get(0);
+            for (int i = 1; i < bucket.size(); i++)
+            {
+                Sector right = bucket.get(i);
+                if ((newSector.status == Sector.Status.OK) && (right.status == Sector.Status.OK) &&
+                        (!newSector.data.equals(right.data)))
+                {
+                    if (!collapseConflicts)
+                    {
+                        Sector s = new Sector(right);
+                        s.status = Sector.Status.CONFLICT;
+                        sectorSet.add(s);
+                    }
+                    Sector s = new Sector(newSector);
+                    s.status = Sector.Status.CONFLICT;
+                    newSector = s;
+                    continue;
+                }
+                if (newSector.status == Sector.Status.CONFLICT)
+                    continue;
+                if (right.status == Sector.Status.CONFLICT)
+                {
+                    newSector = right;
+                    continue;
+                }
+                if (newSector.status == Sector.Status.OK)
+                    continue;
+                if (right.status == Sector.Status.OK)
+                    newSector = right;
+            }
+            sectorSet.add(newSector);
+        }
+
+        return sectorSet;
+    }
+
+    static List<Sector> collectSectors(List<Sector> trackSectors)
+    {
+        return collectSectors(trackSectors, true);
+    }
 
     @Override
     public void init()
@@ -113,7 +201,7 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
         diskRotationalPeriodNs = configProto.getDrive().getRotationalPeriodMs() * 1e6;
         if (diskRotationalPeriodNs == 0)
         {
-            UsbDevice device = UsbFactory.reconnect(configProto);
+            UsbDevice device = UsbFactory.getConnection(configProto);
 
             Logger.log(new BeginOperationLogMessage("Measuring drive rotational speed"));
             Logger.log(new BeginSpeedOperationLogMessage());
@@ -121,8 +209,7 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
             int retries = 5;
             do
             {
-                diskRotationalPeriodNs =
-                        device.getRotationalPeriod(configProto.getDrive().getHardSectorCount());
+                diskRotationalPeriodNs = device.getRotationalPeriod(new DriveSettings());
                 retries--;
             } while ((diskRotationalPeriodNs == 0) && (retries > 0));
             Logger.log(new EndOperationLogMessage(""));
@@ -161,79 +248,25 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
 
     void adjustTrackOnError(int baseTrack)
     {
+        DriveSettings driveSettings = new DriveSettings(getConfig());
         switch (getConfig().getDrive().getErrorBehaviour())
         {
             case NOTHING:
                 break;
 
             case RECALIBRATE:
-                getFluxSource().recalibrate();
+                driveSettings.seekPosition = 0;
+                UsbFactory.getConnection(getConfig()).seek(driveSettings);
                 break;
 
             case JIGGLE:
                 if (baseTrack > 0)
-                    getFluxSource().seek(baseTrack - 1);
+                    driveSettings.seekPosition = baseTrack - 1;
                 else
-                    getFluxSource().seek(baseTrack + 1);
+                    driveSettings.seekPosition = baseTrack + 1;
+                UsbFactory.getConnection(getConfig()).seek(driveSettings);
                 break;
         }
-    }
-
-    enum ReadResult
-    {
-        GOOD_READ, BAD_AND_CAN_RETRY, BAD_AND_CAN_NOT_RETRY
-    }
-
-    enum BadSectorsState
-    {
-        HAS_NO_BAD_SECTORS, HAS_BAD_SECTORS
-    }
-
-    static class CombinationResult
-    {
-        BadSectorsState result;
-        List<Sector> sectors;
-    }
-
-    static class ReadGroupResult
-    {
-        ReadResult result;
-        List<Sector> combinedSectors;
-    }
-
-    static CombinationResult combineRecordAndSectors(List<Track> tracks, LogicalTrackLayout ltl)
-    {
-        CombinationResult cr = new CombinationResult();
-        cr.result = BadSectorsState.HAS_NO_BAD_SECTORS;
-        List<Sector> trackSectors = new ArrayList<>();
-
-        /* Add the sectors which were there. */
-
-        for (Track track : tracks)
-            trackSectors.addAll(track.allSectors);
-
-        /* Add the sectors which should be there. */
-
-        for (int sectorId : ltl.diskSectorOrder)
-        {
-            Sector sector =
-                    new Sector(new LogicalLocation(ltl.logicalCylinder, ltl.logicalHead, sectorId));
-
-            sector.status = Sector.Status.MISSING;
-            sector.physicalLocation = new CylinderHead(ltl.physicalCylinder, ltl.physicalHead);
-            trackSectors.add(sector);
-        }
-
-        /* Deduplicate. */
-
-        cr.sectors = collectSectors(trackSectors);
-        if (cr.sectors.isEmpty())
-            cr.result = BadSectorsState.HAS_BAD_SECTORS;
-        for (Sector sector : cr.sectors)
-            if (sector.status != Sector.Status.OK)
-                cr.result = BadSectorsState.HAS_BAD_SECTORS;
-
-        return cr;
     }
 
     protected ReadGroupResult readGroup(
@@ -347,59 +380,6 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
                 retriesRemaining--;
             }
         }
-    }
-
-    /* Given a set of sectors, deduplicates them sensibly (e.g. if there is a
-     * good and bad version of the same sector, the bad version is dropped). */
-    static List<Sector> collectSectors(List<Sector> trackSectors, boolean collapseConflicts)
-    {
-        Map<LogicalLocation, List<Sector>> sectors = new LinkedHashMap<>();
-        for (Sector sector : trackSectors)
-            sectors.computeIfAbsent(sector.location, k -> new ArrayList<>()).add(sector);
-
-        List<Sector> sectorSet = new ArrayList<>();
-        for (Map.Entry<LogicalLocation, List<Sector>> entry : sectors.entrySet())
-        {
-            List<Sector> bucket = entry.getValue();
-            Sector newSector = bucket.get(0);
-            for (int i = 1; i < bucket.size(); i++)
-            {
-                Sector right = bucket.get(i);
-                if ((newSector.status == Sector.Status.OK) && (right.status == Sector.Status.OK) &&
-                        (!newSector.data.equals(right.data)))
-                {
-                    if (!collapseConflicts)
-                    {
-                        Sector s = new Sector(right);
-                        s.status = Sector.Status.CONFLICT;
-                        sectorSet.add(s);
-                    }
-                    Sector s = new Sector(newSector);
-                    s.status = Sector.Status.CONFLICT;
-                    newSector = s;
-                    continue;
-                }
-                if (newSector.status == Sector.Status.CONFLICT)
-                    continue;
-                if (right.status == Sector.Status.CONFLICT)
-                {
-                    newSector = right;
-                    continue;
-                }
-                if (newSector.status == Sector.Status.OK)
-                    continue;
-                if (right.status == Sector.Status.OK)
-                    newSector = right;
-            }
-            sectorSet.add(newSector);
-        }
-
-        return sectorSet;
-    }
-
-    static List<Sector> collectSectors(List<Sector> trackSectors)
-    {
-        return collectSectors(trackSectors, true);
     }
 
     public void readDisk(Disk disk)
@@ -726,7 +706,8 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
 
             if (rgr.result != ReadResult.GOOD_READ)
             {
-                adjustTrackOnError(ltl.physicalCylinder);
+                if (getFluxSinkFactory().isHardware())
+                    adjustTrackOnError(ltl.physicalCylinder);
                 Logger.logf("bad read");
                 return false;
             }
@@ -777,5 +758,27 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
     public void writeDisk(Image image)
     {
         writeDisk(image, getDiskLayout().layoutByLogicalLocation.keySet());
+    }
+
+    enum ReadResult
+    {
+        GOOD_READ, BAD_AND_CAN_RETRY, BAD_AND_CAN_NOT_RETRY
+    }
+
+    enum BadSectorsState
+    {
+        HAS_NO_BAD_SECTORS, HAS_BAD_SECTORS
+    }
+
+    static class CombinationResult
+    {
+        BadSectorsState result;
+        List<Sector> sectors;
+    }
+
+    static class ReadGroupResult
+    {
+        ReadResult result;
+        List<Sector> combinedSectors;
     }
 }

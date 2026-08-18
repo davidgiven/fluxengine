@@ -120,10 +120,8 @@ public class Apple2Encoder extends Encoder
         bits.fillBitmapTo(cursor, bits.size(), new boolean[]{true, false});
 
         Fluxmap fluxmap = new Fluxmap();
-        fluxmap.appendBits(
-                bits,
-                (long) calculatePhysicalClockPeriodNs(
-                        config.getClockPeriodUs() * 1e3,
+        fluxmap.appendBits(bits,
+                (long) calculatePhysicalClockPeriodNs(config.getClockPeriodUs() * 1e3,
                         config.getRotationalPeriodMs() * 1e6));
         return fluxmap;
     }

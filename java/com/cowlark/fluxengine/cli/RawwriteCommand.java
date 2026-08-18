@@ -37,15 +37,6 @@ public class RawwriteCommand implements Command
         return "Writes a flux file to a disk. Warning: you can't use this to copy disks.";
     }
 
-    private class RawwriteOperation extends ReadWriteFluxOperation
-    {
-        @Override
-        public void run()
-        {
-            rawWrite();
-        }
-    }
-
     @Override
     public void run(ImmutableList<String> args)
     {
@@ -58,11 +49,19 @@ public class RawwriteCommand implements Command
             throw new FluxEngineException("you can't use rawwrite to read from hardware");
 
         LogRenderer renderer = LogRenderer.create(System.out);
-        new RawwriteOperation().setConfig(config).create().blockingSubscribe(
-                renderer::add, e -> {
-                    System.err.println("Failed!");
-                    e.printStackTrace();
-                });
+        new RawwriteOperation().setConfig(config).create().blockingSubscribe(renderer::add, e -> {
+            System.err.println("Failed!");
+            e.printStackTrace();
+        });
         System.out.println("done.");
+    }
+
+    private class RawwriteOperation extends ReadWriteFluxOperation
+    {
+        @Override
+        public void run()
+        {
+            rawWrite();
+        }
     }
 }

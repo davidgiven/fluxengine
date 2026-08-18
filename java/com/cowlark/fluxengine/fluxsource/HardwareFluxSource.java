@@ -3,6 +3,7 @@ package com.cowlark.fluxengine.fluxsource;
 import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.data.Fluxmap;
+import com.cowlark.fluxengine.usb.DriveSettings;
 import com.cowlark.fluxengine.usb.UsbDevice;
 import com.cowlark.fluxengine.usb.UsbFactory;
 
@@ -17,7 +18,7 @@ public class HardwareFluxSource extends FluxSource
 
     public HardwareFluxSource(ConfigProto config)
     {
-        this(config, UsbFactory.reconnect(config));
+        this(config, UsbFactory.getConnection(config));
     }
 
     /* Package-private for testing. */
@@ -41,30 +42,16 @@ public class HardwareFluxSource extends FluxSource
             @Override
             public Fluxmap next()
             {
-                device.seek(parameters.cylinder());
+                DriveSettings settings = new DriveSettings(config);
+                settings.seekPosition = parameters.cylinder();
+                settings.side = parameters.head();
 
-                Bytes data = device.read(
-                        parameters.head(),
-                        parameters.syncWithIndex(),
-                        parameters.readTimeNs(),
-                        parameters.hardSectorThresholdNs());
+                Bytes data = device.read(settings, parameters.readTimeNs());
                 Fluxmap fluxmap = new Fluxmap();
                 fluxmap.appendBytes(data);
                 return fluxmap;
             }
         };
-    }
-
-    @Override
-    public void recalibrate()
-    {
-        device.recalibrate();
-    }
-
-    @Override
-    public void seek(int track)
-    {
-        device.seek(track);
     }
 
     @Override

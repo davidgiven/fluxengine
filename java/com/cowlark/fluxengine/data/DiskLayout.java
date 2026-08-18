@@ -119,8 +119,7 @@ public class DiskLayout
                     sectorIdToFilesystemOrdering.put(i, fid);
                 }
 
-                LogicalTrackLayout ltl = new LogicalTrackLayout(
-                        physicalCylinder,
+                LogicalTrackLayout ltl = new LogicalTrackLayout(physicalCylinder,
                         physicalHead,
                         groupSize,
                         logicalCylinder,
@@ -150,13 +149,11 @@ public class DiskLayout
                  physicalHead++)
             {
                 CylinderHead ch = new CylinderHead(physicalCylinder, physicalHead);
-                PhysicalTrackLayout ptl = new PhysicalTrackLayout(
-                        physicalCylinder,
+                PhysicalTrackLayout ptl = new PhysicalTrackLayout(physicalCylinder,
                         physicalHead,
                         (physicalCylinder - headBias) % groupSize,
-                        logicalLayout.get(new CylinderHead(
-                                remapCylinderPhysicalToLogical(physicalCylinder),
-                                remapHeadPhysicalToLogical(physicalHead))));
+                        logicalLayout.get(new CylinderHead(remapCylinderPhysicalToLogical(
+                                physicalCylinder), remapHeadPhysicalToLogical(physicalHead))));
                 physicalLayout.put(ch, ptl);
                 physicalLocationsLocal.add(ch);
             }
@@ -174,8 +171,7 @@ public class DiskLayout
         Map<LogicalLocation, Long> sectorOffsetByLocationLocal = new LinkedHashMap<>();
         Map<LogicalLocation, Integer> blockIdByLocationLocal = new LinkedHashMap<>();
 
-        for (CylinderHead ch : getTrackOrdering(
-                config.getLayout().getFilesystemTrackOrder(),
+        for (CylinderHead ch : getTrackOrdering(config.getLayout().getFilesystemTrackOrder(),
                 numLogicalCylinders,
                 numLogicalHeads))
         {
@@ -285,9 +281,10 @@ public class DiskLayout
         return 1;
     }
 
-    private static List<CylinderHead> getTrackOrdering(LayoutProto.Order ordering,
-                                                       int tracks,
-                                                       int sides)
+    private static List<CylinderHead> getTrackOrdering(
+            LayoutProto.Order ordering,
+            int tracks,
+            int sides)
     {
         List<CylinderHead> trackList = new ArrayList<>();
         switch (ordering)
@@ -361,9 +358,10 @@ public class DiskLayout
         return sectors;
     }
 
-    private static LayoutProto.LayoutdataProto getLayoutData(int logicalCylinder,
-                                                             int logicalHead,
-                                                             ConfigProto config)
+    private static LayoutProto.LayoutdataProto getLayoutData(
+            int logicalCylinder,
+            int logicalHead,
+            ConfigProto config)
     {
         LayoutProto.LayoutdataProto.Builder layoutData = LayoutProto.LayoutdataProto.newBuilder();
         for (LayoutProto.LayoutdataProto f : config.getLayout().getLayoutdataList())
@@ -381,10 +379,11 @@ public class DiskLayout
         return layoutData.build();
     }
 
-    private static ConfigProto createTestConfig(int numCylinders,
-                                                int numHeads,
-                                                int numSectors,
-                                                int sectorSize)
+    private static ConfigProto createTestConfig(
+            int numCylinders,
+            int numHeads,
+            int numSectors,
+            int sectorSize)
     {
         ConfigProto.Builder config = ConfigProto.newBuilder();
         LayoutProto.Builder layout = config.getLayoutBuilder();

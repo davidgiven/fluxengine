@@ -24,12 +24,6 @@ public abstract class ImageWriter implements AutoCloseable
         this.config = config;
     }
 
-    @Override
-    public void close() throws Exception
-    {
-
-    }
-
     public static ImageWriter create(ConfigProto config)
     {
         if (!config.hasImageWriter())
@@ -67,6 +61,12 @@ public abstract class ImageWriter implements AutoCloseable
     private static ImageWriter notImplemented(String name)
     {
         throw new FluxEngineException(name + " image writer is not implemented yet");
+    }
+
+    @Override
+    public void close() throws Exception
+    {
+
     }
 
     protected ImageWriterProto getWriterConfig()
@@ -187,18 +187,15 @@ public abstract class ImageWriter implements AutoCloseable
             System.out.println("No sectors in output; skipping analysis");
         else
         {
-            System.out.printf(
-                    "Good sectors: %d/%d (%d%%)%n",
+            System.out.printf("Good sectors: %d/%d (%d%%)%n",
                     goodSectors,
                     totalSectors,
                     100 * goodSectors / totalSectors);
-            System.out.printf(
-                    "Missing sectors: %d/%d (%d%%)%n",
+            System.out.printf("Missing sectors: %d/%d (%d%%)%n",
                     missingSectors,
                     totalSectors,
                     100 * missingSectors / totalSectors);
-            System.out.printf(
-                    "Bad sectors: %d/%d (%d%%)%n",
+            System.out.printf("Bad sectors: %d/%d (%d%%)%n",
                     badSectors,
                     totalSectors,
                     100 * badSectors / totalSectors);

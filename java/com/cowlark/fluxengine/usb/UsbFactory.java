@@ -29,7 +29,7 @@ public final class UsbFactory
      * same configuration. This is the Java equivalent of the C++ global
      * getUsb(). If a different configuration requires a new device, the
      * previously cached device is evicted and closed. */
-    public static synchronized UsbDevice reconnect(ConfigProto config)
+    public static synchronized UsbDevice getConnection(ConfigProto config)
     {
         UsbDevice device = cache.getIfPresent(config);
         if (device == null)
@@ -50,27 +50,23 @@ public final class UsbFactory
     public static UsbDevice connect(ConfigProto config)
     {
         CandidateDevice candidateDevice = UsbFinder.selectDevice(config);
-        Logger.logf(
-                "using %s serial %s",
+        Logger.logf("using %s serial %s",
                 candidateDevice.type.getDeviceName(),
                 candidateDevice.serial);
         UsbDevice device = switch (candidateDevice.type)
         {
-            case GREASEWEAZLE -> new GreaseweazleUsbDevice(
-                    candidateDevice.serialPort,
-                    config.getUsb().getGreaseweazle());
-            case APPLESAUCE -> new ApplesauceUsbDevice(
-                    candidateDevice.serialPort,
+            case GREASEWEAZLE -> new GreaseweazleUsbDevice(candidateDevice.serialPort, config);
+            case APPLESAUCE -> new ApplesauceUsbDevice(candidateDevice.serialPort,
                     config.getUsb().getApplesauce());
             case FLUXENGINE -> new FluxEngineUsbDevice(candidateDevice.device);
             default -> throw new FluxEngineException("unsupported hardware device");
 
         };
 
-        device.setDrive(
-                config.getDrive().getDrive(),
-                config.getDrive().getHighDensity(),
-                config.getDrive().getIndexMode().getNumber());
+        DriveSettings settings = new DriveSettings();
+        settings.drive = config.getDrive().getDrive();
+        settings.highDensity = config.getDrive().getHighDensity();
+        device.seek(settings);
         return device;
     }
 

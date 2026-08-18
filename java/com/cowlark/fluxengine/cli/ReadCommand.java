@@ -42,15 +42,6 @@ public class ReadCommand implements Command
         return "Reads a disk, producing a sector image.";
     }
 
-    private class ReadOperation extends ReadWriteFluxOperation
-    {
-        @Override
-        public void run()
-        {
-            readDisk();
-        }
-    }
-
     @Override
     public void run(ImmutableList<String> args)
     {
@@ -67,11 +58,19 @@ public class ReadCommand implements Command
             throw new FluxEngineException("you cannot copy flux to a hardware device");
 
         LogRenderer renderer = LogRenderer.create(System.out);
-        new ReadOperation().setConfig(config).create().blockingSubscribe(
-                renderer::add, e -> {
-                    System.err.println("Failed!");
-                    e.printStackTrace();
-                });
+        new ReadOperation().setConfig(config).create().blockingSubscribe(renderer::add, e -> {
+            System.err.println("Failed!");
+            e.printStackTrace();
+        });
         System.out.println("done.");
+    }
+
+    private class ReadOperation extends ReadWriteFluxOperation
+    {
+        @Override
+        public void run()
+        {
+            readDisk();
+        }
     }
 }

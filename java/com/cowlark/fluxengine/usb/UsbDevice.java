@@ -7,30 +7,33 @@ import com.cowlark.fluxengine.core.Bytes;
  */
 public abstract class UsbDevice implements AutoCloseable
 {
-    public void recalibrate()
-    {
-        seek(0);
-    }
+    /* I/O operations --- these all apply the settings in the DriveSetting sobject before doing
+    anything. */
 
-    public abstract void seek(int track);
+    /* Just sets up the drive, and does nothing else. */
+    public abstract void seek(DriveSettings state);
 
-    public abstract double getRotationalPeriod(int hardSectorCount);
+    /* Reads readTimeNs-worth of samples. */
+    public abstract Bytes read(DriveSettings state, double readTimeNs);
 
+    /* Writes samples (must be less than or equal to one revolution). */
+    public abstract void write(DriveSettings state, Bytes bytes);
+
+    /* Magnetically erases the current track. */
+    public abstract void erase(DriveSettings state);
+
+    /* Measures the rotational period of the drive. */
+    public abstract double getRotationalPeriod(DriveSettings settings);
+
+    /* Utility operations. */
+
+    /* Tests data transfers to the device buffer. */
     public abstract void testBulkWrite();
 
+    /* Tests data transfers from the device buffer. */
     public abstract void testBulkRead();
 
-    public abstract Bytes read(int side,
-                               boolean synced,
-                               double readTimeNs,
-                               double hardSectorThresholdNs);
-
-    public abstract void write(int side, Bytes bytes, double hardSectorThresholdNs);
-
-    public abstract void erase(int side, double hardSectorThresholdNs);
-
-    public abstract void setDrive(int drive, boolean highDensity, int indexMode);
-
+    /* Measures the voltages used by the device. */
     public abstract VoltageMeasurements measureVoltages();
 
     /* Closes the device, releasing any underlying resources. */

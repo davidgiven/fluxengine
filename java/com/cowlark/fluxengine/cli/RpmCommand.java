@@ -8,6 +8,7 @@ import com.cowlark.fluxengine.core.FluxEngineException;
 import com.cowlark.fluxengine.core.flags.FlagGroup;
 import com.cowlark.fluxengine.core.flags.StringFlag;
 import com.cowlark.fluxengine.core.flags.ValueFlag;
+import com.cowlark.fluxengine.usb.DriveSettings;
 import com.cowlark.fluxengine.usb.UsbDevice;
 import com.cowlark.fluxengine.usb.UsbFactory;
 import com.google.common.collect.ImmutableList;
@@ -40,12 +41,12 @@ public class RpmCommand implements Command
         if (config.getFluxSource().getType() != FLUXTYPE_DRIVE)
             throw new FluxEngineException("this only makes sense with a real disk drive");
 
-        UsbDevice device = UsbFactory.reconnect(config);
+        UsbDevice device = UsbFactory.getConnection(config);
+        DriveSettings driveSettings = new DriveSettings(config);
 
-        double periodNs = device.getRotationalPeriod(config.getDrive().getHardSectorCount());
+        double periodNs = device.getRotationalPeriod(driveSettings);
         if (periodNs != 0.0)
-            System.out.printf(
-                    "Rotational period is %.0f ms (%.0f rpm)\n",
+            System.out.printf("Rotational period is %.0f ms (%.0f rpm)\n",
                     periodNs / 1e6,
                     60e9 / periodNs);
         else

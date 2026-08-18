@@ -12,11 +12,12 @@ public class ActionFlag extends Flag
     private final boolean hasArgument;
 
     @Builder(setterPrefix = "set")
-    private ActionFlag(FlagGroup group,
-                       @Singular List<String> names,
-                       String helpText,
-                       Runnable voidCallback,
-                       Consumer<String> valueCallback)
+    private ActionFlag(
+            FlagGroup group,
+            @Singular List<String> names,
+            String helpText,
+            Runnable voidCallback,
+            Consumer<String> valueCallback)
     {
         super(group, names, helpText);
         this.voidCallback = voidCallback;

@@ -27,13 +27,13 @@ public final class Logger
         loggerImpl.get().accept(message);
     }
 
-    public static void setLogger(Consumer<? super LogMessage> callback)
-    {
-        loggerImpl.set(callback);
-    }
-
     public static Consumer<? super LogMessage> getLogger()
     {
         return loggerImpl.get();
+    }
+
+    public static void setLogger(Consumer<? super LogMessage> callback)
+    {
+        loggerImpl.set(callback);
     }
 }

@@ -8,14 +8,14 @@ import java.util.function.Consumer;
 public class StringFlag extends ValueFlag<String>
 {
     @Builder(setterPrefix = "set")
-    private StringFlag(FlagGroup group,
-                       @Singular List<String> names,
-                       String helpText,
-                       String defaultValue,
-                       Consumer<String> callback)
+    private StringFlag(
+            FlagGroup group,
+            @Singular List<String> names,
+            String helpText,
+            String defaultValue,
+            Consumer<String> callback)
     {
-        super(
-                group,
+        super(group,
                 names,
                 helpText,
                 defaultValue != null ? defaultValue : "",

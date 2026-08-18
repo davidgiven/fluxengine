@@ -41,8 +41,7 @@ public class DevicesCommand implements Command
             System.out.printf("%-15s %-30s %s\n", "Type", "Serial number", "Port (if any)");
             for (CandidateDevice candidate : candidates)
             {
-                System.out.printf(
-                        "%-15s %-30s %s\n",
+                System.out.printf("%-15s %-30s %s\n",
                         candidate.type.getDeviceName(),
                         candidate.serial,
                         nullToEmpty(candidate.serialPort));

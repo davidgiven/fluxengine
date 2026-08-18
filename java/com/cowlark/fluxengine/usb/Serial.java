@@ -20,9 +20,6 @@ import java.time.Duration;
 public final class Serial
 {
     private final SerialPort serial;
-    private final byte[] readBuffer = new byte[4096];
-    private int readBufferPtr = 0;
-    private int readBufferFill = 0;
 
     public Serial(String path, int baudRate)
     {
@@ -35,10 +32,6 @@ public final class Serial
 
         /* Toggle DTR to reset the device. */
         toggleDtr();
-
-        /* Flush pending input from a generic device. */
-        readBufferPtr = 0;
-        readBufferFill = 0;
     }
 
     /* Toggles the DTR line, which resets the attached device. The C++ clears

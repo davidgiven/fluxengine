@@ -182,8 +182,7 @@ public class ScpFluxSink extends FluxSink
     public void close()
     {
         int checksum = 0;
-        checksum = appendChecksum(
-                checksum,
+        checksum = appendChecksum(checksum,
                 new Bytes(java.util.Arrays.copyOfRange(fileheader, 0x10, fileheader.length)));
         checksum = appendChecksum(checksum, trackdata);
         writeLe32(fileheader, 12, checksum);

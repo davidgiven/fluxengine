@@ -49,9 +49,10 @@ public class FluxfileCpCommand implements Command
         return null;
     }
 
-    private static TrackFluxProto.Builder findOrMakeTrack(FluxFileProto.Builder f,
-                                                          int cylinder,
-                                                          int head)
+    private static TrackFluxProto.Builder findOrMakeTrack(
+            FluxFileProto.Builder f,
+            int cylinder,
+            int head)
     {
         for (TrackFluxProto.Builder trackFlux : f.getTrackBuilderList())
             if ((trackFlux.getTrack() == cylinder) && (trackFlux.getHead() == head))

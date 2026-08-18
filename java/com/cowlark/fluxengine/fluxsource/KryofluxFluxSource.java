@@ -36,8 +36,7 @@ public class KryofluxFluxSource extends TrivialFluxSource
             {
                 Matcher m = FILENAME_REGEX.matcher(f.getName());
                 if (m.matches())
-                    chs.add(new CylinderHead(
-                            Integer.parseInt(m.group(1)),
+                    chs.add(new CylinderHead(Integer.parseInt(m.group(1)),
                             Integer.parseInt(m.group(2))));
             }
         }
@@ -57,10 +56,5 @@ public class KryofluxFluxSource extends TrivialFluxSource
     public Fluxmap readSingleFlux(FluxReadParameters parameters)
     {
         return Kryoflux.readStream(path, parameters.cylinder(), parameters.head());
-    }
-
-    @Override
-    public void recalibrate()
-    {
     }
 }

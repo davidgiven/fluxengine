@@ -10,11 +10,12 @@ public abstract class ValueFlag<T> extends Flag
     private T defaultValue;
     private boolean isSet;
 
-    protected ValueFlag(FlagGroup group,
-                        List<String> names,
-                        String helpText,
-                        T defaultValue,
-                        Consumer<T> callback)
+    protected ValueFlag(
+            FlagGroup group,
+            List<String> names,
+            String helpText,
+            T defaultValue,
+            Consumer<T> callback)
     {
         super(group, names, helpText);
         this.defaultValue = defaultValue;

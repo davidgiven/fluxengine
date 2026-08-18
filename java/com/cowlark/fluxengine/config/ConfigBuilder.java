@@ -352,12 +352,14 @@ public class ConfigBuilder
 
             if (optionProto == null)
                 throw new InapplicableOptionException(
-                        "value %s is not valid for option %s; valid values are: %s", value,
-                        option.group().getName(), option.group()
-                        .getOptionList()
-                        .stream()
-                        .map(OptionProto::getName)
-                        .collect(java.util.stream.Collectors.joining(", ")));
+                        "value %s is not valid for option %s; valid values are: %s",
+                        value,
+                        option.group().getName(),
+                        option.group()
+                                .getOptionList()
+                                .stream()
+                                .map(OptionProto::getName)
+                                .collect(java.util.stream.Collectors.joining(", ")));
         }
 
         checkOptionValid(optionProto);
@@ -424,8 +426,10 @@ public class ConfigBuilder
 
                 throw new InapplicableOptionException(
                         "option '%s' is inapplicable to this configuration " +
-                                "because %s=%s could not be met", optionProto.getName(),
-                        req.getKey(), ss.toString());
+                                "because %s=%s could not be met",
+                        optionProto.getName(),
+                        req.getKey(),
+                        ss.toString());
             }
         }
     }

@@ -19,24 +19,23 @@ public abstract class FluxOperation<T extends FluxOperation<T>> implements Runna
     /* Serialises all operations across the whole program: only one may run at
      * a time, because the hardware doesn't cope with concurrent access. */
     private static final Object lock = new Object();
-
+    private final AtomicBoolean started = new AtomicBoolean(false);
     protected ConfigProto configProto = null;
     private boolean disposed = false;
-    private final AtomicBoolean started = new AtomicBoolean(false);
 
     protected FluxOperation()
     {
+    }
+
+    public ConfigProto getConfig()
+    {
+        return configProto;
     }
 
     public FluxOperation<T> setConfig(ConfigProto config)
     {
         this.configProto = config;
         return this;
-    }
-
-    public ConfigProto getConfig()
-    {
-        return configProto;
     }
 
     /* Returns an Observable which runs the operation on its own fresh worker
@@ -48,8 +47,7 @@ public abstract class FluxOperation<T extends FluxOperation<T>> implements Runna
     {
         ReplaySubject<LogMessage> subject = ReplaySubject.create();
 
-        return Observable.using(
-                () -> this,
+        return Observable.using(() -> this,
                 op -> subject.doOnSubscribe(d -> schedule(subject)),
                 op -> op.dispose());
     }

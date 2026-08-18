@@ -8,15 +8,15 @@ import java.util.function.Consumer;
 public class IntFlag extends ValueFlag<Integer>
 {
     @Builder(setterPrefix = "set")
-    private IntFlag(FlagGroup group,
-                    @Singular List<String> names,
-                    String helpText,
-                    int defaultValue,
-                    Consumer<Integer> callback)
+    private IntFlag(
+            FlagGroup group,
+            @Singular List<String> names,
+            String helpText,
+            int defaultValue,
+            Consumer<Integer> callback)
     {
-        super(
-                group, names, helpText, defaultValue, callback != null ? callback : unused -> {
-                });
+        super(group, names, helpText, defaultValue, callback != null ? callback : unused -> {
+        });
     }
 
     @Override

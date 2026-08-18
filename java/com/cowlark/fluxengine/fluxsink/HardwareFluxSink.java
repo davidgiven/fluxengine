@@ -2,6 +2,7 @@ package com.cowlark.fluxengine.fluxsink;
 
 import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.data.Fluxmap;
+import com.cowlark.fluxengine.usb.DriveSettings;
 import com.cowlark.fluxengine.usb.UsbDevice;
 import com.cowlark.fluxengine.usb.UsbFactory;
 
@@ -16,7 +17,7 @@ public class HardwareFluxSink extends FluxSink
 
     public HardwareFluxSink(ConfigProto config)
     {
-        this(config, UsbFactory.reconnect(config));
+        this(config, UsbFactory.getConnection(config));
     }
 
     HardwareFluxSink(ConfigProto config, UsbDevice device)
@@ -28,12 +29,10 @@ public class HardwareFluxSink extends FluxSink
     @Override
     public void addFlux(int track, int side, Fluxmap fluxmap)
     {
-        device.setDrive(
-                config.getDrive().getDrive(),
-                config.getDrive().getHighDensity(),
-                config.getDrive().getIndexMode().getNumber());
-        device.seek(track);
-        device.write(side, fluxmap.rawBytes(), config.getDrive().getHardSectorThresholdNs());
+        DriveSettings settings = new DriveSettings(config);
+        settings.seekPosition = track;
+        settings.side = side;
+        device.write(settings, fluxmap.rawBytes());
     }
 
     @Override

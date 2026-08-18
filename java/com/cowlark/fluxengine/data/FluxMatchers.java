@@ -24,10 +24,11 @@ public class FluxMatchers implements FluxMatcher
     }
 
     @Override
-    public boolean matches(long[] candidates,
-                           int endIndex,
-                           double clockDecodeThreshold,
-                           FluxMatch match)
+    public boolean matches(
+            long[] candidates,
+            int endIndex,
+            double clockDecodeThreshold,
+            FluxMatch match)
     {
         for (FluxMatcher matcher : matchers)
         {

@@ -63,8 +63,7 @@ public final class Kryoflux
             return readStream(new Bytes(Files.readAllBytes(Path.of(filename))));
         } catch (IOException e)
         {
-            throw new FluxEngineException(String.format(
-                    "cannot open input file '%s': %s",
+            throw new FluxEngineException(String.format("cannot open input file '%s': %s",
                     filename,
                     e.getMessage()));
         }
@@ -120,10 +119,7 @@ public final class Kryoflux
                     else if ((b >= 0x0e) && (b <= 0xff))
                         len = 0; /* Flux1: single byte value */
                     else
-                        error(
-                                "unknown stream block byte 0x%01x at 0x%08x",
-                                b,
-                                (long) br.pos() - 1);
+                        error("unknown stream block byte 0x%01x at 0x%08x", b, (long) br.pos() - 1);
                 }
             }
             br.skip(len);
@@ -199,10 +195,7 @@ public final class Kryoflux
                         writeFlux(fluxmap, indexmarks, br, streamdelta, extrasclks + b);
                         extrasclks = 0;
                     } else
-                        error(
-                                "unknown stream block byte 0x%02x at 0x%08x",
-                                b,
-                                (long) br.pos() - 1);
+                        error("unknown stream block byte 0x%02x at 0x%08x", b, (long) br.pos() - 1);
                 }
             }
         }
@@ -212,11 +205,12 @@ public final class Kryoflux
         return fluxmap;
     }
 
-    private static void writeFlux(Fluxmap fluxmap,
-                                  TreeSet<Integer> indexmarks,
-                                  ByteReader br,
-                                  int streamdelta,
-                                  long sclk)
+    private static void writeFlux(
+            Fluxmap fluxmap,
+            TreeSet<Integer> indexmarks,
+            ByteReader br,
+            int streamdelta,
+            long sclk)
     {
         if (!indexmarks.isEmpty())
         {

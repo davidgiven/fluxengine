@@ -152,10 +152,8 @@ public class NorthstarEncoder extends Encoder
             throw new FluxEngineException("track data overrun");
 
         Fluxmap fluxmap = new Fluxmap();
-        fluxmap.appendBits(
-                bits,
-                (long) calculatePhysicalClockPeriodNs(
-                        clockRateUs * 1e3,
+        fluxmap.appendBits(bits,
+                (long) calculatePhysicalClockPeriodNs(clockRateUs * 1e3,
                         config.getRotationalPeriodMs() * 1e6));
         return fluxmap;
     }

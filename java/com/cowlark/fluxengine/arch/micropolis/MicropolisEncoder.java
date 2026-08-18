@@ -52,8 +52,7 @@ public class MicropolisEncoder extends Encoder
             throw new FluxEngineException("track data mismatched length");
 
         Fluxmap fluxmap = new Fluxmap();
-        long clockPeriod = (long) calculatePhysicalClockPeriodNs(
-                config.getClockPeriodUs() * 1e3,
+        long clockPeriod = (long) calculatePhysicalClockPeriodNs(config.getClockPeriodUs() * 1e3,
                 config.getRotationalPeriodMs() * 1e6);
         int pos = 0;
         for (int i = 1; i < indexes.size(); i++)
@@ -66,10 +65,11 @@ public class MicropolisEncoder extends Encoder
         return fluxmap;
     }
 
-    private void writeSector(Bits bits,
-                             Bits.Cursor cursor,
-                             Sector sector,
-                             MicropolisEncoderProto.EccType eccType)
+    private void writeSector(
+            Bits bits,
+            Bits.Cursor cursor,
+            Sector sector,
+            MicropolisEncoderProto.EccType eccType)
     {
         if ((sector.data.size() != 256) &&
                 (sector.data.size() != Micropolis.MICROPOLIS_ENCODED_SECTOR_SIZE))

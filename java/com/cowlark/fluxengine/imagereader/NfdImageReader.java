@@ -82,8 +82,7 @@ public class NfdImageReader extends ImageReader
             for (int sectorInTrack = 0; sectorInTrack < 26; sectorInTrack++)
             {
                 ByteReader sectorHeaderReader =
-                        new ByteReader(data.slice(
-                                0x120 + track * 26 * 16 + sectorInTrack * 16,
+                        new ByteReader(data.slice(0x120 + track * 26 * 16 + sectorInTrack * 16,
                                 16));
                 int cyl = sectorHeaderReader.seek(0).read8();
                 int head = sectorHeaderReader.seek(1).read8();

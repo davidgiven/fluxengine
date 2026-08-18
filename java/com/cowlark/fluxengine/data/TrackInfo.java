@@ -50,20 +50,21 @@ public class TrackInfo
     /* Mapping of natural order to filesystem order. */
     public final ImmutableMap<Integer, Integer> naturalToFilesystemSectorMap;
 
-    private TrackInfo(int numCylinders,
-                      int numHeads,
-                      int numSectors,
-                      int physicalCylinder,
-                      int physicalHead,
-                      int logicalCylinder,
-                      int logicalHead,
-                      int groupSize,
-                      int sectorSize,
-                      ImmutableList<Integer> naturalSectorOrder,
-                      ImmutableList<Integer> diskSectorOrder,
-                      ImmutableList<Integer> filesystemSectorOrder,
-                      ImmutableMap<Integer, Integer> filesystemToNaturalSectorMap,
-                      ImmutableMap<Integer, Integer> naturalToFilesystemSectorMap)
+    private TrackInfo(
+            int numCylinders,
+            int numHeads,
+            int numSectors,
+            int physicalCylinder,
+            int physicalHead,
+            int logicalCylinder,
+            int logicalHead,
+            int groupSize,
+            int sectorSize,
+            ImmutableList<Integer> naturalSectorOrder,
+            ImmutableList<Integer> diskSectorOrder,
+            ImmutableList<Integer> filesystemSectorOrder,
+            ImmutableMap<Integer, Integer> filesystemToNaturalSectorMap,
+            ImmutableMap<Integer, Integer> naturalToFilesystemSectorMap)
     {
         this.numCylinders = numCylinders;
         this.numHeads = numHeads;

@@ -74,6 +74,9 @@ java_library(
     name = "config",
     srcs = glob(["*.java"]),
     plugins = ["//java/com/cowlark/fluxengine/wiring:lombok_plugin"],
+    runtime_deps = [
+        "@maven//:org_slf4j_slf4j_simple",
+    ],
     deps = [
         ":common_java_proto",
         ":config_java_proto",
@@ -90,8 +93,5 @@ java_library(
         "@maven//:javax_usb_usb_api",
         "@maven//:org_projectlombok_lombok",
         "@maven//:org_usb4java_usb4java_javax",
-    ],
-    runtime_deps = [
-        "@maven//:org_slf4j_slf4j_simple",
     ],
 )

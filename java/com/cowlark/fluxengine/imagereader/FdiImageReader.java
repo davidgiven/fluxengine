@@ -106,7 +106,8 @@ public class FdiImageReader extends ImageReader
                 default:
                     throw new FluxEngineException(String.format(
                             "FDI: unknown fdd type 0x%02x, could not determine write " +
-                                    "profile automatically", fddType));
+                                    "profile automatically",
+                            fddType));
             }
         }
 

@@ -139,8 +139,7 @@ public class Victor9kDecoder extends Decoder
 
         /* Read data. */
 
-        Bytes bytes = decode(readRawBits((Victor9k.VICTOR9K_SECTOR_LENGTH + 4) * 10)).slice(
-                0,
+        Bytes bytes = decode(readRawBits((Victor9k.VICTOR9K_SECTOR_LENGTH + 4) * 10)).slice(0,
                 Victor9k.VICTOR9K_SECTOR_LENGTH + 4);
         ByteReader br = bytes.iterator();
 

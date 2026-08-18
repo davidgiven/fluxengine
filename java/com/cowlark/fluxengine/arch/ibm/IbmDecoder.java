@@ -86,8 +86,7 @@ public class IbmDecoder extends Decoder
      */
     private static final FluxPattern MFM_PATTERN = new FluxPattern(48, 0x448944894489L);
 
-    private static final FluxMatchers ANY_RECORD_PATTERN = FluxMatchers.of(
-            MFM_PATTERN,
+    private static final FluxMatchers ANY_RECORD_PATTERN = FluxMatchers.of(MFM_PATTERN,
             FM_IDAM_PATTERN,
             FM_DAM1_PATTERN,
             FM_DAM2_PATTERN,
@@ -168,17 +167,14 @@ public class IbmDecoder extends Decoder
             sector.status = Sector.Status.DATA_MISSING;
 
         if (trackdata.getIgnoreSideByte())
-            sector.location = new LogicalLocation(
-                    sector.location.logicalCylinder(),
+            sector.location = new LogicalLocation(sector.location.logicalCylinder(),
                     ltl.logicalHead,
                     sector.location.logicalSector());
-        sector.location = new LogicalLocation(
-                sector.location.logicalCylinder(),
+        sector.location = new LogicalLocation(sector.location.logicalCylinder(),
                 sector.location.logicalHead() ^ (trackdata.getInvertSideByte() ? 1 : 0),
                 sector.location.logicalSector());
         if (trackdata.getIgnoreTrackByte())
-            sector.location = new LogicalLocation(
-                    ltl.logicalCylinder,
+            sector.location = new LogicalLocation(ltl.logicalCylinder,
                     sector.location.logicalHead(),
                     sector.location.logicalSector());
 

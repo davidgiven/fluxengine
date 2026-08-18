@@ -12,9 +12,10 @@ public record EndSpeedOperationLogMessage(double rotationalPeriodNs) implements 
     @Override
     public void render(LogRenderer r)
     {
-        r.newline().add(String.format(
-                "Rotational period is %.1fms (%.1frpm)",
-                rotationalPeriodNs / 1e6,
-                60e9 / rotationalPeriodNs)).newline();
+        r.newline()
+                .add(String.format("Rotational period is %.1fms (%.1frpm)",
+                        rotationalPeriodNs / 1e6,
+                        60e9 / rotationalPeriodNs))
+                .newline();
     }
 }

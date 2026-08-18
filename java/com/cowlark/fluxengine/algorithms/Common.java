@@ -1,8 +1,8 @@
 package com.cowlark.fluxengine.algorithms;
 
 import com.cowlark.fluxengine.data.CylinderHead;
-import com.cowlark.fluxengine.fluxsource.FluxSource;
 import com.cowlark.fluxengine.fluxsource.FluxReadParameters;
+import com.cowlark.fluxengine.fluxsource.FluxSource;
 import com.cowlark.fluxengine.fluxsource.FluxSourceIterator;
 import java.util.HashMap;
 import java.util.Map;

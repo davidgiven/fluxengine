@@ -37,10 +37,11 @@ public class ProtoPath
         return getRecursive(builder, components, 0, path);
     }
 
-    private static String getRecursive(Message.Builder builder,
-                                       List<PathComponent> path,
-                                       int pos,
-                                       String originalPath)
+    private static String getRecursive(
+            Message.Builder builder,
+            List<PathComponent> path,
+            int pos,
+            String originalPath)
     {
         PathComponent component = path.get(pos);
         FieldDescriptor field = findField(builder, component, originalPath);
@@ -76,9 +77,10 @@ public class ProtoPath
         return getRecursive(elementBuilder, path, pos + 1, originalPath);
     }
 
-    private static String getLeaf(Message.Builder builder,
-                                  PathComponent component,
-                                  FieldDescriptor field)
+    private static String getLeaf(
+            Message.Builder builder,
+            PathComponent component,
+            FieldDescriptor field)
     {
         if (field.getJavaType() == FieldDescriptor.JavaType.MESSAGE)
             throw new ConfigException("config field '" + component.name() +
@@ -127,18 +129,18 @@ public class ProtoPath
             if (!matcher.matches())
                 throw new ProtoPathNotFoundException("invalid config path '" + path + "'");
             String index = matcher.group(2);
-            components.add(new PathComponent(
-                    matcher.group(1),
+            components.add(new PathComponent(matcher.group(1),
                     index == null ? -1 : Integer.parseInt(index)));
         }
         return components;
     }
 
-    private static void setRecursive(Message.Builder builder,
-                                     List<PathComponent> path,
-                                     int pos,
-                                     String value,
-                                     String originalPath)
+    private static void setRecursive(
+            Message.Builder builder,
+            List<PathComponent> path,
+            int pos,
+            String value,
+            String originalPath)
     {
         PathComponent component = path.get(pos);
         FieldDescriptor field = findField(builder, component, originalPath);
@@ -177,10 +179,11 @@ public class ProtoPath
         }
     }
 
-    private static void setLeaf(Message.Builder builder,
-                                PathComponent component,
-                                FieldDescriptor field,
-                                String value)
+    private static void setLeaf(
+            Message.Builder builder,
+            PathComponent component,
+            FieldDescriptor field,
+            String value)
     {
         if (field.getJavaType() == FieldDescriptor.JavaType.MESSAGE)
             throw new ConfigException("config field '" + component.name() +
@@ -202,9 +205,10 @@ public class ProtoPath
         }
     }
 
-    private static FieldDescriptor findField(Message.Builder builder,
-                                             PathComponent component,
-                                             String path)
+    private static FieldDescriptor findField(
+            Message.Builder builder,
+            PathComponent component,
+            String path)
     {
         FieldDescriptor field = builder.getDescriptorForType().findFieldByName(component.name());
         if (field == null)

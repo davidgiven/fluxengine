@@ -28,16 +28,18 @@ public class Flags
                     "non-option parameter '" + filenames.get(0) + "' seen (try --help)");
     }
 
-    public static ImmutableList<String> parseWithFilenames(ImmutableList<String> argv,
-                                                           Predicate<String> callback,
-                                                           FlagGroup... groups)
+    public static ImmutableList<String> parseWithFilenames(
+            ImmutableList<String> argv,
+            Predicate<String> callback,
+            FlagGroup... groups)
     {
         return parseWithFilenames(argv, callback, ImmutableList.copyOf(groups));
     }
 
-    public static ImmutableList<String> parseWithFilenames(ImmutableList<String> argv,
-                                                           Predicate<String> callback,
-                                                           ImmutableList<FlagGroup> groups)
+    public static ImmutableList<String> parseWithFilenames(
+            ImmutableList<String> argv,
+            Predicate<String> callback,
+            ImmutableList<FlagGroup> groups)
     {
         if (groups.isEmpty())
             throw new IllegalArgumentException("no flag groups");

@@ -134,7 +134,8 @@ public class DimImageReader extends ImageReader
                 default:
                     throw new FluxEngineException(String.format(
                             "DIM: unknown media byte 0x%02x, could not determine write " +
-                                    "profile automatically", mediaByte));
+                                    "profile automatically",
+                            mediaByte));
             }
 
             extra.getDecoderBuilder().getIbmBuilder();

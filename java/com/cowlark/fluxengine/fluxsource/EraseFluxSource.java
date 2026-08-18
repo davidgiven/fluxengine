@@ -30,9 +30,4 @@ public class EraseFluxSource extends TrivialFluxSource
     {
         return null;
     }
-
-    @Override
-    public void recalibrate()
-    {
-    }
 }

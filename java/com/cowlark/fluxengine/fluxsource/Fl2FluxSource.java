@@ -125,9 +125,4 @@ public class Fl2FluxSource extends FluxSource
 
         return new EmptyFluxSourceIterator();
     }
-
-    @Override
-    public void recalibrate()
-    {
-    }
 }

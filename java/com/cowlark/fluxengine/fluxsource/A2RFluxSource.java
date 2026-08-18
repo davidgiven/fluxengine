@@ -134,11 +134,6 @@ public class A2RFluxSource extends FluxSource
         }
     }
 
-    @Override
-    public void recalibrate()
-    {
-    }
-
     private Bytes findChunk(Bytes id)
     {
         long offset = 8;

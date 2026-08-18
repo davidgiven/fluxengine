@@ -92,8 +92,7 @@ public class AmigaEncoder extends Encoder
         writeBits(bits, cursor, 0xaaaa, 2 * 8);
         writeBits(bits, cursor, Amiga.AMIGA_SECTOR_RECORD, 6 * 8);
 
-        Bytes header = Bytes.of(
-                0xff, /* Amiga 1.0 format byte */
+        Bytes header = Bytes.of(0xff, /* Amiga 1.0 format byte */
                 (sector.location.logicalCylinder() << 1) | sector.location.logicalHead(),
                 sector.location.logicalSector(),
                 Amiga.AMIGA_SECTORS_PER_TRACK - sector.location.logicalSector());
@@ -105,8 +104,7 @@ public class AmigaEncoder extends Encoder
         writeInterleavedWord(bits, cursor, checksum[0], checksum);
 
         Bytes data = sector.data.slice(0, 512);
-        writeInterleavedWord(
-                bits,
+        writeInterleavedWord(bits,
                 cursor,
                 Amiga.amigaChecksum(FmMfm.encodeMfm(Amiga.amigaInterleave(data), lastBit)),
                 checksum);
@@ -122,8 +120,7 @@ public class AmigaEncoder extends Encoder
         Bits bits = new Bits(bitsPerRevolution);
         Bits.Cursor cursor = new Bits.Cursor(0);
 
-        bits.fillBitmapTo(
-                cursor,
+        bits.fillBitmapTo(cursor,
                 (int) (config.getPostIndexGapMs() * 1000 / config.getClockRateUs()),
                 new boolean[]{true, false});
         lastBit[0] = false;
@@ -136,8 +133,7 @@ public class AmigaEncoder extends Encoder
         bits.fillBitmapTo(cursor, bits.size(), new boolean[]{true, false});
 
         Fluxmap fluxmap = new Fluxmap();
-        fluxmap.appendBits(
-                bits,
+        fluxmap.appendBits(bits,
                 (long) calculatePhysicalClockPeriodNs(config.getClockRateUs() * 1e3, 200e6));
         return fluxmap;
     }

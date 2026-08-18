@@ -7,14 +7,14 @@ import java.util.List;
 public class HexIntFlag extends ValueFlag<Integer>
 {
     @Builder(setterPrefix = "set")
-    private HexIntFlag(FlagGroup group,
-                       @Singular List<String> names,
-                       String helpText,
-                       Integer defaultValue)
+    private HexIntFlag(
+            FlagGroup group,
+            @Singular List<String> names,
+            String helpText,
+            Integer defaultValue)
     {
-        super(
-                group, names, helpText, defaultValue != null ? defaultValue : 0, unused -> {
-                });
+        super(group, names, helpText, defaultValue != null ? defaultValue : 0, unused -> {
+        });
     }
 
     @Override

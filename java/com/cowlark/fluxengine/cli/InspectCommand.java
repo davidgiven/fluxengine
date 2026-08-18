@@ -186,12 +186,10 @@ public class InspectCommand implements Command
                 .build());
         Fluxmap fluxmap = iterator.next();
 
-        System.out.printf(
-                "0x%x bytes of data in %.3fms%n",
+        System.out.printf("0x%x bytes of data in %.3fms%n",
                 fluxmap.bytes(),
                 fluxmap.durationNs() / 1e6);
-        System.out.printf(
-                "Required USB bandwidth: %dkB/s%n",
+        System.out.printf("Required USB bandwidth: %dkB/s%n",
                 (int) (fluxmap.bytes() / 1024.0 / (fluxmap.durationNs() / 1e9)));
 
         FluxmapReader fmr = new FluxmapReader(fluxmap, DecoderProto.getDefaultInstance());
@@ -250,8 +248,7 @@ public class InspectCommand implements Command
                     System.out.printf("%n%10.3f:%c", next / 1000.0, clocked ? '-' : ' ');
                     bannered = true;
                 }
-                System.out.printf(
-                        "==== %06x %10.3f +%.3f = %.1f clocks",
+                System.out.printf("==== %06x %10.3f +%.3f = %.1f clocks",
                         fmr.tell().bytes(),
                         transition / 1000.0,
                         length / 1000.0,
@@ -262,15 +259,13 @@ public class InspectCommand implements Command
 
         if (dumpBitstreamFlag.get())
         {
-            System.out.printf(
-                    "\n\nAligned bitstream from %.3fms follows:%n",
+            System.out.printf("\n\nAligned bitstream from %.3fms follows:%n",
                     fmr.tell().getDurationNs() / 1000000.0);
 
             FluxDecoder decoder = new FluxDecoder(fmr, clockPeriod, config.getDecoder());
             while (!fmr.eof())
             {
-                System.out.printf(
-                        "%06x %10.3f : ",
+                System.out.printf("%06x %10.3f : ",
                         fmr.tell().bytes(),
                         fmr.tell().getDurationNs() / 1000000.0);
                 for (int i = 0; i < 50; i++)
@@ -287,8 +282,7 @@ public class InspectCommand implements Command
 
         if (dumpRawFlag.isSet())
         {
-            System.out.printf(
-                    "\n\nRaw binary with offset %d from %.3fms follows:%n",
+            System.out.printf("\n\nRaw binary with offset %d from %.3fms follows:%n",
                     dumpRawFlag.get(),
                     fmr.tell().getDurationNs() / 1000000.0);
 
@@ -298,8 +292,7 @@ public class InspectCommand implements Command
 
             while (!fmr.eof())
             {
-                System.out.printf(
-                        "%06x %10.3f : ",
+                System.out.printf("%06x %10.3f : ",
                         fmr.tell().bytes(),
                         fmr.tell().getDurationNs() / 1000000.0);
 

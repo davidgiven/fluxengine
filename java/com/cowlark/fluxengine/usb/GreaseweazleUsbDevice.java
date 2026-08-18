@@ -31,6 +31,7 @@ import static com.cowlark.fluxengine.external.GreaseweazleUtils.FLUXOP_INDEX;
 import static com.cowlark.fluxengine.external.GreaseweazleUtils.FLUXOP_SPACE;
 import static com.cowlark.fluxengine.external.GreaseweazleUtils.GETINFO_FIRMWARE;
 
+import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.core.ByteReader;
 import com.cowlark.fluxengine.core.ByteWriter;
 import com.cowlark.fluxengine.core.Bytes;
@@ -45,12 +46,12 @@ import java.time.Duration;
 class GreaseweazleUsbDevice extends UsbDevice
 {
     private final Serial serial;
-    private final GreaseweazleProto config;
+    private final ConfigProto config;
     private Version version;
     private long clock;
     private long revolutions;
 
-    GreaseweazleUsbDevice(String port, GreaseweazleProto config)
+    GreaseweazleUsbDevice(String port, ConfigProto config)
     {
         this.config = config;
         this.serial = new Serial(port, BAUD_NORMAL);
@@ -65,7 +66,8 @@ class GreaseweazleUsbDevice extends UsbDevice
         else
             throw new FluxEngineException(String.format(
                     "only Greaseweazle firmware versions 22 and 24 or above are currently " +
-                            "supported, but you have version %d. Please file a bug.", version));
+                            "supported, but you have version %d. Please file a bug.",
+                    version));
 
         /* Twiddle the baud rate, which indicates to the Greaseweazle that the
          * data stream has been reset. */
@@ -74,7 +76,9 @@ class GreaseweazleUsbDevice extends UsbDevice
         serial.setBaudRate(BAUD_NORMAL);
 
         /* Configure the hardware. */
-        doCommand(CMD_SET_BUS_TYPE, config.getBusType().getNumber());
+        doCommand(CMD_SELECT, config.getDrive().getDrive());
+        doCommand(CMD_SET_PIN, 2, config.getDrive().getHighDensity() ? 1 : 0);
+        doCommand(CMD_SET_BUS_TYPE, config.getUsb().getGreaseweazle().getBusType().getNumber());
     }
 
     private static String gwError(int e)
@@ -173,17 +177,22 @@ class GreaseweazleUsbDevice extends UsbDevice
     }
 
     @Override
-    public void seek(int track)
+    public void seek(DriveSettings settings)
     {
-        doCommand(CMD_SEEK, track);
+        doCommand(CMD_SEEK, settings.seekPosition);
+        doCommand(CMD_HEAD, settings.side);
+        doCommand(CMD_SELECT, settings.drive);
+        doCommand(CMD_MOTOR, settings.drive, 1);
+        doCommand(CMD_SET_PIN, 2, settings.highDensity ? 1 : 0);
     }
 
     @Override
-    public double getRotationalPeriod(int hardSectorCount)
+    public double getRotationalPeriod(DriveSettings settings)
     {
-        if (hardSectorCount != 0)
+        if (settings.hardSectorCount != 0)
             throw new FluxEngineException(
                     "hard sectors are currently unsupported on the " + "Greaseweazle");
+        seek(settings);
 
         /* The Greaseweazle doesn't have a command to fetch the period directly,
          * so we have to do a flux read. */
@@ -298,8 +307,7 @@ class GreaseweazleUsbDevice extends UsbDevice
         serial.readBytes(1);
         double elapsedTime = getCurrentTime() - startTime;
 
-        System.out.printf(
-                "transferred %d bytes from PC -> device in %d ms (%d kb/s)\n",
+        System.out.printf("transferred %d bytes from PC -> device in %d ms (%d kb/s)\n",
                 LEN,
                 (int) (elapsedTime * 1000.0),
                 (int) ((LEN / 1024.0) / elapsedTime));
@@ -337,22 +345,20 @@ class GreaseweazleUsbDevice extends UsbDevice
         serial.readBytes(LEN);
         double elapsedTime = getCurrentTime() - startTime;
 
-        System.out.printf(
-                "transferred %d bytes from device -> PC in %d ms (%d kb/s)\n",
+        System.out.printf("transferred %d bytes from device -> PC in %d ms (%d kb/s)\n",
                 LEN,
                 (int) (elapsedTime * 1000.0),
                 (int) ((LEN / 1024.0) / elapsedTime));
     }
 
     @Override
-    public Bytes read(int side, boolean synced, double readTimeNs, double hardSectorThresholdNs)
+    public Bytes read(DriveSettings settings, double readTimeNs)
     {
-        if (hardSectorThresholdNs != 0.0)
+        if (settings.hardSectorThresholdNs != 0.0)
             throw new FluxEngineException(
                     "hard sectors are currently unsupported on the " + "Greaseweazle");
 
-        doCommand(CMD_HEAD, side);
-
+        seek(settings);
         switch (version)
         {
             case V22:
@@ -362,7 +368,7 @@ class GreaseweazleUsbDevice extends UsbDevice
                 ByteWriter bw = new ByteWriter(cmd);
                 bw.write8(CMD_READ_FLUX);
                 bw.write8(4);
-                bw.writeLe32((int) (revs + (synced ? 1 : 0)));
+                bw.writeLe32((int) (revs + (settings.synced ? 1 : 0)));
                 doCommand(cmd);
                 break;
             }
@@ -374,7 +380,7 @@ class GreaseweazleUsbDevice extends UsbDevice
                 ByteWriter bw = new ByteWriter(cmd);
                 bw.write8(CMD_READ_FLUX);
                 bw.write8(8);
-                bw.writeLe32((int) ((readTimeNs + (synced ? revolutions : 0)) / clock));
+                bw.writeLe32((int) ((readTimeNs + (settings.synced ? revolutions : 0)) / clock));
                 bw.writeLe16(0);
                 doCommand(cmd);
             }
@@ -393,19 +399,19 @@ class GreaseweazleUsbDevice extends UsbDevice
         doCommand(CMD_GET_FLUX_STATUS);
 
         Bytes fldata = GreaseweazleUtils.greaseweazleToFluxEngine(buffer, clock);
-        if (synced)
+        if (settings.synced)
             fldata = GreaseweazleUtils.stripPartialRotation(fldata);
         return fldata;
     }
 
     @Override
-    public void write(int side, Bytes fldata, double hardSectorThresholdNs)
+    public void write(DriveSettings settings, Bytes fldata)
     {
-        if (hardSectorThresholdNs != 0.0)
+        if (settings.hardSectorThresholdNs != 0.0)
             throw new FluxEngineException(
                     "hard sectors are currently unsupported on the " + "Greaseweazle");
 
-        doCommand(CMD_HEAD, side);
+        seek(settings);
         switch (version)
         {
             case V22:
@@ -425,13 +431,13 @@ class GreaseweazleUsbDevice extends UsbDevice
     }
 
     @Override
-    public void erase(int side, double hardSectorThresholdNs)
+    public void erase(DriveSettings settings)
     {
-        if (hardSectorThresholdNs != 0.0)
+        if (settings.hardSectorThresholdNs != 0.0)
             throw new FluxEngineException(
                     "hard sectors are currently unsupported on the " + "Greaseweazle");
 
-        doCommand(CMD_HEAD, side);
+        seek(settings);
 
         Bytes cmd = new Bytes(0);
         ByteWriter bw = new ByteWriter(cmd);
@@ -442,14 +448,6 @@ class GreaseweazleUsbDevice extends UsbDevice
         serial.readByte(); /* synchronise */
 
         doCommand(CMD_GET_FLUX_STATUS);
-    }
-
-    @Override
-    public void setDrive(int drive, boolean highDensity, int indexMode)
-    {
-        doCommand(CMD_SELECT, drive);
-        doCommand(CMD_MOTOR, drive, 1);
-        doCommand(CMD_SET_PIN, 2, highDensity ? 1 : 0);
     }
 
     @Override

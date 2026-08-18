@@ -1,95 +1,42 @@
 package com.cowlark.fluxengine.usb;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Mockito.verify;
 
 import com.cowlark.fluxengine.config.ConfigBuilder;
 import com.cowlark.fluxengine.config.ConfigProto;
-import com.cowlark.fluxengine.core.Bytes;
+import com.cowlark.fluxengine.testing.TestHelpers;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
+import java.util.function.Function;
 
 @RunWith(JUnit4.class)
 public class UsbFactoryTest
 {
-    @org.junit.Rule
-    public final org.junit.rules.TestRule loggerRule =
-            com.cowlark.fluxengine.testing.TestHelpers.loggerRule();
+    @Rule public final TestRule loggerRule = TestHelpers.loggerRule();
+    @Rule public final MockitoRule mockitoRule = MockitoJUnit.rule();
 
-    private static class FakeUsbDevice extends UsbDevice
-    {
-        int closed = 0;
-
-        @Override
-        public void seek(int track)
-        {
-        }
-
-        @Override
-        public double getRotationalPeriod(int hardSectorCount)
-        {
-            return 0;
-        }
-
-        @Override
-        public void testBulkWrite()
-        {
-        }
-
-        @Override
-        public void testBulkRead()
-        {
-        }
-
-        @Override
-        public Bytes read(int side, boolean synced, double readTimeNs, double hardSectorThresholdNs)
-        {
-            return new Bytes();
-        }
-
-        @Override
-        public void write(int side, Bytes bytes, double hardSectorThresholdNs)
-        {
-        }
-
-        @Override
-        public void erase(int side, double hardSectorThresholdNs)
-        {
-        }
-
-        @Override
-        public void setDrive(int drive, boolean highDensity, int indexMode)
-        {
-        }
-
-        @Override
-        public VoltageMeasurements measureVoltages()
-        {
-            return null;
-        }
-
-        @Override
-        public void close()
-        {
-            closed++;
-        }
-    }
+    @Mock UsbDevice mockUsbDevice;
 
     private static ConfigProto config()
     {
-        return new ConfigBuilder()
-                .set("usb.serial", "test-serial")
-                .build();
+        return new ConfigBuilder().set("usb.serial", "test-serial").build();
     }
 
-    private static void withFakeFactory(java.util.function.Function<ConfigProto, UsbDevice> factory,
-                                        Runnable test)
+    private static void withFakeFactory(Function<ConfigProto, UsbDevice> factory, Runnable test)
     {
-        java.util.function.Function<ConfigProto, UsbDevice> saved = UsbFactory.deviceFactory;
+        Function<ConfigProto, UsbDevice> saved = UsbFactory.deviceFactory;
         UsbFactory.deviceFactory = factory;
         try
         {
-            UsbFactory.reconnect(config()); /* flush any cached device */
+            UsbFactory.getConnection(config()); /* flush any cached device */
             test.run();
         } finally
         {
@@ -98,31 +45,29 @@ public class UsbFactoryTest
     }
 
     @Test
-    public void reconnectReturnsSameInstanceForSameConfig()
+    public void getConnectionReturnsSameInstanceForSameConfig()
     {
-        withFakeFactory(c -> new FakeUsbDevice(), () ->
-        {
+        withFakeFactory(c -> mockUsbDevice, () -> {
             ConfigProto config = config();
 
-            UsbDevice first = UsbFactory.reconnect(config);
-            UsbDevice second = UsbFactory.reconnect(config);
+            UsbDevice first = UsbFactory.getConnection(config);
+            UsbDevice second = UsbFactory.getConnection(config);
 
             assertThat(second).isSameInstanceAs(first);
         });
     }
 
     @Test
-    public void reconnectCachesByConfigValue()
+    public void getConnectionCachesByConfigValue()
     {
-        withFakeFactory(c -> new FakeUsbDevice(), () ->
-        {
+        withFakeFactory(c -> mockUsbDevice, () -> {
             /* The cache is keyed by ConfigProto value equality, so a distinct
              * but equal config object must hit the same cache entry. */
             ConfigProto first = config();
             ConfigProto second = config();
 
-            UsbDevice a = UsbFactory.reconnect(first);
-            UsbDevice b = UsbFactory.reconnect(second);
+            UsbDevice a = UsbFactory.getConnection(first);
+            UsbDevice b = UsbFactory.getConnection(second);
 
             assertThat(a).isNotNull();
             assertThat(b).isSameInstanceAs(a);
@@ -130,23 +75,20 @@ public class UsbFactoryTest
     }
 
     @Test
-    public void reconnectWithDifferentConfigEvictsAndClosesOldDevice()
+    public void getConnectionWithDifferentConfigEvictsAndClosesOldDevice()
     {
-        withFakeFactory(c -> new FakeUsbDevice(), () ->
-        {
+        withFakeFactory(c -> Mockito.mock(UsbDevice.class), () -> {
             ConfigProto first = config();
-            ConfigProto second = new ConfigBuilder()
-                    .set("usb.serial", "test-serial")
+            ConfigProto second = new ConfigBuilder().set("usb.serial", "test-serial")
                     .set("drive.drive", "1")
                     .build();
 
-            UsbDevice a = UsbFactory.reconnect(first);
-            FakeUsbDevice fakeA = (FakeUsbDevice) a;
-            UsbDevice b = UsbFactory.reconnect(second);
+            UsbDevice a = UsbFactory.getConnection(first);
+            UsbDevice b = UsbFactory.getConnection(second);
 
             assertThat(a).isNotNull();
             assertThat(b).isNotSameInstanceAs(a);
-            assertThat(fakeA.closed).isEqualTo(1);
+            verify(a).close();
         });
     }
 }

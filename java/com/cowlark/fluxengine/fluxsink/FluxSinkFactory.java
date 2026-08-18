@@ -24,14 +24,12 @@ public abstract class FluxSinkFactory implements AutoCloseable
             case FLUXTYPE_A2R:
                 return new A2RFluxSinkFactory(sinkConfig.getA2R().getFilename(), config);
             case FLUXTYPE_AU:
-                return new AuFluxSinkFactory(
-                        sinkConfig.getAu().getDirectory(),
+                return new AuFluxSinkFactory(sinkConfig.getAu().getDirectory(),
                         sinkConfig.getAu().getIndexMarkers());
             case FLUXTYPE_VCD:
                 return new VcdFluxSinkFactory(sinkConfig.getVcd().getDirectory());
             case FLUXTYPE_SCP:
-                return new ScpFluxSinkFactory(
-                        sinkConfig.getScp().getFilename(),
+                return new ScpFluxSinkFactory(sinkConfig.getScp().getFilename(),
                         sinkConfig.getScp().getTypeByte(),
                         sinkConfig.getScp().getAlignWithIndex(),
                         config);
@@ -42,14 +40,16 @@ public abstract class FluxSinkFactory implements AutoCloseable
         }
     }
 
-    public static Fl2FluxSinkFactory createFl2FluxSinkFactory(Fl2FluxSinkProto config,
-                                                              ConfigProto fullConfig)
+    public static Fl2FluxSinkFactory createFl2FluxSinkFactory(
+            Fl2FluxSinkProto config,
+            ConfigProto fullConfig)
     {
         return new Fl2FluxSinkFactory(config.getFilename(), fullConfig);
     }
 
-    public static Fl2FluxSinkFactory createFl2FluxSinkFactory(String filename,
-                                                              ConfigProto fullConfig)
+    public static Fl2FluxSinkFactory createFl2FluxSinkFactory(
+            String filename,
+            ConfigProto fullConfig)
     {
         return new Fl2FluxSinkFactory(filename, fullConfig);
     }

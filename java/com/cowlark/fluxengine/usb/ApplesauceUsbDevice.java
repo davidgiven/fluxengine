@@ -30,8 +30,8 @@ class ApplesauceUsbDevice extends UsbDevice
 
         String s = sendrecv("?");
         if (!s.equals("Applesauce"))
-            throw new FluxEngineException(String.format(
-                    "Applesauce device not responding " + "(expected 'Applesauce', got '%s')",
+            throw new FluxEngineException(String.format("Applesauce device not responding " +
+                            "(expected 'Applesauce', got '%s')",
                     s));
 
         doCommand("client:v2");
@@ -42,9 +42,10 @@ class ApplesauceUsbDevice extends UsbDevice
         return (x & 1) != 0 ? (x >> 1) ^ 0x80000062L : x >> 1;
     }
 
-    private static Bytes applesauceReadDataToFluxEngine(Bytes asdata,
-                                                        double clock,
-                                                        List<Integer> indexMarks)
+    private static Bytes applesauceReadDataToFluxEngine(
+            Bytes asdata,
+            double clock,
+            List<Integer> indexMarks)
     {
         ByteReader br = new ByteReader(asdata);
         Fluxmap fluxmap = new Fluxmap();
@@ -172,22 +173,27 @@ class ApplesauceUsbDevice extends UsbDevice
     }
 
     @Override
-    public void seek(int track)
+    public void seek(DriveSettings settings)
     {
-        if (track == 0)
+        if (settings.drive != 0)
+            throw new FluxEngineException("the Applesauce only supports drive 0");
+        connect();
+        doCommand(String.format("dpc:density%s", settings.highDensity ? "+" : "-"));
+        if (settings.seekPosition == 0)
             doCommand("head:zero");
         else
-            doCommand(String.format("head:track%d", track));
+            doCommand(String.format("head:track%d", settings.seekPosition));
+        doCommand(String.format("head:side%d", settings.side));
     }
 
     @Override
-    public double getRotationalPeriod(int hardSectorCount)
+    public double getRotationalPeriod(DriveSettings settings)
     {
-        if (hardSectorCount != 0)
+        if (settings.hardSectorCount != 0)
             throw new FluxEngineException(
                     "hard sectors are currently unsupported on the " + "Applesauce");
 
-        connect();
+        seek(settings);
         try
         {
             double periodUs = Double.parseDouble(doCommandX("sync:?speed"));
@@ -222,8 +228,7 @@ class ApplesauceUsbDevice extends UsbDevice
         serial.readLine();
         double elapsedTime = getCurrentTime() - startTime;
 
-        System.out.printf(
-                "transferred %d bytes from PC -> device in %d ms (%d kb/s)%n",
+        System.out.printf("transferred %d bytes from PC -> device in %d ms (%d kb/s)%n",
                 max,
                 (int) (elapsedTime * 1000.0),
                 (int) ((max / 1024.0) / elapsedTime));
@@ -241,26 +246,23 @@ class ApplesauceUsbDevice extends UsbDevice
         serial.readBytes(max);
         double elapsedTime = getCurrentTime() - startTime;
 
-        System.out.printf(
-                "transferred %d bytes from device -> PC in %d ms (%d kb/s)%n",
+        System.out.printf("transferred %d bytes from device -> PC in %d ms (%d kb/s)%n",
                 max,
                 (int) (elapsedTime * 1000.0),
                 (int) ((max / 1024.0) / elapsedTime));
     }
 
     @Override
-    public Bytes read(int side, boolean synced, double readTimeNs, double hardSectorThresholdNs)
+    public Bytes read(DriveSettings state, double readTimeNs)
     {
-        if (hardSectorThresholdNs != 0.0)
+        if (state.hardSectorThresholdNs != 0.0)
             throw new FluxEngineException(
                     "hard sectors are currently unsupported on the " + "Applesauce");
         boolean shortRead = readTimeNs < 400e6;
-        Logger.logf(
-                "applesauce: timed reads not supported; using read of %s revolutions",
+        Logger.logf("applesauce: timed reads not supported; using read of %s revolutions",
                 shortRead ? "1.25" : "2.25");
 
-        connect();
-        doCommand(String.format("head:side%d", side));
+        seek(state);
         doCommand("sync:on");
         doCommand("data:clear");
         String r = doCommandX(shortRead ? "disk:read" : "disk:readx");
@@ -293,15 +295,14 @@ class ApplesauceUsbDevice extends UsbDevice
     }
 
     @Override
-    public void write(int side, Bytes fldata, double hardSectorThresholdNs)
+    public void write(DriveSettings state, Bytes fldata)
     {
-        if (hardSectorThresholdNs != 0.0)
+        if (state.hardSectorThresholdNs != 0.0)
             throw new FluxEngineException(
                     "hard sectors are currently unsupported on the " + "Applesauce");
         checkWritable();
 
-        connect();
-        doCommand(String.format("head:side%d", side));
+        seek(state);
         doCommand("sync:on");
         doCommand("disk:wipe");
         doCommand("data:clear");
@@ -316,26 +317,16 @@ class ApplesauceUsbDevice extends UsbDevice
     }
 
     @Override
-    public void erase(int side, double hardSectorThresholdNs)
+    public void erase(DriveSettings state)
     {
-        if (hardSectorThresholdNs != 0.0)
+        if (state.hardSectorThresholdNs != 0.0)
             throw new FluxEngineException(
                     "hard sectors are currently unsupported on the " + "Applesauce");
         checkWritable();
 
-        connect();
-        doCommand(String.format("disk:side%d", side));
+        seek(state);
+        doCommand(String.format("disk:side%d", state.side));
         doCommand("disk:wipe");
-    }
-
-    @Override
-    public void setDrive(int drive, boolean highDensity, int indexMode)
-    {
-        if (drive != 0)
-            throw new FluxEngineException("the Applesauce only supports drive 0");
-
-        connect();
-        doCommand(String.format("dpc:density%s", highDensity ? "+" : "-"));
     }
 
     @Override
