@@ -22,8 +22,7 @@ public class HardwareFluxSink extends FluxSink
     @Override
     public void addFlux(int cylinder, int head, Fluxmap fluxmap)
     {
-        usbFactory.getConnection().seek(cylinder);
-        usbFactory.getConnection().write(cylinder, head, fluxmap.rawBytes());
+        usbFactory.perform(device -> device.write(cylinder, head, fluxmap.rawBytes()));
     }
 
     @Override

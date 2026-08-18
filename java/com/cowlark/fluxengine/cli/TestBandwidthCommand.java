@@ -2,7 +2,6 @@ package com.cowlark.fluxengine.cli;
 
 import com.cowlark.fluxengine.config.ConfigBuilder;
 import com.cowlark.fluxengine.config.ConfigProto;
-import com.cowlark.fluxengine.usb.UsbDevice;
 import com.cowlark.fluxengine.usb.UsbFactory;
 import com.google.common.collect.ImmutableList;
 
@@ -24,9 +23,10 @@ public class TestBandwidthCommand implements Command
 
         try (UsbFactory usbFactory = new UsbFactory(config))
         {
-            UsbDevice device = usbFactory.getConnection();
-            device.testBulkWrite();
-            device.testBulkRead();
+            usbFactory.perform(device -> {
+                device.testBulkWrite();
+                device.testBulkRead();
+            });
         }
     }
 }

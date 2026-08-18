@@ -41,18 +41,20 @@ public class RpmCommand implements Command
 
         try (UsbFactory usbFactory = new UsbFactory(config))
         {
-            double periodNs = usbFactory.getConnection().getRotationalPeriod();
-            if (periodNs != 0.0)
-                System.out.printf("Rotational period is %.0f ms (%.0f rpm)\n",
-                        periodNs / 1e6,
-                        60e9 / periodNs);
-            else
-                System.out.println("""
-                        No index pulses detected from the disk. Common causes of this are:
-                          - no drive is connected
-                          - the drive doesn't have an index sensor (e.g. BBC Micro drives)
-                          - the disk has no index holes (e.g. reversed flippy disks)
-                          - (most common) no disk is inserted in the drive!""");
+            usbFactory.perform(device -> {
+                double periodNs = device.getRotationalPeriod();
+                if (periodNs != 0.0)
+                    System.out.printf("Rotational period is %.0f ms (%.0f rpm)\n",
+                            periodNs / 1e6,
+                            60e9 / periodNs);
+                else
+                    System.out.println("""
+                            No index pulses detected from the disk. Common causes of this are:
+                              - no drive is connected
+                              - the drive doesn't have an index sensor (e.g. BBC Micro drives)
+                              - the disk has no index holes (e.g. reversed flippy disks)
+                              - (most common) no disk is inserted in the drive!""");
+            });
         }
     }
 }

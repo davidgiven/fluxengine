@@ -3,19 +3,21 @@ package com.cowlark.fluxengine.usb;
 import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.config.UsbFinder;
 import com.cowlark.fluxengine.config.UsbFinder.CandidateDevice;
-import com.cowlark.fluxengine.core.FluxEngineException;
 import com.cowlark.fluxengine.core.Logger;
 import com.cowlark.fluxengine.core.SupplierOfAutocloseable;
 import lombok.SneakyThrows;
+import org.slf4j.LoggerFactory;
+import java.util.function.Consumer;
 
 /**
  * USB device finder, ported from lib/usb/usbfinder.cc.
  */
 public class UsbFactory implements AutoCloseable
 {
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(UsbFactory.class);
+
     private final ConfigProto config;
-    private final SupplierOfAutocloseable<UsbDevice> deviceSupplier =
-            new SupplierOfAutocloseable<>(this::createConnection);
+    private UsbDevice device = null;
 
     public UsbFactory(ConfigProto config)
     {
@@ -26,12 +28,30 @@ public class UsbFactory implements AutoCloseable
     @SneakyThrows
     public void close()
     {
-        deviceSupplier.close();
+        if (device != null)
+            device.close();
     }
 
-    public UsbDevice getConnection()
+    public void perform(Consumer<UsbDevice> cb)
     {
-        return deviceSupplier.get();
+        for (; ; )
+        {
+            try
+            {
+                if (device == null)
+                    device = createConnection();
+                cb.accept(device);
+                return;
+            } catch (RetryableUsbException e)
+            {
+                logger.atWarn().setCause(e).log("USB threw a retryable error");
+                if (device != null)
+                {
+                    device.close();
+                    device = null;
+                }
+            }
+        }
     }
 
     public UsbDevice createConnection()
@@ -44,10 +64,9 @@ public class UsbFactory implements AutoCloseable
         {
             case GREASEWEAZLE -> new GreaseweazleUsbDevice(candidateDevice.serialPort, config);
             case APPLESAUCE -> new ApplesauceUsbDevice(candidateDevice.serialPort,
-                    config, config.getUsb().getApplesauce());
+                    config,
+                    config.getUsb().getApplesauce());
             case FLUXENGINE -> new FluxEngineUsbDevice(candidateDevice.device, config);
-            default -> throw new FluxEngineException("unsupported hardware device");
-
         };
 
         device.seek(config.getDrive().getDrive());

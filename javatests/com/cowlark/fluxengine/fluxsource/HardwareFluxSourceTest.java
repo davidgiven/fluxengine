@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 
 import com.cowlark.fluxengine.config.ConfigBuilder;
@@ -22,6 +23,7 @@ import org.junit.runners.JUnit4;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
+import java.util.function.Consumer;
 
 @RunWith(JUnit4.class)
 public class HardwareFluxSourceTest
@@ -45,7 +47,11 @@ public class HardwareFluxSourceTest
     @Before
     public void setup()
     {
-        when(mockUsbFactory.getConnection()).thenReturn(mockUsbDevice);
+        doAnswer(invocation -> {
+            Consumer<UsbDevice> cb = invocation.getArgument(0);
+            cb.accept(mockUsbDevice);
+            return null;
+        }).when(mockUsbFactory).perform(any());
     }
 
     @Test

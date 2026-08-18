@@ -32,32 +32,34 @@ public class TestVoltagesCommand implements Command
 
         try (UsbFactory usbFactory = new UsbFactory(config))
         {
-            VoltageMeasurements voltages = usbFactory.getConnection().measureVoltages();
+            usbFactory.perform(device -> {
+                VoltageMeasurements voltages = device.measureVoltages();
 
-            System.out.printf("""
-                            Output voltages:
-                              Both drives deselected
-                            %s  Drive 0 selected
-                            %s  Drive 1 selected
-                            %s  Drive 0 running
-                            %s  Drive 1 running
-                            %sInput voltages:
-                              Both drives deselected
-                            %s  Drive 0 selected
-                            %s  Drive 1 selected
-                            %s  Drive 0 running
-                            %s  Drive 1 running
-                            %s""",
-                    displayVoltages(voltages.outputBothOff),
-                    displayVoltages(voltages.outputDrive0Selected),
-                    displayVoltages(voltages.outputDrive1Selected),
-                    displayVoltages(voltages.outputDrive0Running),
-                    displayVoltages(voltages.outputDrive1Running),
-                    displayVoltages(voltages.inputBothOff),
-                    displayVoltages(voltages.inputDrive0Selected),
-                    displayVoltages(voltages.inputDrive1Selected),
-                    displayVoltages(voltages.inputDrive0Running),
-                    displayVoltages(voltages.inputDrive1Running));
+                System.out.printf("""
+                                Output voltages:
+                                  Both drives deselected
+                                %s  Drive 0 selected
+                                %s  Drive 1 selected
+                                %s  Drive 0 running
+                                %s  Drive 1 running
+                                %sInput voltages:
+                                  Both drives deselected
+                                %s  Drive 0 selected
+                                %s  Drive 1 selected
+                                %s  Drive 0 running
+                                %s  Drive 1 running
+                                %s""",
+                        displayVoltages(voltages.outputBothOff),
+                        displayVoltages(voltages.outputDrive0Selected),
+                        displayVoltages(voltages.outputDrive1Selected),
+                        displayVoltages(voltages.outputDrive0Running),
+                        displayVoltages(voltages.outputDrive1Running),
+                        displayVoltages(voltages.inputBothOff),
+                        displayVoltages(voltages.inputDrive0Selected),
+                        displayVoltages(voltages.inputDrive1Selected),
+                        displayVoltages(voltages.inputDrive0Running),
+                        displayVoltages(voltages.inputDrive1Running));
+            });
         }
     }
 }

@@ -25,7 +25,6 @@ import com.cowlark.fluxengine.fluxsource.FluxSource;
 import com.cowlark.fluxengine.fluxsource.FluxSourceIterator;
 import com.cowlark.fluxengine.imagereader.ImageReader;
 import com.cowlark.fluxengine.imagewriter.ImageWriter;
-import com.cowlark.fluxengine.usb.UsbDevice;
 import com.cowlark.fluxengine.usb.UsbFactory;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
@@ -202,18 +201,18 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
         diskRotationalPeriodNs = configProto.getDrive().getRotationalPeriodMs() * 1e6;
         if (diskRotationalPeriodNs == 0)
         {
-            UsbDevice device = usbFactorySupplier.get().getConnection();
+            usbFactorySupplier.get().perform(device -> {
+                Logger.log(new BeginOperationLogMessage("Measuring drive rotational speed"));
+                Logger.log(new BeginSpeedOperationLogMessage());
 
-            Logger.log(new BeginOperationLogMessage("Measuring drive rotational speed"));
-            Logger.log(new BeginSpeedOperationLogMessage());
-
-            int retries = 5;
-            do
-            {
-                diskRotationalPeriodNs = device.getRotationalPeriod();
-                retries--;
-            } while ((diskRotationalPeriodNs == 0) && (retries > 0));
-            Logger.log(new EndOperationLogMessage(""));
+                int retries = 5;
+                do
+                {
+                    diskRotationalPeriodNs = device.getRotationalPeriod();
+                    retries--;
+                } while ((diskRotationalPeriodNs == 0) && (retries > 0));
+                Logger.log(new EndOperationLogMessage(""));
+            });
         }
 
         if (diskRotationalPeriodNs == 0)
@@ -255,14 +254,14 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
                 break;
 
             case RECALIBRATE:
-                usbFactorySupplier.get().getConnection().seek(0);
+                usbFactorySupplier.get().perform(device -> device.seek(0));
                 break;
 
             case JIGGLE:
-                if (baseTrack > 0)
-                    usbFactorySupplier.get().getConnection().seek(baseTrack - 1);
-                else
-                    usbFactorySupplier.get().getConnection().seek(baseTrack + 1);
+                usbFactorySupplier.get()
+                        .perform(device -> device.seek((baseTrack > 0) ?
+                                (baseTrack - 1) :
+                                (baseTrack + 1)));
                 break;
         }
     }

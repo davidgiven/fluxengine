@@ -35,11 +35,12 @@ public class HardwareFluxSource extends FluxSource
             @Override
             public Fluxmap next()
             {
-                usbFactory.getConnection().seek(parameters.cylinder());
-                Bytes data = usbFactory.getConnection().read(
-                        parameters.cylinder(), parameters.head(), parameters.readTimeNs());
+                Bytes[] box = new Bytes[1];
+                usbFactory.perform(device -> box[0] = device.read(parameters.cylinder(),
+                        parameters.head(),
+                        parameters.readTimeNs()));
                 Fluxmap fluxmap = new Fluxmap();
-                fluxmap.appendBytes(data);
+                fluxmap.appendBytes(box[0]);
                 return fluxmap;
             }
         };

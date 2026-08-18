@@ -48,7 +48,7 @@ public class SeekCommand implements Command
 
         try (UsbFactory usbFactory = new UsbFactory(config))
         {
-            usbFactory.getConnection().seek(track.get());
+            usbFactory.perform(device -> device.seek(track.get()));
         }
     }
 }
