@@ -1,15 +1,8 @@
 load("@com_google_protobuf//bazel:java_proto_library.bzl", "java_proto_library")
-load("@rules_java//java:defs.bzl", "java_library", "java_plugin")
+load("@rules_java//java:defs.bzl", "java_library")
 load("@rules_proto//proto:defs.bzl", "proto_library")
 
 package(default_visibility = ["//visibility:public"])
-
-java_plugin(
-    name = "lombok_plugin",
-    generates_api = True,
-    processor_class = "lombok.launch.AnnotationProcessorHider$AnnotationProcessor",
-    deps = ["@maven//:org_projectlombok_lombok"],
-)
 
 proto_library(
     name = "fluxsource_proto",
@@ -26,7 +19,7 @@ java_proto_library(
 java_library(
     name = "fluxsource",
     srcs = glob(["*.java"]),
-    plugins = [":lombok_plugin"],
+    plugins = ["//java/com/cowlark/fluxengine/wiring:lombok_plugin"],
     deps = [
         ":fluxsource_java_proto",
         "//java/com/cowlark/fluxengine/config",
