@@ -3,6 +3,7 @@ package com.cowlark.fluxengine.fluxsource;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyDouble;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 import com.cowlark.fluxengine.config.ConfigBuilder;
@@ -59,7 +60,7 @@ public class HardwareFluxSourceTest
     public void readFluxReadsAndWrapsFluxmap()
     {
         Bytes readResult = Bytes.of(0x01, 0x02, 0x03, 0x04);
-        when(mockUsbDevice.read(any(), anyDouble())).thenReturn(readResult);
+        when(mockUsbDevice.read(anyInt(), anyInt(), anyDouble())).thenReturn(readResult);
         HardwareFluxSource source = new HardwareFluxSource(config(), mockUsbFactory);
 
         FluxSourceIterator iterator = source.readFlux(FluxReadParameters.builder()

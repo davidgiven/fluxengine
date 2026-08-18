@@ -18,6 +18,8 @@ import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_ERASE_REPLY;
 import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_ERROR;
 import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_GET_VERSION_CMD;
 import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_GET_VERSION_REPLY;
+
+import com.cowlark.fluxengine.config.ConfigProto;
 import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_MEASURE_SPEED_CMD;
 import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_MEASURE_SPEED_REPLY;
 import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_MEASURE_VOLTAGES_CMD;
@@ -49,6 +51,7 @@ class FluxEngineUsbDevice extends UsbDevice
     private static final int MAX_TRANSFER = 32 * 1024;
 
     private final javax.usb.UsbDevice device;
+    private final ConfigProto config;
     private final UsbInterface usbInterface;
     private final UsbPipe cmdOut;
     private final UsbPipe cmdIn;
@@ -56,17 +59,18 @@ class FluxEngineUsbDevice extends UsbDevice
     private final UsbPipe dataIn;
     private final byte[] buffer = new byte[FRAME_SIZE];
 
-    FluxEngineUsbDevice(javax.usb.UsbDevice device)
+    FluxEngineUsbDevice(javax.usb.UsbDevice device, ConfigProto config)
     {
         this.device = device;
+        this.config = config;
 
         UsbInterface iface = null;
         try
         {
             for (Object o : device.getUsbConfigurations())
             {
-                UsbConfiguration config = (UsbConfiguration) o;
-                for (Object i : config.getUsbInterfaces())
+                UsbConfiguration usbConfig = (UsbConfiguration) o;
+                for (Object i : usbConfig.getUsbInterfaces())
                 {
                     UsbInterface candidate = (UsbInterface) i;
                     if (candidate.getUsbEndpoints().size() >= 4)
@@ -256,25 +260,25 @@ class FluxEngineUsbDevice extends UsbDevice
     }
 
     @Override
-    public void seek(DriveSettings settings)
+    public void seek(int cylinder)
     {
         byte[] f = {F_FRAME_SET_DRIVE_CMD,
                 5,
-                (byte) settings.drive,
-                (byte) (settings.highDensity ? 1 : 0),
+                (byte) config.getDrive().getDrive(),
+                (byte) (config.getDrive().getHighDensity() ? 1 : 0),
                 (byte) 0};
         usbCmdSend(f);
         awaitReply(F_FRAME_SET_DRIVE_REPLY);
 
-        byte[] f2 = {F_FRAME_SEEK_CMD, 3, (byte) settings.seekPosition};
+        byte[] f2 = {F_FRAME_SEEK_CMD, 3, (byte) cylinder};
         usbCmdSend(f2);
         awaitReply(F_FRAME_SEEK_REPLY);
     }
 
     @Override
-    public double getRotationalPeriod(DriveSettings settings)
+    public double getRotationalPeriod()
     {
-        byte[] f = {F_FRAME_MEASURE_SPEED_CMD, 3, (byte) settings.hardSectorCount};
+        byte[] f = {F_FRAME_MEASURE_SPEED_CMD, 3, (byte) config.getDrive().getHardSectorCount()};
         usbCmdSend(f);
 
         byte[] r = awaitReply(F_FRAME_MEASURE_SPEED_REPLY);
@@ -350,20 +354,20 @@ class FluxEngineUsbDevice extends UsbDevice
     }
 
     @Override
-    public Bytes read(DriveSettings state, double readTimeNs)
+    public Bytes read(int cylinder, int head, double readTimeNs)
     {
-        seek(state);
+        seek(cylinder);
 
         Bytes f = new Bytes(0);
         ByteWriter bw = f.writer();
         bw.write8(F_FRAME_READ_CMD);
         bw.write8(6);
-        bw.write8(state.side);
-        bw.write8(state.synced ? 1 : 0);
+        bw.write8(head);
+        bw.write8(config.getDrive().getSyncWithIndex() ? 1 : 0);
         int milliseconds = (int) (readTimeNs / 1e6);
         bw.write8(milliseconds & 0xff);
         bw.write8((milliseconds >> 8) & 0xff);
-        bw.write8((int) ((state.hardSectorThresholdNs + 5e5) / 1e6)); /* round to nearest ms */
+        bw.write8((int) ((config.getDrive().getHardSectorThresholdNs() + 5e5) / 1e6)); /* round to nearest ms */
         usbCmdSend(f.toByteArray());
 
         Bytes buffer = usbDataRecv(1024 * 1024);
@@ -373,9 +377,9 @@ class FluxEngineUsbDevice extends UsbDevice
     }
 
     @Override
-    public void write(DriveSettings state, Bytes bytes)
+    public void write(int cylinder, int head, Bytes bytes)
     {
-        seek(state);
+        seek(cylinder);
 
         int safelen = bytes.size() & ~(FRAME_SIZE - 1);
         Bytes safeBytes = bytes.slice(0, safelen);
@@ -384,12 +388,12 @@ class FluxEngineUsbDevice extends UsbDevice
         ByteWriter bw = f.writer();
         bw.write8(F_FRAME_WRITE_CMD);
         bw.write8(7);
-        bw.write8(state.side);
+        bw.write8(head);
         bw.write8(safelen & 0xff);
         bw.write8((safelen >> 8) & 0xff);
         bw.write8((safelen >> 16) & 0xff);
         bw.write8((safelen >> 24) & 0xff);
-        bw.write8((int) ((state.hardSectorThresholdNs + 5e5) / 1e6)); /* round to nearest ms */
+        bw.write8((int) ((config.getDrive().getHardSectorThresholdNs() + 5e5) / 1e6)); /* round to nearest ms */
         usbCmdSend(f.toByteArray());
         usbDataSend(safeBytes);
 
@@ -397,16 +401,16 @@ class FluxEngineUsbDevice extends UsbDevice
     }
 
     @Override
-    public void erase(DriveSettings state)
+    public void erase(int cylinder, int head)
     {
-        seek(state);
+        seek(cylinder);
 
         Bytes f = new Bytes(0);
         ByteWriter bw = f.writer();
         bw.write8(F_FRAME_ERASE_CMD);
         bw.write8(3);
-        bw.write8(state.side);
-        bw.write8((int) ((state.hardSectorThresholdNs + 5e5) / 1e6)); /* round to nearest ms */
+        bw.write8(head);
+        bw.write8((int) ((config.getDrive().getHardSectorThresholdNs() + 5e5) / 1e6)); /* round to nearest ms */
         usbCmdSend(f.toByteArray());
 
         awaitReply(F_FRAME_ERASE_REPLY);

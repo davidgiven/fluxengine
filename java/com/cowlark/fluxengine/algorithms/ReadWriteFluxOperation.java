@@ -25,7 +25,6 @@ import com.cowlark.fluxengine.fluxsource.FluxSource;
 import com.cowlark.fluxengine.fluxsource.FluxSourceIterator;
 import com.cowlark.fluxengine.imagereader.ImageReader;
 import com.cowlark.fluxengine.imagewriter.ImageWriter;
-import com.cowlark.fluxengine.usb.DriveSettings;
 import com.cowlark.fluxengine.usb.UsbDevice;
 import com.cowlark.fluxengine.usb.UsbFactory;
 import com.google.common.base.Supplier;
@@ -211,7 +210,7 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
             int retries = 5;
             do
             {
-                diskRotationalPeriodNs = device.getRotationalPeriod(new DriveSettings());
+                diskRotationalPeriodNs = device.getRotationalPeriod();
                 retries--;
             } while ((diskRotationalPeriodNs == 0) && (retries > 0));
             Logger.log(new EndOperationLogMessage(""));
@@ -250,23 +249,20 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
 
     void adjustTrackOnError(int baseTrack)
     {
-        DriveSettings driveSettings = new DriveSettings(getConfig());
         switch (getConfig().getDrive().getErrorBehaviour())
         {
             case NOTHING:
                 break;
 
             case RECALIBRATE:
-                driveSettings.seekPosition = 0;
-                usbFactorySupplier.get().getConnection().seek(driveSettings);
+                usbFactorySupplier.get().getConnection().seek(0);
                 break;
 
             case JIGGLE:
                 if (baseTrack > 0)
-                    driveSettings.seekPosition = baseTrack - 1;
+                    usbFactorySupplier.get().getConnection().seek(baseTrack - 1);
                 else
-                    driveSettings.seekPosition = baseTrack + 1;
-                usbFactorySupplier.get().getConnection().seek(driveSettings);
+                    usbFactorySupplier.get().getConnection().seek(baseTrack + 1);
                 break;
         }
     }

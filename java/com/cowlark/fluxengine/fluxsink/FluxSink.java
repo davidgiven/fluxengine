@@ -16,9 +16,6 @@ public abstract class FluxSink implements AutoCloseable
         addFlux(location.cylinder(), location.head(), fluxmap);
     }
 
-    /* Flushes any buffered data. The C++ writes this in the destructor; Java
-     * has no destructor, so this must be called explicitly once all tracks
-     * have been written. */
     @Override
     public void close()
     {

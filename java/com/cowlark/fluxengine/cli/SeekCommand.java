@@ -9,7 +9,6 @@ import com.cowlark.fluxengine.core.flags.FlagGroup;
 import com.cowlark.fluxengine.core.flags.IntFlag;
 import com.cowlark.fluxengine.core.flags.StringFlag;
 import com.cowlark.fluxengine.core.flags.ValueFlag;
-import com.cowlark.fluxengine.usb.DriveSettings;
 import com.cowlark.fluxengine.usb.UsbFactory;
 import com.google.common.collect.ImmutableList;
 
@@ -49,9 +48,7 @@ public class SeekCommand implements Command
 
         try (UsbFactory usbFactory = new UsbFactory(config))
         {
-            DriveSettings driveSettings = new DriveSettings(config);
-            driveSettings.seekPosition = track.get();
-            usbFactory.getConnection().seek(driveSettings);
+            usbFactory.getConnection().seek(track.get());
         }
     }
 }

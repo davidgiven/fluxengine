@@ -44,16 +44,13 @@ public class UsbFactory implements AutoCloseable
         {
             case GREASEWEAZLE -> new GreaseweazleUsbDevice(candidateDevice.serialPort, config);
             case APPLESAUCE -> new ApplesauceUsbDevice(candidateDevice.serialPort,
-                    config.getUsb().getApplesauce());
-            case FLUXENGINE -> new FluxEngineUsbDevice(candidateDevice.device);
+                    config, config.getUsb().getApplesauce());
+            case FLUXENGINE -> new FluxEngineUsbDevice(candidateDevice.device, config);
             default -> throw new FluxEngineException("unsupported hardware device");
 
         };
 
-        DriveSettings settings = new DriveSettings();
-        settings.drive = config.getDrive().getDrive();
-        settings.highDensity = config.getDrive().getHighDensity();
-        device.seek(settings);
+        device.seek(config.getDrive().getDrive());
         return device;
     }
 

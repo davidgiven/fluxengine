@@ -2,7 +2,6 @@ package com.cowlark.fluxengine.fluxsink;
 
 import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.data.Fluxmap;
-import com.cowlark.fluxengine.usb.DriveSettings;
 import com.cowlark.fluxengine.usb.UsbFactory;
 
 /**
@@ -21,12 +20,10 @@ public class HardwareFluxSink extends FluxSink
     }
 
     @Override
-    public void addFlux(int track, int side, Fluxmap fluxmap)
+    public void addFlux(int cylinder, int head, Fluxmap fluxmap)
     {
-        DriveSettings settings = new DriveSettings(config);
-        settings.seekPosition = track;
-        settings.side = side;
-        usbFactory.getConnection().write(settings, fluxmap.rawBytes());
+        usbFactory.getConnection().seek(cylinder);
+        usbFactory.getConnection().write(cylinder, head, fluxmap.rawBytes());
     }
 
     @Override

@@ -8,7 +8,6 @@ import com.cowlark.fluxengine.core.FluxEngineException;
 import com.cowlark.fluxengine.core.flags.FlagGroup;
 import com.cowlark.fluxengine.core.flags.StringFlag;
 import com.cowlark.fluxengine.core.flags.ValueFlag;
-import com.cowlark.fluxengine.usb.DriveSettings;
 import com.cowlark.fluxengine.usb.UsbFactory;
 import com.google.common.collect.ImmutableList;
 
@@ -42,9 +41,7 @@ public class RpmCommand implements Command
 
         try (UsbFactory usbFactory = new UsbFactory(config))
         {
-            DriveSettings driveSettings = new DriveSettings(config);
-
-            double periodNs = usbFactory.getConnection().getRotationalPeriod(driveSettings);
+            double periodNs = usbFactory.getConnection().getRotationalPeriod();
             if (periodNs != 0.0)
                 System.out.printf("Rotational period is %.0f ms (%.0f rpm)\n",
                         periodNs / 1e6,
