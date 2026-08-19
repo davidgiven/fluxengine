@@ -55,30 +55,42 @@ class GreaseweazleUsbDevice extends UsbDevice
     {
         this.config = config;
         this.serial = new Serial(port, BAUD_NORMAL);
+        try
+        {
+            int version = getVersion();
+            if (version >= 29)
+                this.version = Version.V29;
+            else if (version >= 24)
+                this.version = Version.V24;
+            else if (version == 22)
+                this.version = Version.V22;
+            else
+                throw new FluxEngineException(String.format(
+                        "only Greaseweazle firmware versions 22 and 24 or above are currently " +
+                                "supported, but you have version %d. Please file a bug.",
+                        version));
 
-        int version = getVersion();
-        if (version >= 29)
-            this.version = Version.V29;
-        else if (version >= 24)
-            this.version = Version.V24;
-        else if (version == 22)
-            this.version = Version.V22;
-        else
-            throw new FluxEngineException(String.format(
-                    "only Greaseweazle firmware versions 22 and 24 or above are currently " +
-                            "supported, but you have version %d. Please file a bug.",
-                    version));
+            /* Twiddle the baud rate, which indicates to the Greaseweazle that the
+             * data stream has been reset. */
+            serial.setBaudRate(BAUD_CLEAR_COMMS);
+            Uninterruptibles.sleepUninterruptibly(Duration.ofMillis(100));
+            serial.setBaudRate(BAUD_NORMAL);
 
-        /* Twiddle the baud rate, which indicates to the Greaseweazle that the
-         * data stream has been reset. */
-        serial.setBaudRate(BAUD_CLEAR_COMMS);
-        Uninterruptibles.sleepUninterruptibly(Duration.ofMillis(100));
-        serial.setBaudRate(BAUD_NORMAL);
-
-        /* Configure the hardware. */
-        doCommand(CMD_SELECT, config.getDrive().getDrive());
-        doCommand(CMD_SET_PIN, 2, config.getDrive().getHighDensity() ? 1 : 0);
-        doCommand(CMD_SET_BUS_TYPE, config.getUsb().getGreaseweazle().getBusType().getNumber());
+            /* Configure the hardware. */
+            doCommand(CMD_SET_BUS_TYPE, config.getUsb().getGreaseweazle().getBusType().getNumber());
+            doCommand(CMD_SELECT, config.getDrive().getDrive());
+            doCommand(CMD_SET_PIN, 2, config.getDrive().getHighDensity() ? 1 : 0);
+        } catch (RuntimeException e)
+        {
+            try
+            {
+                serial.close();
+            } catch (RuntimeException suppressed)
+            {
+                e.addSuppressed(suppressed);
+            }
+            throw e;
+        }
     }
 
     private static String gwError(int e)

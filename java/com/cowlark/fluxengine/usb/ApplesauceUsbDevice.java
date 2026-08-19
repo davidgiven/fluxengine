@@ -30,14 +30,28 @@ class ApplesauceUsbDevice extends UsbDevice
         this.configProto = configProto;
         this.config = config;
         this.serial = new Serial(port, 9600);
+        try
+        {
+            String s = sendrecv("?");
+            if (!s.equals("Applesauce"))
+                throw new FluxEngineException(String.format("Applesauce device not responding " +
+                                "(expected 'Applesauce', got '%s')",
+                        s));
 
-        String s = sendrecv("?");
-        if (!s.equals("Applesauce"))
-            throw new FluxEngineException(String.format("Applesauce device not responding " +
-                            "(expected 'Applesauce', got '%s')",
-                    s));
-
-        doCommand("client:v2");
+            doCommand("client:v2");
+        }
+        catch (RuntimeException e)
+        {
+            try
+            {
+                serial.close();
+            }
+            catch (RuntimeException suppressed)
+            {
+                e.addSuppressed(suppressed);
+            }
+            throw e;
+        }
     }
 
     private static long ssRandNext(long x)

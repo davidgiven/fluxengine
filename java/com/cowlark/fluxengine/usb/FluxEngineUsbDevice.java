@@ -64,69 +64,84 @@ class FluxEngineUsbDevice extends UsbDevice
         this.device = device;
         this.config = config;
 
-        UsbInterface iface = null;
         try
         {
-            for (Object o : device.getUsbConfigurations())
+            UsbInterface iface = null;
+            try
             {
-                UsbConfiguration usbConfig = (UsbConfiguration) o;
-                for (Object i : usbConfig.getUsbInterfaces())
+                for (Object o : device.getUsbConfigurations())
                 {
-                    UsbInterface candidate = (UsbInterface) i;
-                    if (candidate.getUsbEndpoints().size() >= 4)
-                        iface = candidate;
+                    UsbConfiguration usbConfig = (UsbConfiguration) o;
+                    for (Object i : usbConfig.getUsbInterfaces())
+                    {
+                        UsbInterface candidate = (UsbInterface) i;
+                        if (candidate.getUsbEndpoints().size() >= 4)
+                            iface = candidate;
+                    }
                 }
-            }
-            if (iface == null)
-                throw new FluxEngineException("FluxEngine: no suitable USB interface found");
+                if (iface == null)
+                    throw new FluxEngineException("FluxEngine: no suitable USB interface found");
 
-            iface.claim();
-            usbInterface = iface;
+                iface.claim();
+                usbInterface = iface;
 
-            List<UsbEndpoint> endpoints = iface.getUsbEndpoints();
-            UsbPipe cOut = null;
-            UsbPipe cIn = null;
-            UsbPipe dOut = null;
-            UsbPipe dIn = null;
-            for (UsbEndpoint endpoint : endpoints)
+                List<UsbEndpoint> endpoints = iface.getUsbEndpoints();
+                UsbPipe cOut = null;
+                UsbPipe cIn = null;
+                UsbPipe dOut = null;
+                UsbPipe dIn = null;
+                for (UsbEndpoint endpoint : endpoints)
+                {
+                    int address = endpoint.getUsbEndpointDescriptor().bEndpointAddress() & 0xff;
+                    UsbPipe pipe = endpoint.getUsbPipe();
+                    pipe.open();
+                    switch (address)
+                    {
+                        case FLUXENGINE_CMD_OUT_EP:
+                            cOut = pipe;
+                            break;
+                        case FLUXENGINE_CMD_IN_EP:
+                            cIn = pipe;
+                            break;
+                        case FLUXENGINE_DATA_OUT_EP:
+                            dOut = pipe;
+                            break;
+                        case FLUXENGINE_DATA_IN_EP:
+                            dIn = pipe;
+                            break;
+                    }
+                }
+                if (cOut == null || cIn == null || dOut == null || dIn == null)
+                    throw new FluxEngineException("FluxEngine: could not open all USB pipes");
+                cmdOut = cOut;
+                cmdIn = cIn;
+                dataOut = dOut;
+                dataIn = dIn;
+            } catch (UsbException e)
             {
-                int address = endpoint.getUsbEndpointDescriptor().bEndpointAddress() & 0xff;
-                UsbPipe pipe = endpoint.getUsbPipe();
-                pipe.open();
-                switch (address)
-                {
-                    case FLUXENGINE_CMD_OUT_EP:
-                        cOut = pipe;
-                        break;
-                    case FLUXENGINE_CMD_IN_EP:
-                        cIn = pipe;
-                        break;
-                    case FLUXENGINE_DATA_OUT_EP:
-                        dOut = pipe;
-                        break;
-                    case FLUXENGINE_DATA_IN_EP:
-                        dIn = pipe;
-                        break;
-                }
+                throw new FluxEngineException("FluxEngine: USB error: " + e.getMessage());
             }
-            if (cOut == null || cIn == null || dOut == null || dIn == null)
-                throw new FluxEngineException("FluxEngine: could not open all USB pipes");
-            cmdOut = cOut;
-            cmdIn = cIn;
-            dataOut = dOut;
-            dataIn = dIn;
-        } catch (UsbException e)
-        {
-            throw new FluxEngineException("FluxEngine: USB error: " + e.getMessage());
+
+            int version = getVersion();
+            if (version != FLUXENGINE_PROTOCOL_VERSION)
+                throw new FluxEngineException(String.format(
+                        "your FluxEngine firmware is at version %d but the client is for version %d; " +
+                                "please upgrade",
+                        version,
+                        FLUXENGINE_PROTOCOL_VERSION));
         }
-
-        int version = getVersion();
-        if (version != FLUXENGINE_PROTOCOL_VERSION)
-            throw new FluxEngineException(String.format(
-                    "your FluxEngine firmware is at version %d but the client is for version %d; " +
-                            "please upgrade",
-                    version,
-                    FLUXENGINE_PROTOCOL_VERSION));
+        catch (RuntimeException e)
+        {
+            try
+            {
+                close();
+            }
+            catch (RuntimeException suppressed)
+            {
+                e.addSuppressed(suppressed);
+            }
+            throw e;
+        }
     }
 
     private static double getCurrentTime()
@@ -453,11 +468,30 @@ class FluxEngineUsbDevice extends UsbDevice
     {
         try
         {
-            if (usbInterface.isClaimed())
-                usbInterface.release();
-        } catch (UsbException e)
+            if (cmdOut != null)
+                cmdOut.close();
+            if (cmdIn != null)
+                cmdIn.close();
+            if (dataOut != null)
+                dataOut.close();
+            if (dataIn != null)
+                dataIn.close();
+        }
+        catch (UsbException e)
         {
-            throw new FluxEngineException("FluxEngine: USB error: " + e.getMessage());
+            throw new FluxEngineException("FluxEngine: USB error closing pipe: " + e.getMessage());
+        }
+        finally
+        {
+            try
+            {
+                if ((usbInterface != null) && usbInterface.isClaimed())
+                    usbInterface.release();
+            }
+            catch (UsbException e)
+            {
+                throw new FluxEngineException("FluxEngine: USB error: " + e.getMessage());
+            }
         }
     }
 }
