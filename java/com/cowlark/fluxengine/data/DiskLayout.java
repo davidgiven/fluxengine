@@ -8,6 +8,7 @@ import com.cowlark.fluxengine.external.DriveType;
 import com.cowlark.fluxengine.external.FormatType;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSortedMap;
 import lombok.EqualsAndHashCode;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -37,19 +38,20 @@ public class DiskLayout
     public final boolean swapSides;
     public final long totalBytes;
     /* Physical and logical layouts by location. */
-    public final ImmutableMap<CylinderHead, PhysicalTrackLayout> layoutByPhysicalLocation;
-    public final ImmutableMap<CylinderHead, LogicalTrackLayout> layoutByLogicalLocation;
+    public final ImmutableSortedMap<CylinderHead, PhysicalTrackLayout> layoutByPhysicalLocation;
+    public final ImmutableSortedMap<CylinderHead, LogicalTrackLayout> layoutByLogicalLocation;
     /* Ordered lists of physical and logical locations. */
     public final ImmutableList<CylinderHead> logicalLocations;
     public final ImmutableList<CylinderHead> logicalLocationsInFilesystemOrder;
     public final ImmutableList<CylinderHead> physicalLocations;
     /* Ordered lists of sector locations, plus the reverse mapping. */
     public final ImmutableList<LogicalLocation> logicalSectorLocationsInFilesystemOrder;
-    public final ImmutableMap<LogicalLocation, Integer> blockIdByLogicalSectorLocation;
+    public final ImmutableSortedMap<LogicalLocation, Long> blockIdByLogicalSectorLocation;
+    public final ImmutableSortedMap<LogicalLocation, Long> blockSizeByLogicalSectorLocation;
     public final ImmutableList<CylinderHeadSector> physicalSectorLocationsInFilesystemOrder;
     /* Mapping from logical location to sector offset and back again. */
-    public final ImmutableMap<Long, LogicalLocation> logicalSectorLocationBySectorOffset;
-    public final ImmutableMap<LogicalLocation, Long> sectorOffsetByLogicalSectorLocation;
+    public final ImmutableSortedMap<Long, LogicalLocation> logicalSectorLocationBySectorOffset;
+    public final ImmutableSortedMap<LogicalLocation, Long> sectorOffsetByLogicalSectorLocation;
 
     public DiskLayout(ConfigProto config)
     {
@@ -158,18 +160,19 @@ public class DiskLayout
                 physicalLocationsLocal.add(ch);
             }
 
-        layoutByLogicalLocation = ImmutableMap.copyOf(logicalLayout);
+        layoutByLogicalLocation = ImmutableSortedMap.copyOf(logicalLayout);
         logicalLocations = ImmutableList.copyOf(logicalLocationsLocal);
-        layoutByPhysicalLocation = ImmutableMap.copyOf(physicalLayout);
+        layoutByPhysicalLocation = ImmutableSortedMap.copyOf(physicalLayout);
         physicalLocations = ImmutableList.copyOf(physicalLocationsLocal);
 
         long sectorOffset = 0;
-        int blockId = 0;
+        long blockId = 0;
         List<CylinderHead> logicalLocationsFilesystemLocal = new ArrayList<>();
         List<LogicalLocation> logicalSectorLocationsLocal = new ArrayList<>();
         Map<Long, LogicalLocation> logicalSectorOffsetLocal = new LinkedHashMap<>();
         Map<LogicalLocation, Long> sectorOffsetByLocationLocal = new LinkedHashMap<>();
-        Map<LogicalLocation, Integer> blockIdByLocationLocal = new LinkedHashMap<>();
+        Map<LogicalLocation, Long> blockIdByLocationLocal = new LinkedHashMap<>();
+        Map<LogicalLocation, Long> blockSizeByLocationLocal = new LinkedHashMap<>();
 
         for (CylinderHead ch : getTrackOrdering(config.getLayout().getFilesystemTrackOrder(),
                 numLogicalCylinders,
@@ -185,6 +188,7 @@ public class DiskLayout
                 logicalSectorOffsetLocal.put(sectorOffset, logicalLocation);
                 sectorOffsetByLocationLocal.put(logicalLocation, sectorOffset);
                 logicalSectorLocationsLocal.add(logicalLocation);
+                blockSizeByLocationLocal.put(logicalLocation, (long) ltl.sectorSize);
                 sectorOffset += ltl.sectorSize;
 
                 blockIdByLocationLocal.put(logicalLocation, blockId);
@@ -194,9 +198,11 @@ public class DiskLayout
 
         logicalLocationsInFilesystemOrder = ImmutableList.copyOf(logicalLocationsFilesystemLocal);
         logicalSectorLocationsInFilesystemOrder = ImmutableList.copyOf(logicalSectorLocationsLocal);
-        logicalSectorLocationBySectorOffset = ImmutableMap.copyOf(logicalSectorOffsetLocal);
-        sectorOffsetByLogicalSectorLocation = ImmutableMap.copyOf(sectorOffsetByLocationLocal);
-        blockIdByLogicalSectorLocation = ImmutableMap.copyOf(blockIdByLocationLocal);
+        logicalSectorLocationBySectorOffset = ImmutableSortedMap.copyOf(logicalSectorOffsetLocal);
+        sectorOffsetByLogicalSectorLocation =
+                ImmutableSortedMap.copyOf(sectorOffsetByLocationLocal);
+        blockIdByLogicalSectorLocation = ImmutableSortedMap.copyOf(blockIdByLocationLocal);
+        blockSizeByLogicalSectorLocation = ImmutableSortedMap.copyOf(blockSizeByLocationLocal);
         physicalSectorLocationsInFilesystemOrder = ImmutableList.of();
 
         totalBytes = sectorOffset;

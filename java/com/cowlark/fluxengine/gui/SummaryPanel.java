@@ -51,7 +51,7 @@ public class SummaryPanel extends JPanel
 
     private void diskChanged()
     {
-        var newLayout = model.getDisk().get().diskLayout;
+        DiskLayout newLayout = model.getDisk().get().diskLayout;
         if ((currentLayout == null) || !currentLayout.equals(newLayout))
         {
             currentLayout = newLayout;

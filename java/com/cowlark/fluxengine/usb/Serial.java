@@ -8,6 +8,7 @@ import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.core.FluxEngineException;
 import com.fazecast.jSerialComm.SerialPort;
 import com.google.common.util.concurrent.Uninterruptibles;
+import org.slf4j.LoggerFactory;
 import java.time.Duration;
 
 /**
@@ -19,10 +20,14 @@ import java.time.Duration;
  */
 public final class Serial
 {
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(Serial.class);
+
     private final SerialPort serial;
 
     public Serial(String path, int baudRate)
     {
+        logger.atInfo().log("opening serial port {}", path);
+
         serial = SerialPort.getCommPort(path);
         serial.setComPortParameters(baudRate, 8, 1, 0); /* raw 8N1 */
         serial.setFlowControl(FLOW_CONTROL_DISABLED);
@@ -102,6 +107,7 @@ public final class Serial
 
     public void close()
     {
+        logger.atInfo().log("closing serial port");
         serial.closePort();
     }
 }
