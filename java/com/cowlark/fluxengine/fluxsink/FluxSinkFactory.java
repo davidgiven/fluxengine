@@ -16,32 +16,25 @@ public abstract class FluxSinkFactory implements AutoCloseable
     {
         if (!config.hasFluxSink())
             throw new FluxEngineException("no flux sink configured");
-        return create(config, config.getFluxSink(), usbFactorySupplier);
-    }
-
-    public static FluxSinkFactory create(
-            ConfigProto config,
-            FluxSinkProto sinkConfig,
-            Supplier<UsbFactory> usbFactorySupplier)
-    {
-        switch (sinkConfig.getType())
+        FluxSinkProto fluxSinkProto = config.getFluxSink();
+        switch (fluxSinkProto.getType())
         {
             case FLUXTYPE_DRIVE:
                 return new HardwareFluxSinkFactory(config, usbFactorySupplier.get());
             case FLUXTYPE_A2R:
-                return new A2RFluxSinkFactory(sinkConfig.getA2R().getFilename(), config);
+                return new A2RFluxSinkFactory(fluxSinkProto.getA2R().getFilename(), config);
             case FLUXTYPE_AU:
-                return new AuFluxSinkFactory(sinkConfig.getAu().getDirectory(),
-                        sinkConfig.getAu().getIndexMarkers());
+                return new AuFluxSinkFactory(fluxSinkProto.getAu().getDirectory(),
+                        fluxSinkProto.getAu().getIndexMarkers());
             case FLUXTYPE_VCD:
-                return new VcdFluxSinkFactory(sinkConfig.getVcd().getDirectory());
+                return new VcdFluxSinkFactory(fluxSinkProto.getVcd().getDirectory());
             case FLUXTYPE_SCP:
-                return new ScpFluxSinkFactory(sinkConfig.getScp().getFilename(),
-                        sinkConfig.getScp().getTypeByte(),
-                        sinkConfig.getScp().getAlignWithIndex(),
+                return new ScpFluxSinkFactory(fluxSinkProto.getScp().getFilename(),
+                        fluxSinkProto.getScp().getTypeByte(),
+                        fluxSinkProto.getScp().getAlignWithIndex(),
                         config);
             case FLUXTYPE_FLUX:
-                return createFl2FluxSinkFactory(sinkConfig.getFl2(), config);
+                return createFl2FluxSinkFactory(fluxSinkProto.getFl2(), config);
             default:
                 throw new FluxEngineException("no flux sink specified");
         }

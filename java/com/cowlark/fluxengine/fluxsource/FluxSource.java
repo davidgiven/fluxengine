@@ -2,7 +2,6 @@ package com.cowlark.fluxengine.fluxsource;
 
 import com.cowlark.fluxengine.config.ConfigBuilder;
 import com.cowlark.fluxengine.config.ConfigProto;
-import com.cowlark.fluxengine.config.FluxSourceSinkType;
 import com.cowlark.fluxengine.core.FluxEngineException;
 import com.cowlark.fluxengine.usb.UsbFactory;
 import java.util.function.Supplier;
@@ -14,33 +13,27 @@ public abstract class FluxSource implements AutoCloseable
 {
     public static FluxSource create(ConfigProto config, Supplier<UsbFactory> usbFactorySupplier)
     {
-        if (config.getFluxSource().getType() == FluxSourceSinkType.FLUXTYPE_DRIVE)
-            return new HardwareFluxSource(config, usbFactorySupplier.get());
-        return create(config.getFluxSource(), usbFactorySupplier);
-    }
-
-    public static FluxSource create(FluxSourceProto config, Supplier<UsbFactory> usbFactorySupplier)
-    {
-        switch (config.getType())
+        FluxSourceProto fluxSourceProto = config.getFluxSource();
+        switch (fluxSourceProto.getType())
         {
             case FLUXTYPE_DRIVE:
-                return notImplemented("hardware");
+                return new HardwareFluxSource(config, usbFactorySupplier.get());
             case FLUXTYPE_ERASE:
-                return new EraseFluxSource(config.getErase());
+                return new EraseFluxSource(fluxSourceProto.getErase());
             case FLUXTYPE_KRYOFLUX:
-                return new KryofluxFluxSource(config.getKryoflux());
+                return new KryofluxFluxSource(fluxSourceProto.getKryoflux());
             case FLUXTYPE_TEST_PATTERN:
                 return notImplemented("test pattern");
             case FLUXTYPE_SCP:
-                return new ScpFluxSource(config.getScp());
+                return new ScpFluxSource(fluxSourceProto.getScp());
             case FLUXTYPE_A2R:
-                return new A2RFluxSource(config.getA2R());
+                return new A2RFluxSource(fluxSourceProto.getA2R());
             case FLUXTYPE_CWF:
                 return notImplemented("cwf");
             case FLUXTYPE_DMK:
                 return notImplemented("dmk");
             case FLUXTYPE_FLUX:
-                return new Fl2FluxSource(config.getFl2());
+                return new Fl2FluxSource(fluxSourceProto.getFl2());
             case FLUXTYPE_FLX:
                 return notImplemented("flx");
             default:
