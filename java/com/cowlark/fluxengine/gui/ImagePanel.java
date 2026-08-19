@@ -6,8 +6,9 @@ import org.exbin.auxiliary.binary_data.EmptyBinaryData;
 import org.exbin.bined.swing.basic.CodeArea;
 import sprouts.From;
 import sprouts.Viewable;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.UIManager;
+import javax.swing.border.LineBorder;
 import java.awt.BorderLayout;
 import java.awt.Font;
 
@@ -28,6 +29,7 @@ public class ImagePanel extends JPanel
         Font font = new Font(Font.MONOSPACED, Font.PLAIN, UIScale.scale(14));
 
         codeArea = new CodeArea();
+        codeArea.setBorder(new LineBorder(UIManager.getColor("TextArea.background"), 3));
         codeArea.setCodeFont(font);
         codeArea.setContentData(new EmptyBinaryData());
         add(codeArea, BorderLayout.CENTER);
@@ -41,5 +43,4 @@ public class ImagePanel extends JPanel
         Disk disk = model.getDisk().get();
         codeArea.setContentData(new ImageBinaryData(disk));
     }
-
 }
