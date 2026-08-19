@@ -1,6 +1,6 @@
 package com.cowlark.fluxengine.decoders;
 
-import static com.cowlark.fluxengine.external.FluxEngine.NS_PER_TICK;
+import static com.cowlark.fluxengine.wiring.FluxEngine.NS_PER_TICK;
 
 import com.cowlark.fluxengine.core.Bits;
 import com.cowlark.fluxengine.data.FluxPosition;

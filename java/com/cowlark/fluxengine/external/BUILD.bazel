@@ -21,5 +21,7 @@ java_library(
     srcs = glob(["*.java"]),
     deps = [
         "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/data",
+        "//java/com/cowlark/fluxengine/wiring",
     ],
 )

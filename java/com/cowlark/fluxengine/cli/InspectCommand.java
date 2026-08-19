@@ -1,8 +1,8 @@
 package com.cowlark.fluxengine.cli;
 
-import static com.cowlark.fluxengine.external.FluxEngine.F_BIT_PULSE;
-import static com.cowlark.fluxengine.external.FluxEngine.NS_PER_TICK;
-import static com.cowlark.fluxengine.external.FluxEngine.US_PER_TICK;
+import static com.cowlark.fluxengine.wiring.FluxEngine.F_BIT_PULSE;
+import static com.cowlark.fluxengine.wiring.FluxEngine.NS_PER_TICK;
+import static com.cowlark.fluxengine.wiring.FluxEngine.US_PER_TICK;
 
 import com.cowlark.fluxengine.config.ConfigBuilder;
 import com.cowlark.fluxengine.config.ConfigProto;

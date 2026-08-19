@@ -1,38 +1,37 @@
 package com.cowlark.fluxengine.usb;
 
-import static com.cowlark.fluxengine.external.FluxEngine.FLUXENGINE_CMD_IN_EP;
-import static com.cowlark.fluxengine.external.FluxEngine.FLUXENGINE_CMD_OUT_EP;
-import static com.cowlark.fluxengine.external.FluxEngine.FLUXENGINE_DATA_IN_EP;
-import static com.cowlark.fluxengine.external.FluxEngine.FLUXENGINE_DATA_OUT_EP;
-import static com.cowlark.fluxengine.external.FluxEngine.FLUXENGINE_PROTOCOL_VERSION;
-import static com.cowlark.fluxengine.external.FluxEngine.FRAME_SIZE;
-import static com.cowlark.fluxengine.external.FluxEngine.F_ERROR_BAD_COMMAND;
-import static com.cowlark.fluxengine.external.FluxEngine.F_ERROR_UNDERRUN;
-import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_BULK_READ_TEST_CMD;
-import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_BULK_READ_TEST_REPLY;
-import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_BULK_WRITE_TEST_CMD;
-import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_BULK_WRITE_TEST_REPLY;
-import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_DEBUG;
-import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_ERASE_CMD;
-import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_ERASE_REPLY;
-import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_ERROR;
-import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_GET_VERSION_CMD;
-import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_GET_VERSION_REPLY;
+import static com.cowlark.fluxengine.wiring.FluxEngine.FLUXENGINE_CMD_IN_EP;
+import static com.cowlark.fluxengine.wiring.FluxEngine.FLUXENGINE_CMD_OUT_EP;
+import static com.cowlark.fluxengine.wiring.FluxEngine.FLUXENGINE_DATA_IN_EP;
+import static com.cowlark.fluxengine.wiring.FluxEngine.FLUXENGINE_DATA_OUT_EP;
+import static com.cowlark.fluxengine.wiring.FluxEngine.FLUXENGINE_PROTOCOL_VERSION;
+import static com.cowlark.fluxengine.wiring.FluxEngine.FRAME_SIZE;
+import static com.cowlark.fluxengine.wiring.FluxEngine.F_ERROR_BAD_COMMAND;
+import static com.cowlark.fluxengine.wiring.FluxEngine.F_ERROR_UNDERRUN;
+import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_BULK_READ_TEST_CMD;
+import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_BULK_READ_TEST_REPLY;
+import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_BULK_WRITE_TEST_CMD;
+import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_BULK_WRITE_TEST_REPLY;
+import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_DEBUG;
+import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_ERASE_CMD;
+import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_ERASE_REPLY;
+import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_ERROR;
+import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_GET_VERSION_CMD;
+import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_GET_VERSION_REPLY;
+import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_MEASURE_SPEED_CMD;
+import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_MEASURE_SPEED_REPLY;
+import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_MEASURE_VOLTAGES_CMD;
+import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_MEASURE_VOLTAGES_REPLY;
+import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_READ_CMD;
+import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_READ_REPLY;
+import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_SEEK_CMD;
+import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_SEEK_REPLY;
+import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_SET_DRIVE_CMD;
+import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_SET_DRIVE_REPLY;
+import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_WRITE_CMD;
+import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_WRITE_REPLY;
 
 import com.cowlark.fluxengine.config.ConfigProto;
-import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_MEASURE_SPEED_CMD;
-import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_MEASURE_SPEED_REPLY;
-import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_MEASURE_VOLTAGES_CMD;
-import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_MEASURE_VOLTAGES_REPLY;
-import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_READ_CMD;
-import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_READ_REPLY;
-import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_SEEK_CMD;
-import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_SEEK_REPLY;
-import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_SET_DRIVE_CMD;
-import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_SET_DRIVE_REPLY;
-import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_WRITE_CMD;
-import static com.cowlark.fluxengine.external.FluxEngine.F_FRAME_WRITE_REPLY;
-
 import com.cowlark.fluxengine.core.ByteWriter;
 import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.core.FluxEngineException;
@@ -125,18 +124,17 @@ class FluxEngineUsbDevice extends UsbDevice
             int version = getVersion();
             if (version != FLUXENGINE_PROTOCOL_VERSION)
                 throw new FluxEngineException(String.format(
-                        "your FluxEngine firmware is at version %d but the client is for version %d; " +
+                        "your FluxEngine firmware is at version %d but the client is for version " +
+                                "%d; " +
                                 "please upgrade",
                         version,
                         FLUXENGINE_PROTOCOL_VERSION));
-        }
-        catch (RuntimeException e)
+        } catch (RuntimeException e)
         {
             try
             {
                 close();
-            }
-            catch (RuntimeException suppressed)
+            } catch (RuntimeException suppressed)
             {
                 e.addSuppressed(suppressed);
             }
@@ -382,7 +380,8 @@ class FluxEngineUsbDevice extends UsbDevice
         int milliseconds = (int) (readTimeNs / 1e6);
         bw.write8(milliseconds & 0xff);
         bw.write8((milliseconds >> 8) & 0xff);
-        bw.write8((int) ((config.getDrive().getHardSectorThresholdNs() + 5e5) / 1e6)); /* round to nearest ms */
+        bw.write8((int) ((config.getDrive().getHardSectorThresholdNs() + 5e5) /
+                1e6)); /* round to nearest ms */
         usbCmdSend(f.toByteArray());
 
         Bytes buffer = usbDataRecv(1024 * 1024);
@@ -408,7 +407,8 @@ class FluxEngineUsbDevice extends UsbDevice
         bw.write8((safelen >> 8) & 0xff);
         bw.write8((safelen >> 16) & 0xff);
         bw.write8((safelen >> 24) & 0xff);
-        bw.write8((int) ((config.getDrive().getHardSectorThresholdNs() + 5e5) / 1e6)); /* round to nearest ms */
+        bw.write8((int) ((config.getDrive().getHardSectorThresholdNs() + 5e5) /
+                1e6)); /* round to nearest ms */
         usbCmdSend(f.toByteArray());
         usbDataSend(safeBytes);
 
@@ -425,7 +425,8 @@ class FluxEngineUsbDevice extends UsbDevice
         bw.write8(F_FRAME_ERASE_CMD);
         bw.write8(3);
         bw.write8(head);
-        bw.write8((int) ((config.getDrive().getHardSectorThresholdNs() + 5e5) / 1e6)); /* round to nearest ms */
+        bw.write8((int) ((config.getDrive().getHardSectorThresholdNs() + 5e5) /
+                1e6)); /* round to nearest ms */
         usbCmdSend(f.toByteArray());
 
         awaitReply(F_FRAME_ERASE_REPLY);
@@ -476,19 +477,16 @@ class FluxEngineUsbDevice extends UsbDevice
                 dataOut.close();
             if (dataIn != null)
                 dataIn.close();
-        }
-        catch (UsbException e)
+        } catch (UsbException e)
         {
             throw new FluxEngineException("FluxEngine: USB error closing pipe: " + e.getMessage());
-        }
-        finally
+        } finally
         {
             try
             {
                 if ((usbInterface != null) && usbInterface.isClaimed())
                     usbInterface.release();
-            }
-            catch (UsbException e)
+            } catch (UsbException e)
             {
                 throw new FluxEngineException("FluxEngine: USB error: " + e.getMessage());
             }

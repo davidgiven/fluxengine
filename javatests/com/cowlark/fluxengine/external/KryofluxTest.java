@@ -1,8 +1,9 @@
-package com.cowlark.fluxengine.data;
+package com.cowlark.fluxengine.external;
 
 import static com.google.common.truth.Truth.assertThat;
 
 import com.cowlark.fluxengine.core.Bytes;
+import com.cowlark.fluxengine.data.Fluxmap;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;

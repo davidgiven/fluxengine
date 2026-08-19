@@ -2,29 +2,34 @@ package com.cowlark.fluxengine.fluxsource;
 
 import com.cowlark.fluxengine.config.ConfigBuilder;
 import com.cowlark.fluxengine.config.ConfigProto;
+import com.cowlark.fluxengine.core.Bytes;
+import com.cowlark.fluxengine.core.FluxEngineException;
+import com.cowlark.fluxengine.core.Logger;
 import com.cowlark.fluxengine.data.CylinderHead;
+import com.cowlark.fluxengine.external.Flx;
 import com.cowlark.fluxengine.data.Fluxmap;
-import com.cowlark.fluxengine.external.Kryoflux;
 import com.cowlark.fluxengine.data.Locations;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * A flux source which reads raw Kryoflux stream files, ported from
- * lib/fluxsource/kryofluxfluxsource.cc.
+ * A flux source which reads FLX flux stream files, ported from
+ * lib/fluxsource/flxfluxsource.cc.
  */
-public class KryofluxFluxSource extends TrivialFluxSource
+public class FlxFluxSource extends TrivialFluxSource
 {
-    private static final Pattern FILENAME_REGEX =
-            Pattern.compile(".*[^0-9]([0-9]+)\\.([0-9]+)\\.raw");
+    private static final Pattern FILENAME_REGEX = Pattern.compile("@TR([0-9]+)S([0-9]+)@\\.FLX");
 
     private final String path;
     protected ConfigProto extraConfig;
 
-    public KryofluxFluxSource(KryofluxFluxSourceProto config)
+    public FlxFluxSource(FlxFluxSourceProto config)
     {
         path = config.getDirectory();
 
@@ -37,7 +42,7 @@ public class KryofluxFluxSource extends TrivialFluxSource
                 Matcher m = FILENAME_REGEX.matcher(f.getName());
                 if (m.matches())
                     chs.add(new CylinderHead(Integer.parseInt(m.group(1)),
-                            Integer.parseInt(m.group(2))));
+                            Integer.parseInt(m.group(2)) - 1));
             }
         }
 
@@ -55,6 +60,25 @@ public class KryofluxFluxSource extends TrivialFluxSource
     @Override
     public Fluxmap readSingleFlux(FluxReadParameters parameters)
     {
-        return Kryoflux.readStream(path, parameters.cylinder(), parameters.head());
+        String path = String.format("%s/@TR%02dS%d@.FLX",
+                this.path,
+                parameters.cylinder(),
+                parameters.head() + 1);
+        if (!Files.exists(Path.of(path)))
+            return new Fluxmap();
+        Logger.logf("FLX: reading %s", path);
+        return Flx.readFlxBytes(readFile(path));
+    }
+
+    private static Bytes readFile(String filename)
+    {
+        try
+        {
+            return new Bytes(Files.readAllBytes(Path.of(filename)));
+        } catch (IOException e)
+        {
+            throw new FluxEngineException(
+                    "cannot open input file '" + filename + "': " + e.getMessage());
+        }
     }
 }

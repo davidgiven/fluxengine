@@ -1,5 +1,6 @@
 package com.cowlark.fluxengine.external;
 
+import static com.cowlark.fluxengine.wiring.FluxEngine.NS_PER_TICK;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.cowlark.fluxengine.core.ByteWriter;
@@ -11,7 +12,7 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class GreaseweazleUtilsTest
 {
-    private static final double CLOCK = 2 * FluxEngine.NS_PER_TICK;
+    private static final double CLOCK = 2 * NS_PER_TICK;
 
     private static void testConvert(Bytes gwBytes, Bytes flBytes)
     {

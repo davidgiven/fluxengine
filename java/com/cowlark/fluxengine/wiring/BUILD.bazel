@@ -1,4 +1,4 @@
-load("@rules_java//java:defs.bzl", "java_plugin")
+load("@rules_java//java:defs.bzl", "java_library", "java_plugin")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -7,4 +7,9 @@ java_plugin(
     generates_api = True,
     processor_class = "lombok.launch.AnnotationProcessorHider$AnnotationProcessor",
     deps = ["@maven//:org_projectlombok_lombok"],
+)
+
+java_library(
+    name = "wiring",
+    srcs = glob(["*.java"]),
 )

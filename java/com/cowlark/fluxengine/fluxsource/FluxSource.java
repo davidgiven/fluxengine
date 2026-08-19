@@ -29,13 +29,13 @@ public abstract class FluxSource implements AutoCloseable
             case FLUXTYPE_A2R:
                 return new A2RFluxSource(fluxSourceProto.getA2R());
             case FLUXTYPE_CWF:
-                return notImplemented("cwf");
+                return new CwfFluxSource(fluxSourceProto.getCwf());
             case FLUXTYPE_DMK:
-                return notImplemented("dmk");
+                return new DmkFluxSource(fluxSourceProto.getDmk());
             case FLUXTYPE_FLUX:
                 return new Fl2FluxSource(fluxSourceProto.getFl2());
             case FLUXTYPE_FLX:
-                return notImplemented("flx");
+                return new FlxFluxSource(fluxSourceProto.getFlx());
             default:
                 return null;
         }

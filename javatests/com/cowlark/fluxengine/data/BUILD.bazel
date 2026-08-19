@@ -45,6 +45,7 @@ java_test(
         "//java/com/cowlark/fluxengine/data",
         "//java/com/cowlark/fluxengine/decoders:decoders_java_proto",
         "//java/com/cowlark/fluxengine/external",
+        "//java/com/cowlark/fluxengine/wiring",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],
@@ -71,17 +72,6 @@ java_test(
         "//java/com/cowlark/fluxengine/data",
         "//java/com/cowlark/fluxengine/external:fl2_java_proto",
         "@maven//:com_google_guava_guava",
-        "@maven//:com_google_truth_truth",
-        "@maven//:junit_junit",
-    ],
-)
-
-java_test(
-    name = "KryofluxTest",
-    srcs = ["KryofluxTest.java"],
-    deps = [
-        "//java/com/cowlark/fluxengine/core",
-        "//java/com/cowlark/fluxengine/data",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],

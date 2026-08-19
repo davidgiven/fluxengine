@@ -1,7 +1,7 @@
 package com.cowlark.fluxengine.usb;
 
-import static com.cowlark.fluxengine.external.FluxEngine.F_BIT_PULSE;
-import static com.cowlark.fluxengine.external.FluxEngine.NS_PER_TICK;
+import static com.cowlark.fluxengine.wiring.FluxEngine.F_BIT_PULSE;
+import static com.cowlark.fluxengine.wiring.FluxEngine.NS_PER_TICK;
 
 import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.core.ByteReader;
@@ -34,19 +34,17 @@ class ApplesauceUsbDevice extends UsbDevice
         {
             String s = sendrecv("?");
             if (!s.equals("Applesauce"))
-                throw new FluxEngineException(String.format("Applesauce device not responding " +
-                                "(expected 'Applesauce', got '%s')",
+                throw new FluxEngineException(String.format(
+                        "Applesauce device not responding " + "(expected 'Applesauce', got '%s')",
                         s));
 
             doCommand("client:v2");
-        }
-        catch (RuntimeException e)
+        } catch (RuntimeException e)
         {
             try
             {
                 serial.close();
-            }
-            catch (RuntimeException suppressed)
+            } catch (RuntimeException suppressed)
             {
                 e.addSuppressed(suppressed);
             }
@@ -195,7 +193,8 @@ class ApplesauceUsbDevice extends UsbDevice
         if (configProto.getDrive().getDrive() != 0)
             throw new FluxEngineException("the Applesauce only supports drive 0");
         connect();
-        doCommand(String.format("dpc:density%s", configProto.getDrive().getHighDensity() ? "+" : "-"));
+        doCommand(String.format("dpc:density%s",
+                configProto.getDrive().getHighDensity() ? "+" : "-"));
         if (cylinder == 0)
             doCommand("head:zero");
         else

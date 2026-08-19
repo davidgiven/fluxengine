@@ -1,8 +1,8 @@
 package com.cowlark.fluxengine.fluxsink;
 
-import static com.cowlark.fluxengine.external.FluxEngine.F_BIT_INDEX;
-import static com.cowlark.fluxengine.external.FluxEngine.F_BIT_PULSE;
-import static com.cowlark.fluxengine.external.FluxEngine.TICK_FREQUENCY;
+import static com.cowlark.fluxengine.wiring.FluxEngine.F_BIT_INDEX;
+import static com.cowlark.fluxengine.wiring.FluxEngine.F_BIT_PULSE;
+import static com.cowlark.fluxengine.wiring.FluxEngine.TICK_FREQUENCY;
 
 import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.core.FluxEngineException;

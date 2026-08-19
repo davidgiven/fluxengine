@@ -1,10 +1,11 @@
-package com.cowlark.fluxengine.data;
+package com.cowlark.fluxengine.external;
 
-import static com.cowlark.fluxengine.external.FluxEngine.TICK_FREQUENCY;
+import static com.cowlark.fluxengine.wiring.FluxEngine.TICK_FREQUENCY;
 
 import com.cowlark.fluxengine.core.ByteReader;
 import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.core.FluxEngineException;
+import com.cowlark.fluxengine.data.Fluxmap;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;

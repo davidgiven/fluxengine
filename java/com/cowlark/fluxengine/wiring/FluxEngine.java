@@ -1,4 +1,4 @@
-package com.cowlark.fluxengine.external;
+package com.cowlark.fluxengine.wiring;
 
 /**
  * Wire protocol definitions for the FluxEngine hardware.

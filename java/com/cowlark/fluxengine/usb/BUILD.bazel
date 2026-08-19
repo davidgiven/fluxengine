@@ -29,6 +29,7 @@ java_library(
         "//java/com/cowlark/fluxengine/data",
         "//java/com/cowlark/fluxengine/decoders:decoders_java_proto",
         "//java/com/cowlark/fluxengine/external",
+        "//java/com/cowlark/fluxengine/wiring",
         "@maven//:com_fazecast_jSerialComm",
         "@maven//:com_google_guava_guava",
         "@maven//:javax_usb_usb_api",

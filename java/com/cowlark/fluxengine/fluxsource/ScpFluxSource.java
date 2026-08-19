@@ -1,6 +1,6 @@
 package com.cowlark.fluxengine.fluxsource;
 
-import static com.cowlark.fluxengine.external.FluxEngine.NS_PER_TICK;
+import static com.cowlark.fluxengine.wiring.FluxEngine.NS_PER_TICK;
 import static com.cowlark.fluxengine.external.Scp.SCP_FLAG_96TPI;
 
 import com.cowlark.fluxengine.config.ConfigBuilder;

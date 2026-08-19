@@ -1,6 +1,6 @@
 package com.cowlark.fluxengine.data;
 
-import static com.cowlark.fluxengine.external.FluxEngine.NS_PER_TICK;
+import static com.cowlark.fluxengine.wiring.FluxEngine.NS_PER_TICK;
 
 public record FluxPosition(int bytes, int ticks, int zeroes)
 {
