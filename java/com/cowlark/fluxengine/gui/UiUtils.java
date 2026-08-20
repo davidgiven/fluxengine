@@ -1,7 +1,10 @@
 package com.cowlark.fluxengine.gui;
 
+import static java.lang.Math.round;
+
 import io.reactivex.rxjava3.core.Scheduler;
 import io.reactivex.rxjava3.schedulers.Schedulers;
+import swingtree.layout.Size;
 import javax.swing.Action;
 import javax.swing.SwingUtilities;
 import java.awt.Graphics;
@@ -13,12 +16,15 @@ public class UiUtils
 {
     public static final Scheduler EDT = Schedulers.from(SwingUtilities::invokeLater);
 
+    private static final float PIXELS_PER_POINT = 96f / 72f;
+
     /* Fires the given action with the clicked component as its source, so that
      * actions which resolve their target from the event source work correctly.
      */
     static void fireAction(Action action, java.awt.Component source)
     {
-        action.actionPerformed(new ActionEvent(source,
+        action.actionPerformed(new ActionEvent(
+                source,
                 ActionEvent.ACTION_PERFORMED,
                 (String) action.getValue(Action.ACTION_COMMAND_KEY)));
     }
@@ -26,8 +32,15 @@ public class UiUtils
     public static Graphics2D getGraphics2D(Graphics g)
     {
         Graphics2D g2 = (Graphics2D) g;
-        g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+        g2.setRenderingHint(
+                RenderingHints.KEY_TEXT_ANTIALIASING,
                 RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         return g2;
+    }
+
+
+    public static Size pt(float widthPt, float heightPt)
+    {
+        return Size.of(round(widthPt * PIXELS_PER_POINT), round(heightPt * PIXELS_PER_POINT));
     }
 }

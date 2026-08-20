@@ -34,7 +34,11 @@ public class Gui
         UIManager.setLookAndFeel(new FlatDarkLaf());
         System.setProperty("apple.laf.useScreenMenuBar", "true");
 
-        SwingUtilities.invokeLater(() -> new ApplicationFrame(model).show());
+        SwingUtilities.invokeLater(() -> {
+            ApplicationFrame frame = new ApplicationFrame(model);
+            frame.pack();
+            frame.setVisible(true);
+        });
 
         EventProcessor.DECOUPLED.join();
     }

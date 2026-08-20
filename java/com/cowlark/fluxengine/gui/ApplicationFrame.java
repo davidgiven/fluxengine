@@ -11,7 +11,11 @@ import static swingtree.UILayoutConstants.BOTTOM;
 import static swingtree.UILayoutConstants.TOP;
 
 import swingtree.UI;
+import swingtree.UIForSplitPane;
+import swingtree.UIForTabbedPane;
 import javax.swing.JFrame;
+import javax.swing.JSplitPane;
+import javax.swing.JTabbedPane;
 
 public class ApplicationFrame extends JFrame
 {
@@ -34,37 +38,43 @@ public class ApplicationFrame extends JFrame
         visualiserPanel = new VisualiserPanel(model);
         configurationPanel = new ConfigurationPanel(model);
 
-        UI.of(this)
+        UIForTabbedPane<JTabbedPane> leftPane =
+                tabbedPane().add(tab("Configuration").add(scrollPane().add(of(configurationPanel))));
+
+        UIForSplitPane<JSplitPane> topPane =
+                splitPane(UI.Align.HORIZONTAL)
+                        .peek(pane -> pane.setResizeWeight(1.0))
+                        .add(
+                                TOP,
+                                tabbedPane()
+                                        .add(tab("Image").add(of(imagePanel).withPrefSize(UiUtils.pt(
+                                                500,
+                                                300))))
+                                        .add(tab("Log").add(of(logPanel))))
+                        .add(BOTTOM, tabbedPane().add(tab("Visualiser").add(of(visualiserPanel))));
+
+        UIForTabbedPane<JTabbedPane> bottomPane =
+                tabbedPane().add(tab("Summary").add(panel("fillx, wrap 1, aligny " + "center")
+                        .add("growx, h 100pt!", of(summaryPanel))
+                        .add(
+                                "growx",
+                                panel("wrap 3, " + "alignx " + "center")
+                                        .add(button("Read disk").onClick(model::onReadDisk))
+                                        .add(button("Reread disk").onClick(model::onRereadDisk))
+                                        .add(button("Write disk").onClick(model::onWriteDisk)))));
+
+        UI
+                .of(this)
                 .withOnCloseOperation(UI.OnWindowClose.DISPOSE)
                 .onClose(it -> System.exit(0))
                 .peek(frame -> {
                     frame.setJMenuBar(ApplicationMenu.createMenu());
-                    frame.setSize(1280, 720);
-                    frame.setLocationRelativeTo(null);
                 })
-                .add(panel("fill, wrap 2").add("growy",
-                                tabbedPane().add(tab("Configuration").add(scrollPane().add(of(
-                                        configurationPanel)))))
-                        .add("grow, push",
-                                splitPane(UI.Align.VERTICAL).peek(pane -> pane.setResizeWeight(1.0))
-                                        .add(TOP,
-                                                tabbedPane().add(tab("Visualiser").add(of(
-                                                                visualiserPanel)))
-                                                        .add(tab("Image").add(of(imagePanel)))
-                                                        .add(tab("Log").add(of(logPanel))))
-                                        .add(BOTTOM,
-                                                tabbedPane().add(tab("Summary").add(panel(
-                                                        "fillx, wrap 1, aligny " + "center").add(
-                                                                "growx, h 100pt!",
-                                                                of(summaryPanel))
-                                                        .add("growx",
-                                                                panel("wrap 3, " + "alignx " +
-                                                                        "center").add(button(
-                                                                                "Read disk").onClick(model::onReadDisk))
-                                                                        .add(button("Reread disk").onClick(
-                                                                                model::onRereadDisk))
-                                                                        .add(button("Write disk").onClick(
-                                                                                model::onWriteDisk)))))))
-                        .add("growx, span 2", statusbarPanel));
+                .add(panel("fill, wrap 2").add("growy", leftPane).add(
+                        "grow, push",
+                        splitPane(UI.Align.VERTICAL)
+                                .peek(pane -> pane.setResizeWeight(1.0))
+                                .add(TOP, topPane)
+                                .add(BOTTOM, bottomPane)).add("growx, span 2", statusbarPanel));
     }
 }
