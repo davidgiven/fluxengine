@@ -15,8 +15,9 @@ public class IntFlag extends ValueFlag<Integer>
             int defaultValue,
             Consumer<Integer> callback)
     {
-        super(group, names, helpText, defaultValue, callback != null ? callback : unused -> {
-        });
+        super(
+                group, names, helpText, defaultValue, callback != null ? callback : unused -> {
+                });
     }
 
     @Override

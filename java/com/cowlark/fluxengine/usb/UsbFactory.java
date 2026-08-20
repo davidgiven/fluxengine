@@ -56,13 +56,15 @@ public class UsbFactory implements AutoCloseable
     public UsbDevice createConnection()
     {
         CandidateDevice candidateDevice = UsbFinder.selectDevice(config);
-        Logger.logf("connecting to %s serial %s",
+        Logger.logf(
+                "connecting to %s serial %s",
                 candidateDevice.type.getDeviceName(),
                 candidateDevice.serial);
         UsbDevice device = switch (candidateDevice.type)
         {
             case GREASEWEAZLE -> new GreaseweazleUsbDevice(candidateDevice.serialPort, config);
-            case APPLESAUCE -> new ApplesauceUsbDevice(candidateDevice.serialPort,
+            case APPLESAUCE -> new ApplesauceUsbDevice(
+                    candidateDevice.serialPort,
                     config,
                     config.getUsb().getApplesauce());
             case FLUXENGINE -> new FluxEngineUsbDevice(candidateDevice.device, config);

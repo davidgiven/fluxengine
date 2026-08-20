@@ -27,13 +27,15 @@ import java.util.function.Supplier;
 public class ConvertCommand implements Command
 {
     private FlagGroup flags = new FlagGroup();
-    private ValueFlag<String> sourceFluxFlag = StringFlag.builder()
+    private ValueFlag<String> sourceFluxFlag = StringFlag
+            .builder()
             .setGroup(flags)
             .setName("--source")
             .setName("-s")
             .setHelpText("flux file to read from")
             .build();
-    private ValueFlag<String> destImageFlag = StringFlag.builder()
+    private ValueFlag<String> destImageFlag = StringFlag
+            .builder()
             .setGroup(flags)
             .setName("--dest")
             .setName("-d")
@@ -72,7 +74,8 @@ public class ConvertCommand implements Command
         int maxCylinder = diskLayout.maxPhysicalCylinder;
         int minHead = diskLayout.minPhysicalHead;
         int maxHead = diskLayout.maxPhysicalHead;
-        Logger.logf("CONVERT: seen cylinders %d..%d, heads %d..%d",
+        Logger.logf(
+                "CONVERT: seen cylinders %d..%d, heads %d..%d",
                 minCylinder,
                 maxCylinder,
                 minHead,
@@ -83,7 +86,8 @@ public class ConvertCommand implements Command
         {
             for (CylinderHead physicalLocation : diskLayout.physicalLocations)
             {
-                FluxSourceIterator fi = fluxSource.readFlux(FluxReadParameters.builder()
+                FluxSourceIterator fi = fluxSource.readFlux(FluxReadParameters
+                        .builder()
                         .setCylinder(physicalLocation.cylinder())
                         .setHead(physicalLocation.head())
                         .build());

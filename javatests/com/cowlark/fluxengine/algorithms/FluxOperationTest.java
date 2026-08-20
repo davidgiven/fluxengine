@@ -36,20 +36,22 @@ public class FluxOperationTest
         List<LogMessage> first = new ArrayList<>();
         List<LogMessage> second = new ArrayList<>();
         CountDownLatch done = new CountDownLatch(2);
-        Disposable firstSubscription = observable.subscribe(m -> {
-            synchronized (first)
-            {
-                first.add(m);
-            }
-        }, t -> {
-        }, done::countDown);
-        Disposable secondSubscription = observable.subscribe(m -> {
-            synchronized (second)
-            {
-                second.add(m);
-            }
-        }, t -> {
-        }, done::countDown);
+        Disposable firstSubscription = observable.subscribe(
+                m -> {
+                    synchronized (first)
+                    {
+                        first.add(m);
+                    }
+                }, t -> {
+                }, done::countDown);
+        Disposable secondSubscription = observable.subscribe(
+                m -> {
+                    synchronized (second)
+                    {
+                        second.add(m);
+                    }
+                }, t -> {
+                }, done::countDown);
 
         harness.gate.release();
 
@@ -136,11 +138,12 @@ public class FluxOperationTest
         TestFluxOperation failing = new TestFluxOperation();
         List<Throwable> errors = new ArrayList<>();
         CountDownLatch done = new CountDownLatch(1);
-        Disposable subscription = failing.create().subscribe(m -> {
-        }, t -> {
-            errors.add(t);
-            done.countDown();
-        }, done::countDown);
+        Disposable subscription = failing.create().subscribe(
+                m -> {
+                }, t -> {
+                    errors.add(t);
+                    done.countDown();
+                }, done::countDown);
 
         assertThat(done.await(5, TimeUnit.SECONDS)).isTrue();
         assertThat(errors).hasSize(1);
@@ -189,10 +192,11 @@ public class FluxOperationTest
             }
         };
 
-        Disposable subscription = harness.create().subscribe(m -> {
-        }, t -> {
-        }, () -> {
-        });
+        Disposable subscription = harness.create().subscribe(
+                m -> {
+                }, t -> {
+                }, () -> {
+                });
 
         assertThat(harness.disposed.await(5, TimeUnit.SECONDS)).isTrue();
         assertThat(harness.disposeCount.get()).isEqualTo(1);

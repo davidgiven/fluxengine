@@ -81,7 +81,8 @@ public class A2RFluxSourceTest
     {
         Path path = writeTempFile();
 
-        A2RFluxSource source = new A2RFluxSource(A2rFluxSourceProto.newBuilder()
+        A2RFluxSource source = new A2RFluxSource(A2rFluxSourceProto
+                .newBuilder()
                 .setFilename(path.toString())
                 .build());
 
@@ -91,7 +92,8 @@ public class A2RFluxSourceTest
         Bytes expected = Bytes.of(0x40, 0xad, 0xad, 0xad);
         assertThat(iterator.next().rawBytes().toByteArray()).isEqualTo(expected.toByteArray());
         assertThat(iterator.hasNext()).isFalse();
-        assertThat(source.readFlux(FluxReadParameters.builder()
+        assertThat(source.readFlux(FluxReadParameters
+                .builder()
                 .setCylinder(1)
                 .setHead(0)
                 .build())).isInstanceOf(EmptyFluxSourceIterator.class);

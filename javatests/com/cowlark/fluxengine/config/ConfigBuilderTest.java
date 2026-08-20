@@ -46,7 +46,8 @@ public class ConfigBuilderTest
         Files.writeString(first, "shortname: \"first\"\n");
         Files.writeString(second, "tracks: \"c=0:2\"\n");
 
-        ConfigProto proto = builder().loadConfigFile(first.toString())
+        ConfigProto proto = builder()
+                .loadConfigFile(first.toString())
                 .loadConfigFile(second.toString())
                 .build();
 
@@ -57,7 +58,8 @@ public class ConfigBuilderTest
     @Test
     public void loadConfigFileMissingFileThrows()
     {
-        assertThrows(ConfigException.class,
+        assertThrows(
+                ConfigException.class,
                 () -> new ConfigBuilder().loadConfigFile("/nonexistent/config"));
     }
 
@@ -88,7 +90,8 @@ public class ConfigBuilderTest
         ConfigProto proto = builder().loadConfigFile("_global_options").build();
 
         assertThat(proto.getDrive().getTracks()).isEqualTo("c0-80h0-1");
-        assertThat(proto.getDrive()
+        assertThat(proto
+                .getDrive()
                 .getDriveType()).isEqualTo(com.cowlark.fluxengine.external.DriveType.DRIVETYPE_80TRACK);
     }
 
@@ -143,7 +146,8 @@ public class ConfigBuilderTest
     {
         ConfigBuilder builder = builder().loadConfigFile("_global_options");
 
-        assertThrows(FluxEngineException.class,
+        assertThrows(
+                FluxEngineException.class,
                 () -> builder.fromFlags(ImmutableList.of("--no-such-option"), new FlagGroup()));
     }
 
@@ -239,18 +243,19 @@ public class ConfigBuilderTest
     public void checkOptionValidAppliesWhenPrerequisiteMet() throws Exception
     {
         Path file = Files.createTempFile("config", ".textproto");
-        Files.writeString(file, """
-                option {
-                  name: "needs_serial"
-                  prerequisite {
-                    key: "usb.serial"
-                    value: "test-serial"
-                  }
-                  config {
-                    comment: "applied"
-                  }
-                }
-                """);
+        Files.writeString(
+                file, """
+                        option {
+                          name: "needs_serial"
+                          prerequisite {
+                            key: "usb.serial"
+                            value: "test-serial"
+                          }
+                          config {
+                            comment: "applied"
+                          }
+                        }
+                        """);
 
         ConfigBuilder builder =
                 builder().loadConfigFile(file.toString()).set("usb.serial", "test-serial");
@@ -264,18 +269,19 @@ public class ConfigBuilderTest
     public void checkOptionValidThrowsWhenPrerequisiteNotMet() throws Exception
     {
         Path file = Files.createTempFile("config", ".textproto");
-        Files.writeString(file, """
-                option {
-                  name: "needs_serial"
-                  prerequisite {
-                    key: "usb.serial"
-                    value: "test-serial"
-                  }
-                  config {
-                    comment: "applied"
-                  }
-                }
-                """);
+        Files.writeString(
+                file, """
+                        option {
+                          name: "needs_serial"
+                          prerequisite {
+                            key: "usb.serial"
+                            value: "test-serial"
+                          }
+                          config {
+                            comment: "applied"
+                          }
+                        }
+                        """);
 
         ConfigBuilder builder =
                 builder().loadConfigFile(file.toString()).set("usb.serial", "other");
@@ -313,7 +319,8 @@ public class ConfigBuilderTest
         Path file = Files.createTempFile("config", ".textproto");
         Files.writeString(file, "this is not a valid textproto\n");
 
-        assertThrows(ConfigException.class,
+        assertThrows(
+                ConfigException.class,
                 () -> new ConfigBuilder().loadConfigFile(file.toString()));
     }
 
@@ -371,7 +378,8 @@ public class ConfigBuilderTest
     {
         ConfigProto proto = builder().withCopyFluxTo("copy.scp").build();
 
-        assertThat(proto.getDecoder()
+        assertThat(proto
+                .getDecoder()
                 .getCopyFluxTo()
                 .getType()).isEqualTo(FluxSourceSinkType.FLUXTYPE_SCP);
         assertThat(proto.getDecoder().getCopyFluxTo().getScp().getFilename()).isEqualTo("copy.scp");

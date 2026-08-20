@@ -9,7 +9,8 @@ class AboutAction extends AbstractAction
     @Override
     public void actionPerformed(ActionEvent e)
     {
-        JOptionPane.showMessageDialog(null,
+        JOptionPane.showMessageDialog(
+                null,
                 "FluxEngine\nA disk-flux reader/writer",
                 "About FluxEngine",
                 JOptionPane.INFORMATION_MESSAGE);

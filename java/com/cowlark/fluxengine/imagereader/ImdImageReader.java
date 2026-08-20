@@ -313,10 +313,7 @@ public class ImdImageReader extends ImageReader
                     default:
                         throw new FluxEngineException(String.format(
                                 "IMD: Don't understand IMD files with sector status %d, " +
-                                        "track %d, sector %d",
-                                statusSector,
-                                track,
-                                s));
+                                        "track %d, sector %d", statusSector, track, s));
                 }
 
                 if (blnOptionalCylinderMap)
@@ -327,20 +324,23 @@ public class ImdImageReader extends ImageReader
                             sector.location.logicalSector());
                     blnOptionalCylinderMap = false;
                 } else
-                    sector.location = new com.cowlark.fluxengine.data.LogicalLocation(track,
+                    sector.location = new com.cowlark.fluxengine.data.LogicalLocation(
+                            track,
                             sector.location.logicalHead(),
                             sector.location.logicalSector());
 
                 if (blnOptionalHeadMap)
                 {
                     sector.location =
-                            new com.cowlark.fluxengine.data.LogicalLocation(sector.location.logicalCylinder(),
+                            new com.cowlark.fluxengine.data.LogicalLocation(
+                                    sector.location.logicalCylinder(),
                                     optionalheadMap.get(s),
                                     sector.location.logicalSector());
                     blnOptionalHeadMap = false;
                 } else
                     sector.location =
-                            new com.cowlark.fluxengine.data.LogicalLocation(sector.location.logicalCylinder(),
+                            new com.cowlark.fluxengine.data.LogicalLocation(
+                                    sector.location.logicalCylinder(),
                                     head,
                                     sector.location.logicalSector());
             }

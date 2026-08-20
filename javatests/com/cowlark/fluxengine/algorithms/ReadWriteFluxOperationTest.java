@@ -29,7 +29,8 @@ public class ReadWriteFluxOperationTest
     private static LogicalTrackLayout makeLtl()
     {
         ImmutableList<Integer> order = ImmutableList.of(0, 1, 2);
-        return new LogicalTrackLayout(0,
+        return new LogicalTrackLayout(
+                0,
                 0,
                 1,
                 0,
@@ -52,7 +53,8 @@ public class ReadWriteFluxOperationTest
 
     private static ConfigProto makeConfig()
     {
-        return new ConfigBuilder().set("usb.serial", "test-serial")
+        return new ConfigBuilder()
+                .set("usb.serial", "test-serial")
                 .set("drive.rotational_period_ms", "200")
                 .set("layout.tracks", "1")
                 .set("layout.sides", "1")

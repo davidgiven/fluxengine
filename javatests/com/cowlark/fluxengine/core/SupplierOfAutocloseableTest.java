@@ -14,7 +14,8 @@ public class SupplierOfAutocloseableTest
     @Test
     public void nullDelegateThrows()
     {
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(
+                IllegalArgumentException.class,
                 () -> new SupplierOfAutocloseable<TestCloseable>(null));
     }
 
@@ -51,10 +52,11 @@ public class SupplierOfAutocloseableTest
         SupplierOfAutocloseable<TestCloseable> supplier =
                 new SupplierOfAutocloseable<>(TestCloseable::new);
 
-        assertThrows(Exception.class, () -> {
-            supplier.close();
-            supplier.get();
-        });
+        assertThrows(
+                Exception.class, () -> {
+                    supplier.close();
+                    supplier.get();
+                });
     }
 
     @Test

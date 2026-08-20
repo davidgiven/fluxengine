@@ -65,7 +65,8 @@ public class ImgImageWriter extends ImageWriter
 
         output.writeToFile(getWriterConfig().getFilename());
 
-        System.out.printf("IMG: wrote %d tracks, %d sides, %d kB total to %s%n",
+        System.out.printf(
+                "IMG: wrote %d tracks, %d sides, %d kB total to %s%n",
                 tracks,
                 sides,
                 output.size() / 1024,

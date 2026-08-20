@@ -121,7 +121,8 @@ public class DiskLayout
                     sectorIdToFilesystemOrdering.put(i, fid);
                 }
 
-                LogicalTrackLayout ltl = new LogicalTrackLayout(physicalCylinder,
+                LogicalTrackLayout ltl = new LogicalTrackLayout(
+                        physicalCylinder,
                         physicalHead,
                         groupSize,
                         logicalCylinder,
@@ -151,11 +152,13 @@ public class DiskLayout
                  physicalHead++)
             {
                 CylinderHead ch = new CylinderHead(physicalCylinder, physicalHead);
-                PhysicalTrackLayout ptl = new PhysicalTrackLayout(physicalCylinder,
+                PhysicalTrackLayout ptl = new PhysicalTrackLayout(
+                        physicalCylinder,
                         physicalHead,
                         (physicalCylinder - headBias) % groupSize,
-                        logicalLayout.get(new CylinderHead(remapCylinderPhysicalToLogical(
-                                physicalCylinder), remapHeadPhysicalToLogical(physicalHead))));
+                        logicalLayout.get(new CylinderHead(
+                                remapCylinderPhysicalToLogical(physicalCylinder),
+                                remapHeadPhysicalToLogical(physicalHead))));
                 physicalLayout.put(ch, ptl);
                 physicalLocationsLocal.add(ch);
             }
@@ -174,7 +177,8 @@ public class DiskLayout
         Map<LogicalLocation, Long> blockIdByLocationLocal = new LinkedHashMap<>();
         Map<LogicalLocation, Long> blockSizeByLocationLocal = new LinkedHashMap<>();
 
-        for (CylinderHead ch : getTrackOrdering(config.getLayout().getFilesystemTrackOrder(),
+        for (CylinderHead ch : getTrackOrdering(
+                config.getLayout().getFilesystemTrackOrder(),
                 numLogicalCylinders,
                 numLogicalHeads))
         {

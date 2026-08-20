@@ -28,7 +28,8 @@ public class ArchEncoderTest
     @Test
     public void createAmigaEncoder()
     {
-        ConfigProto config = new ConfigBuilder().set("usb.serial", "test-serial")
+        ConfigProto config = new ConfigBuilder()
+                .set("usb.serial", "test-serial")
                 .set("drive.rotational_period_ms", "200")
                 .set("encoder.amiga.clock_rate_us", "2.0")
                 .build();
@@ -41,7 +42,8 @@ public class ArchEncoderTest
     @Test
     public void createIbmEncoder()
     {
-        ConfigProto config = new ConfigBuilder().set("usb.serial", "test-serial")
+        ConfigProto config = new ConfigBuilder()
+                .set("usb.serial", "test-serial")
                 .set("drive.rotational_period_ms", "200")
                 .set("encoder.ibm.trackdata[0].emit_iam", "false")
                 .build();
@@ -54,7 +56,8 @@ public class ArchEncoderTest
     @Test
     public void createTartuEncoder()
     {
-        ConfigProto config = new ConfigBuilder().set("usb.serial", "test-serial")
+        ConfigProto config = new ConfigBuilder()
+                .set("usb.serial", "test-serial")
                 .set("drive.rotational_period_ms", "200")
                 .set("encoder.tartu.clock_period_us", "2.0")
                 .build();

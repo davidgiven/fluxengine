@@ -46,7 +46,8 @@ public class ConfigurationPanel extends JPanel
     private static final ConfigProto GLOBAL_CONFIG = Formats.get("_global_options");
     private static final String LABEL_FORMAT = "wmax 100lp";
     private static final String SETTING_FORMAT = "wmax 200lp, growx, pushx";
-    private static ImmutableMap<String, ConfigProto> formatData = Formats.all()
+    private static ImmutableMap<String, ConfigProto> formatData = Formats
+            .all()
             .stream()
             .map(it -> Pair.of(it, Formats.get(it)))
             .filter(p -> !p.second().getIsExtension())
@@ -99,7 +100,8 @@ public class ConfigurationPanel extends JPanel
 
     private static UIForPanel<JPanel> namedSeparator(String label)
     {
-        return panel("fillx, insets 5 0").add("w 10!", separator())
+        return panel("fillx, insets 5 0")
+                .add("w 10!", separator())
                 .add(label(label))
                 .add("growx, pushx", separator());
     }
@@ -137,7 +139,8 @@ public class ConfigurationPanel extends JPanel
 
     private static String optionRenderer(@Nullable OptionProto option)
     {
-        return Optional.ofNullable(option)
+        return Optional
+                .ofNullable(option)
                 .map(OptionProto::getComment)
                 .orElse("*** missing default ***");
     }
@@ -187,11 +190,11 @@ public class ConfigurationPanel extends JPanel
             Var<OptionProto> selected =
                     options.zoomTo(getOption(optionGroup), withOption(optionGroup));
 
-            panel = panel.add(LABEL_FORMAT, label(commentRenderer(optionGroup.getComment())))
-                    .add(SETTING_FORMAT,
-                            comboBox(selected,
-                                    optionGroup.getOptionList(),
-                                    ConfigurationPanel::optionRenderer));
+            panel = panel.add(LABEL_FORMAT, label(commentRenderer(optionGroup.getComment()))).add(
+                    SETTING_FORMAT, comboBox(
+                            selected,
+                            optionGroup.getOptionList(),
+                            ConfigurationPanel::optionRenderer));
         }
 
         for (OptionProto option : config.getOptionList())
@@ -200,16 +203,18 @@ public class ConfigurationPanel extends JPanel
                 continue;
 
             String optionName = option.getName();
-            Var<Boolean> selected =
-                    options.zoomTo(it -> it.containsKey(optionName), (parent, newValue) -> {
+            Var<Boolean> selected = options.zoomTo(
+                    it -> it.containsKey(optionName), (parent, newValue) -> {
                         if (newValue)
                             return parent.put(optionName, "");
                         else
                             return parent.remove(optionName);
                     });
 
-            panel = panel.add(LABEL_FORMAT, label(commentRenderer(option.getComment())))
-                    .add(SETTING_FORMAT,
+            panel = panel
+                    .add(LABEL_FORMAT, label(commentRenderer(option.getComment())))
+                    .add(
+                            SETTING_FORMAT,
                             comboBox(selected, YES_NO, ConfigurationPanel::yesNoRenderer));
         }
 
@@ -218,14 +223,18 @@ public class ConfigurationPanel extends JPanel
 
     private UIForPanel<ConfigurationPanel> buildFormatPane(UIForPanel<ConfigurationPanel> panel)
     {
-        panel = panel.add("span 2, growx, wrap", namedSeparator("Format properties"))
+        panel = panel
+                .add("span 2, growx, wrap", namedSeparator("Format properties"))
                 .add(LABEL_FORMAT, label("Format:"))
-                .add(SETTING_FORMAT,
-                        comboBox(model.getFormat(),
+                .add(
+                        SETTING_FORMAT, comboBox(
+                                model.getFormat(),
                                 ImmutableList.copyOf(formatData.keySet()),
-                                ConfigurationPanel::formatRenderer).onSelection(it -> model.getFormat()
+                                ConfigurationPanel::formatRenderer).onSelection(it -> model
+                                .getFormat()
                                 .set(From.VIEW, (String) it.get().getSelectedItem())));
-        panel = emitOptions(panel,
+        panel = emitOptions(
+                panel,
                 model.getOptionsForFormat(model.getFormat().get()),
                 formatData.getOrDefault(model.getFormat().get(), ConfigProto.getDefaultInstance()),
                 ImmutableSet.of());
@@ -239,11 +248,11 @@ public class ConfigurationPanel extends JPanel
         Set<OptionApplicabilityHint> applicabilities = new HashSet<>();
         applicabilities.add(ANY_SOURCESINK);
 
-        panel = panel.add(label("Device:"))
-                .add(SETTING_FORMAT,
-                        comboBox(model.getDevice(),
-                                List.copyOf(model.getDevices().keySet()),
-                                this::deviceRenderer));
+        panel = panel.add(label("Device:")).add(
+                SETTING_FORMAT, comboBox(
+                        model.getDevice(),
+                        List.copyOf(model.getDevices().keySet()),
+                        this::deviceRenderer));
 
         switch (model.getDevice().get())
         {
@@ -257,9 +266,9 @@ public class ConfigurationPanel extends JPanel
         }
 
         if (applicabilities.contains(HARDWARE_SOURCESINK))
-            panel = panel.add(label("Drive:"))
-                    .add(SETTING_FORMAT,
-                            comboBox(model.getDrive(), DRIVES, ConfigurationPanel::driveRenderer));
+            panel = panel.add(label("Drive:")).add(
+                    SETTING_FORMAT,
+                    comboBox(model.getDrive(), DRIVES, ConfigurationPanel::driveRenderer));
 
         panel = emitOptions(panel, model.getOptionsForDevice(), GLOBAL_CONFIG, applicabilities);
         return panel;

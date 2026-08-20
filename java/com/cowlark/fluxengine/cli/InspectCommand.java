@@ -37,73 +37,85 @@ public class InspectCommand implements Command
     private static final String[] BLOCK_ELEMENTS = {" ", "▏", "▎", "▍", "▌", "▋", "▊", "▉", "█"};
 
     private FlagGroup flags = new FlagGroup();
-    private ValueFlag<String> sourceFluxFlag = StringFlag.builder()
+    private ValueFlag<String> sourceFluxFlag = StringFlag
+            .builder()
             .setGroup(flags)
             .setName("--source")
             .setName("-s")
             .setHelpText("'drive:' flux source to use")
             .build();
-    private ValueFlag<String> destTracksFlag = StringFlag.builder()
+    private ValueFlag<String> destTracksFlag = StringFlag
+            .builder()
             .setGroup(flags)
             .setName("--tracks")
             .setName("-t")
             .setHelpText("tracks to write to")
             .setDefaultValue("c0h0")
             .build();
-    private SettableFlag dumpFluxFlag = SettableFlag.builder()
+    private SettableFlag dumpFluxFlag = SettableFlag
+            .builder()
             .setGroup(flags)
             .setName("--dump-flux")
             .setName("-F")
             .setHelpText("Dump raw magnetic disk flux.")
             .build();
-    private SettableFlag dumpBitstreamFlag = SettableFlag.builder()
+    private SettableFlag dumpBitstreamFlag = SettableFlag
+            .builder()
             .setGroup(flags)
             .setName("--dump-bitstream")
             .setName("-B")
             .setHelpText("Dump aligned bitstream.")
             .build();
-    private ValueFlag<Integer> dumpRawFlag = IntFlag.builder()
+    private ValueFlag<Integer> dumpRawFlag = IntFlag
+            .builder()
             .setGroup(flags)
             .setName("--dump-raw")
             .setName("-R")
             .setHelpText("Dump raw binary with offset.")
             .build();
-    private SettableFlag dumpMfmFmFlag = SettableFlag.builder()
+    private SettableFlag dumpMfmFmFlag = SettableFlag
+            .builder()
             .setGroup(flags)
             .setName("--mfmfm")
             .setHelpText("When dumping raw binary, do MFM/FM decoding first.")
             .build();
-    private SettableFlag dumpBytecodesFlag = SettableFlag.builder()
+    private SettableFlag dumpBytecodesFlag = SettableFlag
+            .builder()
             .setGroup(flags)
             .setName("--dump-bytecodes")
             .setName("-H")
             .setHelpText("Dump the raw FluxEngine bytecodes.")
             .build();
-    private ValueFlag<Integer> fluxmapResolutionFlag = IntFlag.builder()
+    private ValueFlag<Integer> fluxmapResolutionFlag = IntFlag
+            .builder()
             .setGroup(flags)
             .setName("--fluxmap-resolution")
             .setHelpText("Resolution of flux visualisation (nanoseconds). 0 to autoscale")
             .build();
-    private ValueFlag<Double> seekFlag = DoubleFlag.builder()
+    private ValueFlag<Double> seekFlag = DoubleFlag
+            .builder()
             .setGroup(flags)
             .setName("--seek")
             .setName("-S")
             .setHelpText("Seek this many milliseconds into the track before displaying it.")
             .build();
-    private ValueFlag<Double> manualClockRateFlag = DoubleFlag.builder()
+    private ValueFlag<Double> manualClockRateFlag = DoubleFlag
+            .builder()
             .setGroup(flags)
             .setName("--manual-clock-rate-us")
             .setName("-u")
             .setHelpText("If not zero, force this clock rate; if zero, try to autodetect it.")
             .setDefaultValue(0.0)
             .build();
-    private ValueFlag<Double> noiseFloorFactorFlag = DoubleFlag.builder()
+    private ValueFlag<Double> noiseFloorFactorFlag = DoubleFlag
+            .builder()
             .setGroup(flags)
             .setName("--noise-floor-factor")
             .setHelpText("Clock detection noise floor (min + (max-min)*factor).")
             .setDefaultValue(0.01)
             .build();
-    private ValueFlag<Double> signalLevelFactorFlag = DoubleFlag.builder()
+    private ValueFlag<Double> signalLevelFactorFlag = DoubleFlag
+            .builder()
             .setGroup(flags)
             .setName("--signal-level-factor")
             .setHelpText("Clock detection signal level (min + (max-min)*factor).")
@@ -183,16 +195,19 @@ public class InspectCommand implements Command
             if (tracks.size() != 1)
                 throw new FluxEngineException("you must specify exactly one track");
             CylinderHead ch = tracks.get(0);
-            FluxSourceIterator iterator = fluxSource.readFlux(FluxReadParameters.builder()
+            FluxSourceIterator iterator = fluxSource.readFlux(FluxReadParameters
+                    .builder()
                     .setCylinder(ch.cylinder())
                     .setHead(ch.head())
                     .build());
             Fluxmap fluxmap = iterator.next();
 
-            System.out.printf("0x%x bytes of data in %.3fms%n",
+            System.out.printf(
+                    "0x%x bytes of data in %.3fms%n",
                     fluxmap.bytes(),
                     fluxmap.durationNs() / 1e6);
-            System.out.printf("Required USB bandwidth: %dkB/s%n",
+            System.out.printf(
+                    "Required USB bandwidth: %dkB/s%n",
                     (int) (fluxmap.bytes() / 1024.0 / (fluxmap.durationNs() / 1e9)));
 
             FluxmapReader fmr = new FluxmapReader(fluxmap, DecoderProto.getDefaultInstance());
@@ -251,7 +266,8 @@ public class InspectCommand implements Command
                         System.out.printf("%n%10.3f:%c", next / 1000.0, clocked ? '-' : ' ');
                         bannered = true;
                     }
-                    System.out.printf("==== %06x %10.3f +%.3f = %.1f clocks",
+                    System.out.printf(
+                            "==== %06x %10.3f +%.3f = %.1f clocks",
                             fmr.tell().bytes(),
                             transition / 1000.0,
                             length / 1000.0,
@@ -262,13 +278,15 @@ public class InspectCommand implements Command
 
             if (dumpBitstreamFlag.get())
             {
-                System.out.printf("\n\nAligned bitstream from %.3fms follows:%n",
+                System.out.printf(
+                        "\n\nAligned bitstream from %.3fms follows:%n",
                         fmr.tell().getDurationNs() / 1000000.0);
 
                 FluxDecoder decoder = new FluxDecoder(fmr, clockPeriod, config.getDecoder());
                 while (!fmr.eof())
                 {
-                    System.out.printf("%06x %10.3f : ",
+                    System.out.printf(
+                            "%06x %10.3f : ",
                             fmr.tell().bytes(),
                             fmr.tell().getDurationNs() / 1000000.0);
                     for (int i = 0; i < 50; i++)
@@ -285,7 +303,8 @@ public class InspectCommand implements Command
 
             if (dumpRawFlag.isSet())
             {
-                System.out.printf("\n\nRaw binary with offset %d from %.3fms follows:%n",
+                System.out.printf(
+                        "\n\nRaw binary with offset %d from %.3fms follows:%n",
                         dumpRawFlag.get(),
                         fmr.tell().getDurationNs() / 1000000.0);
 
@@ -295,7 +314,8 @@ public class InspectCommand implements Command
 
                 while (!fmr.eof())
                 {
-                    System.out.printf("%06x %10.3f : ",
+                    System.out.printf(
+                            "%06x %10.3f : ",
                             fmr.tell().bytes(),
                             fmr.tell().getDurationNs() / 1000000.0);
 

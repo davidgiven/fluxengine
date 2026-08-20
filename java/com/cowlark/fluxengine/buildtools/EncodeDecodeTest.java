@@ -42,16 +42,20 @@ public class EncodeDecodeTest
 
         writeRandomImage(srcFile);
 
-        run(new WriteCommand(),
-                ImmutableList.<String>builder()
+        run(
+                new WriteCommand(),
+                ImmutableList
+                        .<String>builder()
                         .add("-c", format, "-i", srcFile.toString(), "-d", fluxFile.toString())
                         .add("--drive.rotational_period_ms=200")
                         .add("--no-verify")
                         .addAll(flags)
                         .build());
 
-        run(new ReadCommand(),
-                ImmutableList.<String>builder()
+        run(
+                new ReadCommand(),
+                ImmutableList
+                        .<String>builder()
                         .add("-c", format, "-s", fluxFile.toString(), "-o", destFile.toString())
                         .add("--drive.rotational_period_ms=200")
                         .addAll(flags)
@@ -85,7 +89,8 @@ public class EncodeDecodeTest
 
     private static void run(Command command, ImmutableList<String> args) throws Exception
     {
-        System.out.printf("fluxengine %s %s%n",
+        System.out.printf(
+                "fluxengine %s %s%n",
                 command instanceof WriteCommand ? "write" : "read",
                 String.join(" ", args));
         command.run(args);

@@ -25,7 +25,8 @@ public class FluxSinkTest
 
     private static ConfigProto makeConfig()
     {
-        return new ConfigBuilder().set("usb.serial", "test-serial")
+        return new ConfigBuilder()
+                .set("usb.serial", "test-serial")
                 .set("drive.rotational_period_ms", "200")
                 .set("layout.tracks", "1")
                 .set("layout.sides", "1")
@@ -114,21 +115,24 @@ public class FluxSinkTest
     @Test
     public void scpRejectsApple2()
     {
-        ConfigProto config = new ConfigBuilder().set("usb.serial", "test-serial")
+        ConfigProto config = new ConfigBuilder()
+                .set("usb.serial", "test-serial")
                 .set("drive.rotational_period_ms", "200")
                 .set("drive.drive_type", "DRIVETYPE_APPLE2")
                 .set("layout.tracks", "1")
                 .set("layout.sides", "1")
                 .build();
 
-        assertThrows(FluxEngineException.class,
+        assertThrows(
+                FluxEngineException.class,
                 () -> new ScpFluxSink("test.scp", 0xff, false, config));
     }
 
     @Test
     public void factoryWiring()
     {
-        ConfigProto config = new ConfigBuilder().set("usb.serial", "test-serial")
+        ConfigProto config = new ConfigBuilder()
+                .set("usb.serial", "test-serial")
                 .set("flux_sink.type", "FLUXTYPE_A2R")
                 .set("flux_sink.a2r.filename", "test.a2r")
                 .build();

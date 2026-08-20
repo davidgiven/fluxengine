@@ -6,10 +6,10 @@ import com.cowlark.fluxengine.core.ByteReader;
 import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.core.FluxEngineException;
 import com.cowlark.fluxengine.core.Logger;
-import com.cowlark.fluxengine.external.Catweasel;
 import com.cowlark.fluxengine.data.CylinderHead;
 import com.cowlark.fluxengine.data.Fluxmap;
 import com.cowlark.fluxengine.data.Locations;
+import com.cowlark.fluxengine.external.Catweasel;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -63,7 +63,8 @@ public class CwfFluxSource extends TrivialFluxSource
                 throw new FluxEngineException("unsupported clock rate");
         }
 
-        Logger.logf("CWF %dx%d = %d cylinders, %d heads",
+        Logger.logf(
+                "CWF %dx%d = %d cylinders, %d heads",
                 cylinders,
                 heads,
                 cylinders * step,
@@ -79,7 +80,8 @@ public class CwfFluxSource extends TrivialFluxSource
             int length = br.readLe32();
             int dataLength = length - 8;
             int pos = br.pos();
-            trackOffsets.put(new CylinderHead(trackCylinder * step, trackHead),
+            trackOffsets.put(
+                    new CylinderHead(trackCylinder * step, trackHead),
                     new int[]{pos, dataLength});
             br.skip(dataLength);
         }

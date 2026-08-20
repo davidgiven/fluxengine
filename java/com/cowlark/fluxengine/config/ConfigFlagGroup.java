@@ -12,14 +12,16 @@ public class ConfigFlagGroup extends FlagGroup
     {
         this.builder = builder;
 
-        ActionFlag.builder()
+        ActionFlag
+                .builder()
                 .setGroup(this)
                 .setName("-c")
                 .setName("--config")
                 .setHelpText("Reads an internal or external configuration file.")
                 .setValueCallback(builder::loadConfigFile)
                 .build();
-        ActionFlag.builder()
+        ActionFlag
+                .builder()
                 .setGroup(this)
                 .setName("--show-config")
                 .setHelpText("Shows the currently set configuration and halts.")
@@ -37,7 +39,8 @@ public class ConfigFlagGroup extends FlagGroup
             {
                 /* This is a config key. */
                 builder.get(path);
-                return ActionFlag.builder()
+                return ActionFlag
+                        .builder()
                         .setGroup(this)
                         .setValueCallback(value -> builder.set(path, value))
                         .build();
@@ -59,12 +62,14 @@ public class ConfigFlagGroup extends FlagGroup
             String path = key.substring(2);
             ConfigBuilder.OptionInfo option = builder.findOption(path);
             if (option.usesValue())
-                return ActionFlag.builder()
+                return ActionFlag
+                        .builder()
                         .setGroup(this)
                         .setValueCallback(arg -> builder.applyOption(option, arg))
                         .build();
             else
-                return ActionFlag.builder()
+                return ActionFlag
+                        .builder()
                         .setGroup(this)
                         .setVoidCallback(() -> builder.applyOption(option, null))
                         .build();

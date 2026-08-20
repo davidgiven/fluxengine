@@ -235,7 +235,8 @@ public class BrotherEncoder extends Encoder
             int dataCursor = (int) (dataMs * 1e3 / config.getClockRateUs());
 
             bits.fillBitmapTo(cursor, headerCursor, new boolean[]{true, false});
-            writeSectorHeader(bits,
+            writeSectorHeader(
+                    bits,
                     cursor,
                     sectorData.location.logicalCylinder(),
                     sectorData.location.logicalSector());

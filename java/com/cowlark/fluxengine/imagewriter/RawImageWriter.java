@@ -33,7 +33,8 @@ public class RawImageWriter extends ImageWriter
             return;
         }
 
-        System.out.printf("RAW: writing %d tracks, %d sides%n",
+        System.out.printf(
+                "RAW: writing %d tracks, %d sides%n",
                 geometry.numCylinders,
                 geometry.numHeads);
 

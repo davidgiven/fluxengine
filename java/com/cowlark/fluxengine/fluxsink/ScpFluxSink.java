@@ -1,12 +1,12 @@
 package com.cowlark.fluxengine.fluxsink;
 
-import static com.cowlark.fluxengine.wiring.FluxEngine.F_BIT_INDEX;
-import static com.cowlark.fluxengine.wiring.FluxEngine.F_BIT_PULSE;
-import static com.cowlark.fluxengine.wiring.FluxEngine.NS_PER_TICK;
 import static com.cowlark.fluxengine.external.Scp.SCP_FLAG_96TPI;
 import static com.cowlark.fluxengine.external.Scp.SCP_FLAG_INDEXED;
 import static com.cowlark.fluxengine.external.Scp.SCP_HEADER_SIZE;
 import static com.cowlark.fluxengine.external.Scp.SCP_TRACK_SIZE;
+import static com.cowlark.fluxengine.wiring.FluxEngine.F_BIT_INDEX;
+import static com.cowlark.fluxengine.wiring.FluxEngine.F_BIT_PULSE;
+import static com.cowlark.fluxengine.wiring.FluxEngine.NS_PER_TICK;
 
 import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.core.ByteReader;
@@ -182,7 +182,8 @@ public class ScpFluxSink extends FluxSink
     public void close()
     {
         int checksum = 0;
-        checksum = appendChecksum(checksum,
+        checksum = appendChecksum(
+                checksum,
                 new Bytes(java.util.Arrays.copyOfRange(fileheader, 0x10, fileheader.length)));
         checksum = appendChecksum(checksum, trackdata);
         writeLe32(fileheader, 12, checksum);

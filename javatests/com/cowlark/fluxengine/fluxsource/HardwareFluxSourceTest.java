@@ -36,7 +36,8 @@ public class HardwareFluxSourceTest
 
     private static ConfigProto config()
     {
-        return new ConfigBuilder().set("usb.serial", "test-serial")
+        return new ConfigBuilder()
+                .set("usb.serial", "test-serial")
                 .set("drive.sync_with_index", "true")
                 .set("drive.revolutions", "3")
                 .set("drive.rotational_period_ms", "200")
@@ -69,7 +70,8 @@ public class HardwareFluxSourceTest
         when(mockUsbDevice.read(anyInt(), anyInt(), anyDouble())).thenReturn(readResult);
         HardwareFluxSource source = new HardwareFluxSource(config(), mockUsbFactory);
 
-        FluxSourceIterator iterator = source.readFlux(FluxReadParameters.builder()
+        FluxSourceIterator iterator = source.readFlux(FluxReadParameters
+                .builder()
                 .setCylinder(17)
                 .setHead(1)
                 .setSyncWithIndex(true)

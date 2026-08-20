@@ -18,13 +18,15 @@ import com.google.common.collect.ImmutableList;
 public class SeekCommand implements Command
 {
     private static FlagGroup flags = new FlagGroup();
-    private static IntFlag track = IntFlag.builder()
+    private static IntFlag track = IntFlag
+            .builder()
             .setGroup(flags)
             .setName("--cylinder")
             .setName("-t")
             .setHelpText("track to seek to")
             .build();
-    private ValueFlag<String> sourceFlag = StringFlag.builder()
+    private ValueFlag<String> sourceFlag = StringFlag
+            .builder()
             .setGroup(flags)
             .setName("--source")
             .setName("-s")

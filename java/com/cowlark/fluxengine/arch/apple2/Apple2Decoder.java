@@ -194,10 +194,12 @@ public class Apple2Decoder extends Decoder
             {
                 /* 3 * 2 bit */
                 output.setByte(i, (byte) (((checksum >> 1) & 0x01) | ((checksum << 1) & 0x02)));
-                output.setByte(i + 86,
+                output.setByte(
+                        i + 86,
                         (byte) (((checksum >> 3) & 0x01) | ((checksum >> 1) & 0x02)));
                 if ((i + 172) < Apple2.APPLE2_SECTOR_LENGTH)
-                    output.setByte(i + 172,
+                    output.setByte(
+                            i + 172,
                             (byte) (((checksum >> 5) & 0x01) | ((checksum >> 3) & 0x02)));
             }
         }

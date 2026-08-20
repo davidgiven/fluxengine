@@ -19,7 +19,8 @@ import com.google.common.collect.ImmutableList;
 public class FluxfileLsCommand implements Command
 {
     private FlagGroup flags = new FlagGroup();
-    private ValueFlag<String> fluxFilename = StringFlag.builder()
+    private ValueFlag<String> fluxFilename = StringFlag
+            .builder()
             .setGroup(flags)
             .setName("--fluxfile")
             .setName("-f")

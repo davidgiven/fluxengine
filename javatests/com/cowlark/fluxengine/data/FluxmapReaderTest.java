@@ -17,7 +17,8 @@ public class FluxmapReaderTest
     @Test
     public void readsEvents()
     {
-        Fluxmap map = new Fluxmap(Bytes.of(FluxEngine.F_DESYNC,
+        Fluxmap map = new Fluxmap(Bytes.of(
+                FluxEngine.F_DESYNC,
                 FluxEngine.F_BIT_PULSE | 0x30,
                 FluxEngine.F_BIT_INDEX | 0x30,
                 FluxEngine.F_BIT_PULSE | FluxEngine.F_BIT_INDEX | 0x30,

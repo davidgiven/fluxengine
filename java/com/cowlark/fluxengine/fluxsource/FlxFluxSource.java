@@ -6,9 +6,9 @@ import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.core.FluxEngineException;
 import com.cowlark.fluxengine.core.Logger;
 import com.cowlark.fluxengine.data.CylinderHead;
-import com.cowlark.fluxengine.external.Flx;
 import com.cowlark.fluxengine.data.Fluxmap;
 import com.cowlark.fluxengine.data.Locations;
+import com.cowlark.fluxengine.external.Flx;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -41,7 +41,8 @@ public class FlxFluxSource extends TrivialFluxSource
             {
                 Matcher m = FILENAME_REGEX.matcher(f.getName());
                 if (m.matches())
-                    chs.add(new CylinderHead(Integer.parseInt(m.group(1)),
+                    chs.add(new CylinderHead(
+                            Integer.parseInt(m.group(1)),
                             Integer.parseInt(m.group(2)) - 1));
             }
         }
@@ -49,25 +50,6 @@ public class FlxFluxSource extends TrivialFluxSource
         ConfigProto.Builder builder = ConfigProto.newBuilder();
         builder.getDriveBuilder().setTracks(Locations.convertCylinderHeadsToString(chs));
         extraConfig = builder.build();
-    }
-
-    @Override
-    public void adjustConfig(ConfigBuilder configBuilder)
-    {
-        configBuilder.mergeConfig(extraConfig);
-    }
-
-    @Override
-    public Fluxmap readSingleFlux(FluxReadParameters parameters)
-    {
-        String path = String.format("%s/@TR%02dS%d@.FLX",
-                this.path,
-                parameters.cylinder(),
-                parameters.head() + 1);
-        if (!Files.exists(Path.of(path)))
-            return new Fluxmap();
-        Logger.logf("FLX: reading %s", path);
-        return Flx.readFlxBytes(readFile(path));
     }
 
     private static Bytes readFile(String filename)
@@ -80,5 +62,25 @@ public class FlxFluxSource extends TrivialFluxSource
             throw new FluxEngineException(
                     "cannot open input file '" + filename + "': " + e.getMessage());
         }
+    }
+
+    @Override
+    public void adjustConfig(ConfigBuilder configBuilder)
+    {
+        configBuilder.mergeConfig(extraConfig);
+    }
+
+    @Override
+    public Fluxmap readSingleFlux(FluxReadParameters parameters)
+    {
+        String path = String.format(
+                "%s/@TR%02dS%d@.FLX",
+                this.path,
+                parameters.cylinder(),
+                parameters.head() + 1);
+        if (!Files.exists(Path.of(path)))
+            return new Fluxmap();
+        Logger.logf("FLX: reading %s", path);
+        return Flx.readFlxBytes(readFile(path));
     }
 }

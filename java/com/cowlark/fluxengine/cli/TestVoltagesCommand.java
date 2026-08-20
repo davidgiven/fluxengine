@@ -14,7 +14,8 @@ public class TestVoltagesCommand implements Command
 {
     private static String displayVoltages(Voltages v)
     {
-        return String.format("      Logic 1 / 0:  %.2fV / %.2fV\n",
+        return String.format(
+                "      Logic 1 / 0:  %.2fV / %.2fV\n",
                 v.logic0Mv() / 1000.0,
                 v.logic1Mv() / 1000.0);
     }
@@ -35,7 +36,8 @@ public class TestVoltagesCommand implements Command
             usbFactory.perform(device -> {
                 VoltageMeasurements voltages = device.measureVoltages();
 
-                System.out.printf("""
+                System.out.printf(
+                        """
                                 Output voltages:
                                   Both drives deselected
                                 %s  Drive 0 selected

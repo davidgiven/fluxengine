@@ -310,7 +310,8 @@ public class MacintoshDecoder extends Decoder
         /* Read data. */
 
         readRawBits(8); /* skip spare byte */
-        Bytes inputbuffer = readRawBits(MAC_ENCODED_SECTOR_LENGTH * 8).toBytes()
+        Bytes inputbuffer = readRawBits(MAC_ENCODED_SECTOR_LENGTH * 8)
+                .toBytes()
                 .slice(0, MAC_ENCODED_SECTOR_LENGTH);
 
         for (int i = 0; i < inputbuffer.size(); i++)

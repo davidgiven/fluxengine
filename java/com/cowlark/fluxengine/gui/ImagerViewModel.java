@@ -74,28 +74,32 @@ public class ImagerViewModel
         /* Viewable.cast reinterprets the property itself as a Viewable, so the
          * listener lives exactly as long as the property (unlike view(), which
          * returns a weakly-held view that must be kept in a field). */
-        Viewable.cast(format)
-                .onChange(From.VIEW,
-                        it -> preferencesReaderWriter.setStringPreference(FORMAT,
-                                it.currentValue().orElseThrowUnchecked()));
-        Viewable.cast(device)
-                .onChange(From.VIEW,
-                        it -> preferencesReaderWriter.setStringPreference(DEVICE,
-                                it.currentValue().orElseThrowUnchecked()));
-        Viewable.cast(drive)
-                .onChange(From.VIEW,
-                        it -> preferencesReaderWriter.setIntegerPreference(DRIVE,
-                                it.currentValue().orElseThrowUnchecked()));
+        Viewable.cast(format).onChange(
+                From.VIEW,
+                it -> preferencesReaderWriter.setStringPreference(
+                        FORMAT,
+                        it.currentValue().orElseThrowUnchecked()));
+        Viewable.cast(device).onChange(
+                From.VIEW,
+                it -> preferencesReaderWriter.setStringPreference(
+                        DEVICE,
+                        it.currentValue().orElseThrowUnchecked()));
+        Viewable.cast(drive).onChange(
+                From.VIEW,
+                it -> preferencesReaderWriter.setIntegerPreference(
+                        DRIVE,
+                        it.currentValue().orElseThrowUnchecked()));
     }
 
     Var<Association<String, String>> getOptionsForFormat(String format)
     {
         Var<Association<String, String>> value =
                 Var.of(preferencesReaderWriter.getOptionsForFormat(format));
-        Viewable.cast(value)
-                .onChange(From.VIEW,
-                        it -> preferencesReaderWriter.setOptionsForFormat(format,
-                                it.currentValue().orElseThrowUnchecked()));
+        Viewable.cast(value).onChange(
+                From.VIEW,
+                it -> preferencesReaderWriter.setOptionsForFormat(
+                        format,
+                        it.currentValue().orElseThrowUnchecked()));
         return value;
     }
 
@@ -103,19 +107,21 @@ public class ImagerViewModel
     {
         Var<Association<String, String>> value =
                 Var.of(preferencesReaderWriter.getOptions(PreferencesReaderWriter.DEVICE_OPTIONS));
-        Viewable.cast(value)
-                .onChange(From.VIEW,
-                        it -> preferencesReaderWriter.setOptions(PreferencesReaderWriter.DEVICE_OPTIONS,
-                                it.currentValue().orElseThrowUnchecked()));
+        Viewable.cast(value).onChange(
+                From.VIEW,
+                it -> preferencesReaderWriter.setOptions(
+                        PreferencesReaderWriter.DEVICE_OPTIONS,
+                        it.currentValue().orElseThrowUnchecked()));
         return value;
     }
 
     void refreshUsbDevices()
     {
-        devices = new ImmutableMap.Builder<String, CandidateDevice>().put(DEVICE_FLUXFILE,
-                        new CandidateDevice())
+        devices = new ImmutableMap.Builder<String, CandidateDevice>()
+                .put(DEVICE_FLUXFILE, new CandidateDevice())
                 .put(DEVICE_MANUAL, new CandidateDevice())
-                .putAll(UsbFinder.findUsbDevices()
+                .putAll(UsbFinder
+                        .findUsbDevices()
                         .stream()
                         .map(candidate -> Map.entry(candidate.getSerial(), candidate))
                         .collect(toImmutableList()))
@@ -148,13 +154,15 @@ public class ImagerViewModel
             builder.withFluxSink(drive);
         }
 
-        currentOperation.set(new ReadOperation().setConfig(builder.build())
+        currentOperation.set(new ReadOperation()
+                .setConfig(builder.build())
                 .create()
                 .observeOn(UiUtils.EDT)
-                .subscribe(this::handleLogMessage, e -> {
-                    logQueue.add(new ErrorLogMessage(e.getMessage()));
-                    currentOperation.fireChange(From.VIEW_MODEL);
-                }, () -> currentOperation.fireChange(From.VIEW_MODEL)));
+                .subscribe(
+                        this::handleLogMessage, e -> {
+                            logQueue.add(new ErrorLogMessage(e.getMessage()));
+                            currentOperation.fireChange(From.VIEW_MODEL);
+                        }, () -> currentOperation.fireChange(From.VIEW_MODEL)));
     }
 
     void onRereadDisk(ComponentDelegate<JButton, ActionEvent> delegate)

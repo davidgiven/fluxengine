@@ -193,7 +193,8 @@ class ApplesauceUsbDevice extends UsbDevice
         if (configProto.getDrive().getDrive() != 0)
             throw new FluxEngineException("the Applesauce only supports drive 0");
         connect();
-        doCommand(String.format("dpc:density%s",
+        doCommand(String.format(
+                "dpc:density%s",
                 configProto.getDrive().getHighDensity() ? "+" : "-"));
         if (cylinder == 0)
             doCommand("head:zero");
@@ -243,7 +244,8 @@ class ApplesauceUsbDevice extends UsbDevice
         serial.readLine();
         double elapsedTime = getCurrentTime() - startTime;
 
-        System.out.printf("transferred %d bytes from PC -> device in %d ms (%d kb/s)%n",
+        System.out.printf(
+                "transferred %d bytes from PC -> device in %d ms (%d kb/s)%n",
                 max,
                 (int) (elapsedTime * 1000.0),
                 (int) ((max / 1024.0) / elapsedTime));
@@ -261,7 +263,8 @@ class ApplesauceUsbDevice extends UsbDevice
         serial.readBytes(max);
         double elapsedTime = getCurrentTime() - startTime;
 
-        System.out.printf("transferred %d bytes from device -> PC in %d ms (%d kb/s)%n",
+        System.out.printf(
+                "transferred %d bytes from device -> PC in %d ms (%d kb/s)%n",
                 max,
                 (int) (elapsedTime * 1000.0),
                 (int) ((max / 1024.0) / elapsedTime));
@@ -274,7 +277,8 @@ class ApplesauceUsbDevice extends UsbDevice
             throw new FluxEngineException(
                     "hard sectors are currently unsupported on the " + "Applesauce");
         boolean shortRead = readTimeNs < 400e6;
-        Logger.logf("applesauce: timed reads not supported; using read of %s revolutions",
+        Logger.logf(
+                "applesauce: timed reads not supported; using read of %s revolutions",
                 shortRead ? "1.25" : "2.25");
 
         seek(cylinder);

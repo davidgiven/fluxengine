@@ -37,7 +37,8 @@ public class EncoderTest
         /* A single-track, single-side disk with sectors 0 and 1. */
         DiskLayout layout = new DiskLayout(1, 1, 2, 256);
         LogicalTrackLayout ltl =
-                layout.layoutByLogicalLocation.get(new com.cowlark.fluxengine.data.CylinderHead(0,
+                layout.layoutByLogicalLocation.get(new com.cowlark.fluxengine.data.CylinderHead(
+                        0,
                         0));
         assertThat(ltl).isNotNull();
 
@@ -59,7 +60,8 @@ public class EncoderTest
     {
         DiskLayout layout = new DiskLayout(1, 1, 2, 256);
         LogicalTrackLayout ltl =
-                layout.layoutByLogicalLocation.get(new com.cowlark.fluxengine.data.CylinderHead(0,
+                layout.layoutByLogicalLocation.get(new com.cowlark.fluxengine.data.CylinderHead(
+                        0,
                         0));
 
         Image image = new Image();
@@ -83,7 +85,8 @@ public class EncoderTest
     {
         TestEncoder encoder = new TestEncoder(0);
 
-        assertThrows(FluxEngineException.class,
+        assertThrows(
+                FluxEngineException.class,
                 () -> encoder.calculatePhysicalClockPeriodNs(4000, 200e6));
     }
 

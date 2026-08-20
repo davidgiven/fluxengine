@@ -67,8 +67,7 @@ class GreaseweazleUsbDevice extends UsbDevice
             else
                 throw new FluxEngineException(String.format(
                         "only Greaseweazle firmware versions 22 and 24 or above are currently " +
-                                "supported, but you have version %d. Please file a bug.",
-                        version));
+                                "supported, but you have version %d. Please file a bug.", version));
 
             /* Twiddle the baud rate, which indicates to the Greaseweazle that the
              * data stream has been reset. */
@@ -324,7 +323,8 @@ class GreaseweazleUsbDevice extends UsbDevice
         serial.readBytes(1);
         double elapsedTime = getCurrentTime() - startTime;
 
-        System.out.printf("transferred %d bytes from PC -> device in %d ms (%d kb/s)\n",
+        System.out.printf(
+                "transferred %d bytes from PC -> device in %d ms (%d kb/s)\n",
                 LEN,
                 (int) (elapsedTime * 1000.0),
                 (int) ((LEN / 1024.0) / elapsedTime));
@@ -362,7 +362,8 @@ class GreaseweazleUsbDevice extends UsbDevice
         serial.readBytes(LEN);
         double elapsedTime = getCurrentTime() - startTime;
 
-        System.out.printf("transferred %d bytes from device -> PC in %d ms (%d kb/s)\n",
+        System.out.printf(
+                "transferred %d bytes from device -> PC in %d ms (%d kb/s)\n",
                 LEN,
                 (int) (elapsedTime * 1000.0),
                 (int) ((LEN / 1024.0) / elapsedTime));

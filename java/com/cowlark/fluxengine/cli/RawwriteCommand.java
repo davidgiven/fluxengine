@@ -18,13 +18,15 @@ import com.google.common.collect.ImmutableList;
 public class RawwriteCommand implements Command
 {
     private FlagGroup flags = new FlagGroup();
-    private ValueFlag<String> sourceFluxFlag = StringFlag.builder()
+    private ValueFlag<String> sourceFluxFlag = StringFlag
+            .builder()
             .setGroup(flags)
             .setName("--source")
             .setName("-s")
             .setHelpText("source flux file to read from")
             .build();
-    private ValueFlag<String> destFluxFlag = StringFlag.builder()
+    private ValueFlag<String> destFluxFlag = StringFlag
+            .builder()
             .setGroup(flags)
             .setName("--dest")
             .setName("-d")
@@ -40,7 +42,8 @@ public class RawwriteCommand implements Command
     @Override
     public void run(ImmutableList<String> args)
     {
-        ConfigProto config = new ConfigBuilder().fromFlags(args, flags)
+        ConfigProto config = new ConfigBuilder()
+                .fromFlags(args, flags)
                 .withFluxSource(sourceFluxFlag.get())
                 .withFluxSink(destFluxFlag.get())
                 .build();
@@ -49,10 +52,11 @@ public class RawwriteCommand implements Command
             throw new FluxEngineException("you can't use rawwrite to read from hardware");
 
         LogRenderer renderer = LogRenderer.create(System.out);
-        new RawwriteOperation().setConfig(config).create().blockingSubscribe(renderer::add, e -> {
-            System.err.println("Failed!");
-            e.printStackTrace();
-        });
+        new RawwriteOperation().setConfig(config).create().blockingSubscribe(
+                renderer::add, e -> {
+                    System.err.println("Failed!");
+                    e.printStackTrace();
+                });
         System.out.println("done.");
     }
 

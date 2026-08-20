@@ -3,8 +3,8 @@ package com.cowlark.fluxengine.fluxsource;
 import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.core.FluxEngineException;
 import com.cowlark.fluxengine.core.Logger;
-import com.cowlark.fluxengine.external.Catweasel;
 import com.cowlark.fluxengine.data.Fluxmap;
+import com.cowlark.fluxengine.external.Catweasel;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,6 +27,18 @@ class DmkFluxSourceIterator implements FluxSourceIterator
         this.side = side;
     }
 
+    private static Bytes readFile(String filename)
+    {
+        try
+        {
+            return new Bytes(Files.readAllBytes(Path.of(filename)));
+        } catch (IOException e)
+        {
+            throw new FluxEngineException(
+                    "cannot open input file '" + filename + "': " + e.getMessage());
+        }
+    }
+
     private String getPath()
     {
         return String.format("%s/C_S%01dT%02d.%03d", path, side, track, count);
@@ -46,17 +58,5 @@ class DmkFluxSourceIterator implements FluxSourceIterator
         Bytes bytes = readFile(path);
         count++;
         return Catweasel.decodeCatweaselData(bytes, 1e9 / 7080500.0);
-    }
-
-    private static Bytes readFile(String filename)
-    {
-        try
-        {
-            return new Bytes(Files.readAllBytes(Path.of(filename)));
-        } catch (IOException e)
-        {
-            throw new FluxEngineException(
-                    "cannot open input file '" + filename + "': " + e.getMessage());
-        }
     }
 }

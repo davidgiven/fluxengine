@@ -252,8 +252,10 @@ public class IbmEncoder extends Encoder
             writeFillerRawBytes(1, gapFill);
 
         Fluxmap fluxmap = new Fluxmap();
-        fluxmap.appendBits(bits,
-                (long) calculatePhysicalClockPeriodNs(clockRateNs,
+        fluxmap.appendBits(
+                bits,
+                (long) calculatePhysicalClockPeriodNs(
+                        clockRateNs,
                         trackdata.getTargetRotationalPeriodMs() * 1e6));
         return fluxmap;
     }

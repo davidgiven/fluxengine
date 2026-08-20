@@ -94,7 +94,8 @@ public class ProtoPathTest
     @Test
     public void setNestedEnum()
     {
-        assertThat(set("drive.drive_type", "DRIVETYPE_80TRACK").getDrive()
+        assertThat(set("drive.drive_type", "DRIVETYPE_80TRACK")
+                .getDrive()
                 .getDriveType()
                 .name()).isEqualTo("DRIVETYPE_80TRACK");
     }
@@ -102,7 +103,8 @@ public class ProtoPathTest
     @Test
     public void setRepeatedStringWithIndex()
     {
-        assertThat(set("documentation[2]", "hello").getDocumentationList()).containsExactly("",
+        assertThat(set("documentation[2]", "hello").getDocumentationList()).containsExactly(
+                "",
                 "",
                 "hello");
     }

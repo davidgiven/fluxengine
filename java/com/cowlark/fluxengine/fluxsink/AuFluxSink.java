@@ -67,11 +67,13 @@ public class AuFluxSink extends FluxSink
 
         /* Write header */
         Bytes header = new Bytes(24);
-        header.writer()
+        header
+                .writer()
                 .writeBe32(0x2e736e64)
                 .writeBe32(24)
                 .writeBe32(totalTicks * channels)
-                .writeBe32(2) /* 8-bit PCM */.writeBe32(TICK_FREQUENCY)
+                .writeBe32(2) /* 8-bit PCM */
+                .writeBe32(TICK_FREQUENCY)
                 .writeBe32(channels); /* channels */
 
         String filename = String.format("%s/c%02d.h%01d.au", directory, track, head);

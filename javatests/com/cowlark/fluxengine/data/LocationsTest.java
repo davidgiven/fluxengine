@@ -15,16 +15,16 @@ public class LocationsTest
     @Test
     public void parseSingle()
     {
-        assertThat(Locations.parseCylinderHeadsString("c0h0")).containsExactly(new CylinderHead(0,
+        assertThat(Locations.parseCylinderHeadsString("c0h0")).containsExactly(new CylinderHead(
+                0,
                 0));
     }
 
     @Test
     public void parseRangeAndStep()
     {
-        assertThat(Locations.parseCylinderHeadsString("c0-2h0-2x2")).containsExactly(new CylinderHead(
-                        0,
-                        0),
+        assertThat(Locations.parseCylinderHeadsString("c0-2h0-2x2")).containsExactly(
+                new CylinderHead(0, 0),
                 new CylinderHead(0, 2),
                 new CylinderHead(1, 0),
                 new CylinderHead(1, 2),
@@ -35,9 +35,9 @@ public class LocationsTest
     @Test
     public void parseMultipleGroups()
     {
-        assertThat(Locations.parseCylinderHeadsString("c1h1 c0h0")).containsExactly(new CylinderHead(
-                0,
-                0), new CylinderHead(1, 1));
+        assertThat(Locations.parseCylinderHeadsString("c1h1 c0h0")).containsExactly(
+                new CylinderHead(0,
+                        0), new CylinderHead(1, 1));
     }
 
     @Test
@@ -52,7 +52,8 @@ public class LocationsTest
     public void parseMalformedThrows()
     {
         assertThrows(FluxEngineException.class, () -> Locations.parseCylinderHeadsString("c0"));
-        assertThrows(FluxEngineException.class,
+        assertThrows(
+                FluxEngineException.class,
                 () -> Locations.parseCylinderHeadsString("garbage"));
         assertThrows(FluxEngineException.class, () -> Locations.parseCylinderHeadsString("c0h2x0"));
     }

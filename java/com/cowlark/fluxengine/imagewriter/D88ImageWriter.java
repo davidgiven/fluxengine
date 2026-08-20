@@ -112,7 +112,8 @@ public class D88ImageWriter extends ImageWriter
 
         output.writeToFile(config.getFilename());
 
-        System.out.printf("D88: wrote %d tracks, %d sides, %d kB total%n",
+        System.out.printf(
+                "D88: wrote %d tracks, %d sides, %d kB total%n",
                 tracks,
                 sides,
                 output.size() / 1024);

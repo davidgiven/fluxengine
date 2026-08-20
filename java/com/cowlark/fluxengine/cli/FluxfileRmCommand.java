@@ -19,13 +19,15 @@ import com.google.common.collect.ImmutableList;
 public class FluxfileRmCommand implements Command
 {
     private FlagGroup flags = new FlagGroup();
-    private ValueFlag<String> fluxFilename = StringFlag.builder()
+    private ValueFlag<String> fluxFilename = StringFlag
+            .builder()
             .setGroup(flags)
             .setName("--fluxfile")
             .setName("-f")
             .setHelpText("flux file to remove from")
             .build();
-    private ValueFlag<String> tracksFlag = StringFlag.builder()
+    private ValueFlag<String> tracksFlag = StringFlag
+            .builder()
             .setGroup(flags)
             .setName("--tracks")
             .setName("-t")

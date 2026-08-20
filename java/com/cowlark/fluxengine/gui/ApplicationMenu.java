@@ -25,24 +25,31 @@ public class ApplicationMenu
     {
         installMacAboutHandler();
 
-        return of(new UI.MenuBar()).add(menu("File").add(menuItem("About FluxEngine...").onClick(it -> UiUtils.fireAction(
+        return of(new UI.MenuBar())
+                .add(menu("File")
+                        .add(menuItem("About FluxEngine...").onClick(it -> UiUtils.fireAction(
                                 new AboutAction(),
                                 it.getComponent())))
                         .add(separator())
                         .add(menuItem("Exit").onClick(it -> System.exit(0))))
-                .add(menu("Edit").add(actionMenuItem("Cut",
+                .add(menu("Edit")
+                        .add(actionMenuItem(
+                                "Cut",
                                 "cut",
                                 new DefaultEditorKit.CutAction(),
                                 shortcut(KeyEvent.VK_X)))
-                        .add(actionMenuItem("Copy",
+                        .add(actionMenuItem(
+                                "Copy",
                                 "copy",
                                 new DefaultEditorKit.CopyAction(),
                                 shortcut(KeyEvent.VK_C)))
-                        .add(actionMenuItem("Paste",
+                        .add(actionMenuItem(
+                                "Paste",
                                 "paste",
                                 new DefaultEditorKit.PasteAction(),
                                 shortcut(KeyEvent.VK_V)))
-                        .add(actionMenuItem("Delete",
+                        .add(actionMenuItem(
+                                "Delete",
                                 "delete",
                                 new DeleteAction(),
                                 shortcut(KeyEvent.VK_DELETE))))
@@ -64,16 +71,17 @@ public class ApplicationMenu
             Class<?> aboutHandlerClass = Class.forName("com.apple.eawt.AboutHandler");
 
             Object application = applicationClass.getMethod("getApplication").invoke(null);
-            Object handler =
-                    java.lang.reflect.Proxy.newProxyInstance(ApplicationMenu.class.getClassLoader(),
-                            new Class<?>[]{aboutHandlerClass},
-                            (proxy, method, args) -> {
-                                if (method.getName().equals("handleAbout"))
-                                    new AboutAction().actionPerformed(null);
-                                return null;
-                            });
+            Object handler = java.lang.reflect.Proxy.newProxyInstance(
+                    ApplicationMenu.class.getClassLoader(),
+                    new Class<?>[]{aboutHandlerClass},
+                    (proxy, method, args) -> {
+                        if (method.getName().equals("handleAbout"))
+                            new AboutAction().actionPerformed(null);
+                        return null;
+                    });
 
-            applicationClass.getMethod("setAboutHandler", aboutHandlerClass)
+            applicationClass
+                    .getMethod("setAboutHandler", aboutHandlerClass)
                     .invoke(application, handler);
         } catch (ReflectiveOperationException e)
         {
@@ -85,7 +93,8 @@ public class ApplicationMenu
      * code (Cmd on macOS, Ctrl elsewhere). */
     static KeyStroke shortcut(int keyCode)
     {
-        return KeyStroke.getKeyStroke(keyCode,
+        return KeyStroke.getKeyStroke(
+                keyCode,
                 Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx());
     }
 
@@ -133,7 +142,8 @@ public class ApplicationMenu
 
             Action delete = component.getActionMap().get(DefaultEditorKit.deleteNextCharAction);
             if (delete != null)
-                delete.actionPerformed(new ActionEvent(component,
+                delete.actionPerformed(new ActionEvent(
+                        component,
                         ActionEvent.ACTION_PERFORMED,
                         null));
         }

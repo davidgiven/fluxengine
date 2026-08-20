@@ -52,7 +52,8 @@ public final class Flx
                 default:
                 {
                     if (b < 32)
-                        throw new FluxEngineException(String.format("unknown FLX opcode 0x%02x",
+                        throw new FluxEngineException(String.format(
+                                "unknown FLX opcode 0x%02x",
                                 b));
                     double intervalNs = b * FLX_TICK_NS;
                     fluxmap.appendInterval((int) (intervalNs / NS_PER_TICK));

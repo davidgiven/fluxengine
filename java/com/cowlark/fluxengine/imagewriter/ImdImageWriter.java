@@ -137,7 +137,8 @@ public class ImdImageWriter extends ImageWriter
         if (comment.length() == 0)
         {
             comment = LABEL;
-            comment = comment + " date: " + LocalDateTime.now()
+            comment = comment + " date: " + LocalDateTime
+                    .now()
                     .format(DateTimeFormatter.ofPattern("E MMM d HH:mm:ss yyyy"));
         } else
         {
@@ -169,7 +170,8 @@ public class ImdImageWriter extends ImageWriter
                 {
                     /* sector 0 doesnt exist exit with error */
                     statusSector = 0;
-                    System.out.printf("IMD: sector %d not found on track %d, head %d%n",
+                    System.out.printf(
+                            "IMD: sector %d not found on track %d, head %d%n",
                             sectorId + 1,
                             track,
                             head);
@@ -350,7 +352,8 @@ public class ImdImageWriter extends ImageWriter
             }
         }
         imagenew.writeToFile(config.getFilename());
-        System.out.printf("IMD: Written %d tracks, %d heads, %d sectors, %d bytes per " +
+        System.out.printf(
+                "IMD: Written %d tracks, %d heads, %d sectors, %d bytes per " +
                         "sector, %d kB total%n",
                 geometry.numCylinders,
                 numHeads,

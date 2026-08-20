@@ -107,8 +107,10 @@ public class TartuEncoder extends Encoder
         writeFillerRawBitsUs(config.getTargetRotationalPeriodMs() * 1000.0);
 
         Fluxmap fluxmap = new Fluxmap();
-        fluxmap.appendBits(bits,
-                (long) calculatePhysicalClockPeriodNs(clockRateUs * 1e3,
+        fluxmap.appendBits(
+                bits,
+                (long) calculatePhysicalClockPeriodNs(
+                        clockRateUs * 1e3,
                         config.getTargetRotationalPeriodMs() * 1e6));
         return fluxmap;
     }

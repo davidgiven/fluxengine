@@ -70,7 +70,8 @@ public class ScpFluxSourceTest
     {
         Path path = writeTempFile();
 
-        ScpFluxSource source = new ScpFluxSource(ScpFluxSourceProto.newBuilder()
+        ScpFluxSource source = new ScpFluxSource(ScpFluxSourceProto
+                .newBuilder()
                 .setFilename(path.toString())
                 .build());
 
@@ -93,7 +94,8 @@ public class ScpFluxSourceTest
     {
         Path path = writeTempFile();
 
-        ScpFluxSource source = new ScpFluxSource(ScpFluxSourceProto.newBuilder()
+        ScpFluxSource source = new ScpFluxSource(ScpFluxSourceProto
+                .newBuilder()
                 .setFilename(path.toString())
                 .build());
 

@@ -373,7 +373,8 @@ public final class Bytes implements List<Byte>
             throw new IndexOutOfBoundsException(String.valueOf(index));
         detach();
         byte old = storage.data[low + index];
-        System.arraycopy(storage.data,
+        System.arraycopy(
+                storage.data,
                 low + index + 1,
                 storage.data,
                 low + index,
@@ -598,7 +599,8 @@ public final class Bytes implements List<Byte>
     @Override
     public String toString()
     {
-        return String.format("Bytes(hash=%08x, refcount=%d, size=%d)",
+        return String.format(
+                "Bytes(hash=%08x, refcount=%d, size=%d)",
                 System.identityHashCode(this),
                 storage.refcount,
                 size());

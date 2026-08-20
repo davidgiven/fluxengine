@@ -17,20 +17,23 @@ import com.google.common.collect.ImmutableList;
 public class WriteCommand implements Command
 {
     private FlagGroup flags = new FlagGroup();
-    private ValueFlag<String> sourceImageFlag = StringFlag.builder()
+    private ValueFlag<String> sourceImageFlag = StringFlag
+            .builder()
             .setGroup(flags)
             .setName("--input")
             .setName("-i")
             .setHelpText("source image to read from")
             .build();
-    private ValueFlag<String> destFluxFlag = StringFlag.builder()
+    private ValueFlag<String> destFluxFlag = StringFlag
+            .builder()
             .setGroup(flags)
             .setName("--dest")
             .setName("-d")
             .setHelpText("flux destination to write to")
             .build();
     private boolean verify = true;
-    private ActionFlag noVerifyFlag = ActionFlag.builder()
+    private ActionFlag noVerifyFlag = ActionFlag
+            .builder()
             .setGroup(flags)
             .setName("--no-verify")
             .setName("-n")
@@ -47,18 +50,20 @@ public class WriteCommand implements Command
     @Override
     public void run(ImmutableList<String> args)
     {
-        ConfigProto config = new ConfigBuilder().fromFlags(args, flags)
+        ConfigProto config = new ConfigBuilder()
+                .fromFlags(args, flags)
                 .withImageReader(sourceImageFlag.get())
                 .withFluxSink(destFluxFlag.get())
-                .withFluxSource(destFluxFlag.get()) /* for verification */.set("verify_writes",
-                        Boolean.toString(verify))
+                .withFluxSource(destFluxFlag.get()) /* for verification */
+                .set("verify_writes", Boolean.toString(verify))
                 .build();
 
         LogRenderer renderer = LogRenderer.create(System.out);
-        new WriteOperation().setConfig(config).create().blockingSubscribe(renderer::add, e -> {
-            System.err.println("Failed!");
-            e.printStackTrace();
-        });
+        new WriteOperation().setConfig(config).create().blockingSubscribe(
+                renderer::add, e -> {
+                    System.err.println("Failed!");
+                    e.printStackTrace();
+                });
         System.out.println("done.");
     }
 

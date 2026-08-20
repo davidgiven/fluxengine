@@ -23,7 +23,8 @@ public class Fl2FluxSinkTest
 
     private static ConfigProto makeConfig()
     {
-        return new ConfigBuilder().set("usb.serial", "test-serial")
+        return new ConfigBuilder()
+                .set("usb.serial", "test-serial")
                 .set("drive.rotational_period_ms", "200")
                 .build();
     }
@@ -67,7 +68,8 @@ public class Fl2FluxSinkTest
     @Test
     public void factoryWiring()
     {
-        ConfigProto config = new ConfigBuilder().set("usb.serial", "test-serial")
+        ConfigProto config = new ConfigBuilder()
+                .set("usb.serial", "test-serial")
                 .set("flux_sink.type", "FLUXTYPE_FLUX")
                 .set("flux_sink.fl2.filename", "test.fl2")
                 .build();

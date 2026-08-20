@@ -3,7 +3,6 @@ package com.cowlark.fluxengine.fluxsource;
 import com.cowlark.fluxengine.config.ConfigBuilder;
 import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.data.CylinderHead;
-import com.cowlark.fluxengine.data.Fluxmap;
 import com.cowlark.fluxengine.data.Locations;
 import java.io.File;
 import java.util.ArrayList;
@@ -17,8 +16,7 @@ import java.util.regex.Pattern;
  */
 public class DmkFluxSource extends FluxSource
 {
-    private static final Pattern FILENAME_REGEX =
-            Pattern.compile("C_S([0-9]+)T([0-9]+)\\.[0-9]+");
+    private static final Pattern FILENAME_REGEX = Pattern.compile("C_S([0-9]+)T([0-9]+)\\.[0-9]+");
 
     private final String path;
     protected ConfigProto extraConfig;
@@ -35,7 +33,8 @@ public class DmkFluxSource extends FluxSource
             {
                 Matcher m = FILENAME_REGEX.matcher(f.getName());
                 if (m.matches())
-                    chs.add(new CylinderHead(Integer.parseInt(m.group(2)),
+                    chs.add(new CylinderHead(
+                            Integer.parseInt(m.group(2)),
                             Integer.parseInt(m.group(1))));
             }
         }

@@ -22,7 +22,8 @@ public class SummaryPanelTest
         Disk disk = new Disk();
         disk.diskLayout = new DiskLayout(80, 2, 18, 512);
         when(model.getDisk()).thenReturn(Var.of(disk));
-        when(model.getDriveActivity()).thenReturn(Var.of(new DriveActivity(DriveActivity.ActivityType.IDLE,
+        when(model.getDriveActivity()).thenReturn(Var.of(new DriveActivity(
+                DriveActivity.ActivityType.IDLE,
                 0,
                 0)));
 

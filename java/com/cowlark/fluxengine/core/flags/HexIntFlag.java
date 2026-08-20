@@ -13,8 +13,9 @@ public class HexIntFlag extends ValueFlag<Integer>
             String helpText,
             Integer defaultValue)
     {
-        super(group, names, helpText, defaultValue != null ? defaultValue : 0, unused -> {
-        });
+        super(
+                group, names, helpText, defaultValue != null ? defaultValue : 0, unused -> {
+                });
     }
 
     @Override

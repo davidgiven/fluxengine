@@ -80,7 +80,8 @@ public class AgatDecoder extends Decoder
         if (readRaw64() != Agat.DATA_ID)
             return;
 
-        Bytes bytes = FmMfm.decodeFmMfm(readRawBits((Agat.AGAT_SECTOR_SIZE + 2) * 16))
+        Bytes bytes = FmMfm
+                .decodeFmMfm(readRawBits((Agat.AGAT_SECTOR_SIZE + 2) * 16))
                 .slice(0, Agat.AGAT_SECTOR_SIZE + 2);
 
         if (bytes.getByte(Agat.AGAT_SECTOR_SIZE + 1) != 0x5a)

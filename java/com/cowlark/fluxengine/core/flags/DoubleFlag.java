@@ -15,7 +15,8 @@ public class DoubleFlag extends ValueFlag<Double>
             Double defaultValue,
             Consumer<Double> callback)
     {
-        super(group,
+        super(
+                group,
                 names,
                 helpText,
                 defaultValue != null ? defaultValue : 1.0,

@@ -31,18 +31,21 @@ public class Fl2FluxSourceTest
     @Test
     public void readsTracks() throws IOException
     {
-        TrackFluxProto track = TrackFluxProto.newBuilder()
+        TrackFluxProto track = TrackFluxProto
+                .newBuilder()
                 .setTrack(0)
                 .setHead(0)
                 .addFlux(ByteString.copyFrom(new byte[]{(byte) 0xb0}))
                 .build();
-        Path path = writeTemp(FluxFileProto.newBuilder()
+        Path path = writeTemp(FluxFileProto
+                .newBuilder()
                 .setVersion(FluxFileVersion.VERSION_2)
                 .addTrack(track)
                 .setRotationalPeriodMs(200.0)
                 .build());
 
-        Fl2FluxSource source = new Fl2FluxSource(Fl2FluxSourceProto.newBuilder()
+        Fl2FluxSource source = new Fl2FluxSource(Fl2FluxSourceProto
+                .newBuilder()
                 .setFilename(path.toString())
                 .build());
 
@@ -51,7 +54,8 @@ public class Fl2FluxSourceTest
         assertThat(iterator.hasNext()).isTrue();
         assertThat(iterator.next()).isNotNull();
         assertThat(iterator.hasNext()).isFalse();
-        assertThat(source.readFlux(FluxReadParameters.builder()
+        assertThat(source.readFlux(FluxReadParameters
+                .builder()
                 .setCylinder(1)
                 .setHead(0)
                 .build())).isInstanceOf(EmptyFluxSourceIterator.class);
@@ -68,17 +72,20 @@ public class Fl2FluxSourceTest
     {
         /* A single flux segment containing a desync byte should be split into
          * two segments. */
-        TrackFluxProto track = TrackFluxProto.newBuilder()
+        TrackFluxProto track = TrackFluxProto
+                .newBuilder()
                 .setTrack(0)
                 .setHead(0)
                 .addFlux(ByteString.copyFrom(new byte[]{(byte) 0xb0, 0x00, (byte) 0xb0}))
                 .build();
-        Path path = writeTemp(FluxFileProto.newBuilder()
+        Path path = writeTemp(FluxFileProto
+                .newBuilder()
                 .setVersion(FluxFileVersion.VERSION_1)
                 .addTrack(track)
                 .build());
 
-        Fl2FluxSource source = new Fl2FluxSource(Fl2FluxSourceProto.newBuilder()
+        Fl2FluxSource source = new Fl2FluxSource(Fl2FluxSourceProto
+                .newBuilder()
                 .setFilename(path.toString())
                 .build());
 

@@ -105,8 +105,9 @@ public class AgatEncoder extends Encoder
         bits.fillBitmapTo(cursor, bits.size(), new boolean[]{true, false});
 
         Fluxmap fluxmap = new Fluxmap();
-        fluxmap.appendBits(bits,
-                (long) calculatePhysicalClockPeriodNs(config.getTargetClockPeriodUs() * 1e3,
+        fluxmap.appendBits(
+                bits, (long) calculatePhysicalClockPeriodNs(
+                        config.getTargetClockPeriodUs() * 1e3,
                         config.getTargetRotationalPeriodMs() * 1e6));
         return fluxmap;
     }

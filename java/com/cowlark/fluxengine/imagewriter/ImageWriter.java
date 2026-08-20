@@ -77,7 +77,8 @@ public abstract class ImageWriter implements AutoCloseable
     public void writeCsv(Image image, String filename)
     {
         StringBuilder f = new StringBuilder();
-        f.append("\"Physical track\",")
+        f
+                .append("\"Physical track\",")
                 .append("\"Physical side\",")
                 .append("\"Logical sector\",")
                 .append("\"Logical track\",")
@@ -94,9 +95,13 @@ public abstract class ImageWriter implements AutoCloseable
 
         for (Sector sector : image)
         {
-            f.append(sector.physicalLocation != null ? sector.physicalLocation.cylinder() : -1)
+            f
+                    .append(sector.physicalLocation != null ?
+                            sector.physicalLocation.cylinder() :
+                            -1)
                     .append(',');
-            f.append(sector.physicalLocation != null ? sector.physicalLocation.head() : -1)
+            f
+                    .append(sector.physicalLocation != null ? sector.physicalLocation.head() : -1)
                     .append(',');
             f.append(sector.location.logicalSector()).append(',');
             f.append(sector.location.logicalCylinder()).append(',');
@@ -187,15 +192,18 @@ public abstract class ImageWriter implements AutoCloseable
             System.out.println("No sectors in output; skipping analysis");
         else
         {
-            System.out.printf("Good sectors: %d/%d (%d%%)%n",
+            System.out.printf(
+                    "Good sectors: %d/%d (%d%%)%n",
                     goodSectors,
                     totalSectors,
                     100 * goodSectors / totalSectors);
-            System.out.printf("Missing sectors: %d/%d (%d%%)%n",
+            System.out.printf(
+                    "Missing sectors: %d/%d (%d%%)%n",
                     missingSectors,
                     totalSectors,
                     100 * missingSectors / totalSectors);
-            System.out.printf("Bad sectors: %d/%d (%d%%)%n",
+            System.out.printf(
+                    "Bad sectors: %d/%d (%d%%)%n",
                     badSectors,
                     totalSectors,
                     100 * badSectors / totalSectors);

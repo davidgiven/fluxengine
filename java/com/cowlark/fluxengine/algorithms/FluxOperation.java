@@ -47,7 +47,8 @@ public abstract class FluxOperation<T extends FluxOperation<T>> implements Runna
     {
         ReplaySubject<LogMessage> subject = ReplaySubject.create();
 
-        return Observable.using(() -> this,
+        return Observable.using(
+                () -> this,
                 op -> subject.doOnSubscribe(d -> schedule(subject)),
                 op -> op.dispose());
     }

@@ -45,14 +45,16 @@ public class PreferencesReaderWriter
     Association<String, String> getOptions(String key)
     {
         String optionsString = preferences.get(key, "");
-        Map<String, String> rawMap = Splitter.on('&')
+        Map<String, String> rawMap = Splitter
+                .on('&')
                 .omitEmptyStrings()
                 .trimResults()
                 .withKeyValueSeparator(Splitter.on('=').limit(2))
                 .split(optionsString);
 
         // Decode URL-encoded keys and values
-        return rawMap.entrySet()
+        return rawMap
+                .entrySet()
                 .stream()
                 .map(e -> Pair.of(URLDecoder.decode(e.getKey(), StandardCharsets.UTF_8),
                         URLDecoder.decode(e.getValue(), StandardCharsets.UTF_8)))
@@ -61,7 +63,8 @@ public class PreferencesReaderWriter
 
     void setOptions(String key, Association<String, String> options)
     {
-        String optionsString = options.entrySet()
+        String optionsString = options
+                .entrySet()
                 .stream()
                 .map(entry -> encode(entry.first()) + "=" + encode(entry.second()))
                 .collect(Collectors.joining("&"));

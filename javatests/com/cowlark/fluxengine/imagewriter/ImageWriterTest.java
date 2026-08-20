@@ -51,7 +51,8 @@ public class ImageWriterTest
     @Test
     public void createDiskCopyImageWriter()
     {
-        ImageWriterProto config = ImageWriterProto.newBuilder()
+        ImageWriterProto config = ImageWriterProto
+                .newBuilder()
                 .setType(ImageReaderWriterType.IMAGETYPE_DISKCOPY)
                 .build();
 
@@ -88,7 +89,8 @@ public class ImageWriterTest
     @Test
     public void createImgImageWriterFromConfig()
     {
-        ConfigProto config = new ConfigBuilder().set("usb.serial", "test-serial")
+        ConfigProto config = new ConfigBuilder()
+                .set("usb.serial", "test-serial")
                 .withImageWriter("out.dsk")
                 .build();
 
@@ -98,7 +100,8 @@ public class ImageWriterTest
     @Test
     public void createBadTypeThrows()
     {
-        ImageWriterProto config = ImageWriterProto.newBuilder()
+        ImageWriterProto config = ImageWriterProto
+                .newBuilder()
                 .setType(ImageReaderWriterType.IMAGETYPE_NOT_SET)
                 .build();
 
@@ -121,7 +124,8 @@ public class ImageWriterTest
         sector.data = com.cowlark.fluxengine.core.Bytes.of(1, 2, 3, 4);
 
         Path file = Files.createTempFile("image", ".d64");
-        ImageWriterProto config = ImageWriterProto.newBuilder()
+        ImageWriterProto config = ImageWriterProto
+                .newBuilder()
                 .setType(ImageReaderWriterType.IMAGETYPE_D64)
                 .setFilename(file.toString())
                 .build();
@@ -142,7 +146,8 @@ public class ImageWriterTest
         Image image = new Image();
 
         Path file = Files.createTempFile("image", ".d64");
-        ImageWriterProto config = ImageWriterProto.newBuilder()
+        ImageWriterProto config = ImageWriterProto
+                .newBuilder()
                 .setType(ImageReaderWriterType.IMAGETYPE_D64)
                 .setFilename(file.toString())
                 .build();

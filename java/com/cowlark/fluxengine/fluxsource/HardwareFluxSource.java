@@ -36,7 +36,8 @@ public class HardwareFluxSource extends FluxSource
             public Fluxmap next()
             {
                 Bytes[] box = new Bytes[1];
-                usbFactory.perform(device -> box[0] = device.read(parameters.cylinder(),
+                usbFactory.perform(device -> box[0] = device.read(
+                        parameters.cylinder(),
                         parameters.head(),
                         parameters.readTimeNs()));
                 Fluxmap fluxmap = new Fluxmap();

@@ -15,7 +15,8 @@ public class StringFlag extends ValueFlag<String>
             String defaultValue,
             Consumer<String> callback)
     {
-        super(group,
+        super(
+                group,
                 names,
                 helpText,
                 defaultValue != null ? defaultValue : "",

@@ -39,7 +39,8 @@ public class FmMfmTest
     @Test
     public void decode()
     {
-        assertThat(FmMfm.decodeFmMfm(bits(true,
+        assertThat(FmMfm.decodeFmMfm(bits(
+                true,
                 false,
                 true,
                 false,
@@ -56,7 +57,8 @@ public class FmMfmTest
                 true,
                 false))).isEqualTo(Bytes.of(0x00));
 
-        assertThat(FmMfm.decodeFmMfm(bits(true,
+        assertThat(FmMfm.decodeFmMfm(bits(
+                true,
                 true,
                 true,
                 false,
@@ -79,7 +81,8 @@ public class FmMfmTest
     @Test
     public void encodeMfm()
     {
-        assertThat(wrapEncodeMfm(Bytes.of(0xa1))).isEqualTo(bits(false,
+        assertThat(wrapEncodeMfm(Bytes.of(0xa1))).isEqualTo(bits(
+                false,
                 true,
                 false,
                 false,
@@ -96,7 +99,8 @@ public class FmMfmTest
                 false,
                 true));
 
-        assertThat(wrapEncodeMfm(Bytes.of(0xc2))).isEqualTo(bits(false,
+        assertThat(wrapEncodeMfm(Bytes.of(0xc2))).isEqualTo(bits(
+                false,
                 true,
                 false,
                 true,
@@ -113,7 +117,8 @@ public class FmMfmTest
                 false,
                 false));
 
-        assertThat(wrapEncodeMfm(Bytes.of(0xb0))).isEqualTo(bits(false,
+        assertThat(wrapEncodeMfm(Bytes.of(0xb0))).isEqualTo(bits(
+                false,
                 true,
                 false,
                 false,
@@ -134,7 +139,8 @@ public class FmMfmTest
     @Test
     public void encodeFm()
     {
-        assertThat(wrapEncodeFm(Bytes.of(0x00))).isEqualTo(bits(true,
+        assertThat(wrapEncodeFm(Bytes.of(0x00))).isEqualTo(bits(
+                true,
                 false,
                 true,
                 false,
@@ -151,7 +157,8 @@ public class FmMfmTest
                 true,
                 false));
 
-        assertThat(wrapEncodeFm(Bytes.of(0x81))).isEqualTo(bits(true,
+        assertThat(wrapEncodeFm(Bytes.of(0x81))).isEqualTo(bits(
+                true,
                 true,
                 true,
                 false,

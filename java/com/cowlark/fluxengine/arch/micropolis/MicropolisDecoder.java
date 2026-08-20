@@ -233,7 +233,8 @@ public class MicropolisDecoder extends Decoder
             if (wantChecksum == micropolisChecksum(bytes.slice(1, 2 + 266)))
             {
                 checksumType = MicropolisDecoderProto.ChecksumType.MICROPOLIS;
-            } else if (wantChecksum == mzosChecksum(bytes.slice(Micropolis.MICROPOLIS_HEADER_SIZE,
+            } else if (wantChecksum == mzosChecksum(bytes.slice(
+                    Micropolis.MICROPOLIS_HEADER_SIZE,
                     Micropolis.MICROPOLIS_PAYLOAD_SIZE)))
             {
                 checksumType = MicropolisDecoderProto.ChecksumType.MZOS;
@@ -245,7 +246,8 @@ public class MicropolisDecoder extends Decoder
 
         if (checksumType == MicropolisDecoderProto.ChecksumType.MZOS)
         {
-            gotChecksum = mzosChecksum(bytes.slice(Micropolis.MICROPOLIS_HEADER_SIZE,
+            gotChecksum = mzosChecksum(bytes.slice(
+                    Micropolis.MICROPOLIS_HEADER_SIZE,
                     Micropolis.MICROPOLIS_PAYLOAD_SIZE));
         } else
         {

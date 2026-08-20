@@ -22,7 +22,8 @@ public class ByteWriterTest
     public void writes24And32()
     {
         Bytes bytes = new Bytes(0);
-        new ByteWriter(bytes).writeBe24(0x010203)
+        new ByteWriter(bytes)
+                .writeBe24(0x010203)
                 .writeLe24(0x060504)
                 .writeBe32(0x0708090a)
                 .writeLe32(0x0e0d0c0b);
@@ -47,7 +48,8 @@ public class ByteWriterTest
     public void writes48And64()
     {
         Bytes bytes = new Bytes(0);
-        new ByteWriter(bytes).writeBe48(0x010203040506L)
+        new ByteWriter(bytes)
+                .writeBe48(0x010203040506L)
                 .writeLe48(0x0c0b0a090807L)
                 .writeBe64(0x0102030405060708L)
                 .writeLe64(0x100f0e0d0c0b0a09L);

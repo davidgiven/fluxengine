@@ -16,8 +16,9 @@ public class BoolFlag extends ValueFlag<Boolean>
             boolean defaultValue,
             Consumer<Boolean> callback)
     {
-        super(group, names, helpText, defaultValue, callback != null ? callback : unused -> {
-        });
+        super(
+                group, names, helpText, defaultValue, callback != null ? callback : unused -> {
+                });
     }
 
     @Override

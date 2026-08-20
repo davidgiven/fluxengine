@@ -117,7 +117,8 @@ public class ConfigBuilder
 
     public ConfigBuilder fromFlags(ImmutableList<String> args, FlagGroup... group)
     {
-        ImmutableList<FlagGroup> allGroups = ImmutableList.<FlagGroup>builder()
+        ImmutableList<FlagGroup> allGroups = ImmutableList
+                .<FlagGroup>builder()
                 .add(group)
                 .add(new ConfigFlagGroup(this))
                 .build();
@@ -355,7 +356,8 @@ public class ConfigBuilder
                         "value %s is not valid for option %s; valid values are: %s",
                         value,
                         option.group().getName(),
-                        option.group()
+                        option
+                                .group()
                                 .getOptionList()
                                 .stream()
                                 .map(OptionProto::getName)

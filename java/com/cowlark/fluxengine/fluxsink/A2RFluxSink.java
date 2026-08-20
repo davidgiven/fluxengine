@@ -47,7 +47,8 @@ public class A2RFluxSink extends FluxSink
     {
         this.filename = filename;
         this.config = config;
-        metadata.put("image_date",
+        metadata.put(
+                "image_date",
                 DateTimeFormatter.ISO_INSTANT.format(ZonedDateTime.now(ZoneOffset.UTC)));
     }
 
@@ -65,7 +66,8 @@ public class A2RFluxSink extends FluxSink
 
     private void writeHeader()
     {
-        writer.write(Bytes.of(A2R.FILEHEADER[0] & 0xff,
+        writer.write(Bytes.of(
+                A2R.FILEHEADER[0] & 0xff,
                 A2R.FILEHEADER[1] & 0xff,
                 A2R.FILEHEADER[2] & 0xff,
                 A2R.FILEHEADER[3] & 0xff,

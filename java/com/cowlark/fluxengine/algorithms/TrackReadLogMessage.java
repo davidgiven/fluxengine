@@ -32,20 +32,25 @@ public record TrackReadLogMessage(List<Track> tracks, List<Sector> sectors) impl
         if (!rawSectors.isEmpty())
             clock /= rawSectors.size();
 
-        r.comma()
-                .add(String.format("%d raw records, %d raw sectors",
+        r
+                .comma()
+                .add(String.format(
+                        "%d raw records, %d raw sectors",
                         rawRecords.size(),
                         rawSectors.size()));
         if (clock != 0)
-            r.comma()
-                    .add(String.format("%.2fus clock (%.0fkHz)",
+            r
+                    .comma()
+                    .add(String.format(
+                            "%.2fus clock (%.0fkHz)",
                             clock / 1000.0,
                             1000000.0 / clock));
 
         r.newline().add("sectors:");
 
         for (Sector sector : rawSectors)
-            r.add(String.format("%d.%d.%d%s",
+            r.add(String.format(
+                    "%d.%d.%d%s",
                     sector.location.logicalCylinder(),
                     sector.location.logicalHead(),
                     sector.location.logicalSector(),

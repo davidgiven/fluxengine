@@ -129,7 +129,8 @@ public class Image implements Iterable<Sector>
         {
             LogicalTrackLayout ltl =
                     diskLayout.layoutByLogicalLocation.get(sector.location.trackLocation());
-            Sector newSector = tempImage.put(sector.location.logicalCylinder(),
+            Sector newSector = tempImage.put(
+                    sector.location.logicalCylinder(),
                     sector.location.logicalHead(),
                     sector.location.logicalSector());
             newSector.location = sector.location;

@@ -147,7 +147,8 @@ public class Victor9kEncoder extends Encoder
 
         int encodedTrack = sector.location.logicalCylinder() | (sector.location.logicalHead() << 7);
         int encodedSector = sector.location.logicalSector();
-        writeBytes(bits,
+        writeBytes(
+                bits,
                 cursor,
                 Bytes.of(encodedTrack, encodedSector, (encodedTrack + encodedSector) & 0xff));
 
@@ -191,11 +192,13 @@ public class Victor9kEncoder extends Encoder
         int bitsPerRevolution =
                 (int) ((trackdata.getRotationalPeriodMs() * 1e3) / trackdata.getClockPeriodUs());
         Bits bits = new Bits(bitsPerRevolution);
-        long clockPeriod = (long) calculatePhysicalClockPeriodNs(trackdata.getClockPeriodUs() * 1e3,
+        long clockPeriod = (long) calculatePhysicalClockPeriodNs(
+                trackdata.getClockPeriodUs() * 1e3,
                 trackdata.getRotationalPeriodMs() * 1e6);
         Bits.Cursor cursor = new Bits.Cursor(0);
 
-        bits.fillBitmapTo(cursor,
+        bits.fillBitmapTo(
+                cursor,
                 (int) (trackdata.getPostIndexGapUs() * 1e3 / clockPeriod),
                 new boolean[]{true, false});
         lastBit[0] = false;

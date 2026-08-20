@@ -22,12 +22,14 @@ public abstract class FluxSinkFactory implements AutoCloseable
             case FLUXTYPE_A2R:
                 return new A2RFluxSinkFactory(fluxSinkProto.getA2R().getFilename(), config);
             case FLUXTYPE_AU:
-                return new AuFluxSinkFactory(fluxSinkProto.getAu().getDirectory(),
+                return new AuFluxSinkFactory(
+                        fluxSinkProto.getAu().getDirectory(),
                         fluxSinkProto.getAu().getIndexMarkers());
             case FLUXTYPE_VCD:
                 return new VcdFluxSinkFactory(fluxSinkProto.getVcd().getDirectory());
             case FLUXTYPE_SCP:
-                return new ScpFluxSinkFactory(fluxSinkProto.getScp().getFilename(),
+                return new ScpFluxSinkFactory(
+                        fluxSinkProto.getScp().getFilename(),
                         fluxSinkProto.getScp().getTypeByte(),
                         fluxSinkProto.getScp().getAlignWithIndex(),
                         config);

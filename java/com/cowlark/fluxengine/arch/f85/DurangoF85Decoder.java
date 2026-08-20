@@ -131,7 +131,8 @@ public class DurangoF85Decoder extends Decoder
         if (readRaw24() != F85.F85_DATA_RECORD)
             return;
 
-        Bytes bytes = decode(readRawBits((F85.F85_SECTOR_LENGTH + 3) * 10)).slice(0,
+        Bytes bytes = decode(readRawBits((F85.F85_SECTOR_LENGTH + 3) * 10)).slice(
+                0,
                 F85.F85_SECTOR_LENGTH + 3);
         ByteReader br = bytes.iterator();
 

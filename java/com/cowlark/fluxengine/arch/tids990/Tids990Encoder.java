@@ -133,8 +133,10 @@ public class Tids990Encoder extends Encoder
             writeBytes(1, 0x55);
 
         Fluxmap fluxmap = new Fluxmap();
-        fluxmap.appendBits(bits,
-                (long) calculatePhysicalClockPeriodNs(clockRateUs * 1e3,
+        fluxmap.appendBits(
+                bits,
+                (long) calculatePhysicalClockPeriodNs(
+                        clockRateUs * 1e3,
                         config.getRotationalPeriodMs() * 1e6));
         return fluxmap;
     }

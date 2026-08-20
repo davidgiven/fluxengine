@@ -8,10 +8,10 @@ import java.util.Comparator;
 public record LogicalLocation(int logicalCylinder, int logicalHead, int logicalSector) implements
         Comparable<LogicalLocation>
 {
-    private static final Comparator<LogicalLocation> COMPARATOR =
-            Comparator.comparing(LogicalLocation::logicalCylinder)
-                    .thenComparingInt(LogicalLocation::logicalHead)
-                    .thenComparingInt(LogicalLocation::logicalSector);
+    private static final Comparator<LogicalLocation> COMPARATOR = Comparator
+            .comparing(LogicalLocation::logicalCylinder)
+            .thenComparingInt(LogicalLocation::logicalHead)
+            .thenComparingInt(LogicalLocation::logicalSector);
 
     public CylinderHead trackLocation()
     {

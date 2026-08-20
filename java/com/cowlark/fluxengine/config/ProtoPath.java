@@ -129,7 +129,8 @@ public class ProtoPath
             if (!matcher.matches())
                 throw new ProtoPathNotFoundException("invalid config path '" + path + "'");
             String index = matcher.group(2);
-            components.add(new PathComponent(matcher.group(1),
+            components.add(new PathComponent(
+                    matcher.group(1),
                     index == null ? -1 : Integer.parseInt(index)));
         }
         return components;

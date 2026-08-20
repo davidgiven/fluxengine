@@ -38,7 +38,8 @@ public abstract class Encoder
 
         for (int sectorId : ltl.diskSectorOrder)
         {
-            Sector sector = getSector(new CylinderHead(ltl.logicalCylinder, ltl.logicalHead),
+            Sector sector = getSector(
+                    new CylinderHead(ltl.logicalCylinder, ltl.logicalHead),
                     image,
                     sectorId);
             if (sector == null)

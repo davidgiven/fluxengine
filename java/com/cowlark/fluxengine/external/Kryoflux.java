@@ -64,7 +64,8 @@ public final class Kryoflux
             return readStream(new Bytes(Files.readAllBytes(Path.of(filename))));
         } catch (IOException e)
         {
-            throw new FluxEngineException(String.format("cannot open input file '%s': %s",
+            throw new FluxEngineException(String.format(
+                    "cannot open input file '%s': %s",
                     filename,
                     e.getMessage()));
         }

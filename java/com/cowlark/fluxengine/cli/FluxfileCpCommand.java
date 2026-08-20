@@ -21,19 +21,22 @@ import com.google.common.collect.ImmutableList;
 public class FluxfileCpCommand implements Command
 {
     private FlagGroup flags = new FlagGroup();
-    private ValueFlag<String> inputFilenameFlag = StringFlag.builder()
+    private ValueFlag<String> inputFilenameFlag = StringFlag
+            .builder()
             .setGroup(flags)
             .setName("--input")
             .setName("-i")
             .setHelpText("input flux file")
             .build();
-    private ValueFlag<String> outputFilenameFlag = StringFlag.builder()
+    private ValueFlag<String> outputFilenameFlag = StringFlag
+            .builder()
             .setGroup(flags)
             .setName("--output")
             .setName("-o")
             .setHelpText("output flux file (must exist)")
             .build();
-    private ValueFlag<String> tracksFlag = StringFlag.builder()
+    private ValueFlag<String> tracksFlag = StringFlag
+            .builder()
             .setGroup(flags)
             .setName("--tracks")
             .setName("-t")

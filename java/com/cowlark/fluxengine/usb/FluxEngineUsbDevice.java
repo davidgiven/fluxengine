@@ -125,10 +125,7 @@ class FluxEngineUsbDevice extends UsbDevice
             if (version != FLUXENGINE_PROTOCOL_VERSION)
                 throw new FluxEngineException(String.format(
                         "your FluxEngine firmware is at version %d but the client is for version " +
-                                "%d; " +
-                                "please upgrade",
-                        version,
-                        FLUXENGINE_PROTOCOL_VERSION));
+                                "%d; " + "please upgrade", version, FLUXENGINE_PROTOCOL_VERSION));
         } catch (RuntimeException e)
         {
             try

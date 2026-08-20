@@ -61,7 +61,8 @@ public class ImageReaderTest
     @Test
     public void createBadTypeThrows()
     {
-        ImageReaderProto config = ImageReaderProto.newBuilder()
+        ImageReaderProto config = ImageReaderProto
+                .newBuilder()
                 .setType(ImageReaderWriterType.IMAGETYPE_NOT_SET)
                 .build();
 
@@ -86,7 +87,8 @@ public class ImageReaderTest
         data[0] = 0x42;
         Files.write(file, data);
 
-        ImageReaderProto config = ImageReaderProto.newBuilder()
+        ImageReaderProto config = ImageReaderProto
+                .newBuilder()
                 .setType(ImageReaderWriterType.IMAGETYPE_D64)
                 .setFilename(file.toString())
                 .build();
@@ -106,7 +108,8 @@ public class ImageReaderTest
         Path file = Files.createTempFile("image", ".d64");
         Files.write(file, new byte[10]);
 
-        ImageReaderProto config = ImageReaderProto.newBuilder()
+        ImageReaderProto config = ImageReaderProto
+                .newBuilder()
                 .setType(ImageReaderWriterType.IMAGETYPE_D64)
                 .setFilename(file.toString())
                 .build();
@@ -128,7 +131,8 @@ public class ImageReaderTest
         data[0] = 0x43;
         Files.write(file, data);
 
-        ImageReaderProto config = ImageReaderProto.newBuilder()
+        ImageReaderProto config = ImageReaderProto
+                .newBuilder()
                 .setType(ImageReaderWriterType.IMAGETYPE_NSI)
                 .setFilename(file.toString())
                 .build();
@@ -147,7 +151,8 @@ public class ImageReaderTest
         Path file = Files.createTempFile("image", ".nsi");
         Files.write(file, new byte[12345]);
 
-        ImageReaderProto config = ImageReaderProto.newBuilder()
+        ImageReaderProto config = ImageReaderProto
+                .newBuilder()
                 .setType(ImageReaderWriterType.IMAGETYPE_NSI)
                 .setFilename(file.toString())
                 .build();

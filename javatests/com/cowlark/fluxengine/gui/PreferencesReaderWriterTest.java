@@ -41,7 +41,8 @@ public class PreferencesReaderWriterTest
         when(preferences.get("format_ibm", "")).thenReturn("tracks=c0-80&side=0");
         writer = new PreferencesReaderWriter(preferences);
 
-        assertThat(writer.getOptionsForFormat("ibm").toMap()).isEqualTo(assoc("tracks",
+        assertThat(writer.getOptionsForFormat("ibm").toMap()).isEqualTo(assoc(
+                "tracks",
                 "c0-80",
                 "side",
                 "0").toMap());
@@ -70,9 +71,11 @@ public class PreferencesReaderWriterTest
 
         writer.setOptionsForFormat("amiga", options);
 
-        String stored = options.entrySet()
+        String stored = options
+                .entrySet()
                 .stream()
-                .map(entry -> java.net.URLEncoder.encode(entry.first(),
+                .map(entry -> java.net.URLEncoder.encode(
+                        entry.first(),
                         java.nio.charset.StandardCharsets.UTF_8) + "=" + java.net.URLEncoder.encode(
                         entry.second(),
                         java.nio.charset.StandardCharsets.UTF_8))

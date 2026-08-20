@@ -24,7 +24,8 @@ public class AmigaEncoderTest
 
     private ConfigProto makeConfig()
     {
-        return new ConfigBuilder().set("usb.serial", "test-serial")
+        return new ConfigBuilder()
+                .set("usb.serial", "test-serial")
                 .set("drive.rotational_period_ms", "200")
                 .set("encoder.amiga.clock_rate_us", "2.0")
                 .build();

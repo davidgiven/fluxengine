@@ -18,19 +18,22 @@ import com.google.common.collect.ImmutableList;
 public class ReadCommand implements Command
 {
     private FlagGroup flags = new FlagGroup();
-    private ValueFlag<String> sourceFlag = StringFlag.builder()
+    private ValueFlag<String> sourceFlag = StringFlag
+            .builder()
             .setGroup(flags)
             .setName("--source")
             .setName("-s")
             .setHelpText("flux file to read from")
             .build();
-    private ValueFlag<String> outputFlag = StringFlag.builder()
+    private ValueFlag<String> outputFlag = StringFlag
+            .builder()
             .setGroup(flags)
             .setName("--output")
             .setName("-o")
             .setHelpText("destination image to write")
             .build();
-    private ValueFlag<String> copyFluxToFlag = StringFlag.builder()
+    private ValueFlag<String> copyFluxToFlag = StringFlag
+            .builder()
             .setGroup(flags)
             .setName("--copy-flux-to")
             .setHelpText("while reading, copy the read flux to this file")
@@ -58,10 +61,11 @@ public class ReadCommand implements Command
             throw new FluxEngineException("you cannot copy flux to a hardware device");
 
         LogRenderer renderer = LogRenderer.create(System.out);
-        new ReadOperation().setConfig(config).create().blockingSubscribe(renderer::add, e -> {
-            System.err.println("Failed!");
-            e.printStackTrace();
-        });
+        new ReadOperation().setConfig(config).create().blockingSubscribe(
+                renderer::add, e -> {
+                    System.err.println("Failed!");
+                    e.printStackTrace();
+                });
         System.out.println("done.");
     }
 

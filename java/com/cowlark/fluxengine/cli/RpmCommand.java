@@ -17,7 +17,8 @@ import com.google.common.collect.ImmutableList;
 public class RpmCommand implements Command
 {
     private FlagGroup flags = new FlagGroup();
-    private ValueFlag<String> sourceFlag = StringFlag.builder()
+    private ValueFlag<String> sourceFlag = StringFlag
+            .builder()
             .setGroup(flags)
             .setName("--source")
             .setName("-s")
@@ -44,7 +45,8 @@ public class RpmCommand implements Command
             usbFactory.perform(device -> {
                 double periodNs = device.getRotationalPeriod();
                 if (periodNs != 0.0)
-                    System.out.printf("Rotational period is %.0f ms (%.0f rpm)\n",
+                    System.out.printf(
+                            "Rotational period is %.0f ms (%.0f rpm)\n",
                             periodNs / 1e6,
                             60e9 / periodNs);
                 else
