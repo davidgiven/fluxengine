@@ -23,7 +23,7 @@ public abstract class FluxSource implements AutoCloseable
             case FLUXTYPE_KRYOFLUX:
                 return new KryofluxFluxSource(fluxSourceProto.getKryoflux());
             case FLUXTYPE_TEST_PATTERN:
-                return notImplemented("test pattern");
+                return new TestPatternFluxSource(fluxSourceProto.getTestPattern());
             case FLUXTYPE_SCP:
                 return new ScpFluxSource(fluxSourceProto.getScp());
             case FLUXTYPE_A2R:
@@ -37,13 +37,8 @@ public abstract class FluxSource implements AutoCloseable
             case FLUXTYPE_FLX:
                 return new FlxFluxSource(fluxSourceProto.getFlx());
             default:
-                return null;
+                throw new FluxEngineException("no flux source configured");
         }
-    }
-
-    private static FluxSource notImplemented(String name)
-    {
-        throw new FluxEngineException(name + " flux source is not implemented yet");
     }
 
     @Override

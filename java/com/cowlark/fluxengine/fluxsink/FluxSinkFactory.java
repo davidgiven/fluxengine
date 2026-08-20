@@ -14,8 +14,6 @@ public abstract class FluxSinkFactory implements AutoCloseable
             ConfigProto config,
             Supplier<UsbFactory> usbFactorySupplier)
     {
-        if (!config.hasFluxSink())
-            throw new FluxEngineException("no flux sink configured");
         FluxSinkProto fluxSinkProto = config.getFluxSink();
         switch (fluxSinkProto.getType())
         {
