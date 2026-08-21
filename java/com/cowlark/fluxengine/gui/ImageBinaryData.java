@@ -46,11 +46,13 @@ class ImageBinaryData implements BinaryData
         long sectorOffset = address - sectorAddress;
         LogicalLocation logicalLocation = entry.getValue();
         long sectorSize = diskLayout.blockSizeByLogicalSectorLocation.get(logicalLocation);
-        if (sectorOffset > sectorSize)
+        if (sectorOffset >= sectorSize)
             return 0;
 
         Sector sector = disk.image.get(logicalLocation);
         if (sector == null)
+            return 0;
+        if (sectorOffset >= sector.data.size())
             return 0;
         return (byte) sector.data.getByte((int) sectorOffset);
     }

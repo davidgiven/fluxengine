@@ -25,10 +25,12 @@ import com.cowlark.fluxengine.gui.DriveActivity.ActivityType;
 import io.reactivex.rxjava3.disposables.Disposable;
 import lombok.Getter;
 import org.apache.commons.lang3.function.Consumers;
+import sprouts.Action;
 import sprouts.Association;
 import sprouts.From;
 import sprouts.Pair;
 import sprouts.Val;
+import sprouts.ValDelegate;
 import sprouts.Var;
 import sprouts.Vars;
 import sprouts.Viewable;
@@ -43,7 +45,9 @@ public class ImagerViewModel
     @Getter private Var<String> statusMessage = Var.of("Ready");
     @Getter private Var<String> selectedFormat;
     @Getter private Var<String> selectedDevice;
+    @Getter private Var<String> selectedManualFluxFile;
     @Getter private Var<Integer> selectedDrive;
+
     @Getter private Var<Association<String, String>> options =
             Var.of(Association.between(String.class, String.class));
     @Getter private Var<Image> diskImage = Var.of(new Image());
@@ -67,6 +71,8 @@ public class ImagerViewModel
         selectedDevice =
                 Var.of(preferencesReaderWriter.getStringPreference(DEVICE, DEVICE_FLUXFILE));
         selectedDrive = Var.of(preferencesReaderWriter.getIntegerPreference(DRIVE, 0));
+        selectedManualFluxFile =
+                Var.of(preferencesReaderWriter.getStringPreference(DEVICE_FLUXFILE, ""));
         options.set(preferencesReaderWriter.getOptionsForFormat(selectedFormat.get()));
 
         refreshUsbDevices();
@@ -74,21 +80,26 @@ public class ImagerViewModel
         /* Viewable.cast reinterprets the property itself as a Viewable, so the
          * listener lives exactly as long as the property (unlike view(), which
          * returns a weakly-held view that must be kept in a field). */
-        Viewable.cast(selectedFormat).onChange(
-                From.VIEW,
-                it -> preferencesReaderWriter.setStringPreference(
-                        FORMAT,
-                        it.currentValue().orElseThrowUnchecked()));
-        Viewable.cast(selectedDevice).onChange(
-                From.VIEW,
-                it -> preferencesReaderWriter.setStringPreference(
-                        DEVICE,
-                        it.currentValue().orElseThrowUnchecked()));
-        Viewable.cast(selectedDrive).onChange(
-                From.VIEW,
-                it -> preferencesReaderWriter.setIntegerPreference(
-                        DRIVE,
-                        it.currentValue().orElseThrowUnchecked()));
+        Viewable.cast(selectedFormat).onChange(From.VIEW, stringPreferenceSaver(FORMAT));
+        Viewable.cast(selectedDevice).onChange(From.VIEW, stringPreferenceSaver(DEVICE));
+        Viewable.cast(selectedDrive).onChange(From.VIEW, integerPreferenceSaver(DRIVE));
+        Viewable
+                .cast(selectedManualFluxFile)
+                .onChange(From.VIEW, stringPreferenceSaver(DEVICE_FLUXFILE));
+    }
+
+    private Action<ValDelegate<String>> stringPreferenceSaver(String preference)
+    {
+        return it -> preferencesReaderWriter.setStringPreference(
+                preference,
+                it.currentValue().orElseThrowUnchecked());
+    }
+
+    private Action<ValDelegate<Integer>> integerPreferenceSaver(String preference)
+    {
+        return it -> preferencesReaderWriter.setIntegerPreference(
+                preference,
+                it.currentValue().orElseThrowUnchecked());
     }
 
     Var<Association<String, String>> getOptionsForFormat(String format)
@@ -145,8 +156,13 @@ public class ImagerViewModel
         ConfigBuilder builder = buildConfig();
 
         String device = getSelectedDevice().get();
-        if (device.equals(DEVICE_FLUXFILE))
+        if (device.equals(DEVICE_MANUAL))
         {
+        } else if (device.equals(DEVICE_FLUXFILE))
+        {
+            String fluxfile = getSelectedManualFluxFile().get();
+            builder.withFluxSource(fluxfile);
+            builder.withFluxSink(fluxfile);
         } else
         {
             builder.set("usb.serial", device);
@@ -176,10 +192,6 @@ public class ImagerViewModel
     }
 
     void onEmergencyStop(ComponentDelegate<JButton, ActionEvent> delegate)
-    {
-    }
-
-    void onUseFluxFile(ComponentDelegate<JButton, ActionEvent> delegate)
     {
     }
 

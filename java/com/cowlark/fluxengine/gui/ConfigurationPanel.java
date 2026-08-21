@@ -7,6 +7,7 @@ import static com.cowlark.fluxengine.gui.PreferencesReaderWriter.DEVICE_FLUXFILE
 import static com.cowlark.fluxengine.gui.PreferencesReaderWriter.DEVICE_MANUAL;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.ImmutableMap.toImmutableMap;
+import static javax.swing.JFileChooser.APPROVE_OPTION;
 import static swingtree.UI.label;
 import static swingtree.UI.of;
 import static swingtree.UI.panel;
@@ -20,6 +21,7 @@ import com.cowlark.fluxengine.config.OptionGroupProto;
 import com.cowlark.fluxengine.config.OptionProto;
 import com.cowlark.fluxengine.config.UsbFinder;
 import com.cowlark.fluxengine.data.Formats;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -30,8 +32,14 @@ import sprouts.From;
 import sprouts.Pair;
 import sprouts.Var;
 import sprouts.Viewable;
+import swingtree.ComponentDelegate;
+import swingtree.UI;
 import swingtree.UIForPanel;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JPanel;
+import java.awt.event.ActionEvent;
+import java.io.File;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
@@ -60,6 +68,7 @@ public class ConfigurationPanel extends JPanel
 
         Viewable.cast(model.getSelectedFormat()).onChange(From.ALL, it -> rebuildUi());
         Viewable.cast(model.getSelectedDevice()).onChange(From.ALL, it -> rebuildUi());
+        Viewable.cast(model.getSelectedManualFluxFile()).onChange(From.ALL, it -> rebuildUi());
         Viewable.cast(model.getUsbDevices()).onChange(From.ALL, it -> rebuildUi());
         rebuildUi();
     }
@@ -261,7 +270,7 @@ public class ConfigurationPanel extends JPanel
                 .add(
                         "skip 1, split 2, align right",
                         button("Rescan USB").onClick(delegate -> model.refreshUsbDevices()))
-                .add(button("Use flux file").onClick(model::onUseFluxFile));
+                .add(button("Use flux file").onClick(this::onUseFluxFile));
 
         switch (model.getSelectedDevice().get())
         {
@@ -274,8 +283,12 @@ public class ConfigurationPanel extends JPanel
             default -> applicabilities.add(HARDWARE_SOURCESINK);
         }
 
+        if (applicabilities.contains(FLUXFILE_SOURCESINK))
+            panel = panel.add(LABEL_FORMAT, label("Flux file:")).add(
+                    SETTING_FORMAT,
+                    UI.textField(model.getSelectedManualFluxFile()).isEditableIf(false));
         if (applicabilities.contains(HARDWARE_SOURCESINK))
-            panel = panel.add(label("Drive:")).add(
+            panel = panel.add(LABEL_FORMAT, label("Drive:")).add(
                     SETTING_FORMAT,
                     comboBox(model.getSelectedDrive(), DRIVES, ConfigurationPanel::driveRenderer));
 
@@ -300,5 +313,22 @@ public class ConfigurationPanel extends JPanel
                     yield String.format("%s: %s", candidate.type.getDeviceName(), candidate.serial);
             }
         };
+    }
+
+    private void onUseFluxFile(ComponentDelegate<JButton, ActionEvent> delegate)
+    {
+        JFileChooser fileChooser = new JFileChooser();
+        String oldFile = model.getSelectedManualFluxFile().get();
+        if (!isNullOrEmpty(oldFile))
+            fileChooser.setCurrentDirectory(new File(oldFile).getParentFile());
+        fileChooser.setDialogTitle("Open flux file");
+        fileChooser.setApproveButtonText("Select");
+        if (fileChooser.showOpenDialog(this) == APPROVE_OPTION)
+        {
+            model.getSelectedDevice().set(From.VIEW, DEVICE_FLUXFILE);
+            model
+                    .getSelectedManualFluxFile()
+                    .set(From.VIEW, fileChooser.getSelectedFile().getPath());
+        }
     }
 }
