@@ -1,8 +1,10 @@
 package com.cowlark.fluxengine.data;
 
+import static com.cowlark.fluxengine.wiring.FluxEngine.NS_PER_TICK;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.cowlark.fluxengine.core.Bytes;
+import com.google.common.collect.ImmutableSortedSet;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -77,9 +79,9 @@ public class FluxmapTest
         map.appendInterval(50);
         map.appendIndex();
 
-        List<Long> marks = map.getIndexMarks();
+        ImmutableSortedSet<Double> marks = map.getIndexMarks();
 
-        assertThat(marks).containsExactly(100L, 150L);
+        assertThat(marks).containsExactly(100 * NS_PER_TICK, 150 * NS_PER_TICK);
     }
 
     @Test

@@ -309,11 +309,17 @@ public class SummaryPanel extends JPanel
                 if (!analysis.label.isEmpty())
                 {
                     Graphics2D g2 = getGraphics2D(g);
-                    g2.setXORMode(Color.WHITE);
-                    FontMetrics metrics = g2.getFontMetrics();
-                    int x = (getWidth() - metrics.stringWidth(analysis.label)) / 2;
-                    int y = (getHeight() - metrics.getHeight()) / 2 + metrics.getAscent();
-                    g2.drawString(analysis.label, x, y);
+                    try
+                    {
+                        g2.setXORMode(Color.WHITE);
+                        FontMetrics metrics = g2.getFontMetrics();
+                        int x = (getWidth() - metrics.stringWidth(analysis.label)) / 2;
+                        int y = (getHeight() - metrics.getHeight()) / 2 + metrics.getAscent();
+                        g2.drawString(analysis.label, x, y);
+                    } finally
+                    {
+                        g2.dispose();
+                    }
                 }
             }
         }

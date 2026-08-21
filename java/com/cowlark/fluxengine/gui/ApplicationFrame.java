@@ -1,5 +1,6 @@
 package com.cowlark.fluxengine.gui;
 
+import static com.cowlark.fluxengine.gui.UiUtils.sizePts;
 import static swingtree.UIFactoryMethods.button;
 import static swingtree.UIFactoryMethods.of;
 import static swingtree.UIFactoryMethods.panel;
@@ -47,7 +48,7 @@ public class ApplicationFrame extends JFrame
                         .add(
                                 TOP,
                                 tabbedPane()
-                                        .add(tab("Image").add(of(imagePanel).withPrefSize(UiUtils.pt(
+                                        .add(tab("Image").add(of(imagePanel).withPrefSize(sizePts(
                                                 500,
                                                 300))))
                                         .add(tab("Log").add(of(logPanel))))

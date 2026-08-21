@@ -9,6 +9,7 @@ import com.cowlark.fluxengine.core.Bits;
 import com.cowlark.fluxengine.core.ByteWriter;
 import com.cowlark.fluxengine.core.Bytes;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSortedSet;
 
 /**
  * A stream of flux transitions, ported from lib/data/fluxmap.{h,cc}.
@@ -18,7 +19,7 @@ public class Fluxmap
 
     private int ticks;
     private Bytes bytes;
-    private ImmutableList<Long> indexMarks;
+    private ImmutableSortedSet<Double> indexMarks;
 
     public Fluxmap()
     {
@@ -148,11 +149,11 @@ public class Fluxmap
         return maps.build();
     }
 
-    public ImmutableList<Long> getIndexMarks()
+    public ImmutableSortedSet<Double> getIndexMarks()
     {
         if (indexMarks == null)
         {
-            ImmutableList.Builder<Long> marks = ImmutableList.builder();
+            ImmutableSortedSet.Builder<Double> marks = ImmutableSortedSet.naturalOrder();
             long totalTicks = 0;
             long oldTicks = -1;
             for (int i = 0; i < bytes.size(); i++)
@@ -162,7 +163,7 @@ public class Fluxmap
                 if ((b & F_BIT_INDEX) != 0)
                 {
                     if (totalTicks != oldTicks)
-                        marks.add(totalTicks);
+                        marks.add(totalTicks * NS_PER_TICK);
                     oldTicks = totalTicks;
                 }
             }
