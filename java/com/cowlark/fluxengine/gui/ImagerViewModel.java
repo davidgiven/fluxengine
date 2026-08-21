@@ -5,7 +5,7 @@ import static com.cowlark.fluxengine.gui.PreferencesReaderWriter.DEVICE_FLUXFILE
 import static com.cowlark.fluxengine.gui.PreferencesReaderWriter.DEVICE_MANUAL;
 import static com.cowlark.fluxengine.gui.PreferencesReaderWriter.DRIVE;
 import static com.cowlark.fluxengine.gui.PreferencesReaderWriter.FORMAT;
-import static com.google.common.collect.ImmutableList.toImmutableList;
+import static java.util.stream.Collectors.toList;
 
 import com.cowlark.fluxengine.algorithms.BeginReadOperationLogMessage;
 import com.cowlark.fluxengine.algorithms.BeginWriteOperationLogMessage;
@@ -22,7 +22,6 @@ import com.cowlark.fluxengine.core.Logger;
 import com.cowlark.fluxengine.data.Disk;
 import com.cowlark.fluxengine.data.Image;
 import com.cowlark.fluxengine.gui.DriveActivity.ActivityType;
-import com.google.common.collect.ImmutableMap;
 import io.reactivex.rxjava3.disposables.Disposable;
 import lombok.Getter;
 import org.apache.commons.lang3.function.Consumers;
@@ -36,16 +35,15 @@ import sprouts.Viewable;
 import swingtree.ComponentDelegate;
 import javax.swing.JButton;
 import java.awt.event.ActionEvent;
-import java.util.Map;
 
 public class ImagerViewModel
 {
     private final PreferencesReaderWriter preferencesReaderWriter;
 
     @Getter private Var<String> statusMessage = Var.of("Ready");
-    @Getter private Var<String> format;
-    @Getter private Var<String> device;
-    @Getter private Var<Integer> drive;
+    @Getter private Var<String> selectedFormat;
+    @Getter private Var<String> selectedDevice;
+    @Getter private Var<Integer> selectedDrive;
     @Getter private Var<Association<String, String>> options =
             Var.of(Association.between(String.class, String.class));
     @Getter private Var<Image> diskImage = Var.of(new Image());
@@ -58,33 +56,35 @@ public class ImagerViewModel
     @Getter private Val<Boolean> busy =
             currentOperation.viewAs(Boolean.class, op -> op != null && !op.isDisposed());
 
-    @Getter private ImmutableMap<String, CandidateDevice> devices = ImmutableMap.of();
+    @Getter private Var<Association<String, CandidateDevice>> usbDevices =
+            Var.of(Association.between(String.class, CandidateDevice.class));
 
     ImagerViewModel(PreferencesReaderWriter preferencesReaderWriter)
     {
         this.preferencesReaderWriter = preferencesReaderWriter;
 
-        format = Var.of(preferencesReaderWriter.getStringPreference(FORMAT, "ibm"));
-        device = Var.of(preferencesReaderWriter.getStringPreference(DEVICE, DEVICE_FLUXFILE));
-        drive = Var.of(preferencesReaderWriter.getIntegerPreference(DRIVE, 0));
-        options.set(preferencesReaderWriter.getOptionsForFormat(format.get()));
+        selectedFormat = Var.of(preferencesReaderWriter.getStringPreference(FORMAT, "ibm"));
+        selectedDevice =
+                Var.of(preferencesReaderWriter.getStringPreference(DEVICE, DEVICE_FLUXFILE));
+        selectedDrive = Var.of(preferencesReaderWriter.getIntegerPreference(DRIVE, 0));
+        options.set(preferencesReaderWriter.getOptionsForFormat(selectedFormat.get()));
 
         refreshUsbDevices();
 
         /* Viewable.cast reinterprets the property itself as a Viewable, so the
          * listener lives exactly as long as the property (unlike view(), which
          * returns a weakly-held view that must be kept in a field). */
-        Viewable.cast(format).onChange(
+        Viewable.cast(selectedFormat).onChange(
                 From.VIEW,
                 it -> preferencesReaderWriter.setStringPreference(
                         FORMAT,
                         it.currentValue().orElseThrowUnchecked()));
-        Viewable.cast(device).onChange(
+        Viewable.cast(selectedDevice).onChange(
                 From.VIEW,
                 it -> preferencesReaderWriter.setStringPreference(
                         DEVICE,
                         it.currentValue().orElseThrowUnchecked()));
-        Viewable.cast(drive).onChange(
+        Viewable.cast(selectedDrive).onChange(
                 From.VIEW,
                 it -> preferencesReaderWriter.setIntegerPreference(
                         DRIVE,
@@ -117,15 +117,17 @@ public class ImagerViewModel
 
     void refreshUsbDevices()
     {
-        devices = new ImmutableMap.Builder<String, CandidateDevice>()
+        usbDevices.set(Association
+                .between(
+                        String.class,
+                        com.cowlark.fluxengine.config.UsbFinder.CandidateDevice.class)
                 .put(DEVICE_FLUXFILE, new CandidateDevice())
                 .put(DEVICE_MANUAL, new CandidateDevice())
                 .putAll(UsbFinder
                         .findUsbDevices()
                         .stream()
-                        .map(candidate -> Map.entry(candidate.getSerial(), candidate))
-                        .collect(toImmutableList()))
-                .build();
+                        .map(candidate -> Pair.of(candidate.getSerial(), candidate))
+                        .collect(toList())));
     }
 
     void onReadDisk(ComponentDelegate<JButton, ActionEvent> delegate)
@@ -142,14 +144,14 @@ public class ImagerViewModel
 
         ConfigBuilder builder = buildConfig();
 
-        String device = getDevice().get();
+        String device = getSelectedDevice().get();
         if (device.equals(DEVICE_FLUXFILE))
         {
         } else
         {
             builder.set("usb.serial", device);
 
-            String drive = String.format("drive:%d", getDrive().get());
+            String drive = String.format("drive:%d", getSelectedDrive().get());
             builder.withFluxSource(drive);
             builder.withFluxSink(drive);
         }
@@ -177,14 +179,18 @@ public class ImagerViewModel
     {
     }
 
+    void onUseFluxFile(ComponentDelegate<JButton, ActionEvent> delegate)
+    {
+    }
+
     private ConfigBuilder buildConfig()
     {
         Logger.setLogger(Consumers.nop());
         ConfigBuilder builder = new ConfigBuilder();
         builder.loadConfigFile("_global_options");
-        builder.loadConfigFile(format.get());
+        builder.loadConfigFile(selectedFormat.get());
 
-        for (Pair<String, String> e : getOptionsForFormat(format.get()).get())
+        for (Pair<String, String> e : getOptionsForFormat(selectedFormat.get()).get())
             builder.applyOption(e.first(), e.second());
         for (Pair<String, String> e : getOptionsForDevice().get())
             builder.applyOption(e.first(), e.second());

@@ -10,6 +10,7 @@ import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static swingtree.UI.label;
 import static swingtree.UI.of;
 import static swingtree.UI.panel;
+import static swingtree.UIFactoryMethods.button;
 import static swingtree.UIFactoryMethods.comboBox;
 import static swingtree.UIFactoryMethods.separator;
 
@@ -33,7 +34,6 @@ import swingtree.UIForPanel;
 import javax.swing.JPanel;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
@@ -58,8 +58,9 @@ public class ConfigurationPanel extends JPanel
     {
         this.model = model;
 
-        Viewable.cast(model.getFormat()).onChange(From.ALL, it -> rebuildUi());
-        Viewable.cast(model.getDevice()).onChange(From.ALL, it -> rebuildUi());
+        Viewable.cast(model.getSelectedFormat()).onChange(From.ALL, it -> rebuildUi());
+        Viewable.cast(model.getSelectedDevice()).onChange(From.ALL, it -> rebuildUi());
+        Viewable.cast(model.getUsbDevices()).onChange(From.ALL, it -> rebuildUi());
         rebuildUi();
     }
 
@@ -228,15 +229,17 @@ public class ConfigurationPanel extends JPanel
                 .add(LABEL_FORMAT, label("Format:"))
                 .add(
                         SETTING_FORMAT, comboBox(
-                                model.getFormat(),
+                                model.getSelectedFormat(),
                                 ImmutableList.copyOf(formatData.keySet()),
                                 ConfigurationPanel::formatRenderer).onSelection(it -> model
-                                .getFormat()
+                                .getSelectedFormat()
                                 .set(From.VIEW, (String) it.get().getSelectedItem())));
         panel = emitOptions(
                 panel,
-                model.getOptionsForFormat(model.getFormat().get()),
-                formatData.getOrDefault(model.getFormat().get(), ConfigProto.getDefaultInstance()),
+                model.getOptionsForFormat(model.getSelectedFormat().get()),
+                formatData.getOrDefault(
+                        model.getSelectedFormat().get(),
+                        ConfigProto.getDefaultInstance()),
                 ImmutableSet.of());
         return panel;
     }
@@ -250,11 +253,17 @@ public class ConfigurationPanel extends JPanel
 
         panel = panel.add(label("Device:")).add(
                 SETTING_FORMAT, comboBox(
-                        model.getDevice(),
-                        List.copyOf(model.getDevices().keySet()),
+                        model.getSelectedDevice(),
+                        model.getUsbDevices().get().keySet().stream().toList(),
                         this::deviceRenderer));
 
-        switch (model.getDevice().get())
+        panel = panel
+                .add(
+                        "skip 1, split 2, align right",
+                        button("Rescan USB").onClick(delegate -> model.refreshUsbDevices()))
+                .add(button("Use flux file").onClick(model::onUseFluxFile));
+
+        switch (model.getSelectedDevice().get())
         {
             case DEVICE_FLUXFILE -> applicabilities.add(FLUXFILE_SOURCESINK);
             case DEVICE_MANUAL ->
@@ -268,7 +277,7 @@ public class ConfigurationPanel extends JPanel
         if (applicabilities.contains(HARDWARE_SOURCESINK))
             panel = panel.add(label("Drive:")).add(
                     SETTING_FORMAT,
-                    comboBox(model.getDrive(), DRIVES, ConfigurationPanel::driveRenderer));
+                    comboBox(model.getSelectedDrive(), DRIVES, ConfigurationPanel::driveRenderer));
 
         panel = emitOptions(panel, model.getOptionsForDevice(), GLOBAL_CONFIG, applicabilities);
         return panel;
@@ -282,8 +291,9 @@ public class ConfigurationPanel extends JPanel
             case DEVICE_FLUXFILE -> "Flux file";
             default ->
             {
-                ImmutableMap<String, UsbFinder.CandidateDevice> devices = model.getDevices();
-                UsbFinder.CandidateDevice candidate = devices.get(device);
+                Association<String, UsbFinder.CandidateDevice> devices =
+                        model.getUsbDevices().get();
+                UsbFinder.CandidateDevice candidate = devices.get(device).orElse(null);
                 if (candidate == null)
                     yield String.format("disconnected: %s", candidate.serial);
                 else
