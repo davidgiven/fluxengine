@@ -1,6 +1,7 @@
 package com.cowlark.fluxengine.imagewriter;
 
 import com.cowlark.fluxengine.core.Bytes;
+import com.cowlark.fluxengine.core.Logger;
 import com.cowlark.fluxengine.data.Geometry;
 import com.cowlark.fluxengine.data.Image;
 import com.cowlark.fluxengine.data.Record;
@@ -29,14 +30,11 @@ public class RawImageWriter extends ImageWriter
 
         if (geometry.numCylinders * trackSize == 0)
         {
-            System.out.println("RAW: no sectors in output; skipping image file generation.");
+            Logger.logf("RAW: no sectors in output; skipping image file generation.");
             return;
         }
 
-        System.out.printf(
-                "RAW: writing %d tracks, %d sides%n",
-                geometry.numCylinders,
-                geometry.numHeads);
+        Logger.logf("RAW: writing %d tracks, %d sides", geometry.numCylinders, geometry.numHeads);
 
         Bytes output = new Bytes();
 

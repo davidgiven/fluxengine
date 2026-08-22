@@ -2,6 +2,7 @@ package com.cowlark.fluxengine.imagewriter;
 
 import com.cowlark.fluxengine.core.ByteWriter;
 import com.cowlark.fluxengine.core.Bytes;
+import com.cowlark.fluxengine.core.Logger;
 import com.cowlark.fluxengine.data.Geometry;
 import com.cowlark.fluxengine.data.Image;
 import com.cowlark.fluxengine.data.Sector;
@@ -112,7 +113,7 @@ public class D88ImageWriter extends ImageWriter
 
         output.writeToFile(config.getFilename());
 
-        System.out.printf(
+        Logger.logf(
                 "D88: wrote %d tracks, %d sides, %d kB total%n",
                 tracks,
                 sides,

@@ -4,6 +4,7 @@ import com.cowlark.fluxengine.core.ByteReader;
 import com.cowlark.fluxengine.core.ByteWriter;
 import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.core.FluxEngineException;
+import com.cowlark.fluxengine.core.Logger;
 import com.cowlark.fluxengine.data.Geometry;
 import com.cowlark.fluxengine.data.Image;
 import com.cowlark.fluxengine.data.Sector;
@@ -352,7 +353,7 @@ public class ImdImageWriter extends ImageWriter
             }
         }
         imagenew.writeToFile(config.getFilename());
-        System.out.printf(
+        Logger.logf(
                 "IMD: Written %d tracks, %d heads, %d sectors, %d bytes per " +
                         "sector, %d kB total%n",
                 geometry.numCylinders,

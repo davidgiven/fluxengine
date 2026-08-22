@@ -3,6 +3,7 @@ package com.cowlark.fluxengine.imagewriter;
 import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.core.ByteWriter;
 import com.cowlark.fluxengine.core.Bytes;
+import com.cowlark.fluxengine.core.Logger;
 import com.cowlark.fluxengine.data.CylinderHead;
 import com.cowlark.fluxengine.data.DiskLayout;
 import com.cowlark.fluxengine.data.Geometry;
@@ -65,7 +66,7 @@ public class ImgImageWriter extends ImageWriter
 
         output.writeToFile(getWriterConfig().getFilename());
 
-        System.out.printf(
+        Logger.logf(
                 "IMG: wrote %d tracks, %d sides, %d kB total to %s%n",
                 tracks,
                 sides,

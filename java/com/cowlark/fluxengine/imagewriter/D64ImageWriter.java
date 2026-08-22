@@ -2,6 +2,7 @@ package com.cowlark.fluxengine.imagewriter;
 
 import com.cowlark.fluxengine.core.ByteWriter;
 import com.cowlark.fluxengine.core.Bytes;
+import com.cowlark.fluxengine.core.Logger;
 import com.cowlark.fluxengine.data.Image;
 import com.cowlark.fluxengine.data.Sector;
 
@@ -30,7 +31,7 @@ public class D64ImageWriter extends ImageWriter
     @Override
     public void writeImage(Image image)
     {
-        System.out.println("D64: writing triangular image");
+        Logger.logf("D64: writing triangular image");
 
         Bytes output = new Bytes();
         ByteWriter bw = output.writer();

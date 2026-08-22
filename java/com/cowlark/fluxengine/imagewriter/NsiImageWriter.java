@@ -2,6 +2,7 @@ package com.cowlark.fluxengine.imagewriter;
 
 import com.cowlark.fluxengine.core.ByteWriter;
 import com.cowlark.fluxengine.core.Bytes;
+import com.cowlark.fluxengine.core.Logger;
 import com.cowlark.fluxengine.data.Geometry;
 import com.cowlark.fluxengine.data.Image;
 import com.cowlark.fluxengine.data.Sector;
@@ -27,11 +28,11 @@ public class NsiImageWriter extends ImageWriter
 
         if (geometry.numCylinders * trackSize == 0)
         {
-            System.out.println("No sectors in output; skipping .nsi image file generation.");
+            Logger.logf("No sectors in output; skipping .nsi image file generation.");
             return;
         }
 
-        System.out.printf(
+        Logger.logf(
                 "Writing %d tracks, %d sides, %d sectors, %s (%d bytes/sector), " + "%d kB total%n",
                 geometry.numCylinders,
                 geometry.numHeads,
@@ -78,7 +79,7 @@ public class NsiImageWriter extends ImageWriter
                          * spaces. */
                         if (!mixedDensity)
                         {
-                            System.out.println("Warning: Disk contains mixed " +
+                            Logger.logf("Warning: Disk contains mixed " +
                                     "single/double-density sectors.");
                         }
                         mixedDensity = true;

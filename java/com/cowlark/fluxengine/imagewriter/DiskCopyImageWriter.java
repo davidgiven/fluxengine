@@ -4,6 +4,7 @@ import com.cowlark.fluxengine.core.ByteReader;
 import com.cowlark.fluxengine.core.ByteWriter;
 import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.core.FluxEngineException;
+import com.cowlark.fluxengine.core.Logger;
 import com.cowlark.fluxengine.data.Geometry;
 import com.cowlark.fluxengine.data.Image;
 import com.cowlark.fluxengine.data.Sector;
@@ -58,8 +59,8 @@ public class DiskCopyImageWriter extends ImageWriter
         }
         final boolean isMfm = mfm;
 
-        System.out.println("DC42: writing DiskCopy 4.2 image");
-        System.out.printf(
+        Logger.logf("DC42: writing DiskCopy 4.2 image");
+        Logger.logf(
                 "DC42: %d tracks, %d sides, %d sectors, %d bytes per sector; %s%n",
                 geometry.numCylinders,
                 geometry.numHeads,
