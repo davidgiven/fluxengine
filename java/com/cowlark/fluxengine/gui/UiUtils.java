@@ -1,18 +1,34 @@
 package com.cowlark.fluxengine.gui;
 
 import static java.lang.Math.round;
+import static swingtree.UIFactoryMethods.menuItem;
+import static swingtree.UIFactoryMethods.popupMenu;
+import static swingtree.UIFactoryMethods.splitButton;
 
 import io.reactivex.rxjava3.core.Scheduler;
 import io.reactivex.rxjava3.schedulers.Schedulers;
+import lombok.Builder;
+import sprouts.Tuple;
+import sprouts.Val;
+import sprouts.Var;
+import swingtree.ComponentDelegate;
+import swingtree.UI;
+import swingtree.UIForAnySwing;
+import swingtree.UIForPopup;
 import swingtree.layout.Size;
 import javax.swing.Action;
+import javax.swing.JButton;
+import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
+import java.util.Arrays;
+import java.util.function.Consumer;
 
 public class UiUtils
 {
@@ -53,5 +69,48 @@ public class UiUtils
     public static Size sizePts(float widthPt, float heightPt)
     {
         return Size.of(round(widthPt * PIXELS_PER_POINT), round(heightPt * PIXELS_PER_POINT));
+    }
+
+    public static UIForAnySwing<?, ?> createSplitButton(SplitPanelAction... actions)
+    {
+        Var<SplitPanelAction> selectedItem = Var.of(actions[0]);
+
+        JPopupMenu popupMenu = popupMenu().addAll(
+                Tuple.of(SplitPanelAction.class, actions),
+                action -> menuItem(action.label()).onClick(it1 -> {
+                    selectedItem.set(action);
+                    action.onClick().accept(null);
+                })).get(JPopupMenu.class);
+
+        return splitButton(actions[0].label())
+                .peek(b -> b.setPopupMenu(popupMenu))
+                .withText(selectedItem.viewAs(String.class, SplitPanelAction::label))
+                .onClick(it -> selectedItem.get().onClick().accept(
+                        new ComponentDelegate<>(
+                                it.getComponent(),
+                                it.getEvent())))
+                .peek(b -> {
+                    /* Pin the button's preferred width to fit the longest
+                     * label it can ever show, so that picking another action
+                     * from the menu does not resize it and shift the layout. */
+                    FontMetrics metrics = b.getFontMetrics(b.getFont());
+                    int maxLabelWidth = Arrays
+                            .stream(actions)
+                            .map(action -> metrics.stringWidth(action.label()))
+                            .max(Integer::compareTo)
+                            .get();
+                    Dimension preferred = b.getPreferredSize();
+                    int borderPadding =
+                            preferred.width - metrics.stringWidth(actions[0].label());
+                    b.setPreferredSize(new Dimension(
+                            maxLabelWidth + borderPadding + b.getSplitWidth(),
+                            preferred.height));
+                });
+    }
+
+    @Builder(setterPrefix = "set")
+    record SplitPanelAction(String label, Val<Boolean> isEnabled,
+                            Consumer<ComponentDelegate<JButton, ActionEvent>> onClick)
+    {
     }
 }

@@ -187,6 +187,22 @@ public class ImagerViewModel
     {
     }
 
+    void onRedecodeDisk(ComponentDelegate<JButton, ActionEvent> delegate)
+    {
+    }
+
+    void onLoadDiskImage(ComponentDelegate<JButton, ActionEvent> delegate)
+    {
+    }
+
+    void onSaveDiskImage(ComponentDelegate<JButton, ActionEvent> delegate)
+    {
+    }
+
+    void onSaveDiskFlux(ComponentDelegate<JButton, ActionEvent> delegate)
+    {
+    }
+
     void onWriteDisk(ComponentDelegate<JButton, ActionEvent> delegate)
     {
     }
