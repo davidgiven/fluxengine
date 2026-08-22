@@ -25,6 +25,7 @@ import com.cowlark.fluxengine.gui.DriveActivity.ActivityType;
 import io.reactivex.rxjava3.disposables.Disposable;
 import lombok.Getter;
 import org.apache.commons.lang3.function.Consumers;
+import org.jspecify.annotations.NonNull;
 import sprouts.Action;
 import sprouts.Association;
 import sprouts.From;
@@ -153,42 +154,22 @@ public class ImagerViewModel
             }
         }
 
-        ConfigBuilder builder = buildConfig();
-
-        String device = getSelectedDevice().get();
-        if (device.equals(DEVICE_MANUAL))
-        {
-        } else if (device.equals(DEVICE_FLUXFILE))
-        {
-            String fluxfile = getSelectedManualFluxFile().get();
-            builder.withFluxSource(fluxfile);
-            builder.withFluxSink(fluxfile);
-        } else
-        {
-            builder.set("usb.serial", device);
-
-            String drive = String.format("drive:%d", getSelectedDrive().get());
-            builder.withFluxSource(drive);
-            builder.withFluxSink(drive);
-        }
-
-        currentOperation.set(new ReadOperation()
-                .setConfig(builder.build())
-                .create()
-                .observeOn(UiUtils.EDT)
-                .subscribe(
-                        this::handleLogMessage, e -> {
-                            logQueue.add(new ErrorLogMessage(e.getMessage()));
-                            currentOperation.fireChange(From.VIEW_MODEL);
-                        }, () -> currentOperation.fireChange(From.VIEW_MODEL)));
+        performOperation(makeConfigBuilder(), new ReadOperation());
     }
 
     void onRereadDisk(ComponentDelegate<JButton, ActionEvent> delegate)
     {
-    }
+        Disk disk = getDisk().get();
+        class RereadOperation extends ReadWriteFluxOperation
+        {
+            @Override
+            public void run()
+            {
+                readDisk(disk);
+            }
+        }
 
-    void onRedecodeDisk(ComponentDelegate<JButton, ActionEvent> delegate)
-    {
+        performOperation(makeConfigBuilder(), new RereadOperation());
     }
 
     void onLoadDiskImage(ComponentDelegate<JButton, ActionEvent> delegate)
@@ -211,7 +192,22 @@ public class ImagerViewModel
     {
     }
 
-    private ConfigBuilder buildConfig()
+    private @NonNull Var<Disposable> performOperation(
+            ConfigBuilder configBuilder,
+            ReadWriteFluxOperation operation)
+    {
+        return currentOperation.set(operation
+                .setConfig(configBuilder.build())
+                .create()
+                .observeOn(UiUtils.EDT)
+                .subscribe(
+                        this::handleLogMessage, e -> {
+                            logQueue.add(new ErrorLogMessage(e.getMessage()));
+                            currentOperation.fireChange(From.VIEW_MODEL);
+                        }, () -> currentOperation.fireChange(From.VIEW_MODEL)));
+    }
+
+    private ConfigBuilder makeConfigBuilder()
     {
         Logger.setLogger(Consumers.nop());
         ConfigBuilder builder = new ConfigBuilder();
@@ -222,6 +218,23 @@ public class ImagerViewModel
             builder.applyOption(e.first(), e.second());
         for (Pair<String, String> e : getOptionsForDevice().get())
             builder.applyOption(e.first(), e.second());
+
+        String device = getSelectedDevice().get();
+        if (device.equals(DEVICE_MANUAL))
+        {
+        } else if (device.equals(DEVICE_FLUXFILE))
+        {
+            String fluxfile = getSelectedManualFluxFile().get();
+            builder.withFluxSource(fluxfile);
+            builder.withFluxSink(fluxfile);
+        } else
+        {
+            builder.set("usb.serial", device);
+
+            String drive = String.format("drive:%d", getSelectedDrive().get());
+            builder.withFluxSource(drive);
+            builder.withFluxSink(drive);
+        }
 
         return builder;
     }
