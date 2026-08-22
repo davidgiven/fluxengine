@@ -57,6 +57,7 @@ public class UiUtils
         g2.setRenderingHint(
                 RenderingHints.KEY_TEXT_ANTIALIASING,
                 RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         return g2;
     }
 
@@ -88,10 +89,10 @@ public class UiUtils
                 .isEnabledIf(isEnabled)
                 .peek(b -> b.setPopupMenu(popupMenu))
                 .withText(selectedItem.viewAs(String.class, SplitPanelAction::label))
-                .onClick(it -> selectedItem.get().onClick().accept(
-                        new ComponentDelegate<>(
-                                it.getComponent(),
-                                it.getEvent())))
+                .onClick(it -> selectedItem
+                        .get()
+                        .onClick()
+                        .accept(new ComponentDelegate<>(it.getComponent(), it.getEvent())))
                 .peek(b -> {
                     /* Pin the button's preferred width to fit the longest
                      * label it can ever show, so that picking another action
@@ -103,8 +104,7 @@ public class UiUtils
                             .max(Integer::compareTo)
                             .get();
                     Dimension preferred = b.getPreferredSize();
-                    int borderPadding =
-                            preferred.width - metrics.stringWidth(actions[0].label());
+                    int borderPadding = preferred.width - metrics.stringWidth(actions[0].label());
                     b.setPreferredSize(new Dimension(
                             maxLabelWidth + borderPadding + b.getSplitWidth(),
                             preferred.height));

@@ -20,7 +20,7 @@ import java.awt.geom.Point2D;
 import java.util.Collection;
 import java.util.Map;
 
-public class VisualiserPanel extends JPanel implements ComponentListener
+public class VisualiserPanel extends JPanel
 {
     public static final double WINDOW_PADDING_X = 8;
     public static final double WINDOW_PADDING_Y = 8;
@@ -45,7 +45,6 @@ public class VisualiserPanel extends JPanel implements ComponentListener
         this.model = model;
 
         setPreferredSize(dimensionPts(300, 600));
-        addComponentListener(this);
 
         Viewable.cast(model.getDisk()).onChange(From.ALL, it -> diskChanged());
     }
@@ -57,47 +56,6 @@ public class VisualiserPanel extends JPanel implements ComponentListener
             currentLayout = newLayout;
         invalidate();
         repaint();
-    }
-
-    private void updateGeometry()
-    {
-        width = getWidth();
-        height = getHeight();
-
-        fg = getForeground();
-        bg = getBackground();
-        Color uiPanelBackground = UIManager.getColor("Panel.background");
-        diskbg = (uiPanelBackground != null) ? uiPanelBackground : bg;
-
-        centreX = width / 2.0;
-        centreY = height / 2.0;
-        outerRadius = (width - WINDOW_PADDING_X * 2) / 2;
-        side0pos = new Point2D.Double(centreX, centreY - outerRadius - WINDOW_PADDING_Y);
-        side1pos = new Point2D.Double(centreX, centreY + outerRadius + WINDOW_PADDING_Y);
-    }
-
-    @Override
-    public void componentHidden(ComponentEvent e)
-    {
-
-    }
-
-    @Override
-    public void componentMoved(ComponentEvent e)
-    {
-
-    }
-
-    @Override
-    public void componentResized(ComponentEvent e)
-    {
-        updateGeometry();
-    }
-
-    @Override
-    public void componentShown(ComponentEvent e)
-    {
-
     }
 
     private void drawCentered(Graphics2D g2, Point2D pos, Color colour, String s)
@@ -186,6 +144,21 @@ public class VisualiserPanel extends JPanel implements ComponentListener
     protected void paintComponent(Graphics g)
     {
         super.paintComponent(g);
+
+        width = getWidth();
+        height = getHeight();
+
+        fg = getForeground();
+        bg = getBackground();
+        Color uiPanelBackground = UIManager.getColor("Panel.background");
+        diskbg = (uiPanelBackground != null) ? uiPanelBackground : bg;
+
+        centreX = width / 2.0;
+        centreY = height / 2.0;
+        outerRadius = (width - WINDOW_PADDING_X * 2) / 2;
+        side0pos = new Point2D.Double(centreX, centreY - outerRadius - WINDOW_PADDING_Y);
+        side1pos = new Point2D.Double(centreX, centreY + outerRadius + WINDOW_PADDING_Y);
+
         Graphics2D g2 = UiUtils.getGraphics2D(g);
         try
         {
