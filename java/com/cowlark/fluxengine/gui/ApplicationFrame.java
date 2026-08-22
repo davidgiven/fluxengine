@@ -16,6 +16,7 @@ import static swingtree.UILayoutConstants.TOP;
 
 import com.cowlark.fluxengine.gui.UiUtils.SplitPanelAction;
 import org.jspecify.annotations.NonNull;
+import sprouts.Val;
 import sprouts.Var;
 import swingtree.UI;
 import swingtree.UIForPanel;
@@ -74,29 +75,40 @@ public class ApplicationFrame extends JFrame
         UIForTabbedPane<JTabbedPane> leftPane =
                 tabbedPane().add(tab("Configuration").add(scrollPane().add(of(configurationPanel))));
 
-        UIForSplitPane<JSplitPane> topPane =
-                splitPane(UI.Align.HORIZONTAL)
-                        .peek(pane -> pane.setResizeWeight(1.0))
-                        .add(
-                                TOP,
-                                tabbedPane()
-                                        .add(tab("Image").add(of(imagePanel).withPrefSize(sizePts(
-                                                500,
-                                                300))))
-                                        .add(tab("Log").add(of(logPanel))))
-                        .add(BOTTOM, tabbedPane().add(tab("Visualiser").add(of(visualiserPanel))));
+        UIForSplitPane<JSplitPane> topPane = splitPane(UI.Align.HORIZONTAL)
+                .peek(pane -> pane.setResizeWeight(1.0))
+                .add(
+                        TOP,
+                        tabbedPane()
+                                .add(tab("Image").add(of(imagePanel).withPrefSize(sizePts(
+                                        500,
+                                        300))))
+                                .add(tab("Log").add(of(logPanel))))
+                .add(BOTTOM, tabbedPane().add(tab("Visualiser").add(of(visualiserPanel))));
 
-        UIForPanel<JPanel> controlPanel =
-                panel("wrap 4, center").add("aligny center", label("I want to")).add(
+        /* Disabling a Swing container does not disable its children, so
+         * every interactive control inside the cards is bound to this
+         * property instead. */
+        Val<Boolean> controlsEnabled = model.getBusy().viewAs(Boolean.class, busy -> !busy);
+
+        UIForPanel<JPanel> controlPanel = panel("wrap 4, center, nogrid")
+                .add("aligny center", label("I want to"))
+                .add(
                         "aligny center",
-                        comboBox(currentWorkflow, Workflow.values(), Workflow::getDisplayName)).add(
+                        comboBox(
+                                currentWorkflow,
+                                Workflow.values(),
+                                Workflow::getDisplayName))
+                .add(label(":"))
+                .add(
                         "aligny center",
                         panel("fill, ins 0")
                                 .withSizeExactly(sizePts(CARD_WIDTH_PTS, CARD_HEIGHT_PTS))
                                 .add(
                                         "align center",
                                         currentWorkflow,
-                                        createControlPanelCard(model))).add(
+                                        createControlPanelCard(model, controlsEnabled)))
+                .add(
                         "aligny center",
                         button("Stop")
                                 .isEnabledIf(model.getBusy())
@@ -123,14 +135,17 @@ public class ApplicationFrame extends JFrame
                                 .add(BOTTOM, bottomPane)));
     }
 
-    private static @NonNull ViewSupplier<Workflow> createControlPanelCard(ImagerViewModel model)
+    private static @NonNull ViewSupplier<Workflow> createControlPanelCard(
+            ImagerViewModel model,
+            Val<Boolean> enabled)
     {
         return workflow -> switch (workflow)
         {
             case DISK_READING -> panel("center, nogrid, ins 0")
-                    .add(button("Read disk").onClick(model::onReadDisk))
+                    .add(button("Read disk").isEnabledIf(enabled).onClick(model::onReadDisk))
                     .add(label(" → "))
                     .add(createSplitButton(
+                            enabled,
                             SplitPanelAction
                                     .builder()
                                     .setLabel("Re-read bad tracks")
@@ -143,6 +158,7 @@ public class ApplicationFrame extends JFrame
                                     .build()))
                     .add(label(" → "))
                     .add(createSplitButton(
+                            enabled,
                             SplitPanelAction
                                     .builder()
                                     .setLabel("Save disk image")
@@ -154,9 +170,12 @@ public class ApplicationFrame extends JFrame
                                     .setOnClick(model::onSaveDiskFlux)
                                     .build()));
             case DISK_WRITING -> panel("center, nogrid, ins 0")
-                    .add(button("Load disk image").onClick(model::onLoadDiskImage))
+                    .add(button("Load disk image")
+                            .isEnabledIf(enabled)
+                            .onClick(model::onLoadDiskImage))
                     .add(label(" → "))
                     .add(createSplitButton(
+                            enabled,
                             SplitPanelAction
                                     .builder()
                                     .setLabel("Write flux to disk")

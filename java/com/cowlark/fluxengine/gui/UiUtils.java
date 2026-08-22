@@ -71,7 +71,9 @@ public class UiUtils
         return Size.of(round(widthPt * PIXELS_PER_POINT), round(heightPt * PIXELS_PER_POINT));
     }
 
-    public static UIForAnySwing<?, ?> createSplitButton(SplitPanelAction... actions)
+    public static UIForAnySwing<?, ?> createSplitButton(
+            Val<Boolean> isEnabled,
+            SplitPanelAction... actions)
     {
         Var<SplitPanelAction> selectedItem = Var.of(actions[0]);
 
@@ -83,6 +85,7 @@ public class UiUtils
                 })).get(JPopupMenu.class);
 
         return splitButton(actions[0].label())
+                .isEnabledIf(isEnabled)
                 .peek(b -> b.setPopupMenu(popupMenu))
                 .withText(selectedItem.viewAs(String.class, SplitPanelAction::label))
                 .onClick(it -> selectedItem.get().onClick().accept(
