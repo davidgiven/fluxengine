@@ -3,6 +3,7 @@ package com.cowlark.fluxengine.gui;
 import static com.cowlark.fluxengine.gui.PreferencesReaderWriter.DEVICE;
 import static com.cowlark.fluxengine.gui.PreferencesReaderWriter.DEVICE_FLUXFILE;
 import static com.cowlark.fluxengine.gui.PreferencesReaderWriter.DEVICE_MANUAL;
+import static com.cowlark.fluxengine.gui.PreferencesReaderWriter.DEVICE_OPTIONS;
 import static com.cowlark.fluxengine.gui.PreferencesReaderWriter.DRIVE;
 import static com.cowlark.fluxengine.gui.PreferencesReaderWriter.FORMAT;
 import static java.util.stream.Collectors.toList;
@@ -54,8 +55,6 @@ public class ImagerViewModel
     @Getter private Var<String> selectedManualFluxFile;
     @Getter private Var<Integer> selectedDrive;
 
-    @Getter private Var<Association<String, String>> options =
-            Var.of(Association.between(String.class, String.class));
     @Getter private Var<Image> diskImage = Var.of(new Image());
     @Getter private Vars<LogMessage> logQueue = Vars.of(LogMessage.class);
     @Getter private Var<Disposable> currentOperation = Var.ofNull(Disposable.class);
@@ -79,7 +78,6 @@ public class ImagerViewModel
         selectedDrive = Var.of(preferencesReaderWriter.getIntegerPreference(DRIVE, 0));
         selectedManualFluxFile =
                 Var.of(preferencesReaderWriter.getStringPreference(DEVICE_FLUXFILE, ""));
-        options.set(preferencesReaderWriter.getOptionsForFormat(selectedFormat.get()));
 
         refreshUsbDevices();
 
@@ -123,11 +121,11 @@ public class ImagerViewModel
     Var<Association<String, String>> getOptionsForDevice()
     {
         Var<Association<String, String>> value =
-                Var.of(preferencesReaderWriter.getOptions(PreferencesReaderWriter.DEVICE_OPTIONS));
+                Var.of(preferencesReaderWriter.getOptions(DEVICE_OPTIONS));
         Viewable.cast(value).onChange(
                 From.VIEW,
                 it -> preferencesReaderWriter.setOptions(
-                        PreferencesReaderWriter.DEVICE_OPTIONS,
+                        DEVICE_OPTIONS,
                         it.currentValue().orElseThrowUnchecked()));
         return value;
     }
@@ -178,6 +176,25 @@ public class ImagerViewModel
 
     void onLoadDiskImage(ComponentDelegate<JButton, ActionEvent> delegate)
     {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Load image file");
+        fileChooser.setApproveButtonText("Load");
+        if (fileChooser.showOpenDialog(null) != APPROVE_OPTION)
+            return;
+
+        performOperation(
+                makeConfigBuilder().withImageReader(fileChooser.getSelectedFile().getPath()),
+                new ReadWriteFluxOperation()
+                {
+                    @Override
+                    public void run()
+                    {
+                        Disk disk = new Disk();
+                        disk.diskLayout = getDiskLayout();
+                        disk.image = getImageReader().readImage();
+                        Logger.log(new DiskUpdateLogMessage(disk));
+                    }
+                });
     }
 
     void onSaveDiskImage(ComponentDelegate<JButton, ActionEvent> delegate)
@@ -237,6 +254,21 @@ public class ImagerViewModel
 
     void onWriteDisk(ComponentDelegate<JButton, ActionEvent> delegate)
     {
+        Image image = getDisk().get().image;
+
+        performOperation(
+                makeConfigBuilder().withImageReader("/home/dg/mac800.dsk"),
+                new ReadWriteFluxOperation()
+                {
+                    @Override
+                    public void run()
+                    {
+                        Disk disk = new Disk();
+                        disk.diskLayout = getDiskLayout();
+                        disk.image = getImageReader().readImage();
+                        writeDisk(disk);
+                    }
+                });
     }
 
     void onEmergencyStop(ComponentDelegate<JButton, ActionEvent> delegate)

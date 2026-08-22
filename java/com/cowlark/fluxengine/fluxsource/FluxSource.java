@@ -3,7 +3,6 @@ package com.cowlark.fluxengine.fluxsource;
 import com.cowlark.fluxengine.config.ConfigBuilder;
 import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.core.FluxEngineException;
-import com.cowlark.fluxengine.data.Disk;
 import com.cowlark.fluxengine.usb.UsbFactory;
 import java.util.function.Supplier;
 
@@ -15,31 +14,22 @@ public abstract class FluxSource implements AutoCloseable
     public static FluxSource create(ConfigProto config, Supplier<UsbFactory> usbFactorySupplier)
     {
         FluxSourceProto fluxSourceProto = config.getFluxSource();
-        switch (fluxSourceProto.getType())
+        return switch (fluxSourceProto.getType())
         {
-            case FLUXTYPE_DRIVE:
-                return new HardwareFluxSource(config, usbFactorySupplier.get());
-            case FLUXTYPE_ERASE:
-                return new EraseFluxSource(fluxSourceProto.getErase());
-            case FLUXTYPE_KRYOFLUX:
-                return new KryofluxFluxSource(fluxSourceProto.getKryoflux());
-            case FLUXTYPE_TEST_PATTERN:
-                return new TestPatternFluxSource(fluxSourceProto.getTestPattern());
-            case FLUXTYPE_SCP:
-                return new ScpFluxSource(fluxSourceProto.getScp());
-            case FLUXTYPE_A2R:
-                return new A2RFluxSource(fluxSourceProto.getA2R());
-            case FLUXTYPE_CWF:
-                return new CwfFluxSource(fluxSourceProto.getCwf());
-            case FLUXTYPE_DMK:
-                return new DmkFluxSource(fluxSourceProto.getDmk());
-            case FLUXTYPE_FLUX:
-                return new Fl2FluxSource(fluxSourceProto.getFl2());
-            case FLUXTYPE_FLX:
-                return new FlxFluxSource(fluxSourceProto.getFlx());
-            default:
-                throw new FluxEngineException("no flux source configured");
-        }
+            case FLUXTYPE_DRIVE -> new HardwareFluxSource(config, usbFactorySupplier.get());
+            case FLUXTYPE_ERASE -> new EraseFluxSource(fluxSourceProto.getErase());
+            case FLUXTYPE_KRYOFLUX -> new KryofluxFluxSource(fluxSourceProto.getKryoflux());
+            case FLUXTYPE_TEST_PATTERN ->
+                    new TestPatternFluxSource(fluxSourceProto.getTestPattern());
+            case FLUXTYPE_SCP -> new ScpFluxSource(fluxSourceProto.getScp());
+            case FLUXTYPE_A2R -> new A2RFluxSource(fluxSourceProto.getA2R());
+            case FLUXTYPE_CWF -> new CwfFluxSource(fluxSourceProto.getCwf());
+            case FLUXTYPE_DMK -> new DmkFluxSource(fluxSourceProto.getDmk());
+            case FLUXTYPE_FLUX -> new Fl2FluxSource(fluxSourceProto.getFl2());
+            case FLUXTYPE_FLX -> new FlxFluxSource(fluxSourceProto.getFlx());
+            case FLUXTYPE_NOP -> new NopFluxSource();
+            default -> throw new FluxEngineException("no flux source configured");
+        };
     }
 
     @Override

@@ -85,10 +85,12 @@ public class ConfigurationPanel extends JPanel
                 return defaultOption;
             };
         else
-            return it -> {
-                for (OptionProto option : optionGroup.getOptionList())
-                    if (option.getName().equals(optionGroupName))
-                        return option;
+            return assoc -> {
+                Optional<String> value = assoc.get(optionGroupName);
+                if (!value.isEmpty())
+                    for (OptionProto option : optionGroup.getOptionList())
+                        if (value.get().equals(option.getName()))
+                            return option;
                 return defaultOption;
             };
     }

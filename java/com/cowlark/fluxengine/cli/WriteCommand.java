@@ -8,6 +8,7 @@ import com.cowlark.fluxengine.core.flags.ActionFlag;
 import com.cowlark.fluxengine.core.flags.FlagGroup;
 import com.cowlark.fluxengine.core.flags.StringFlag;
 import com.cowlark.fluxengine.core.flags.ValueFlag;
+import com.cowlark.fluxengine.data.Disk;
 import com.cowlark.fluxengine.data.Image;
 import com.google.common.collect.ImmutableList;
 
@@ -72,8 +73,10 @@ public class WriteCommand implements Command
         @Override
         public void run()
         {
-            Image image = getImageReader().readImage();
-            writeDisk(image);
+            Disk disk = new Disk();
+            disk.diskLayout = getDiskLayout();
+            disk.image = getImageReader().readImage();
+            writeDisk(disk);
         }
     }
 }

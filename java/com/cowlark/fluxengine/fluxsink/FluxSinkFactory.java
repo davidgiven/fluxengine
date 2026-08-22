@@ -15,43 +15,25 @@ public abstract class FluxSinkFactory implements AutoCloseable
             Supplier<UsbFactory> usbFactorySupplier)
     {
         FluxSinkProto fluxSinkProto = config.getFluxSink();
-        switch (fluxSinkProto.getType())
+        return switch (fluxSinkProto.getType())
         {
-            case FLUXTYPE_DRIVE:
-                return new HardwareFluxSinkFactory(config, usbFactorySupplier.get());
-            case FLUXTYPE_A2R:
-                return new A2RFluxSinkFactory(fluxSinkProto.getA2R().getFilename(), config);
-            case FLUXTYPE_AU:
-                return new AuFluxSinkFactory(
-                        fluxSinkProto.getAu().getDirectory(),
-                        fluxSinkProto.getAu().getIndexMarkers());
-            case FLUXTYPE_VCD:
-                return new VcdFluxSinkFactory(fluxSinkProto.getVcd().getDirectory());
-            case FLUXTYPE_SCP:
-                return new ScpFluxSinkFactory(
-                        fluxSinkProto.getScp().getFilename(),
-                        fluxSinkProto.getScp().getTypeByte(),
-                        fluxSinkProto.getScp().getAlignWithIndex(),
-                        config);
-            case FLUXTYPE_FLUX:
-                return createFl2FluxSinkFactory(fluxSinkProto.getFl2(), config);
-            default:
-                throw new FluxEngineException("no flux sink specified");
-        }
-    }
-
-    public static Fl2FluxSinkFactory createFl2FluxSinkFactory(
-            Fl2FluxSinkProto config,
-            ConfigProto fullConfig)
-    {
-        return new Fl2FluxSinkFactory(config.getFilename(), fullConfig);
-    }
-
-    public static Fl2FluxSinkFactory createFl2FluxSinkFactory(
-            String filename,
-            ConfigProto fullConfig)
-    {
-        return new Fl2FluxSinkFactory(filename, fullConfig);
+            case FLUXTYPE_DRIVE -> new HardwareFluxSinkFactory(config, usbFactorySupplier.get());
+            case FLUXTYPE_A2R ->
+                    new A2RFluxSinkFactory(fluxSinkProto.getA2R().getFilename(), config);
+            case FLUXTYPE_AU -> new AuFluxSinkFactory(
+                    fluxSinkProto.getAu().getDirectory(),
+                    fluxSinkProto.getAu().getIndexMarkers());
+            case FLUXTYPE_VCD -> new VcdFluxSinkFactory(fluxSinkProto.getVcd().getDirectory());
+            case FLUXTYPE_SCP -> new ScpFluxSinkFactory(
+                    fluxSinkProto.getScp().getFilename(),
+                    fluxSinkProto.getScp().getTypeByte(),
+                    fluxSinkProto.getScp().getAlignWithIndex(),
+                    config);
+            case FLUXTYPE_FLUX ->
+                    new Fl2FluxSinkFactory(fluxSinkProto.getFl2().getFilename(), config);
+            case FLUXTYPE_NOP -> new NopFluxSinkFactory();
+            default -> throw new FluxEngineException("no flux sink specified");
+        };
     }
 
     @Override

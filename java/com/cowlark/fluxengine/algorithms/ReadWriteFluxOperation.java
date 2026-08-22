@@ -28,8 +28,10 @@ import com.cowlark.fluxengine.imagewriter.ImageWriter;
 import com.cowlark.fluxengine.usb.UsbFactory;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -637,9 +639,10 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
     }
 
     private void writeTracks(
+            Disk disk,
             Function<LogicalTrackLayout, Fluxmap> producer,
             Predicate<LogicalTrackLayout> verifier,
-            ImmutableSet<CylinderHead> logicalLocations)
+            ImmutableCollection<CylinderHead> logicalLocations)
     {
         Logger.log(new BeginOperationLogMessage("Encoding and writing to disk"));
 
@@ -663,6 +666,8 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
                     {
                         int physicalCylinder = ltl.physicalCylinder + offset;
                         int physicalHead = ltl.physicalHead;
+                        Track track = findPhysicalTrack(disk, ltl, physicalCylinder, physicalHead);
+                        track.ltl = ltl;
 
                         Logger.log(new BeginWriteOperationLogMessage(
                                 physicalCylinder,
@@ -676,6 +681,8 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
                                 erase = true;
                             else
                             {
+                                track.fluxmap = fluxmap;
+                                Logger.log(new DiskUpdateLogMessage(disk));
                                 fluxSink.addFlux(physicalCylinder, physicalHead, fluxmap);
                                 Logger.logf(
                                         "writing %d ms in %d bytes",
@@ -690,6 +697,8 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
                             /* Erase this track rather than writing. */
 
                             Fluxmap blank = new Fluxmap();
+                            track.fluxmap = blank;
+                            Logger.log(new DiskUpdateLogMessage(disk));
                             fluxSink.addFlux(physicalCylinder, physicalHead, blank);
                             Logger.logf("erased");
                         }
@@ -712,21 +721,40 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
         Logger.log(new EndOperationLogMessage("Write complete"));
     }
 
-    private void writeTracks(Image image, ImmutableSet<CylinderHead> chs)
+    private Track findPhysicalTrack(
+            Disk disk,
+            LogicalTrackLayout ltl,
+            int physicalCylinder,
+            int physicalHead)
     {
-        writeTracks(
-                ltl -> {
-                    ImmutableList<Sector> sectors = getEncoder().collectSectors(ltl, image);
-                    return getEncoder().encode(ltl, sectors, image);
-                }, ltl -> true, chs);
+        CylinderHead pch = new CylinderHead(physicalCylinder, physicalHead);
+        List<Track> tracks = disk.tracksByPhysicalLocation.get(pch);
+        Track track;
+        if (tracks.isEmpty())
+        {
+            track = new Track();
+            track.ltl = ltl;
+            disk.tracksByPhysicalLocation.put(pch, track);
+        } else
+            track = Iterables.getOnlyElement(tracks);
+        return track;
     }
 
-    private void writeTracksAndVerify(Image image, ImmutableSet<CylinderHead> chs)
+    private void writeTracks(Disk disk, ImmutableCollection<CylinderHead> logicalLocations)
     {
         writeTracks(
-                ltl -> {
-                    List<Sector> sectors = getEncoder().collectSectors(ltl, image);
-                    return getEncoder().encode(ltl, sectors, image);
+                disk, ltl -> {
+                    ImmutableList<Sector> sectors = getEncoder().collectSectors(ltl, disk.image);
+                    return getEncoder().encode(ltl, sectors, disk.image);
+                }, ltl -> true, logicalLocations);
+    }
+
+    private void writeTracksAndVerify(Disk disk, ImmutableCollection<CylinderHead> logicalLocations)
+    {
+        writeTracks(
+                disk, ltl -> {
+                    List<Sector> sectors = getEncoder().collectSectors(ltl, disk.image);
+                    return getEncoder().encode(ltl, sectors, disk.image);
                 }, ltl -> {
                     Common.FluxSourceIteratorHolder fluxSourceIteratorHolder =
                             new Common.FluxSourceIteratorHolder(getFluxSource());
@@ -742,7 +770,7 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
                     }
 
                     Image wanted = new Image();
-                    for (Sector sector : getEncoder().collectSectors(ltl, image))
+                    for (Sector sector : getEncoder().collectSectors(ltl, disk.image))
                         wanted.put(
                                 sector.location.logicalCylinder(),
                                 sector.location.logicalHead(),
@@ -775,21 +803,20 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
                         return false;
                     }
                     return true;
-                }, chs);
+                }, logicalLocations);
     }
 
-    public void writeDisk(Image image, Collection<CylinderHead> physicalLocations)
+    public void writeDisk(Disk disk, ImmutableCollection<CylinderHead> logicalLocations)
     {
-        ImmutableSet<CylinderHead> chs = getDiskLayout().layoutByLogicalLocation.keySet();
         if (getConfig().getVerifyWrites())
-            writeTracksAndVerify(image, chs);
+            writeTracksAndVerify(disk, logicalLocations);
         else
-            writeTracks(image, chs);
+            writeTracks(disk, logicalLocations);
     }
 
-    public void writeDisk(Image image)
+    public void writeDisk(Disk disk)
     {
-        writeDisk(image, getDiskLayout().layoutByLogicalLocation.keySet());
+        writeDisk(disk, disk.diskLayout.layoutByLogicalLocation.keySet());
     }
 
     enum ReadResult

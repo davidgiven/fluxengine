@@ -9,6 +9,7 @@ import static com.cowlark.fluxengine.config.FluxSourceSinkType.FLUXTYPE_ERASE;
 import static com.cowlark.fluxengine.config.FluxSourceSinkType.FLUXTYPE_FLUX;
 import static com.cowlark.fluxengine.config.FluxSourceSinkType.FLUXTYPE_FLX;
 import static com.cowlark.fluxengine.config.FluxSourceSinkType.FLUXTYPE_KRYOFLUX;
+import static com.cowlark.fluxengine.config.FluxSourceSinkType.FLUXTYPE_NOP;
 import static com.cowlark.fluxengine.config.FluxSourceSinkType.FLUXTYPE_SCP;
 import static com.cowlark.fluxengine.config.FluxSourceSinkType.FLUXTYPE_TEST_PATTERN;
 import static com.cowlark.fluxengine.config.FluxSourceSinkType.FLUXTYPE_VCD;
@@ -205,7 +206,9 @@ public class ConfigBuilder
         {
             fluxSource.setType(FLUXTYPE_FLX);
             fluxSource.getFlxBuilder().setDirectory(filename.substring(4));
-        } else
+        } else if (filename.startsWith("nop:"))
+            fluxSource.setType(FLUXTYPE_NOP);
+        else
             throw new ConfigException("unrecognised flux filename '" + filename + "'");
         return this;
     }
@@ -248,6 +251,9 @@ public class ConfigBuilder
         {
             fluxSink.setType(FLUXTYPE_AU);
             fluxSink.getAuBuilder().setDirectory(filename.substring(3));
+        } else if (filename.startsWith("nop:"))
+        {
+            fluxSink.setType(FLUXTYPE_NOP);
         } else
             throw new ConfigException("unrecognised flux filename '" + filename + "'");
     }
