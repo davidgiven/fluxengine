@@ -5,7 +5,6 @@ import static com.cowlark.fluxengine.gui.PreferencesReaderWriter.DEVICE_FLUXFILE
 import static com.cowlark.fluxengine.gui.PreferencesReaderWriter.DEVICE_MANUAL;
 import static com.cowlark.fluxengine.gui.PreferencesReaderWriter.DRIVE;
 import static com.cowlark.fluxengine.gui.PreferencesReaderWriter.FORMAT;
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.stream.Collectors.toList;
 import static javax.swing.JFileChooser.APPROVE_OPTION;
 
@@ -23,6 +22,8 @@ import com.cowlark.fluxengine.core.LogMessage.ErrorLogMessage;
 import com.cowlark.fluxengine.core.Logger;
 import com.cowlark.fluxengine.data.Disk;
 import com.cowlark.fluxengine.data.Image;
+import com.cowlark.fluxengine.fluxsource.FluxSource;
+import com.cowlark.fluxengine.fluxsource.MemoryFluxSource;
 import com.cowlark.fluxengine.gui.DriveActivity.ActivityType;
 import com.cowlark.fluxengine.imagewriter.ImageWriter;
 import io.reactivex.rxjava3.disposables.Disposable;
@@ -42,7 +43,6 @@ import swingtree.ComponentDelegate;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import java.awt.event.ActionEvent;
-import java.io.File;
 
 public class ImagerViewModel
 {
@@ -149,32 +149,31 @@ public class ImagerViewModel
 
     void onReadDisk(ComponentDelegate<JButton, ActionEvent> delegate)
     {
-        class ReadOperation extends ReadWriteFluxOperation
-        {
-            @Override
-            public void run()
-            {
-                Disk disk = new Disk();
-                readDisk(disk);
-            }
-        }
-
-        performOperation(makeConfigBuilder(), new ReadOperation());
+        performOperation(
+                makeConfigBuilder(), new ReadWriteFluxOperation()
+                {
+                    @Override
+                    public void run()
+                    {
+                        Disk disk = new Disk();
+                        readDisk(disk);
+                    }
+                });
     }
 
     void onRereadDisk(ComponentDelegate<JButton, ActionEvent> delegate)
     {
         Disk disk = getDisk().get();
-        class RereadOperation extends ReadWriteFluxOperation
-        {
-            @Override
-            public void run()
-            {
-                readDisk(disk);
-            }
-        }
 
-        performOperation(makeConfigBuilder(), new RereadOperation());
+        performOperation(
+                makeConfigBuilder(), new ReadWriteFluxOperation()
+                {
+                    @Override
+                    public void run()
+                    {
+                        readDisk(disk);
+                    }
+                });
     }
 
     void onLoadDiskImage(ComponentDelegate<JButton, ActionEvent> delegate)
@@ -184,30 +183,56 @@ public class ImagerViewModel
     void onSaveDiskImage(ComponentDelegate<JButton, ActionEvent> delegate)
     {
         Image image = getDisk().get().image;
-        class SaveDiskImageOperation extends ReadWriteFluxOperation
-        {
-            @Override
-            public void run()
-            {
-                ImageWriter.create(getConfig()).writeImage(image);
-            }
-        }
 
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Save image file");
         fileChooser.setApproveButtonText("Save");
-        if (fileChooser.showOpenDialog(null) != APPROVE_OPTION)
+        if (fileChooser.showSaveDialog(null) != APPROVE_OPTION)
             return;
 
         performOperation(
                 makeConfigBuilder().withImageWriter(fileChooser
                         .getSelectedFile()
                         .getPath()
-                        .toString()), new SaveDiskImageOperation());
+                        .toString()), new ReadWriteFluxOperation()
+                {
+                    @Override
+                    public void run()
+                    {
+                        ImageWriter.create(getConfig()).writeImage(image);
+                    }
+                });
     }
 
     void onSaveDiskFlux(ComponentDelegate<JButton, ActionEvent> delegate)
     {
+        Disk disk = getDisk().get();
+        FluxSource fluxSource = new MemoryFluxSource(disk);
+
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Save flux file");
+        fileChooser.setApproveButtonText("Save");
+        if (fileChooser.showSaveDialog(null) != APPROVE_OPTION)
+            return;
+
+        performOperation(
+                makeConfigBuilder().withFluxSink(fileChooser
+                        .getSelectedFile()
+                        .getPath()
+                        .toString()), new ReadWriteFluxOperation()
+                {
+                    @Override
+                    public FluxSource getFluxSource()
+                    {
+                        return fluxSource;
+                    }
+
+                    @Override
+                    public void run()
+                    {
+                        rawWrite();
+                    }
+                });
     }
 
     void onWriteDisk(ComponentDelegate<JButton, ActionEvent> delegate)

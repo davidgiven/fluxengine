@@ -15,6 +15,7 @@ java_library(
         "//java/com/cowlark/fluxengine/config:config_java_proto",
         "//java/com/cowlark/fluxengine/core",
         "//java/com/cowlark/fluxengine/data",
+        "//java/com/cowlark/fluxengine/fluxsource",
         "//java/com/cowlark/fluxengine/imagewriter",
         "//java/com/cowlark/fluxengine/usb",
         "@maven//:com_formdev_flatlaf",

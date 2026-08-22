@@ -3,6 +3,7 @@ package com.cowlark.fluxengine.fluxsource;
 import com.cowlark.fluxengine.config.ConfigBuilder;
 import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.core.FluxEngineException;
+import com.cowlark.fluxengine.data.Disk;
 import com.cowlark.fluxengine.usb.UsbFactory;
 import java.util.function.Supplier;
 
