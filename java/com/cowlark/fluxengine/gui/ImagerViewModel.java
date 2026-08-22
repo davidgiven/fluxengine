@@ -5,7 +5,9 @@ import static com.cowlark.fluxengine.gui.PreferencesReaderWriter.DEVICE_FLUXFILE
 import static com.cowlark.fluxengine.gui.PreferencesReaderWriter.DEVICE_MANUAL;
 import static com.cowlark.fluxengine.gui.PreferencesReaderWriter.DRIVE;
 import static com.cowlark.fluxengine.gui.PreferencesReaderWriter.FORMAT;
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.stream.Collectors.toList;
+import static javax.swing.JFileChooser.APPROVE_OPTION;
 
 import com.cowlark.fluxengine.algorithms.BeginReadOperationLogMessage;
 import com.cowlark.fluxengine.algorithms.BeginWriteOperationLogMessage;
@@ -22,6 +24,7 @@ import com.cowlark.fluxengine.core.Logger;
 import com.cowlark.fluxengine.data.Disk;
 import com.cowlark.fluxengine.data.Image;
 import com.cowlark.fluxengine.gui.DriveActivity.ActivityType;
+import com.cowlark.fluxengine.imagewriter.ImageWriter;
 import io.reactivex.rxjava3.disposables.Disposable;
 import lombok.Getter;
 import org.apache.commons.lang3.function.Consumers;
@@ -37,7 +40,9 @@ import sprouts.Vars;
 import sprouts.Viewable;
 import swingtree.ComponentDelegate;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import java.awt.event.ActionEvent;
+import java.io.File;
 
 public class ImagerViewModel
 {
@@ -178,6 +183,27 @@ public class ImagerViewModel
 
     void onSaveDiskImage(ComponentDelegate<JButton, ActionEvent> delegate)
     {
+        Image image = getDisk().get().image;
+        class SaveDiskImageOperation extends ReadWriteFluxOperation
+        {
+            @Override
+            public void run()
+            {
+                ImageWriter.create(getConfig()).writeImage(image);
+            }
+        }
+
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Save image file");
+        fileChooser.setApproveButtonText("Save");
+        if (fileChooser.showOpenDialog(null) != APPROVE_OPTION)
+            return;
+
+        performOperation(
+                makeConfigBuilder().withImageWriter(fileChooser
+                        .getSelectedFile()
+                        .getPath()
+                        .toString()), new SaveDiskImageOperation());
     }
 
     void onSaveDiskFlux(ComponentDelegate<JButton, ActionEvent> delegate)
