@@ -24,13 +24,15 @@ jobs:
         run: |
           cd fluxengine
           bazel test //... --test_output=errors
-          bazel build //:fluxengine //:fluxengine_deb //:fluxengine_rpm //:fluxengine_app_image
+          bazel build //:fluxengine_deb //:fluxengine_rpm //:fluxengine_app_image
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ github.event.repository.name }}.${{ github.sha }}.bazel.artifacts
+          name: ${{ github.event.repository.name }}.${{ github.sha }}.installer
           path: |
-            fluxengine/bazel-bin/**
+            fluxengine/bazel-bin/java/com/cowlark/fluxengine/*.deb
+            fluxengine/bazel-bin/java/com/cowlark/fluxengine/*.rpm
+            fluxengine/bazel-bin/java/com/cowlark/fluxengine/*.tar.xz
 
   build-macos-current:
     strategy:
@@ -53,12 +55,13 @@ jobs:
           cd fluxengine
           bazel test //... --test_output=errors
           bazel build //:fluxengine //:fluxengine_dmg
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ github.event.repository.name }}.${{ github.sha }}.bazel.artifacts.${{ runner.arch }}
+          name: ${{ github.event.repository.name }}.${{ github.sha }}.installer.${{ runner.arch }}
           path: |
-            fluxengine/bazel-bin/**
+            fluxengine/bazel-bin/java/com/cowlark/fluxengine/*.dmg
 
   build-windows:
     runs-on: windows-latest
@@ -105,5 +108,5 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ github.event.repository.name }}.${{ github.sha }}.bazel.artifacts.windows
-          path: fluxengine/bazel-bin/**
+          name: ${{ github.event.repository.name }}.${{ github.sha }}.installer
+          path: fluxengine/bazel-bin/java/com/cowlark/fluxengine/*.msi
