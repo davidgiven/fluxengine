@@ -744,7 +744,7 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
             track.ltl = ltl;
             disk.tracksByPhysicalLocation.put(pch, track);
         } else
-            track = Iterables.getOnlyElement(tracks);
+            track = tracks.getFirst();
         return track;
     }
 

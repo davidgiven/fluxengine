@@ -30,5 +30,6 @@ java_library(
         "@maven//:org_exbin_bined_bined_swing",
         "@maven//:org_jspecify_jspecify",
         "@maven//:org_projectlombok_lombok",
+        "@maven//:org_slf4j_slf4j_api",
     ],
 )

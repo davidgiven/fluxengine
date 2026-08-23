@@ -16,8 +16,10 @@ import com.cowlark.fluxengine.algorithms.EndReadOperationLogMessage;
 import com.cowlark.fluxengine.algorithms.EndWriteOperationLogMessage;
 import com.cowlark.fluxengine.algorithms.ReadWriteFluxOperation;
 import com.cowlark.fluxengine.config.ConfigBuilder;
+import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.config.UsbFinder;
 import com.cowlark.fluxengine.config.UsbFinder.CandidateDevice;
+import com.cowlark.fluxengine.core.FluxEngineException;
 import com.cowlark.fluxengine.core.LogMessage;
 import com.cowlark.fluxengine.core.LogMessage.ErrorLogMessage;
 import com.cowlark.fluxengine.core.Logger;
@@ -31,6 +33,7 @@ import io.reactivex.rxjava3.disposables.Disposable;
 import lombok.Getter;
 import org.apache.commons.lang3.function.Consumers;
 import org.jspecify.annotations.NonNull;
+import org.slf4j.LoggerFactory;
 import sprouts.Action;
 import sprouts.Association;
 import sprouts.From;
@@ -41,12 +44,16 @@ import sprouts.Var;
 import sprouts.Vars;
 import sprouts.Viewable;
 import swingtree.ComponentDelegate;
+import swingtree.UI;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import java.awt.event.ActionEvent;
+import java.util.function.Supplier;
 
 public class ImagerViewModel
 {
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(ImagerViewModel.class);
+
     private final PreferencesReaderWriter preferencesReaderWriter;
 
     @Getter private Var<String> statusMessage = Var.of("Ready");
@@ -148,7 +155,7 @@ public class ImagerViewModel
     void onReadDisk(ComponentDelegate<JButton, ActionEvent> delegate)
     {
         performOperation(
-                makeConfigBuilder(), new ReadWriteFluxOperation()
+                this::makeConfigBuilder, new ReadWriteFluxOperation()
                 {
                     @Override
                     public void run()
@@ -164,7 +171,7 @@ public class ImagerViewModel
         Disk disk = getDisk().get();
 
         performOperation(
-                makeConfigBuilder(), new ReadWriteFluxOperation()
+                this::makeConfigBuilder, new ReadWriteFluxOperation()
                 {
                     @Override
                     public void run()
@@ -183,7 +190,7 @@ public class ImagerViewModel
             return;
 
         performOperation(
-                makeConfigBuilderWithFormat().withImageReader(fileChooser
+                () -> makeConfigBuilderWithFormat().withImageReader(fileChooser
                         .getSelectedFile()
                         .getPath()), new ReadWriteFluxOperation()
                 {
@@ -210,7 +217,7 @@ public class ImagerViewModel
             return;
 
         performOperation(
-                makeConfigBuilder().withImageWriter(fileChooser
+                () -> makeConfigBuilder().withImageWriter(fileChooser
                         .getSelectedFile()
                         .getPath()
                         .toString()), new ReadWriteFluxOperation()
@@ -235,7 +242,7 @@ public class ImagerViewModel
             return;
 
         performOperation(
-                makeConfigBuilder().withFluxSink(fileChooser
+                () -> makeConfigBuilder().withFluxSink(fileChooser
                         .getSelectedFile()
                         .getPath()
                         .toString()), new ReadWriteFluxOperation()
@@ -259,7 +266,7 @@ public class ImagerViewModel
         Image image = getDisk().get().image;
 
         performOperation(
-                makeConfigBuilder(), new ReadWriteFluxOperation()
+                this::makeConfigBuilder, new ReadWriteFluxOperation()
                 {
                     @Override
                     public void run()
@@ -276,19 +283,25 @@ public class ImagerViewModel
     {
     }
 
-    private @NonNull Var<Disposable> performOperation(
-            ConfigBuilder configBuilder,
+    private void performOperation(
+            Supplier<ConfigBuilder> configBuilderSupplier,
             ReadWriteFluxOperation operation)
     {
-        return currentOperation.set(operation
-                .setConfig(configBuilder.build())
-                .create()
-                .observeOn(UiUtils.EDT)
-                .subscribe(
-                        this::handleLogMessage, e -> {
-                            logQueue.add(new ErrorLogMessage(e.getMessage()));
-                            currentOperation.fireChange(From.VIEW_MODEL);
-                        }, () -> currentOperation.fireChange(From.VIEW_MODEL)));
+        ConfigProto config;
+        try
+        {
+            config = configBuilderSupplier.get().build();
+        } catch (FluxEngineException e)
+        {
+            UI.message(String.format("Configuration error: %s", e.getMessage())).showAsError();
+            return;
+        }
+
+        currentOperation.set(operation.setConfig(config).create().observeOn(UiUtils.EDT).subscribe(
+                this::handleLogMessage, e -> {
+                    logQueue.add(new ErrorLogMessage(e.getMessage()));
+                    currentOperation.fireChange(From.VIEW_MODEL);
+                }, () -> currentOperation.fireChange(From.VIEW_MODEL)));
     }
 
     private ConfigBuilder makeConfigBuilderWithFormat()
@@ -352,6 +365,9 @@ public class ImagerViewModel
 
             case EndWriteOperationLogMessage ignored ->
                     getDriveActivity().set(new DriveActivity(ActivityType.IDLE, 0, 0));
+
+            case ErrorLogMessage m ->
+                    UI.message(String.format("Error: %s", m.message())).showAsError();
 
             default ->
             {
