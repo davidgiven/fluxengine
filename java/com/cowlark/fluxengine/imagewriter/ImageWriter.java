@@ -42,7 +42,7 @@ public abstract class ImageWriter implements AutoCloseable
             case IMAGETYPE_D64:
                 return new D64ImageWriter(config);
             case IMAGETYPE_LDBS:
-                return notImplemented("ldbs");
+                return new LdbsImageWriter(config);
             case IMAGETYPE_DISKCOPY:
                 return new DiskCopyImageWriter(config);
             case IMAGETYPE_NSI:

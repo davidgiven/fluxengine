@@ -22,12 +22,12 @@ public class ImageWriterTest
             com.cowlark.fluxengine.testing.TestHelpers.loggerRule();
 
     @Test
-    public void createUnportedTypeThrows()
+    public void createLdbsImageWriter()
     {
         ImageWriterProto config =
                 ImageWriterProto.newBuilder().setType(ImageReaderWriterType.IMAGETYPE_LDBS).build();
 
-        assertThrows(FluxEngineException.class, () -> ImageWriter.create(config));
+        assertThat(ImageWriter.create(config)).isInstanceOf(LdbsImageWriter.class);
     }
 
     @Test

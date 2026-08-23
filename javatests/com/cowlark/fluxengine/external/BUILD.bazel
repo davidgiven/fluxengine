@@ -14,6 +14,17 @@ java_test(
 )
 
 java_test(
+    name = "LdbsTest",
+    srcs = ["LdbsTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/external",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
     name = "CrcTest",
     srcs = ["CrcTest.java"],
     deps = [

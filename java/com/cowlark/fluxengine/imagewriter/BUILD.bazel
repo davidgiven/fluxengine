@@ -28,6 +28,7 @@ java_library(
         "//java/com/cowlark/fluxengine/config:config_java_proto",
         "//java/com/cowlark/fluxengine/core",
         "//java/com/cowlark/fluxengine/data",
+        "//java/com/cowlark/fluxengine/external",
         "//java/com/cowlark/fluxengine/imagereader:imagereader_java_proto",
     ],
 )
