@@ -76,7 +76,7 @@ jobs:
 
       - name: Setup software
         run: |
-          winget install ImageMagick.ImageMagick
+          winget install ImageMagick.ImageMagick --accept-source-agreements --accept-package-agreements
 
       - name: Setup Bazel
         uses: bazel-contrib/setup-bazel@0.19.0
