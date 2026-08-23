@@ -775,6 +775,8 @@ public class AnalyseDriveResponse implements Command
     @Override
     public void run(ImmutableList<String> args)
     {
+        System.setProperty("java.awt.headless", "true");
+
         ConfigProto config =
                 new ConfigBuilder().fromFlags(args, flags).withFluxSink(destFlux.get()).build();
 

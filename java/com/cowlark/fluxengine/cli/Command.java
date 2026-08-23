@@ -7,12 +7,10 @@ import java.util.function.Supplier;
 
 public interface Command
 {
-    ImmutableMap<String, Supplier<? extends Command>> ANALYSABLES =
-            ImmutableMap.<String, Supplier<? extends Command>>builder().put(
-                    "driveresponse",
-                    AnalyseDriveResponse::new).put(
-                    "layout",
-                    stub("layout", "Produces a visualisation of the track/sector layout.")).build();
+    ImmutableMap<String, Supplier<? extends Command>> ANALYSABLES = ImmutableMap
+            .<String, Supplier<? extends Command>>builder()
+            .put("driveresponse", AnalyseDriveResponse::new)
+            .build();
 
     ImmutableMap<String, Supplier<? extends Command>> FLUXFILEABLES = ImmutableMap
             .<String, Supplier<? extends Command>>builder()
@@ -51,7 +49,9 @@ public interface Command
             .put("test", () -> new CommandGroup(TESTABLES, "Various testing commands."))
             .put(
                     "fluxfile",
-                    () -> new CommandGroup(FLUXFILEABLES, "Flux file manipulation operations."))
+                    () -> new CommandGroup(
+                            FLUXFILEABLES,
+                            "Flux file manipulation operations."))
             .put(
                     "vfs",
                     () -> new CommandGroup(VFSABLES, "File system manipulation commands."))
