@@ -1,6 +1,7 @@
 package com.cowlark.fluxengine.gui;
 
 import static java.lang.Math.round;
+import static java.util.Objects.requireNonNull;
 import static swingtree.UIFactoryMethods.menuItem;
 import static swingtree.UIFactoryMethods.popupMenu;
 import static swingtree.UIFactoryMethods.splitButton;
@@ -12,11 +13,12 @@ import sprouts.Tuple;
 import sprouts.Val;
 import sprouts.Var;
 import swingtree.ComponentDelegate;
-import swingtree.UI;
 import swingtree.UIForAnySwing;
-import swingtree.UIForPopup;
 import swingtree.layout.Size;
+import javax.imageio.ImageIO;
 import javax.swing.Action;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
@@ -27,7 +29,12 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.Arrays;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 public class UiUtils
@@ -41,6 +48,7 @@ public class UiUtils
     static final Color INDEX_LINE_COLOUR = new Color(0xf39c12);
     static final Color NO_DATA_COLOUR = new Color(0x5c5c5c);
     static final Color DATA_BUT_NO_FLUX_COLOUR = DATA_OK_COLOUR.darker();
+    private static final Map<String, Icon> TINTED_ICONS = new ConcurrentHashMap<>();
 
     /* Fires the given action with the clicked component as its source, so that
      * actions which resolve their target from the event source work correctly.
@@ -110,6 +118,57 @@ public class UiUtils
                     b.setPreferredSize(new Dimension(
                             maxLabelWidth + borderPadding + b.getSplitWidth(),
                             preferred.height));
+                });
+    }
+
+    /* Loads a bundled icon image. */
+    static BufferedImage loadImage(String resource)
+    {
+        try
+        {
+            return requireNonNull(
+                    ImageIO.read(UiUtils.class.getResource(resource)),
+                    "missing icon resource " + resource);
+        } catch (IOException e)
+        {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    /* Returns a version of the given black-and-white icon image whose dark
+     * pixels take the foreground colour and whose light pixels take the
+     * background colour, preserving antialiasing; cached per colour pair. */
+    public static Icon createTintedIcon(BufferedImage image, String key, Color fg, Color bg)
+    {
+        return TINTED_ICONS.computeIfAbsent(
+                key + "|" + fg.getRGB() + "|" + bg.getRGB(), ignored -> {
+                    BufferedImage out = new BufferedImage(
+                            image.getWidth(),
+                            image.getHeight(),
+                            BufferedImage.TYPE_INT_ARGB);
+                    for (int y = 0; y < image.getHeight(); y++)
+                        for (int x = 0; x < image.getWidth(); x++)
+                        {
+                            int argb = image.getRGB(x, y);
+                            int alpha = (argb >>> 24) & 0xff;
+                            int red = (argb >> 16) & 0xff;
+                            int green = (argb >> 8) & 0xff;
+                            int blue = argb & 0xff;
+
+                            /* Brightness of the source pixel: 0 means black,
+                             * 1 means white. */
+                            double brightness = (red + green + blue) / (3.0 * 255);
+                            out.setRGB(
+                                    x,
+                                    y,
+                                    (alpha << 24) | ((int) (fg.getRed() +
+                                            (bg.getRed() - fg.getRed()) * brightness) << 16) |
+                                            ((int) (fg.getGreen() +
+                                                    (bg.getGreen() - fg.getGreen()) * brightness) <<
+                                                    8) | (int) (fg.getBlue() +
+                                            (bg.getBlue() - fg.getBlue()) * brightness));
+                        }
+                    return new ImageIcon(out);
                 });
     }
 

@@ -33,11 +33,17 @@ import sprouts.Var;
 import sprouts.Viewable;
 import swingtree.ComponentDelegate;
 import swingtree.UI;
+import swingtree.UIForLabel;
 import swingtree.UIForPanel;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.ListCellRenderer;
 import javax.swing.SwingUtilities;
+import javax.swing.border.EmptyBorder;
+import java.awt.Color;
+import java.awt.image.BufferedImage;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.util.Collection;
@@ -54,6 +60,12 @@ public class ConfigurationPanel extends JPanel
     private static final ConfigProto GLOBAL_CONFIG = Formats.get("_global_options");
     private static final String LABEL_FORMAT = "wmax 100lp";
     private static final String SETTING_FORMAT = "wmax 200lp, growx, pushx";
+
+    /* Black-and-white device icons, recoloured at render time to the text
+     * foreground and background colours (see deviceIcon()). */
+    private static final BufferedImage HARDWARE_IMAGE = UiUtils.loadImage("/hardware.png");
+    private static final BufferedImage FLUXFILE_IMAGE = UiUtils.loadImage("/fluxfile.png");
+
     private static ImmutableMap<String, ConfigProto> formatData = Formats
             .all()
             .stream()
@@ -267,8 +279,12 @@ public class ConfigurationPanel extends JPanel
                 .add(
                         SETTING_FORMAT, comboBox(
                                 model.getSelectedDevice(),
-                                model.getUsbDevices().get().keySet().stream().toList(),
-                                this::deviceRenderer))
+                                model
+                                        .getUsbDevices()
+                                        .get()
+                                        .keySet()
+                                        .stream()
+                                        .toList()).withCellRenderer(deviceCellRenderer()))
                 .add(
                         "skip 1, split 2, align right",
                         button("Rescan USB").onClick(delegate -> model.refreshUsbDevices()))
@@ -311,22 +327,59 @@ public class ConfigurationPanel extends JPanel
         return panel;
     }
 
-    private String deviceRenderer(String device)
+    /* A renderer which shows each device entry with the placeholder icon
+     * next to its text. */
+    private ListCellRenderer<String> deviceCellRenderer()
     {
-        return switch (device)
-        {
-            case DEVICE_SERIALPORT -> "Greaseweazle: serial port";
-            case DEVICE_FLUXFILE -> "Flux file";
-            default ->
+        return (list, value, index, isSelected, cellHasFocus) -> {
+            Color foreground = isSelected ? list.getSelectionForeground() : list.getForeground();
+            Color background = isSelected ? list.getSelectionBackground() : list.getBackground();
+
+            UIForLabel<JLabel> item = switch (value)
             {
-                Association<String, UsbFinder.CandidateDevice> devices =
-                        model.getUsbDevices().get();
-                UsbFinder.CandidateDevice candidate = devices.get(device).orElse(null);
-                if (candidate == null)
-                    yield String.format("disconnected: %s", candidate.serial);
-                else
-                    yield String.format("%s: %s", candidate.type.getDeviceName(), candidate.serial);
-            }
+                case DEVICE_SERIALPORT ->
+                        label("Greaseweazle: serial port").withIcon(UiUtils.createTintedIcon(
+                                HARDWARE_IMAGE,
+                                "hardware",
+                                foreground,
+                                background));
+
+                case DEVICE_FLUXFILE -> label("Flux file").withIcon(UiUtils.createTintedIcon(
+                        FLUXFILE_IMAGE,
+                        "fluxfile",
+                        foreground,
+                        background));
+
+                default ->
+                {
+                    Association<String, UsbFinder.CandidateDevice> devices =
+                            model.getUsbDevices().get();
+                    UsbFinder.CandidateDevice candidate = devices.get(value).orElse(null);
+                    if (candidate == null)
+                        yield label(String.format(
+                                "disconnected: %s",
+                                value)).withIcon(UiUtils.createTintedIcon(
+                                HARDWARE_IMAGE,
+                                "hardware",
+                                foreground,
+                                background));
+                    else
+                        yield label(String.format(
+                                "%s: %s",
+                                candidate.type.getDeviceName(),
+                                candidate.serial)).withIcon(UiUtils.createTintedIcon(
+                                HARDWARE_IMAGE,
+                                "hardware",
+                                foreground,
+                                background));
+                }
+            };
+
+            item = item
+                    .withForeground(foreground)
+                    .withBackground(background)
+                    .withBorder(new EmptyBorder(6, 0, 6, 0));
+            return item.get(JLabel.class);
         };
     }
 
