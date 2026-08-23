@@ -64,6 +64,13 @@ jobs:
     runs-on: windows-latest
 
     steps:
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: mingw64
+          update: true
+          install: |
+            png2ico
+
       - uses: actions/checkout@v4
         with:
           repository: 'davidgiven/fluxengine'
