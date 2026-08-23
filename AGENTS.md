@@ -126,7 +126,6 @@ Useful commands:
 
 ## Code style
 
-- Allman brace style (opening brace on its own line), 4-space indent.
 - Explicit types, no `var`.
 - Prefer Guava utilities over hand-rolled checks: `Strings.nullToEmpty(...)` instead of
   explicit null checks; use `ImmutableList` for returned collections.

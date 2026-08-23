@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 
 /**
  * A disk image, a collection of sectors indexed by logical location, ported
@@ -164,5 +165,10 @@ public class Image implements Iterable<Sector>
     public Iterator<Sector> iterator()
     {
         return sectors.values().iterator();
+    }
+
+    public Stream<Sector> stream()
+    {
+        return sectors.values().stream();
     }
 }

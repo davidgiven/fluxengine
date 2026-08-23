@@ -11,7 +11,6 @@ import com.cowlark.fluxengine.data.LogicalTrackLayout;
 import com.cowlark.fluxengine.data.PhysicalTrackLayout;
 import com.cowlark.fluxengine.data.Sector;
 import com.cowlark.fluxengine.data.Sector.Status;
-import com.google.common.collect.ImmutableSet;
 import sprouts.From;
 import sprouts.Viewable;
 import swingtree.UI.HorizontalAlignment;
@@ -28,6 +27,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.util.HashMap;
+import java.util.List;
 
 public class SummaryPanel extends JPanel
 {
@@ -85,8 +85,8 @@ public class SummaryPanel extends JPanel
             for (int cylinder = 0; cylinder < currentLayout.numLogicalCylinders; cylinder++)
             {
                 CylinderHead lch = new CylinderHead(cylinder, head);
-                LogicalTrackLayout ptl = currentLayout.layoutByLogicalLocation.get(lch);
-                if (ptl == null)
+                LogicalTrackLayout ltl = currentLayout.layoutByLogicalLocation.get(lch);
+                if (ltl == null)
                     continue;
 
                 SummaryButton button = logicalTrackButtons.get(lch);
@@ -95,8 +95,8 @@ public class SummaryPanel extends JPanel
                 button.setTrackAnalysis(analyseTrack(
                         disk,
                         driveActivity,
-                        ptl.physicalCylinder,
-                        ptl.physicalHead));
+                        ltl.physicalCylinder,
+                        ltl.physicalHead));
             }
         }
 
@@ -213,42 +213,74 @@ public class SummaryPanel extends JPanel
         return ui;
     }
 
-    private ImmutableSet<Sector> findSectors(Disk disk, int physicalCylinder, int physicalHead)
-    {
-        return ImmutableSet.copyOf(disk.sectorsByPhysicalLocation.get(new CylinderHead(physicalCylinder,
-                physicalHead)));
-    }
-
     private TrackAnalysis analyseTrack(
             Disk disk,
             DriveActivity activity,
             int physicalCylinder,
             int physicalHead)
     {
-        ImmutableSet<Sector> sectors = findSectors(disk, physicalCylinder, physicalHead);
+        CylinderHead pch = new CylinderHead(physicalCylinder, physicalHead);
+        PhysicalTrackLayout ptl = disk.diskLayout.layoutByPhysicalLocation.get(new CylinderHead(
+                physicalCylinder,
+                physicalHead));
+        LogicalTrackLayout ltl = ptl.logicalTrackLayout;
         TrackAnalysis result = new TrackAnalysis();
-        result.colour = StatusColour.MISSING.getColour();
+        result.colour = StatusColour.NOT_PRESENT.getColour();
         result.tooltip = "No data";
         result.label = "";
-        if (!sectors.isEmpty())
+
+        if (disk.tracksByPhysicalLocation.containsKey(pch))
         {
+            List<Sector> sectors = disk.sectorsByPhysicalLocation.get(pch);
             int totalSectors = sectors.size();
             int goodSectors = (int) sectors.stream().filter(it -> it.status == Status.OK).count();
             int badSectors = totalSectors - goodSectors;
-
-            if ((goodSectors == totalSectors) && (goodSectors != 0) && (totalSectors != 0))
-                result.colour = StatusColour.OK.getColour();
-            else
-                result.colour = StatusColour.BAD.getColour();
+            int wantedSectors = ltl.numSectors;
 
             result.tooltip = String.format(
-                    "c%dh%d\n%d sectors read\n%d good sectors\n%d bad sectors",
-                    physicalCylinder,
-                    physicalHead,
+                    """
+                            %d sectors read
+                            %d good sectors
+                            %d bad sectors
+                            %d sectors required""",
                     totalSectors,
                     goodSectors,
-                    badSectors);
+                    badSectors,
+                    wantedSectors);
+
+            if (goodSectors == wantedSectors)
+                result.colour = StatusColour.OK.getColour();
+            else if (badSectors > 0)
+                result.colour = StatusColour.BAD.getColour();
+            else
+                result.colour = StatusColour.MISSING.getColour();
+
+        } else
+        {
+            long sectors = disk.image
+                    .stream()
+                    .filter(sector -> (sector.physicalLocation != null) &&
+                            (sector.physicalLocation.cylinder() == physicalCylinder) &&
+                            (sector.physicalLocation.head() == physicalHead))
+                    .count();
+
+            result.tooltip = String.format("%d sectors in image\n(No flux)", sectors);
+            if (sectors > 0)
+                result.colour = StatusColour.OK.getColour();
+            else
+                result.colour = StatusColour.MISSING.getColour();
         }
+
+        result.tooltip = String.format(
+                """
+                        Physical: c%dh%d
+                        Logical: c%dh%d
+                        %s""",
+                physicalCylinder,
+                physicalHead,
+                ltl.logicalCylinder,
+                ltl.logicalHead,
+                result.tooltip);
 
         if ((physicalCylinder == activity.cylinder()) && (physicalHead == activity.head()))
             result.label = switch (activity.type())

@@ -183,8 +183,9 @@ public class ImagerViewModel
             return;
 
         performOperation(
-                makeConfigBuilder().withImageReader(fileChooser.getSelectedFile().getPath()),
-                new ReadWriteFluxOperation()
+                makeConfigBuilderWithFormat().withImageReader(fileChooser
+                        .getSelectedFile()
+                        .getPath()), new ReadWriteFluxOperation()
                 {
                     @Override
                     public void run()
@@ -192,6 +193,7 @@ public class ImagerViewModel
                         Disk disk = new Disk();
                         disk.diskLayout = getDiskLayout();
                         disk.image = getImageReader().readImage();
+                        disk.image.populateSectorPhysicalLocationsFromLogicalLocations(disk.diskLayout);
                         Logger.log(new DiskUpdateLogMessage(disk));
                     }
                 });
@@ -257,15 +259,14 @@ public class ImagerViewModel
         Image image = getDisk().get().image;
 
         performOperation(
-                makeConfigBuilder().withImageReader("/home/dg/mac800.dsk"),
-                new ReadWriteFluxOperation()
+                makeConfigBuilder(), new ReadWriteFluxOperation()
                 {
                     @Override
                     public void run()
                     {
                         Disk disk = new Disk();
                         disk.diskLayout = getDiskLayout();
-                        disk.image = getImageReader().readImage();
+                        disk.image = image;
                         writeDisk(disk);
                     }
                 });
@@ -290,7 +291,7 @@ public class ImagerViewModel
                         }, () -> currentOperation.fireChange(From.VIEW_MODEL)));
     }
 
-    private ConfigBuilder makeConfigBuilder()
+    private ConfigBuilder makeConfigBuilderWithFormat()
     {
         Logger.setLogger(Consumers.nop());
         ConfigBuilder builder = new ConfigBuilder();
@@ -299,6 +300,14 @@ public class ImagerViewModel
 
         for (Pair<String, String> e : getOptionsForFormat(selectedFormat.get()).get())
             builder.applyOption(e.first(), e.second());
+
+        return builder;
+    }
+
+    private ConfigBuilder makeConfigBuilder()
+    {
+        ConfigBuilder builder = makeConfigBuilderWithFormat();
+
         for (Pair<String, String> e : getOptionsForDevice().get())
             builder.applyOption(e.first(), e.second());
 
