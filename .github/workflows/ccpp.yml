@@ -69,7 +69,7 @@ jobs:
           msystem: mingw64
           update: true
           pacboy: |
-            p:png2ico
+            png2ico:p
 
       - uses: actions/checkout@v4
         with:
