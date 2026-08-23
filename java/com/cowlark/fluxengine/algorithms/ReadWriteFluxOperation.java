@@ -682,7 +682,11 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
                             else
                             {
                                 track.fluxmap = fluxmap;
-                                Logger.log(new DiskUpdateLogMessage(disk));
+
+                                /* Log a _copy_ of the disk structure so that the logger
+                                 * doesn't see the disk get mutated in subsequent reads. */
+                                Logger.log(new DiskUpdateLogMessage(new Disk(disk)));
+
                                 fluxSink.addFlux(physicalCylinder, physicalHead, fluxmap);
                                 Logger.logf(
                                         "writing %d ms in %d bytes",
@@ -698,7 +702,11 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
 
                             Fluxmap blank = new Fluxmap();
                             track.fluxmap = blank;
-                            Logger.log(new DiskUpdateLogMessage(disk));
+
+                            /* Log a _copy_ of the disk structure so that the logger
+                             * doesn't see the disk get mutated in subsequent reads. */
+                            Logger.log(new DiskUpdateLogMessage(new Disk(disk)));
+
                             fluxSink.addFlux(physicalCylinder, physicalHead, blank);
                             Logger.logf("erased");
                         }
@@ -758,8 +766,19 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
                 }, ltl -> {
                     Common.FluxSourceIteratorHolder fluxSourceIteratorHolder =
                             new Common.FluxSourceIteratorHolder(getFluxSource());
+
                     List<Track> tracks = new ArrayList<>();
                     ReadGroupResult rgr = readGroup(fluxSourceIteratorHolder, ltl, tracks);
+
+                    CylinderHead pch = new CylinderHead(ltl.physicalCylinder, ltl.physicalHead);
+                    disk.tracksByPhysicalLocation.removeAll(pch);
+                    disk.tracksByPhysicalLocation.putAll(pch, tracks);
+                    disk.sectorsByPhysicalLocation.removeAll(pch);
+                    disk.sectorsByPhysicalLocation.putAll(pch, rgr.combinedSectors);
+
+                    /* Log a _copy_ of the disk structure so that the logger
+                     * doesn't see the disk get mutated in subsequent reads. */
+                    Logger.log(new DiskUpdateLogMessage(new Disk(disk)));
 
                     if (rgr.result != ReadResult.GOOD_READ)
                     {

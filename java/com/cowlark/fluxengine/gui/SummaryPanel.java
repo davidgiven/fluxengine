@@ -266,7 +266,7 @@ public class SummaryPanel extends JPanel
 
             result.tooltip = String.format("%d sectors in image\n(No flux)", sectors);
             if (sectors > 0)
-                result.colour = StatusColour.OK.getColour();
+                result.colour = UiUtils.DATA_BUT_NO_FLUX_COLOUR;
             else
                 result.colour = StatusColour.MISSING.getColour();
         }

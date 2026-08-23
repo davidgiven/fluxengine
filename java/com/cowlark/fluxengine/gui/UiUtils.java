@@ -40,6 +40,7 @@ public class UiUtils
     static final Color DATA_BAD_COLOUR = new Color(0xe74c3c);
     static final Color INDEX_LINE_COLOUR = new Color(0xf39c12);
     static final Color NO_DATA_COLOUR = new Color(0x5c5c5c);
+    static final Color DATA_BUT_NO_FLUX_COLOUR = DATA_OK_COLOUR.darker();
 
     /* Fires the given action with the clicked component as its source, so that
      * actions which resolve their target from the event source work correctly.
