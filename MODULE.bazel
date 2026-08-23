@@ -11,6 +11,7 @@ maven.install(
     artifacts = [
         "org.projectlombok:lombok:1.18.46",
         "org.apache.commons:commons-lang3:3.17.0",
+        "org.apache.commons:commons-csv:1.10.0",
         "com.fazecast:jSerialComm:2.11.4",
         "com.google.guava:guava:33.6.0-jre",
         "com.google.truth:truth:1.4.5",

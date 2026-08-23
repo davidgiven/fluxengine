@@ -9,9 +9,8 @@ public interface Command
 {
     ImmutableMap<String, Supplier<? extends Command>> ANALYSABLES =
             ImmutableMap.<String, Supplier<? extends Command>>builder().put(
-                    "driveresponse", stub(
-                            "driveresponse",
-                            "Measures the drive's ability to read and write pulses.")).put(
+                    "driveresponse",
+                    AnalyseDriveResponse::new).put(
                     "layout",
                     stub("layout", "Produces a visualisation of the track/sector layout.")).build();
 
