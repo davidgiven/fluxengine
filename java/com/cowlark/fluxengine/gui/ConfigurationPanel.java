@@ -4,7 +4,7 @@ import static com.cowlark.fluxengine.config.OptionApplicabilityHint.ANY_SOURCESI
 import static com.cowlark.fluxengine.config.OptionApplicabilityHint.FLUXFILE_SOURCESINK;
 import static com.cowlark.fluxengine.config.OptionApplicabilityHint.HARDWARE_SOURCESINK;
 import static com.cowlark.fluxengine.gui.PreferencesReaderWriter.DEVICE_FLUXFILE;
-import static com.cowlark.fluxengine.gui.PreferencesReaderWriter.DEVICE_MANUAL;
+import static com.cowlark.fluxengine.gui.PreferencesReaderWriter.DEVICE_SERIALPORT;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static javax.swing.JFileChooser.APPROVE_OPTION;
@@ -21,7 +21,6 @@ import com.cowlark.fluxengine.config.OptionGroupProto;
 import com.cowlark.fluxengine.config.OptionProto;
 import com.cowlark.fluxengine.config.UsbFinder;
 import com.cowlark.fluxengine.data.Formats;
-import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -38,6 +37,7 @@ import swingtree.UIForPanel;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.util.Collection;
@@ -68,7 +68,7 @@ public class ConfigurationPanel extends JPanel
 
         Viewable.cast(model.getSelectedFormat()).onChange(From.ALL, it -> rebuildUi());
         Viewable.cast(model.getSelectedDevice()).onChange(From.ALL, it -> rebuildUi());
-        Viewable.cast(model.getSelectedManualFluxFile()).onChange(From.ALL, it -> rebuildUi());
+        Viewable.cast(model.getSelectedFluxFile()).onChange(From.ALL, it -> rebuildUi());
         Viewable.cast(model.getUsbDevices()).onChange(From.ALL, it -> rebuildUi());
         rebuildUi();
     }
@@ -262,33 +262,46 @@ public class ConfigurationPanel extends JPanel
         Set<OptionApplicabilityHint> applicabilities = new HashSet<>();
         applicabilities.add(ANY_SOURCESINK);
 
-        panel = panel.add(label("Device:")).add(
-                SETTING_FORMAT, comboBox(
-                        model.getSelectedDevice(),
-                        model.getUsbDevices().get().keySet().stream().toList(),
-                        this::deviceRenderer));
-
         panel = panel
+                .add(label("Device:"))
+                .add(
+                        SETTING_FORMAT, comboBox(
+                                model.getSelectedDevice(),
+                                model.getUsbDevices().get().keySet().stream().toList(),
+                                this::deviceRenderer))
                 .add(
                         "skip 1, split 2, align right",
                         button("Rescan USB").onClick(delegate -> model.refreshUsbDevices()))
                 .add(button("Use flux file").onClick(this::onUseFluxFile));
 
-        switch (model.getSelectedDevice().get())
-        {
-            case DEVICE_FLUXFILE -> applicabilities.add(FLUXFILE_SOURCESINK);
-            case DEVICE_MANUAL ->
-            {
-                applicabilities.add(FLUXFILE_SOURCESINK);
-                applicabilities.add(HARDWARE_SOURCESINK);
-            }
-            default -> applicabilities.add(HARDWARE_SOURCESINK);
-        }
+        if (model.getSelectedDevice().get().equals(DEVICE_FLUXFILE))
+            applicabilities.add(FLUXFILE_SOURCESINK);
+        else
+            applicabilities.add(HARDWARE_SOURCESINK);
 
         if (applicabilities.contains(FLUXFILE_SOURCESINK))
             panel = panel.add(LABEL_FORMAT, label("Flux file:")).add(
                     SETTING_FORMAT,
-                    UI.textField(model.getSelectedManualFluxFile()).isEditableIf(false));
+                    UI.textField(model.getSelectedFluxFile()).isEditableIf(false).peek(field -> {
+                        /* Show the tail of an over-long path: keep
+                         * the caret pinned to the end, since
+                         * alignment has no effect once the content
+                         * overflows. */
+                        Runnable pin =
+                                () -> SwingUtilities.invokeLater(() -> field.setCaretPosition(field
+                                        .getDocument()
+                                        .getLength()));
+                        pin.run();
+                        Viewable
+                                .cast(model.getSelectedFluxFile())
+                                .onChange(From.ALL, it -> pin.run());
+                    }));
+
+        if (model.getSelectedDevice().get().equals(DEVICE_SERIALPORT))
+            panel = panel
+                    .add(LABEL_FORMAT, label("Serial port:"))
+                    .add(SETTING_FORMAT, UI.textField(model.getSelectedSerialPort()));
+
         if (applicabilities.contains(HARDWARE_SOURCESINK))
             panel = panel.add(LABEL_FORMAT, label("Drive:")).add(
                     SETTING_FORMAT,
@@ -302,7 +315,7 @@ public class ConfigurationPanel extends JPanel
     {
         return switch (device)
         {
-            case DEVICE_MANUAL -> "Greaseweazle: serial port";
+            case DEVICE_SERIALPORT -> "Greaseweazle: serial port";
             case DEVICE_FLUXFILE -> "Flux file";
             default ->
             {
@@ -320,7 +333,7 @@ public class ConfigurationPanel extends JPanel
     private void onUseFluxFile(ComponentDelegate<JButton, ActionEvent> delegate)
     {
         JFileChooser fileChooser = new JFileChooser();
-        String oldFile = model.getSelectedManualFluxFile().get();
+        String oldFile = model.getSelectedFluxFile().get();
         if (!isNullOrEmpty(oldFile))
             fileChooser.setCurrentDirectory(new File(oldFile).getParentFile());
         fileChooser.setDialogTitle("Open flux file");
@@ -328,9 +341,7 @@ public class ConfigurationPanel extends JPanel
         if (fileChooser.showOpenDialog(this) == APPROVE_OPTION)
         {
             model.getSelectedDevice().set(From.VIEW, DEVICE_FLUXFILE);
-            model
-                    .getSelectedManualFluxFile()
-                    .set(From.VIEW, fileChooser.getSelectedFile().getPath());
+            model.getSelectedFluxFile().set(From.VIEW, fileChooser.getSelectedFile().getPath());
         }
     }
 }

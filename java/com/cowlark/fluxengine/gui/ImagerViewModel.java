@@ -2,8 +2,8 @@ package com.cowlark.fluxengine.gui;
 
 import static com.cowlark.fluxengine.gui.PreferencesReaderWriter.DEVICE;
 import static com.cowlark.fluxengine.gui.PreferencesReaderWriter.DEVICE_FLUXFILE;
-import static com.cowlark.fluxengine.gui.PreferencesReaderWriter.DEVICE_MANUAL;
 import static com.cowlark.fluxengine.gui.PreferencesReaderWriter.DEVICE_OPTIONS;
+import static com.cowlark.fluxengine.gui.PreferencesReaderWriter.DEVICE_SERIALPORT;
 import static com.cowlark.fluxengine.gui.PreferencesReaderWriter.DRIVE;
 import static com.cowlark.fluxengine.gui.PreferencesReaderWriter.FORMAT;
 import static java.util.stream.Collectors.toList;
@@ -33,12 +33,10 @@ import io.reactivex.rxjava3.disposables.Disposable;
 import lombok.Getter;
 import org.apache.commons.lang3.function.Consumers;
 import org.slf4j.LoggerFactory;
-import sprouts.Action;
 import sprouts.Association;
 import sprouts.From;
 import sprouts.Pair;
 import sprouts.Val;
-import sprouts.ValDelegate;
 import sprouts.Var;
 import sprouts.Vars;
 import sprouts.Viewable;
@@ -58,7 +56,8 @@ public class ImagerViewModel
     @Getter private Var<String> statusMessage = Var.of("Ready");
     @Getter private Var<String> selectedFormat;
     @Getter private Var<String> selectedDevice;
-    @Getter private Var<String> selectedManualFluxFile;
+    @Getter private Var<String> selectedFluxFile;
+    @Getter private Var<String> selectedSerialPort;
     @Getter private Var<Integer> selectedDrive;
 
     @Getter private Var<Image> diskImage = Var.of(new Image());
@@ -78,38 +77,46 @@ public class ImagerViewModel
     {
         this.preferencesReaderWriter = preferencesReaderWriter;
 
-        selectedFormat = Var.of(preferencesReaderWriter.getStringPreference(FORMAT, "ibm"));
-        selectedDevice =
-                Var.of(preferencesReaderWriter.getStringPreference(DEVICE, DEVICE_FLUXFILE));
-        selectedDrive = Var.of(preferencesReaderWriter.getIntegerPreference(DRIVE, 0));
-        selectedManualFluxFile =
-                Var.of(preferencesReaderWriter.getStringPreference(DEVICE_FLUXFILE, ""));
+        selectedFormat = makeStringPreference(FORMAT, "ibm");
+        selectedDevice = makeStringPreference(DEVICE, DEVICE_FLUXFILE);
+        selectedFluxFile = makeStringPreference(DEVICE_FLUXFILE, "");
+        selectedSerialPort = makeStringPreference(DEVICE_SERIALPORT, "");
+        selectedDrive = makeIntegerPreference(DRIVE, 0);
 
         refreshUsbDevices();
+    }
 
+    private Var<String> makeStringPreference(String preferenceName, String defaultValue)
+    {
         /* Viewable.cast reinterprets the property itself as a Viewable, so the
          * listener lives exactly as long as the property (unlike view(), which
          * returns a weakly-held view that must be kept in a field). */
-        Viewable.cast(selectedFormat).onChange(From.VIEW, stringPreferenceSaver(FORMAT));
-        Viewable.cast(selectedDevice).onChange(From.VIEW, stringPreferenceSaver(DEVICE));
-        Viewable.cast(selectedDrive).onChange(From.VIEW, integerPreferenceSaver(DRIVE));
-        Viewable
-                .cast(selectedManualFluxFile)
-                .onChange(From.VIEW, stringPreferenceSaver(DEVICE_FLUXFILE));
+
+        Var<String> value =
+                Var.of(preferencesReaderWriter.getStringPreference(preferenceName, defaultValue));
+        Viewable.cast(value).onChange(
+                From.VIEW,
+                it -> preferencesReaderWriter.setStringPreference(
+                        preferenceName,
+                        it.currentValue().orElseThrowUnchecked()));
+        return value;
     }
 
-    private Action<ValDelegate<String>> stringPreferenceSaver(String preference)
-    {
-        return it -> preferencesReaderWriter.setStringPreference(
-                preference,
-                it.currentValue().orElseThrowUnchecked());
-    }
 
-    private Action<ValDelegate<Integer>> integerPreferenceSaver(String preference)
+    private Var<Integer> makeIntegerPreference(String preferenceName, int defaultValue)
     {
-        return it -> preferencesReaderWriter.setIntegerPreference(
-                preference,
-                it.currentValue().orElseThrowUnchecked());
+        /* Viewable.cast reinterprets the property itself as a Viewable, so the
+         * listener lives exactly as long as the property (unlike view(), which
+         * returns a weakly-held view that must be kept in a field). */
+
+        Var<Integer> value =
+                Var.of(preferencesReaderWriter.getIntegerPreference(preferenceName, defaultValue));
+        Viewable.cast(value).onChange(
+                From.VIEW,
+                it -> preferencesReaderWriter.setIntegerPreference(
+                        preferenceName,
+                        it.currentValue().orElseThrowUnchecked()));
+        return value;
     }
 
     Var<Association<String, String>> getOptionsForFormat(String format)
@@ -143,7 +150,7 @@ public class ImagerViewModel
                         String.class,
                         com.cowlark.fluxengine.config.UsbFinder.CandidateDevice.class)
                 .put(DEVICE_FLUXFILE, new CandidateDevice())
-                .put(DEVICE_MANUAL, new CandidateDevice())
+                .put(DEVICE_SERIALPORT, new CandidateDevice())
                 .putAll(UsbFinder
                         .findUsbDevices()
                         .stream()
@@ -337,17 +344,17 @@ public class ImagerViewModel
             builder.applyOption(e.first(), e.second());
 
         String device = getSelectedDevice().get();
-        if (device.equals(DEVICE_MANUAL))
+        if (device.equals(DEVICE_SERIALPORT))
+            builder.set("usb.port", device);
+        else if (device.equals(DEVICE_FLUXFILE))
         {
-        } else if (device.equals(DEVICE_FLUXFILE))
-        {
-            String fluxfile = getSelectedManualFluxFile().get();
+            String fluxfile = getSelectedFluxFile().get();
             builder.withFluxSource(fluxfile);
             builder.withFluxSink(fluxfile);
-        } else
-        {
-            builder.set("usb.serial", device);
+        }
 
+        if (!device.equals(DEVICE_FLUXFILE))
+        {
             String drive = String.format("drive:%d", getSelectedDrive().get());
             builder.withFluxSource(drive);
             builder.withFluxSink(drive);

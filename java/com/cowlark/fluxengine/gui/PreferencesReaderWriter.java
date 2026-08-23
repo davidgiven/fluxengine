@@ -18,7 +18,7 @@ public class PreferencesReaderWriter
     static final String DRIVE = "drive";
 
     static final String DEVICE_FLUXFILE = "fluxfile";
-    static final String DEVICE_MANUAL = "manual";
+    static final String DEVICE_SERIALPORT = "serialport";
 
     private final Preferences preferences;
 
