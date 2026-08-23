@@ -15,6 +15,7 @@ java_binary(
 
 jpackage(
     name = "fluxengine_deb",
+    launcher_icon = "//extras:icon.png",
     package_name = "fluxengine",
     app_version = "1.0.0",
     extra_launchers = [":fluxengine-gui.properties"],
@@ -26,6 +27,7 @@ jpackage(
 
 jpackage(
     name = "fluxengine_rpm",
+    launcher_icon = "//extras:icon.png",
     package_name = "fluxengine",
     app_version = "1.0.0",
     extra_launchers = [":fluxengine-gui.properties"],
@@ -43,6 +45,10 @@ jpackage(
     name = "fluxengine_msi",
     package_name = "fluxengine",
     app_version = "1.0.0",
+    launcher_icon = select({
+        "@platforms//os:windows": "//extras:fluxengine_ico",
+        "//conditions:default": "//extras:icon.png",
+    }),
     extra_launchers = [":fluxengine-gui.properties"],
     jar = ":fluxengine_deploy.jar",
     main_class = "com.cowlark.fluxengine.cli.Main",
@@ -57,6 +63,10 @@ jpackage(
     name = "fluxengine_dmg",
     package_name = "fluxengine",
     app_version = "1.0.0",
+    launcher_icon = select({
+        "@platforms//os:osx": "//extras:fluxengine_icns",
+        "//conditions:default": "//extras:icon.png",
+    }),
     extra_launchers = [":fluxengine-gui.properties"],
     jar = ":fluxengine_deploy.jar",
     main_class = "com.cowlark.fluxengine.cli.Main",
@@ -69,6 +79,7 @@ jpackage(
 
 jpackage_app_image(
     name = "fluxengine_app_image",
+    launcher_icon = "//extras:icon.png",
     package_name = "fluxengine",
     app_version = "1.0.0",
     extra_launchers = [":fluxengine-gui.properties"],

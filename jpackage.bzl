@@ -1,13 +1,38 @@
 _JPACKAGE_TYPES = ["deb", "rpm", "msi", "dmg", "unsupported"]
 
-def _add_launcher_args(files):
+def _add_launcher_args(launchers):
+    # launchers is a list of (name, properties_file) pairs.
     args = []
-    for f in files:
-        name = f.basename
+    for name, f in launchers:
         if name.endswith(".properties"):
             name = name[: -len(".properties")]
         args.append("--add-launcher %s=%s" % (name, f.path))
     return " ".join(args)
+
+# Returns [(launcher_name, properties_file)] for --add-launcher. If an icon is
+# set, each properties file gets a copy with an "icon=" line appended, pointing
+# at the icon's execroot-relative path (jpackage resolves relative paths
+# against its working directory, which for these actions is the execroot).
+def _launcher_properties(ctx):
+    icon = ctx.file.launcher_icon
+    launchers = []
+    for f in ctx.files.extra_launchers:
+        name = f.basename
+        if icon:
+            out = ctx.actions.declare_file("with-icon-" + f.basename)
+            ctx.actions.run_shell(
+                outputs = [out],
+                inputs = [f, icon],
+                command = "cp {props} {out} && echo >> {out} && echo 'icon={icon}' >> {out}".format(
+                    props = f.path,
+                    out = out.path,
+                    icon = icon.path,
+                ),
+            )
+            launchers.append((name, out))
+        else:
+            launchers.append((name, f))
+    return launchers
 
 
 def _jpackage_impl(ctx):
@@ -33,7 +58,7 @@ def _jpackage_impl(ctx):
 
     jar = ctx.file.jar
     out = ctx.actions.declare_file(ctx.attr.package_name + "_" + ctx.attr.app_version + "." + extension)
-    extra_launchers = ctx.files.extra_launchers
+    launchers = _launcher_properties(ctx)
 
     # jpackage writes a lot of scratch state (a jlink runtime image and an app
     # image) and chmods files in it. Do all the scratch work in a plain
@@ -47,7 +72,8 @@ def _jpackage_impl(ctx):
     # scratch dir via a ~/.rpmmacros file.
     ctx.actions.run_shell(
         outputs = [out],
-        inputs = [jar] + extra_launchers,
+        inputs = [jar] + [f for (_, f) in launchers] +\
+                 ([ctx.file.launcher_icon] if ctx.file.launcher_icon else []),
         tools = [java_runtime.files],
         use_default_shell_env = True,
         command = """
@@ -91,7 +117,7 @@ EOF
             jar = jar.path,
             main_jar = jar.basename,
             main_class = ctx.attr.main_class,
-            add_launcher_args = _add_launcher_args(extra_launchers),
+            add_launcher_args = _add_launcher_args(launchers),
             out = out.path,
         ),
         mnemonic = "Jpackage" + package_type.title(),
@@ -108,7 +134,7 @@ def _jpackage_app_image_impl(ctx):
 
     jar = ctx.file.jar
     out = ctx.actions.declare_file(ctx.attr.package_name + "_" + ctx.attr.app_version + ".tar.xz")
-    extra_launchers = ctx.files.extra_launchers
+    launchers = _launcher_properties(ctx)
 
     # jpackage --type app-image writes a directory (with a jlink runtime image
     # and the app launcher) and chmods files in it. Do the scratch work in a
@@ -117,7 +143,8 @@ def _jpackage_app_image_impl(ctx):
     # file, so dereference it (cp -L) and make the copy writable.
     ctx.actions.run_shell(
         outputs = [out],
-        inputs = [jar] + extra_launchers,
+        inputs = [jar] + [f for (_, f) in launchers] +\
+                 ([ctx.file.launcher_icon] if ctx.file.launcher_icon else []),
         tools = [java_runtime.files],
         use_default_shell_env = True,
         command = """
@@ -150,7 +177,7 @@ def _jpackage_app_image_impl(ctx):
             jar = jar.path,
             main_jar = jar.basename,
             main_class = ctx.attr.main_class,
-            add_launcher_args = _add_launcher_args(extra_launchers),
+            add_launcher_args = _add_launcher_args(launchers),
             out = out.path,
         ),
         mnemonic = "JpackageAppImage",
@@ -171,6 +198,12 @@ _jpackage_attrs = {
         allow_files = [".properties"],
         doc = "jpackage launcher properties files for additional launchers; " +
               "each launcher is named after the file (minus its .properties suffix).",
+    ),
+    "launcher_icon": attr.label(
+        allow_single_file = [".png", ".ico", ".icns"],
+        doc = "Icon for all additional launchers, added to each launcher's " +
+              "properties as an icon= entry. jpackage requires .png on Linux, " +
+              ".ico on Windows and .icns on macOS.",
     ),
     "package_name": attr.string(
         mandatory = True,

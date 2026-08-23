@@ -29,6 +29,8 @@ import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import java.awt.Color;
+import java.awt.Toolkit;
+import java.net.URL;
 
 public class ApplicationFrame extends JFrame
 {
@@ -72,6 +74,11 @@ public class ApplicationFrame extends JFrame
         imagePanel = new ImagePanel(model);
         visualiserPanel = new VisualiserPanel(model);
         configurationPanel = new ConfigurationPanel(model);
+
+        URL iconUrl = ApplicationFrame.class.getResource("/icon.png");
+        if (iconUrl != null)
+            setIconImage(Toolkit.getDefaultToolkit().getImage(iconUrl));
+        setTitle("FluxEngine");
 
         UIForTabbedPane<JTabbedPane> leftPane =
                 tabbedPane().add(tab("Configuration").add(scrollPane().add(of(configurationPanel))));
