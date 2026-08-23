@@ -203,7 +203,7 @@ public class FluxOperationTest
     }
 
     @Test
-    public void disposingSubscriptionDisposesOperation() throws Exception
+    public void disposingSubscriptionJoinsTheWorkerThread() throws Exception
     {
         Harness harness = new Harness();
         Disposable subscription = harness.create().subscribe();
@@ -212,8 +212,14 @@ public class FluxOperationTest
         {
             assertThat(harness.started.await(5, TimeUnit.SECONDS)).isTrue();
 
+            /* Dispose now joins the worker thread before cleaning up, so the
+             * operation must be allowed to finish first. */
+            harness.gate.release();
             subscription.dispose();
 
+            /* Cleanup must have happened only after the worker had fully
+             * exited. */
+            assertThat(harness.finished.await(5, TimeUnit.SECONDS)).isTrue();
             assertThat(harness.disposed.await(5, TimeUnit.SECONDS)).isTrue();
             assertThat(harness.disposeCount.get()).isEqualTo(1);
         } finally

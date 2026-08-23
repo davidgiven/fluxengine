@@ -1,12 +1,13 @@
 package com.cowlark.fluxengine.core;
 
 /**
- * Thrown to abort a running operation, ported from lib/core/utils.h.
+ * Thrown by Common.testForEmergencyStop when the emergency stop flag is set,
+ * causing the current operation to unwind, ported from lib/core/utils.h.
  */
 public class EmergencyStopException extends RuntimeException
 {
     public EmergencyStopException()
     {
-        super();
+        super("aborted by emergency stop");
     }
 }

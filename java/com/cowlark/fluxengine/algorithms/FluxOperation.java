@@ -4,9 +4,7 @@ import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.core.LogMessage;
 import com.cowlark.fluxengine.core.Logger;
 import io.reactivex.rxjava3.core.Observable;
-import io.reactivex.rxjava3.schedulers.Schedulers;
 import io.reactivex.rxjava3.subjects.ReplaySubject;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 /**
@@ -19,7 +17,8 @@ public abstract class FluxOperation<T extends FluxOperation<T>> implements Runna
     /* Serialises all operations across the whole program: only one may run at
      * a time, because the hardware doesn't cope with concurrent access. */
     private static final Object lock = new Object();
-    private final AtomicBoolean started = new AtomicBoolean(false);
+    private boolean started = false;
+    private Thread workerThread;
     protected ConfigProto configProto = null;
     private boolean disposed = false;
 
@@ -57,14 +56,28 @@ public abstract class FluxOperation<T extends FluxOperation<T>> implements Runna
      * how many subscribers there are. */
     private void schedule(ReplaySubject<LogMessage> subject)
     {
-        if (started.compareAndSet(false, true))
-            Schedulers.newThread().scheduleDirect(() -> execute(subject));
+        boolean start = false;
+        synchronized (this)
+        {
+            if (!started)
+            {
+                started = true;
+                workerThread = new Thread(() -> execute(subject));
+                start = true;
+            }
+        }
+        if (start)
+            workerThread.start();
     }
 
     private void execute(ReplaySubject<LogMessage> subject)
     {
         synchronized (lock)
         {
+            /* Clear any emergency stop left over from a previous aborted
+             * operation. */
+            Common.setEmergencyStop(false);
+
             Consumer<? super LogMessage> oldLogger = Logger.getLogger();
             Logger.setLogger(subject::onNext);
             try
@@ -82,18 +95,44 @@ public abstract class FluxOperation<T extends FluxOperation<T>> implements Runna
         }
     }
 
+    /* Requests that the current operation terminate as soon as possible, at
+     * its next testForEmergencyStop checkpoint. */
+    public static void requestEmergencyStop()
+    {
+        Common.setEmergencyStop(true);
+    }
+
     /* Disposes the factory, releasing any AutoCloseable resources it holds.
-     * Safe to call multiple times; only the first call has any effect. */
+     * Safe to call multiple times; only the first call has any effect. That
+     * first call joins the worker thread, blocking until it exits, so cleanup
+     * only ever happens after the operation has completely finished. */
     public void dispose()
     {
         boolean wasDisposed;
+        Thread thread;
         synchronized (this)
         {
             wasDisposed = disposed;
             disposed = true;
+            thread = workerThread;
         }
-        if (!wasDisposed)
-            onDispose();
+        if (wasDisposed)
+            return;
+
+        /* If called from the worker itself (normal completion), joining would
+         * deadlock, and there is nothing to wait for anyway. */
+        if ((thread != null) && (thread != Thread.currentThread()))
+        {
+            try
+            {
+                thread.join();
+            } catch (InterruptedException e)
+            {
+                Thread.currentThread().interrupt();
+            }
+        }
+
+        onDispose();
     }
 
     /* Hook for subclasses to close their AutoCloseable resources. Called at

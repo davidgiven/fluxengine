@@ -1,5 +1,6 @@
 package com.cowlark.fluxengine.algorithms;
 
+import com.cowlark.fluxengine.core.EmergencyStopException;
 import com.cowlark.fluxengine.data.CylinderHead;
 import com.cowlark.fluxengine.fluxsource.FluxReadParameters;
 import com.cowlark.fluxengine.fluxsource.FluxSource;
@@ -9,8 +10,20 @@ import java.util.Map;
 
 class Common
 {
+    /* If set, any running job will terminate as soon as possible (with an
+     * error), ported from lib/core/utils.cc. */
+    private static volatile boolean emergencyStop = false;
+
     static void testForEmergencyStop()
+            throws EmergencyStopException
     {
+        if (emergencyStop)
+            throw new EmergencyStopException();
+    }
+
+    static void setEmergencyStop(boolean value)
+    {
+        emergencyStop = value;
     }
 
     static class FluxSourceIteratorHolder

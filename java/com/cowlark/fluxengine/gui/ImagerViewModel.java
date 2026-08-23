@@ -32,7 +32,6 @@ import com.cowlark.fluxengine.imagewriter.ImageWriter;
 import io.reactivex.rxjava3.disposables.Disposable;
 import lombok.Getter;
 import org.apache.commons.lang3.function.Consumers;
-import org.jspecify.annotations.NonNull;
 import org.slf4j.LoggerFactory;
 import sprouts.Action;
 import sprouts.Association;
@@ -281,6 +280,17 @@ public class ImagerViewModel
 
     void onEmergencyStop(ComponentDelegate<JButton, ActionEvent> delegate)
     {
+        Disposable operation = getCurrentOperation().get();
+        if ((operation == null) || operation.isDisposed())
+            return;
+
+        ReadWriteFluxOperation.requestEmergencyStop();
+        operation.dispose();
+
+        /* Only clear the property once the dispose has actually happened;
+         * dispose() blocks until the worker thread has exited. */
+        getCurrentOperation().set(From.VIEW_MODEL, null);
+        getDriveActivity().set(new DriveActivity(ActivityType.IDLE, 0, 0));
     }
 
     private void performOperation(
@@ -299,9 +309,11 @@ public class ImagerViewModel
 
         currentOperation.set(operation.setConfig(config).create().observeOn(UiUtils.EDT).subscribe(
                 this::handleLogMessage, e -> {
-                    logQueue.add(new ErrorLogMessage(e.getMessage()));
-                    currentOperation.fireChange(From.VIEW_MODEL);
-                }, () -> currentOperation.fireChange(From.VIEW_MODEL)));
+                    currentOperation.set(From.VIEW_MODEL, null);
+                    ErrorLogMessage m = new ErrorLogMessage(e.getMessage());
+                    logQueue.add(m);
+                    showFatalError(m);
+                }, () -> currentOperation.set(From.VIEW_MODEL, null)));
     }
 
     private ConfigBuilder makeConfigBuilderWithFormat()
@@ -366,13 +378,17 @@ public class ImagerViewModel
             case EndWriteOperationLogMessage ignored ->
                     getDriveActivity().set(new DriveActivity(ActivityType.IDLE, 0, 0));
 
-            case ErrorLogMessage m ->
-                    UI.message(String.format("Error: %s", m.message())).showAsError();
+            case ErrorLogMessage m -> showFatalError(m);
 
             default ->
             {
             }
         }
         logQueue.add(message);
+    }
+
+    private static void showFatalError(ErrorLogMessage m)
+    {
+        UI.message(String.format("Error: %s", m.message())).showAsError();
     }
 }
