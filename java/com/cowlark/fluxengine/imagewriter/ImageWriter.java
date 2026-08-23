@@ -6,6 +6,9 @@ import com.cowlark.fluxengine.core.FluxEngineException;
 import com.cowlark.fluxengine.data.Geometry;
 import com.cowlark.fluxengine.data.Image;
 import com.cowlark.fluxengine.data.Sector;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.csv.QuoteMode;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -17,6 +20,18 @@ import java.nio.file.Path;
  */
 public abstract class ImageWriter implements AutoCloseable
 {
+    /* The CSV report quotes its header fields but leaves the data fields
+     * bare, so two formats are needed; both end records with a bare \n. */
+    private static final CSVFormat CSV_HEADER_FORMAT = CSVFormat.DEFAULT
+            .builder()
+            .setQuoteMode(QuoteMode.ALL)
+            .setRecordSeparator("\n")
+            .build();
+    private static final CSVFormat CSV_DATA_FORMAT = CSVFormat.DEFAULT
+            .builder()
+            .setRecordSeparator("\n")
+            .build();
+
     protected final ImageWriterProto config;
 
     public ImageWriter(ImageWriterProto config)
@@ -76,50 +91,48 @@ public abstract class ImageWriter implements AutoCloseable
 
     public void writeCsv(Image image, String filename)
     {
-        StringBuilder f = new StringBuilder();
-        f
-                .append("\"Physical track\",")
-                .append("\"Physical side\",")
-                .append("\"Logical sector\",")
-                .append("\"Logical track\",")
-                .append("\"Logical side\",")
-                .append("\"Clock (ns)\",")
-                .append("\"Header start (ns)\",")
-                .append("\"Header end (ns)\",")
-                .append("\"Data start (ns)\",")
-                .append("\"Data end (ns)\",")
-                .append("\"Raw data address (bytes)\",")
-                .append("\"User payload length (bytes)\",")
-                .append("\"Status\"")
-                .append("\n");
-
-        for (Sector sector : image)
+        try (CSVPrinter printer = new CSVPrinter(
+                Files.newBufferedWriter(
+                        Path.of(filename), StandardCharsets.UTF_8),
+                CSV_DATA_FORMAT);
+             CSVPrinter header = new CSVPrinter(
+                     printer.getOut(), CSV_HEADER_FORMAT))
         {
-            f
-                    .append(sector.physicalLocation != null ?
-                            sector.physicalLocation.cylinder() :
-                            -1)
-                    .append(',');
-            f
-                    .append(sector.physicalLocation != null ? sector.physicalLocation.head() : -1)
-                    .append(',');
-            f.append(sector.location.logicalSector()).append(',');
-            f.append(sector.location.logicalCylinder()).append(',');
-            f.append(sector.location.logicalHead()).append(',');
-            f.append(sector.clockNs).append(',');
-            f.append(sector.headerStartTimeNs).append(',');
-            f.append(sector.headerEndTimeNs).append(',');
-            f.append(sector.dataStartTimeNs).append(',');
-            f.append(sector.dataEndTimeNs).append(',');
-            f.append(sector.position).append(',');
-            f.append(sector.data.size()).append(',');
-            f.append(Sector.statusToString(sector.status));
-            f.append("\n");
-        }
+            header.printRecord(
+                    "Physical track",
+                    "Physical side",
+                    "Logical sector",
+                    "Logical track",
+                    "Logical side",
+                    "Clock (ns)",
+                    "Header start (ns)",
+                    "Header end (ns)",
+                    "Data start (ns)",
+                    "Data end (ns)",
+                    "Raw data address (bytes)",
+                    "User payload length (bytes)",
+                    "Status");
 
-        try
-        {
-            Files.writeString(Path.of(filename), f.toString(), StandardCharsets.UTF_8);
+            for (Sector sector : image)
+            {
+                printer.printRecord(
+                        sector.physicalLocation != null
+                                ? sector.physicalLocation.cylinder() :
+                                -1,
+                        sector.physicalLocation != null
+                                ? sector.physicalLocation.head() : -1,
+                        sector.location.logicalSector(),
+                        sector.location.logicalCylinder(),
+                        sector.location.logicalHead(),
+                        sector.clockNs,
+                        sector.headerStartTimeNs,
+                        sector.headerEndTimeNs,
+                        sector.dataStartTimeNs,
+                        sector.dataEndTimeNs,
+                        sector.position,
+                        sector.data.size(),
+                        Sector.statusToString(sector.status));
+            }
         } catch (IOException e)
         {
             throw new FluxEngineException("cannot open CSV report file");

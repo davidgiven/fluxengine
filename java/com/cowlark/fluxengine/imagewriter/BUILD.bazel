@@ -30,5 +30,6 @@ java_library(
         "//java/com/cowlark/fluxengine/data",
         "//java/com/cowlark/fluxengine/external",
         "//java/com/cowlark/fluxengine/imagereader:imagereader_java_proto",
+        "@maven//:org_apache_commons_commons_csv",
     ],
 )
