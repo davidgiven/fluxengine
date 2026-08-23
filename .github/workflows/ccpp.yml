@@ -64,13 +64,6 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - uses: msys2/setup-msys2@v2
-        with:
-          msystem: mingw64
-          update: true
-          pacboy: |
-            png2ico:p
-
       - uses: actions/checkout@v4
         with:
           repository: 'davidgiven/fluxengine'
@@ -80,6 +73,10 @@ jobs:
         with:
           repository: 'davidgiven/fluxengine-testdata'
           path: 'fluxengine-testdata'
+
+      - name: Setup software
+        run: |
+          winget install ImageMagick.ImageMagick
 
       - name: Setup Bazel
         uses: bazel-contrib/setup-bazel@0.19.0
