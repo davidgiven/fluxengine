@@ -1,0 +1,318 @@
+shortname: 'Commodore'
+comment: '1541, 1581, 8050 and variations'
+read_support_status: UNICORN
+write_support_status: UNICORN
+
+documentation:
+<<<
+Commodore 8-bit computer disks come in two varieties: GCR, which are the
+overwhelming majority; and MFM, only used on the 1571 and 1581. The latter were
+(as far as I can tell) standard IBM PC format disks with a slightly odd sector
+count.
+
+The GCR disks are much more interesting. They could store 170kB on a
+single-sided disk (although later drives were double-sided), using a proprietary
+encoding and record scheme; like [Apple Macintosh disks](macintosh.md) they
+stored varying numbers of sectors per track to make the most of the physical
+disk area, although unlike them they did it by changing the bitrate rather than
+adjusting the motor speed.
+
+The drives were also intelligent and ran DOS on a CPU inside them. The
+computer itself knew nothing about file systems. You could even upload
+programs onto the drive and run them there, allowing all sorts of custom disk
+formats, although this was mostly used to compensate for the [cripplingly
+slow connection to the
+computer](https://ilesj.wordpress.com/2014/05/14/1541-why-so-complicated/) of
+300 bytes per second (!). (The drive itself could transfer data reasonably
+quickly.)
+
+  - a 1541 disk has 35 tracks of 17 to 21 sectors, each 256 bytes long
+	(sometimes 40 tracks), and uses GCR encoding.
+
+  - a standard 1581 disk has 80 tracks and two sides, each with 10 sectors, 512
+	bytes long, and uses normal IBM encoding.
+
+  - an 8050 disk has 77 tracks and two sides, with four speed zones; the number
+	of sectors varies from 23 to 29, using GCR encoding. These will store
+	1042kB. These drives are peculiar because they are 100tpi and therefore the
+	disks cannot be read in normal 96tpi drives.
+
+  - a CMD FD2000 disk (a popular third-party Commodore disk drive) has 81
+	tracks and two sides, each with 10 1024-byte sectors, for a massive 1620kB
+	of storage. This also uses IBM encoding.
+
+A CMD FD2000 disk (a popular third-party Commodore disk drive) 
+>>>
+
+documentation:
+<<<
+## References
+
+  - [Ruud's Commodore Site: 1541](http://www.baltissen.org/newhtm/1541c.htm):
+    documentation on the 1541 disk format.
+>>>
+
+image_reader {
+	filename: "commodore.d64"
+	type: IMAGETYPE_D64
+}
+
+image_writer {
+	filename: "commodore.d64"
+	type: IMAGETYPE_D64
+}
+
+filesystem {
+	type: CBMFS
+}
+
+option_group {
+	comment: "$formats"
+
+	option {
+		name: "171"
+		comment: "171kB 1541, 35-track variant"
+		set_by_default: true
+		
+		config {
+			layout {
+				format_type: FORMATTYPE_40TRACK
+				tracks: 35
+				sides: 1
+				layoutdata {
+					sector_size: 256
+				}
+				layoutdata {
+					track: 0
+					up_to_track: 16
+					physical {
+						start_sector: 0
+						count: 21
+					}
+				}
+				layoutdata {
+					track: 17
+					up_to_track: 23
+					physical {
+						start_sector: 0
+						count: 19
+					}
+				}
+				layoutdata {
+					track: 24
+					up_to_track: 29
+					physical {
+						start_sector: 0
+						count: 18
+					}
+				}
+				layoutdata {
+					track: 30
+					up_to_track: 39
+					physical {
+						start_sector: 0
+						count: 17
+					}
+				}
+			}
+
+			encoder {
+				c64 {}
+			}
+
+			decoder {
+				c64 {}
+			}
+		}
+	}
+		
+	option {
+		name: "192"
+		comment: "192kB 1541, 40-track variant"
+		
+		config {
+			layout {
+				format_type: FORMATTYPE_40TRACK
+				tracks: 40
+				sides: 1
+				layoutdata {
+					sector_size: 256
+				}
+				layoutdata {
+					track: 0
+					up_to_track: 16
+					physical {
+						start_sector: 0
+						count: 21
+					}
+				}
+				layoutdata {
+					track: 17
+					up_to_track: 23
+					physical {
+						start_sector: 0
+						count: 19
+					}
+				}
+				layoutdata {
+					track: 24
+					up_to_track: 29
+					physical {
+						start_sector: 0
+						count: 18
+					}
+				}
+				layoutdata {
+					track: 30
+					up_to_track: 39
+					physical {
+						start_sector: 0
+						count: 17
+					}
+				}
+			}
+
+			encoder {
+				c64 {}
+			}
+
+			decoder {
+				c64 {}
+			}
+		}
+	}
+
+	option {
+		name: "800"
+		comment: '800kB 3.5" 1581'
+
+		config {
+			layout {
+				format_type: FORMATTYPE_80TRACK
+				tracks: 80
+				sides: 2
+				swap_sides: true
+				layoutdata {
+					sector_size: 512
+					physical {
+						start_sector: 1
+						count: 10
+					}
+				}
+			}
+
+			encoder {
+				ibm {
+					trackdata {
+						target_rotational_period_ms: 200
+						target_clock_period_us: 4
+						emit_iam: false
+						gap0: 80
+						gap2: 22
+						gap3: 34
+					}
+				}
+			}
+
+			decoder {
+				ibm {
+					trackdata {
+						ignore_side_byte: true
+					}
+				}
+			}
+		}
+	}
+
+	option {
+		name: "1042"
+		comment: '1042kB 5.25" 8051'
+		
+		config {
+			layout {
+				format_type: FORMATTYPE_80TRACK
+				sides: 2
+				tracks: 77
+				layoutdata {
+					sector_size: 256
+				}
+				layoutdata {
+					track: 0
+					up_to_track: 38
+					physical {
+						start_sector: 0
+						count: 29
+					}
+				}
+				layoutdata {
+					track: 39
+					up_to_track: 52
+					physical {
+						start_sector: 0
+						count: 27
+					}
+				}
+				layoutdata {
+					track: 53
+					up_to_track: 63
+					physical {
+						start_sector: 0
+						count: 25
+					}
+				}
+				layoutdata {
+					track: 64
+					up_to_track: 76
+					physical {
+						start_sector: 0
+						count: 23
+					}
+				}
+			}
+
+			decoder {
+				c64 {}
+			}
+		}
+	}
+
+	option {
+		name: "1620"
+		comment: "1620kB, CMD FD2000"
+
+		config {
+			layout {
+				format_type: FORMATTYPE_80TRACK
+				tracks: 81
+				sides: 2
+				swap_sides: true
+				layoutdata {
+					sector_size: 1024
+					physical {
+						start_sector: 1
+						count: 10
+					}
+				}
+			}
+
+			encoder {
+				ibm {
+					trackdata {
+						target_rotational_period_ms: 200
+						target_clock_period_us: 2
+						emit_iam: false
+					}
+				}
+			}
+
+			decoder {
+				ibm {
+					trackdata {
+						ignore_side_byte: true
+					}
+				}
+			}
+		}
+	}
+}
+		

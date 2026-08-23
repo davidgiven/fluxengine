@@ -1,0 +1,118 @@
+shortname: 'Northstar'
+comment: '5.25" hard sectored'
+read_support_status: UNICORN
+write_support_status: UNICORN
+
+documentation:
+<<<
+Northstar Floppy disks use 10-sector hard sectored disks with either FM or MFM
+encoding.  They may be single- or double-sided.  Each of the 10 sectors contains
+256 (FM) or 512 (MFM) bytes of data.  The disk has 35 cylinders, with tracks 0-
+34 on side 0, and tracks 35-69 on side 1.  Tracks on side 1 are numbered "back-
+wards" in that track 35 corresponds to cylinder 34, side 1, and track 69
+corresponds to cylinder 0, side 1.
+
+The Northstar sector format does not include any head positioning information.
+As such, reads from Northstar floppies need to by synchronized with the index
+pulse, in order to properly identify the sector being read.  This is handled
+automatically by FluxEngine.
+
+Due to the nature of the track ordering on side 1, an .nsi image reader and
+writer are provided for double-sided disks.  The .nsi image writer supports
+both single- and double-sided disks; however single-sided .nsi images are
+equivalent to .img images.
+>>>
+
+documentation:
+<<<
+## References
+
+  - [MICRO-DISK SYSTEM MDS-A-D DOUBLE DENSITY Manual][northstar_mds].
+    Page 33 documents sector format for single- and double-density.
+
+[northstar_mds]: http://bitsavers.org/pdf/northstar/boards/Northstar_MDS-A-D_1978.pdf
+>>>
+
+image_reader {
+	filename: "northstar.nsi"
+	type: IMAGETYPE_NSI
+}
+
+image_writer {
+	filename: "northstar.nsi"
+	type: IMAGETYPE_NSI
+}
+
+layout {
+	format_type: FORMATTYPE_40TRACK
+	layoutdata {
+		physical {
+			start_sector: 0
+			count: 10
+		}
+	}
+}
+
+drive {
+	hard_sector_count: 10
+	sync_with_index: true
+}
+
+encoder {
+	northstar {}
+}
+
+decoder {
+	northstar {}
+}
+
+
+option_group {
+	comment: "$formats"
+
+	option {
+		name: "87"
+		comment: '87.5kB 5.25" 35-track SSSD hard-sectored'
+
+		config {
+			layout {
+				tracks: 40
+				sides: 1
+				layoutdata {
+					sector_size: 256
+				}
+			}
+		}
+	}
+
+	option {
+		name: "175"
+		comment: '175kB 5.25" 40-track SSDD hard-sectored'
+
+		config {
+			layout {
+				tracks: 40
+				sides: 1
+				layoutdata {
+					sector_size: 512
+				}
+			}
+		}
+	}
+
+	option {
+		name: "350"
+		comment: '350kB 5.25" 40-track DSDD hard-sectored'
+		set_by_default: true
+
+		config {
+			layout {
+				tracks: 40
+				sides: 2
+				layoutdata {
+					sector_size: 512
+				}
+			}
+		}
+	}
+}

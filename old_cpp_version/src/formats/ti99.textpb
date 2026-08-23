@@ -1,0 +1,44 @@
+shortname: 'TI-99'
+comment: '90kB 35-track SSSD'
+read_support_status: DINOSAUR
+
+documentation:
+<<<
+The TI-99 was a deeply weird microcomputer from 1981, whose main claim to fame
+was being built around a 16-bit TMS9900 CPU --- and also having only 256 bytes
+of system RAM, with an additional 16kB of video RAM, requiring the BASIC to
+store the user's program in video RAM.
+
+It had an optional rack-mount expansion system with an optional disk drive. This
+was controlled by a standard FD1771 or FD179x chip, meaning a relatively normal
+IBM-scheme disk format of 35 tracks containing nine 256-byte sectors.
+
+FluxEngine can read these.
+>>>
+
+image_reader {
+	filename: "ti99.img"
+	type: IMAGETYPE_IMG
+}
+
+image_writer {
+	filename: "ti99.img"
+	type: IMAGETYPE_IMG
+}
+
+layout {
+	format_type: FORMATTYPE_40TRACK
+	tracks: 40
+	sides: 1
+	layoutdata {
+		sector_size: 256
+		physical {
+			start_sector: 0
+			count: 9
+		}
+	}
+}
+
+decoder {
+	ibm {}
+}

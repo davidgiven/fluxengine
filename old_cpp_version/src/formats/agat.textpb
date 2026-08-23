@@ -1,0 +1,55 @@
+shortname: 'Agat'
+comment: '840kB 5.25" 80-track DS'
+read_support_status: DINOSAUR
+write_support_status: DINOSAUR
+
+documentation:
+<<<
+The Agat (Russian: Агат) was a series Soviet-era computer, first released about
+1983. These were based around a 6502 and were nominally Apple II-compatible
+although with enough differences to be problematic.
+
+They could use either standard Apple II 140kB disks, or a proprietary 840kb
+MFM-based double-sided format. FluxEngine supports both of these; this profile
+is for the proprietary format. for the Apple II format, use the `apple2`
+profile.
+>>>
+
+documentation:
+<<<
+## References
+
+  - [Magazine article on the
+        Agat](https://sudonull.com/post/54185-Is-AGAT-a-bad-copy-of-Apple)
+
+  - [Forum thread with (some) documentation on the
+        format](https://torlus.com/floppy/forum/viewtopic.php?t=1385)
+>>>
+
+image_writer {
+	filename: "agat.img"
+	type: IMAGETYPE_IMG
+}
+
+layout {
+	format_type: FORMATTYPE_80TRACK
+	tracks: 80
+	sides: 2
+	layoutdata {
+		sector_size: 256
+		physical {
+			start_sector: 0
+			count: 21
+		}
+	}
+}
+
+decoder {
+	agat {}
+}
+
+encoder {
+	agat {}
+}
+
+

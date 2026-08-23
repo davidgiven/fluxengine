@@ -1,0 +1,58 @@
+comment: 'MS2000 Microdisk Development System'
+
+documentation:
+<<<
+The RCA MicroDisk Development System MS2000 is a highly obscure (i.e. I gather
+that single digit numbers of original machines exist) development system for the
+RCA1802 series of CPUs, as made famous by the Cosmac ELF. It was a fairly
+straightforward big bag o'RAM system with a 2kB boot ROM, 62kB of RAM, twin
+floppy drives and a serial terminal --- CP/M users will find it very familiar.
+
+Read and writing disks is currently not supported by FluxEngine, but there is
+basic support for the MicroDisk operating system's file system. This should
+allow files to be read from MS2000 disk images.
+
+The disks are normal DD 3.5" disks, using a 70-track, single sided variation of
+the venerable IBM floppy disk scheme, so allowing 315kB of storage per disk.
+
+If you have access to flux files for MS2000 disks, please [get in
+touch](https://github.com/davidgiven/cpm65/issues/new) --- I would like to add
+better support for these.
+>>>
+
+documentation:
+<<<
+## References
+
+  - [The EMMA-02 emulator](https://www.emma02.hobby-site.com/ms2000.html), which
+    supports the MS2000 and provides information on it.
+>>>
+
+image_reader {
+	filename: "ms2000.img"
+	type: IMAGETYPE_IMG
+}
+
+image_writer {
+	filename: "ms2000.img"
+	type: IMAGETYPE_IMG
+}
+
+layout {
+	tracks: 70
+	sides: 1
+	format_type: FORMATTYPE_80TRACK
+	layoutdata {
+		sector_size: 512
+		physical {
+			start_sector: 1
+			count: 9
+		}
+	}
+}
+
+filesystem {
+	type: MICRODOS
+}
+
+
