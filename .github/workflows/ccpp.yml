@@ -9,14 +9,6 @@ concurrency:
 jobs:
   build-docker:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        variant:
-          - debian12
-          - debian13
-          - fedora42
-          - fedora43
-          - fedora43.nooptionaldeps
     steps:
       - uses: actions/checkout@v4
         with:
