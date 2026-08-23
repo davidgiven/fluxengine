@@ -28,7 +28,7 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ github.event.repository.name }}.${{ github.sha }}.installer
+          name: ${{ github.event.repository.name }}.${{ github.sha }}.linux
           path: |
             fluxengine/bazel-bin/java/com/cowlark/fluxengine/*.deb
             fluxengine/bazel-bin/java/com/cowlark/fluxengine/*.rpm
@@ -59,7 +59,7 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ github.event.repository.name }}.${{ github.sha }}.installer.${{ runner.arch }}
+          name: ${{ github.event.repository.name }}.${{ github.sha }}.osx.${{ runner.arch }}
           path: |
             fluxengine/bazel-bin/java/com/cowlark/fluxengine/*.dmg
 
@@ -108,5 +108,5 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ github.event.repository.name }}.${{ github.sha }}.installer
+          name: ${{ github.event.repository.name }}.${{ github.sha }}.windows
           path: fluxengine/bazel-bin/java/com/cowlark/fluxengine/*.msi
