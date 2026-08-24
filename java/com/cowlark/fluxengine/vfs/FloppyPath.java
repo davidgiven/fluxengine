@@ -1,8 +1,12 @@
-package com.example.vfs;
+package com.cowlark.fluxengine.vfs;
 
 import java.io.File;
 import java.net.URI;
-import java.nio.file.*;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
+import java.nio.file.WatchEvent;
+import java.nio.file.WatchKey;
+import java.nio.file.WatchService;
 
 public class FloppyPath implements Path
 {

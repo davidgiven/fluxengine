@@ -21,6 +21,9 @@ java_library(
     srcs = glob(["*.java"]),
     plugins = ["//java/com/cowlark/fluxengine/wiring:lombok_plugin"],
     deps = [
+        "//java/com/cowlark/fluxengine/algorithms",
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/data",
         "@maven//:com_google_guava_guava",
         "@maven//:org_projectlombok_lombok",
         "@maven//:org_slf4j_slf4j_api",

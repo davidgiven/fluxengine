@@ -1,6 +1,7 @@
 package com.cowlark.fluxengine.data;
 
 import com.cowlark.fluxengine.core.Bytes;
+import com.google.common.collect.ImmutableSortedSet;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -170,5 +171,10 @@ public class Image implements Iterable<Sector>
     public Stream<Sector> stream()
     {
         return sectors.values().stream();
+    }
+
+    public ImmutableSortedSet<LogicalLocation> getLogicalLocations()
+    {
+        return ImmutableSortedSet.copyOf(sectors.keySet());
     }
 }

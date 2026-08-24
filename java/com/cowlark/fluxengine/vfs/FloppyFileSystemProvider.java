@@ -1,4 +1,4 @@
-package com.example.vfs;
+package com.cowlark.fluxengine.vfs;
 
 import java.io.IOException;
 import java.net.URI;
