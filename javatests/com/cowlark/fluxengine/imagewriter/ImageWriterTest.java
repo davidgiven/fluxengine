@@ -21,11 +21,18 @@ public class ImageWriterTest
     @org.junit.Rule public final org.junit.rules.TestRule loggerRule =
             com.cowlark.fluxengine.testing.TestHelpers.loggerRule();
 
+    private static ConfigProto configWithWriter(ImageReaderWriterType type)
+    {
+        return ConfigProto
+                .newBuilder()
+                .setImageWriter(ImageWriterProto.newBuilder().setType(type).build())
+                .build();
+    }
+
     @Test
     public void createLdbsImageWriter()
     {
-        ImageWriterProto config =
-                ImageWriterProto.newBuilder().setType(ImageReaderWriterType.IMAGETYPE_LDBS).build();
+        ConfigProto config = configWithWriter(ImageReaderWriterType.IMAGETYPE_LDBS);
 
         assertThat(ImageWriter.create(config)).isInstanceOf(LdbsImageWriter.class);
     }
@@ -33,8 +40,7 @@ public class ImageWriterTest
     @Test
     public void createD64ImageWriter()
     {
-        ImageWriterProto config =
-                ImageWriterProto.newBuilder().setType(ImageReaderWriterType.IMAGETYPE_D64).build();
+        ConfigProto config = configWithWriter(ImageReaderWriterType.IMAGETYPE_D64);
 
         assertThat(ImageWriter.create(config)).isInstanceOf(D64ImageWriter.class);
     }
@@ -42,8 +48,7 @@ public class ImageWriterTest
     @Test
     public void createD88ImageWriter()
     {
-        ImageWriterProto config =
-                ImageWriterProto.newBuilder().setType(ImageReaderWriterType.IMAGETYPE_D88).build();
+        ConfigProto config = configWithWriter(ImageReaderWriterType.IMAGETYPE_D88);
 
         assertThat(ImageWriter.create(config)).isInstanceOf(D88ImageWriter.class);
     }
@@ -51,10 +56,7 @@ public class ImageWriterTest
     @Test
     public void createDiskCopyImageWriter()
     {
-        ImageWriterProto config = ImageWriterProto
-                .newBuilder()
-                .setType(ImageReaderWriterType.IMAGETYPE_DISKCOPY)
-                .build();
+        ConfigProto config = configWithWriter(ImageReaderWriterType.IMAGETYPE_DISKCOPY);
 
         assertThat(ImageWriter.create(config)).isInstanceOf(DiskCopyImageWriter.class);
     }
@@ -62,8 +64,7 @@ public class ImageWriterTest
     @Test
     public void createImdImageWriter()
     {
-        ImageWriterProto config =
-                ImageWriterProto.newBuilder().setType(ImageReaderWriterType.IMAGETYPE_IMD).build();
+        ConfigProto config = configWithWriter(ImageReaderWriterType.IMAGETYPE_IMD);
 
         assertThat(ImageWriter.create(config)).isInstanceOf(ImdImageWriter.class);
     }
@@ -71,8 +72,7 @@ public class ImageWriterTest
     @Test
     public void createNsiImageWriter()
     {
-        ImageWriterProto config =
-                ImageWriterProto.newBuilder().setType(ImageReaderWriterType.IMAGETYPE_NSI).build();
+        ConfigProto config = configWithWriter(ImageReaderWriterType.IMAGETYPE_NSI);
 
         assertThat(ImageWriter.create(config)).isInstanceOf(NsiImageWriter.class);
     }
@@ -80,8 +80,7 @@ public class ImageWriterTest
     @Test
     public void createRawImageWriter()
     {
-        ImageWriterProto config =
-                ImageWriterProto.newBuilder().setType(ImageReaderWriterType.IMAGETYPE_RAW).build();
+        ConfigProto config = configWithWriter(ImageReaderWriterType.IMAGETYPE_RAW);
 
         assertThat(ImageWriter.create(config)).isInstanceOf(RawImageWriter.class);
     }
@@ -100,10 +99,7 @@ public class ImageWriterTest
     @Test
     public void createBadTypeThrows()
     {
-        ImageWriterProto config = ImageWriterProto
-                .newBuilder()
-                .setType(ImageReaderWriterType.IMAGETYPE_NOT_SET)
-                .build();
+        ConfigProto config = configWithWriter(ImageReaderWriterType.IMAGETYPE_NOT_SET);
 
         assertThrows(FluxEngineException.class, () -> ImageWriter.create(config));
     }

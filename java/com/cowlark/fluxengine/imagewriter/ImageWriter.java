@@ -27,10 +27,8 @@ public abstract class ImageWriter implements AutoCloseable
             .setQuoteMode(QuoteMode.ALL)
             .setRecordSeparator("\n")
             .build();
-    private static final CSVFormat CSV_DATA_FORMAT = CSVFormat.DEFAULT
-            .builder()
-            .setRecordSeparator("\n")
-            .build();
+    private static final CSVFormat CSV_DATA_FORMAT =
+            CSVFormat.DEFAULT.builder().setRecordSeparator("\n").build();
 
     protected final ImageWriterProto config;
 
@@ -41,41 +39,28 @@ public abstract class ImageWriter implements AutoCloseable
 
     public static ImageWriter create(ConfigProto config)
     {
-        if (!config.hasImageWriter())
-            throw new FluxEngineException("no image writer configured");
-        if (config.getImageWriter().getType() == ImageReaderWriterType.IMAGETYPE_IMG)
-            return new ImgImageWriter(config.getImageWriter(), config);
-        return create(config.getImageWriter());
-    }
-
-    public static ImageWriter create(ImageWriterProto config)
-    {
-        switch (config.getType())
+        ImageWriterProto writerConfig = config.getImageWriter();
+        switch (writerConfig.getType())
         {
             case IMAGETYPE_IMG:
-                return notImplemented("img");
+                return new ImgImageWriter(writerConfig, config);
             case IMAGETYPE_D64:
-                return new D64ImageWriter(config);
+                return new D64ImageWriter(writerConfig);
             case IMAGETYPE_LDBS:
-                return new LdbsImageWriter(config);
+                return new LdbsImageWriter(writerConfig);
             case IMAGETYPE_DISKCOPY:
-                return new DiskCopyImageWriter(config);
+                return new DiskCopyImageWriter(writerConfig);
             case IMAGETYPE_NSI:
-                return new NsiImageWriter(config);
+                return new NsiImageWriter(writerConfig);
             case IMAGETYPE_RAW:
-                return new RawImageWriter(config);
+                return new RawImageWriter(writerConfig);
             case IMAGETYPE_D88:
-                return new D88ImageWriter(config);
+                return new D88ImageWriter(writerConfig);
             case IMAGETYPE_IMD:
-                return new ImdImageWriter(config);
+                return new ImdImageWriter(writerConfig);
             default:
-                throw new FluxEngineException("bad output image config");
+                throw new FluxEngineException("no image writer configured");
         }
-    }
-
-    private static ImageWriter notImplemented(String name)
-    {
-        throw new FluxEngineException(name + " image writer is not implemented yet");
     }
 
     @Override
@@ -92,11 +77,9 @@ public abstract class ImageWriter implements AutoCloseable
     public void writeCsv(Image image, String filename)
     {
         try (CSVPrinter printer = new CSVPrinter(
-                Files.newBufferedWriter(
-                        Path.of(filename), StandardCharsets.UTF_8),
+                Files.newBufferedWriter(Path.of(filename), StandardCharsets.UTF_8),
                 CSV_DATA_FORMAT);
-             CSVPrinter header = new CSVPrinter(
-                     printer.getOut(), CSV_HEADER_FORMAT))
+                CSVPrinter header = new CSVPrinter(printer.getOut(), CSV_HEADER_FORMAT))
         {
             header.printRecord(
                     "Physical track",
@@ -116,11 +99,8 @@ public abstract class ImageWriter implements AutoCloseable
             for (Sector sector : image)
             {
                 printer.printRecord(
-                        sector.physicalLocation != null
-                                ? sector.physicalLocation.cylinder() :
-                                -1,
-                        sector.physicalLocation != null
-                                ? sector.physicalLocation.head() : -1,
+                        sector.physicalLocation != null ? sector.physicalLocation.cylinder() : -1,
+                        sector.physicalLocation != null ? sector.physicalLocation.head() : -1,
                         sector.location.logicalSector(),
                         sector.location.logicalCylinder(),
                         sector.location.logicalHead(),
