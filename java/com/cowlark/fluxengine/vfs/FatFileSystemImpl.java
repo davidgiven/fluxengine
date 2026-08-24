@@ -1,6 +1,7 @@
 package com.cowlark.fluxengine.vfs;
 
 import static com.cowlark.fluxengine.vfs.FileSystemImpl.Capability.OP_CREATE;
+import static com.cowlark.fluxengine.vfs.FileSystemImpl.Capability.OP_CREATEDIR;
 import static com.cowlark.fluxengine.vfs.FileSystemImpl.Capability.OP_GETDIRENT;
 import static com.cowlark.fluxengine.vfs.FileSystemImpl.Capability.OP_GETFILE;
 import static com.cowlark.fluxengine.vfs.FileSystemImpl.Capability.OP_LIST;
@@ -10,6 +11,7 @@ import static com.cowlark.fluxengine.vfs.FileSystemImpl.FileType.IS_FILE;
 import static com.google.common.collect.ImmutableMap.toImmutableMap;
 
 import com.cowlark.fluxengine.core.Bytes;
+import com.cowlark.fluxengine.vfs.FileSystemImpl.Dirent.DirentBuilder;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Streams;
@@ -23,6 +25,7 @@ import de.waldheinz.fs.fat.SuperFloppyFormatter;
 import lombok.SneakyThrows;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.FileSystemException;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.NotDirectoryException;
@@ -31,7 +34,7 @@ import java.nio.file.Path;
 public class FatFileSystemImpl extends FileSystemImpl
 {
     private static final ImmutableSet<Capability> CAPABILITIES =
-            ImmutableSet.of(OP_CREATE, OP_LIST, OP_GETFILE, OP_PUTFILE, OP_GETDIRENT);
+            ImmutableSet.of(OP_CREATE, OP_LIST, OP_GETFILE, OP_PUTFILE, OP_GETDIRENT, OP_CREATEDIR);
 
     private final FatFsProto config;
     private final BlockDevice blockDevice;
@@ -144,12 +147,34 @@ public class FatFileSystemImpl extends FileSystemImpl
     }
 
     @Override
+    public void createDirectory(Path path) throws IOException
+    {
+        mount();
+        FsDirectory dir = findDir(path.getParent());
+
+        FsDirectory de;
+        try
+        {
+            de = dir.addDirectory(path.getFileName().toString()).getDirectory();
+        } catch (IOException e)
+        {
+            if (e.getMessage().contains("already exists"))
+                throw new FileAlreadyExistsException("file already exists");
+            throw e;
+        }
+        de.flush();
+        fatFilesystem.flush();
+    }
+
+    @Override
     public void putFile(Path path, Bytes bytes) throws IOException
     {
         mount();
         FsDirectory dir = findDir(path.getParent());
 
-        FsFile file = dir.addFile(path.getFileName().toString()).getFile();
+        String leaf = path.getFileName().toString();
+        dir.remove(leaf);
+        FsFile file = dir.addFile(leaf).getFile();
         file.write(0, bytes.toByteBuffer());
         file.flush();
         fatFilesystem.flush();
@@ -166,21 +191,29 @@ public class FatFileSystemImpl extends FileSystemImpl
     @SneakyThrows
     private static Dirent makeDirent(Path dir, FsDirectoryEntry de)
     {
-        long length = de.getFile().getLength();
-        return Dirent
+        ImmutableMap.Builder<String, String> attrsBuilder = ImmutableMap.builder();
+        DirentBuilder direntBuilder = Dirent
                 .builder()
                 .setFilename(de.getName())
-                .setLength((int) length)
                 .setPath(dir.resolve(de.getName()))
-                .setMode("")
-                .setFileType(de.isDirectory() ? IS_DIR : IS_FILE)
-                .setAttributes(ImmutableMap
-                        .<String, String>builder()
-                        .put(Attributes.FILENAME, de.getName())
-                        .put(Attributes.LENGTH, Long.toString(length))
-                        .put(Attributes.FILE_TYPE, de.isDirectory() ? "dir" : "file")
-                        .build())
-                .build();
+                .setMode("");
+
+        attrsBuilder.put(Attributes.FILENAME, de.getName());
+
+        if (de.isFile())
+        {
+            long length = de.getFile().getLength();
+            direntBuilder.setFileType(IS_FILE).setLength((int) length);
+            attrsBuilder
+                    .put(Attributes.LENGTH, Long.toString(length))
+                    .put(Attributes.FILE_TYPE, "file");
+        } else
+        {
+            direntBuilder.setFileType(IS_DIR);
+            attrsBuilder.put(Attributes.FILE_TYPE, "dir");
+        }
+
+        return direntBuilder.setAttributes(attrsBuilder.build()).build();
     }
 
     private FsDirectoryEntry findExistingEntry(Path path) throws IOException

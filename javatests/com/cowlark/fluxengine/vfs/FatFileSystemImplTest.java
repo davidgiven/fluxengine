@@ -1,5 +1,6 @@
 package com.cowlark.fluxengine.vfs;
 
+import static com.cowlark.fluxengine.vfs.FileSystemImpl.FileType.IS_DIR;
 import static com.cowlark.fluxengine.vfs.FileSystemImpl.FileType.IS_FILE;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
@@ -20,6 +21,7 @@ import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 
@@ -82,6 +84,56 @@ public class FatFileSystemImplTest
         impl.putFile(Path.of("/data"), new Bytes("Hello, world!"));
         blockDevice.commit();
         assertThat(image.get(1, 1, 4).data.reader().readString(13)).isEqualTo("Hello, world!");
+    }
+
+    @Test
+    public void putFile_replaces() throws IOException
+    {
+        impl.create(true, "LABEL");
+        impl.putFile(Path.of("/data"), new Bytes("This is the wrong data."));
+        impl.putFile(Path.of("/data"), new Bytes("Hello, world!"));
+        blockDevice.commit();
+        assertThat(image.get(1, 1, 4).data.reader().readString(13)).isEqualTo("Hello, world!");
+    }
+
+    @Test
+    public void putFile_onDirectory() throws IOException
+    {
+        impl.create(true, "LABEL");
+        impl.createDirectory(Path.of("/data"));
+        impl.putFile(Path.of("/data"), new Bytes("Hello, world!"));
+        blockDevice.commit();
+        assertThat(image.get(1, 1, 4).data.reader().readString(13)).isEqualTo("Hello, world!");
+    }
+
+    @Test
+    public void createDirectory() throws IOException
+    {
+        impl.create(true, "LABEL");
+        impl.createDirectory(Path.of("/dir"));
+        Dirent de = impl.getDirent(Path.of("/dir"));
+        assertThat(de.fileType()).isEqualTo(IS_DIR);
+    }
+
+    @Test
+    public void createDirectory_fileExists() throws IOException
+    {
+        impl.create(true, "LABEL");
+        impl.putFile(Path.of("/data"), new Bytes("Hello, world!"));
+        assertThrows(
+                FileAlreadyExistsException.class,
+                () -> impl.createDirectory(Path.of("/data")));
+    }
+
+    @Test
+    public void createDirectory_nested() throws IOException
+    {
+        impl.create(true, "LABEL");
+        impl.createDirectory(Path.of("/dir1"));
+        impl.createDirectory(Path.of("/dir1", "dir2"));
+        Dirent de = impl.getDirent(Path.of("/dir1/dir2"));
+        assertThat(de.filename()).isEqualTo("dir2");
+        assertThat(de.fileType()).isEqualTo(IS_DIR);
     }
 
     @Test

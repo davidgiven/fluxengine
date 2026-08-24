@@ -133,7 +133,7 @@ public abstract class FileSystemImpl implements AutoCloseable
     /**
      * Creates a directory.
      */
-    public void createDirectory(Path path)
+    public void createDirectory(Path path) throws IOException
     {
         throw new UnsupportedOperationException();
     }
