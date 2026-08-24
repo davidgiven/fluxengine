@@ -1,21 +1,38 @@
 package com.cowlark.fluxengine.vfs;
 
+import static com.cowlark.fluxengine.vfs.FileSystemImpl.Capability.OP_CREATE;
+import static com.cowlark.fluxengine.vfs.FileSystemImpl.Capability.OP_LIST;
+import static com.cowlark.fluxengine.vfs.FileSystemImpl.Capability.OP_PUTFILE;
+import static com.cowlark.fluxengine.vfs.FileSystemImpl.FileType.IS_DIR;
+import static com.cowlark.fluxengine.vfs.FileSystemImpl.FileType.IS_FILE;
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
+
 import com.cowlark.fluxengine.core.Bytes;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Streams;
+import de.waldheinz.fs.FileSystemFactory;
+import de.waldheinz.fs.FsDirectory;
+import de.waldheinz.fs.FsDirectoryEntry;
+import de.waldheinz.fs.FsFile;
 import de.waldheinz.fs.ReadOnlyException;
 import de.waldheinz.fs.fat.FatType;
 import de.waldheinz.fs.fat.SuperFloppyFormatter;
+import lombok.SneakyThrows;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.file.NotDirectoryException;
+import java.nio.file.Path;
 
 public class FatFileSystemImpl extends FileSystemImpl
 {
     private static final ImmutableSet<Capability> CAPABILITIES =
-            ImmutableSet.of(Capability.OP_CREATE);
+            ImmutableSet.of(OP_CREATE, OP_LIST, OP_PUTFILE);
 
     private final FatFsProto config;
     private final BlockDevice blockDevice;
     private final de.waldheinz.fs.BlockDevice fatDevice;
+    private de.waldheinz.fs.FileSystem fatFilesystem;
 
     private static class BlockDeviceAdapter implements de.waldheinz.fs.BlockDevice
     {
@@ -97,5 +114,68 @@ public class FatFileSystemImpl extends FileSystemImpl
                 .setOemName("fluxengn")
                 .setVolumeLabel(volumeName)
                 .format();
+    }
+
+    @Override
+    public ImmutableMap<String, Dirent> list(Path path) throws IOException
+    {
+        mount();
+        FsDirectory dir = findDir(path.getParent());
+
+        return Streams
+                .stream(dir)
+                .collect(toImmutableMap(FsDirectoryEntry::getName, de -> makeDirent(path, de)));
+    }
+
+    @Override
+    public void putFile(Path path, Bytes bytes) throws IOException
+    {
+        mount();
+        FsDirectory dir = findDir(path.getParent());
+
+        FsFile file = dir.addFile(path.getFileName().toString()).getFile();
+        file.write(0, bytes.toByteBuffer());
+        file.flush();
+        fatFilesystem.flush();
+    }
+
+    @SneakyThrows
+    private static Dirent makeDirent(Path dir, FsDirectoryEntry de)
+    {
+        long length = de.getFile().getLength();
+        return Dirent
+                .builder()
+                .setFilename(de.getName())
+                .setLength((int) length)
+                .setPath(dir.resolve(de.getName()))
+                .setMode("")
+                .setFileType(de.isDirectory() ? IS_DIR : IS_FILE)
+                .setAttributes(ImmutableMap
+                        .<String, String>builder()
+                        .put(Attributes.FILENAME, de.getName())
+                        .put(Attributes.LENGTH, Long.toString(length))
+                        .put(Attributes.FILE_TYPE, de.isDirectory() ? "dir" : "file")
+                        .build())
+                .build();
+    }
+
+    private FsDirectory findDir(Path path) throws IOException
+    {
+        FsDirectory dir = fatFilesystem.getRoot();
+        if (path != null)
+            for (Path s : path)
+            {
+                FsDirectoryEntry entry = dir.getEntry(s.toString());
+                if (!entry.isDirectory())
+                    throw new NotDirectoryException(String.format(
+                            "'%s' is not a directory",
+                            entry.getName()));
+            }
+        return dir;
+    }
+
+    private void mount() throws IOException
+    {
+        fatFilesystem = FileSystemFactory.create(fatDevice, false);
     }
 }

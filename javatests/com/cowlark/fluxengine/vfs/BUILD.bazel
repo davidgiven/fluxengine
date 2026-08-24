@@ -30,6 +30,7 @@ java_test(
         "//java/com/cowlark/fluxengine/imagewriter:imagewriter_java_proto",
         "//java/com/cowlark/fluxengine/vfs",
         "//javatests/com/cowlark/fluxengine/testing",
+        "@maven//:com_google_guava_guava",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],

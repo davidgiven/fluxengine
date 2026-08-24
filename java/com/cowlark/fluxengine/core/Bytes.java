@@ -3,6 +3,7 @@ package com.cowlark.fluxengine.core;
 import com.google.common.collect.ImmutableList;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
@@ -605,6 +606,12 @@ public final class Bytes implements List<Byte>
                 storage.refcount,
                 size());
     }
+
+    public ByteBuffer toByteBuffer()
+    {
+        return ByteBuffer.wrap(toByteArray());
+    }
+
 
     /* Copy-on-write: if this window shares its storage with other windows,
      * detach it into a private copy so mutations don't affect them. */

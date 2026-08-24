@@ -9,6 +9,7 @@ import java.nio.file.Path;
 
 public abstract class FileSystemImpl implements AutoCloseable
 {
+
     public enum Capability
     {
         OP_CREATE,
@@ -25,8 +26,13 @@ public abstract class FileSystemImpl implements AutoCloseable
         OP_MOVE;
     }
 
+    public enum FileType
+    {
+        IS_FILE, IS_DIR
+    }
+
     @Builder(setterPrefix = "set")
-    public record Dirent(Path path, String filename, int length, String mode,
+    public record Dirent(Path path, String filename, int length, String mode, FileType fileType,
                          ImmutableMap<String, String> attributes)
     {
     }
@@ -87,7 +93,7 @@ public abstract class FileSystemImpl implements AutoCloseable
     /**
      * List files in a given directory.
      */
-    public ImmutableMap<String, Dirent> list(Path path)
+    public ImmutableMap<String, Dirent> list(Path path) throws IOException
     {
         throw new UnsupportedOperationException();
     }
@@ -103,7 +109,7 @@ public abstract class FileSystemImpl implements AutoCloseable
     /**
      * Write a file.
      */
-    public void putFile(Path path, Bytes bytes)
+    public void putFile(Path path, Bytes bytes) throws IOException
     {
         throw new UnsupportedOperationException();
     }
