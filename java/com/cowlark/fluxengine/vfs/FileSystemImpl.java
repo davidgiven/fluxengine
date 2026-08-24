@@ -117,7 +117,7 @@ public abstract class FileSystemImpl implements AutoCloseable
     /**
      * Get a single file dirent (which includes the metadata).
      */
-    public Dirent getDirent(Path path)
+    public Dirent getDirent(Path path) throws IOException
     {
         throw new UnsupportedOperationException();
     }

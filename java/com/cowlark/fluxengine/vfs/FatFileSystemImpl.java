@@ -1,6 +1,7 @@
 package com.cowlark.fluxengine.vfs;
 
 import static com.cowlark.fluxengine.vfs.FileSystemImpl.Capability.OP_CREATE;
+import static com.cowlark.fluxengine.vfs.FileSystemImpl.Capability.OP_GETDIRENT;
 import static com.cowlark.fluxengine.vfs.FileSystemImpl.Capability.OP_GETFILE;
 import static com.cowlark.fluxengine.vfs.FileSystemImpl.Capability.OP_LIST;
 import static com.cowlark.fluxengine.vfs.FileSystemImpl.Capability.OP_PUTFILE;
@@ -28,7 +29,7 @@ import java.nio.file.Path;
 public class FatFileSystemImpl extends FileSystemImpl
 {
     private static final ImmutableSet<Capability> CAPABILITIES =
-            ImmutableSet.of(OP_CREATE, OP_LIST, OP_GETFILE, OP_PUTFILE);
+            ImmutableSet.of(OP_CREATE, OP_LIST, OP_GETFILE, OP_PUTFILE, OP_GETDIRENT);
 
     private final FatFsProto config;
     private final BlockDevice blockDevice;
@@ -150,6 +151,16 @@ public class FatFileSystemImpl extends FileSystemImpl
         file.write(0, bytes.toByteBuffer());
         file.flush();
         fatFilesystem.flush();
+    }
+
+    @Override
+    public Dirent getDirent(Path path) throws IOException
+    {
+        mount();
+        FsDirectory dir = findDir(path.getParent());
+
+        FsDirectoryEntry de = dir.getEntry(path.getFileName().toString());
+        return makeDirent(path.getParent(), de);
     }
 
     @SneakyThrows

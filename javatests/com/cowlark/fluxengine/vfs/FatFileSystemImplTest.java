@@ -98,6 +98,28 @@ public class FatFileSystemImplTest
                 .build());
     }
 
+    @Test
+    public void getDirent() throws IOException
+    {
+        impl.create(true, "LABEL");
+        impl.putFile(Path.of("data"), new Bytes("Hello, world!"));
+        Dirent de = impl.getDirent(Path.of("/data"));
+        assertThat(de).isEqualTo(Dirent
+                .builder()
+                .setPath(Path.of("/data"))
+                .setFilename("data")
+                .setLength(13)
+                .setFileType(IS_FILE)
+                .setMode("")
+                .setAttributes(ImmutableMap
+                        .<String, String>builder()
+                        .put(Attributes.FILENAME, "data")
+                        .put(Attributes.LENGTH, "13")
+                        .put(Attributes.FILE_TYPE, "file")
+                        .build())
+                .build());
+    }
+
     /* Do not use --- for debugging the test only */
     private void writeImage()
     {
