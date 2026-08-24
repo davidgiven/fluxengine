@@ -13,7 +13,7 @@ maven.install(
         "org.apache.commons:commons-lang3:3.17.0",
         "org.apache.commons:commons-csv:1.10.0",
         "com.fazecast:jSerialComm:2.11.4",
-        "com.google.guava:guava:33.6.0-jre",
+        "com.google.guava:guava:32.0.1-jre",
         "com.google.truth:truth:1.4.5",
         "com.jayway.jsonpath:json-path:3.0.0",
         "javax.usb:usb-api:1.0.2",
@@ -33,6 +33,7 @@ maven.install(
         "net.bytebuddy:byte-buddy-agent:1.17.7",
         "org.objenesis:objenesis:3.3",
         "org.slf4j:slf4j-simple:2.0.17",
+        "de.waldheinz:fat32-lib:0.6.5",
     ],
     repositories = [
         "https://repo1.maven.org/maven2",
