@@ -57,6 +57,16 @@ public class FatFileSystemImplTest
     }
 
     @Test
+    public void getFile() throws IOException
+    {
+        impl.create(true, "LABEL");
+        impl.putFile(Path.of("data"), new Bytes("Hello, world!"));
+        blockDevice.commit();
+        Bytes bytes = impl.getFile(Path.of("data"));
+        assertThat(bytes.reader().readString(13)).isEqualTo("Hello, world!");
+    }
+
+    @Test
     public void putFile() throws IOException
     {
         impl.create(true, "LABEL");

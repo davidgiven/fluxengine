@@ -101,7 +101,7 @@ public abstract class FileSystemImpl implements AutoCloseable
     /**
      * Read a file.
      */
-    public Bytes getFile(Path path)
+    public Bytes getFile(Path path) throws IOException
     {
         throw new UnsupportedOperationException();
     }

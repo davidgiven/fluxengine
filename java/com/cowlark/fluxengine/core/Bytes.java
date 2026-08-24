@@ -43,6 +43,11 @@ public final class Bytes implements List<Byte>
         System.arraycopy(data, 0, storage.data, 0, data.length);
     }
 
+    public Bytes(ByteBuffer buffer)
+    {
+        this(buffer.array());
+    }
+
     public Bytes(String data)
     {
         this(data.getBytes(StandardCharsets.UTF_8));
