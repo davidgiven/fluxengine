@@ -23,6 +23,8 @@ import de.waldheinz.fs.fat.SuperFloppyFormatter;
 import lombok.SneakyThrows;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.file.FileSystemException;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.NotDirectoryException;
 import java.nio.file.Path;
 
@@ -133,9 +135,9 @@ public class FatFileSystemImpl extends FileSystemImpl
     public Bytes getFile(Path path) throws IOException
     {
         mount();
-        FsDirectory dir = findDir(path.getParent());
 
-        FsFile file = dir.getEntry(path.getFileName().toString()).getFile();
+        FsDirectoryEntry de = findExistingFile(path);
+        FsFile file = de.getFile();
         ByteBuffer buffer = ByteBuffer.allocate((int) file.getLength());
         file.read(0, buffer);
         return new Bytes(buffer);
@@ -157,9 +159,7 @@ public class FatFileSystemImpl extends FileSystemImpl
     public Dirent getDirent(Path path) throws IOException
     {
         mount();
-        FsDirectory dir = findDir(path.getParent());
-
-        FsDirectoryEntry de = dir.getEntry(path.getFileName().toString());
+        FsDirectoryEntry de = findExistingEntry(path);
         return makeDirent(path.getParent(), de);
     }
 
@@ -181,6 +181,24 @@ public class FatFileSystemImpl extends FileSystemImpl
                         .put(Attributes.FILE_TYPE, de.isDirectory() ? "dir" : "file")
                         .build())
                 .build();
+    }
+
+    private FsDirectoryEntry findExistingEntry(Path path) throws IOException
+    {
+        FsDirectory dir = findDir(path.getParent());
+
+        FsDirectoryEntry entry = dir.getEntry(path.getFileName().toString());
+        if (entry == null)
+            throw new NoSuchFileException("file not found");
+        return entry;
+    }
+
+    private FsDirectoryEntry findExistingFile(Path path) throws IOException
+    {
+        FsDirectoryEntry entry = findExistingEntry(path);
+        if (!entry.isFile())
+            throw new FileSystemException("not a file");
+        return entry;
     }
 
     private FsDirectory findDir(Path path) throws IOException

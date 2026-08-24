@@ -2,6 +2,7 @@ package com.cowlark.fluxengine.vfs;
 
 import static com.cowlark.fluxengine.vfs.FileSystemImpl.FileType.IS_FILE;
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertThrows;
 
 import com.cowlark.fluxengine.config.ConfigBuilder;
 import com.cowlark.fluxengine.config.ConfigProto;
@@ -19,6 +20,7 @@ import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import java.io.IOException;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 
 @RunWith(JUnit4.class)
@@ -60,17 +62,24 @@ public class FatFileSystemImplTest
     public void getFile() throws IOException
     {
         impl.create(true, "LABEL");
-        impl.putFile(Path.of("data"), new Bytes("Hello, world!"));
+        impl.putFile(Path.of("/data"), new Bytes("Hello, world!"));
         blockDevice.commit();
-        Bytes bytes = impl.getFile(Path.of("data"));
+        Bytes bytes = impl.getFile(Path.of("/data"));
         assertThat(bytes.reader().readString(13)).isEqualTo("Hello, world!");
+    }
+
+    @Test
+    public void getFile_missing() throws IOException
+    {
+        impl.create(true, "LABEL");
+        assertThrows(NoSuchFileException.class, () -> impl.getFile(Path.of("/data")));
     }
 
     @Test
     public void putFile() throws IOException
     {
         impl.create(true, "LABEL");
-        impl.putFile(Path.of("data"), new Bytes("Hello, world!"));
+        impl.putFile(Path.of("/data"), new Bytes("Hello, world!"));
         blockDevice.commit();
         assertThat(image.get(1, 1, 4).data.reader().readString(13)).isEqualTo("Hello, world!");
     }
@@ -79,7 +88,7 @@ public class FatFileSystemImplTest
     public void listFiles() throws IOException
     {
         impl.create(true, "LABEL");
-        impl.putFile(Path.of("data"), new Bytes("Hello, world!"));
+        impl.putFile(Path.of("/data"), new Bytes("Hello, world!"));
         ImmutableMap<String, Dirent> files = impl.list(Path.of("/"));
         assertThat(files).hasSize(1);
         assertThat(files.get("data")).isEqualTo(Dirent
@@ -102,7 +111,7 @@ public class FatFileSystemImplTest
     public void getDirent() throws IOException
     {
         impl.create(true, "LABEL");
-        impl.putFile(Path.of("data"), new Bytes("Hello, world!"));
+        impl.putFile(Path.of("/data"), new Bytes("Hello, world!"));
         Dirent de = impl.getDirent(Path.of("/data"));
         assertThat(de).isEqualTo(Dirent
                 .builder()
