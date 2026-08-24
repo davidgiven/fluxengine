@@ -127,4 +127,27 @@ public class ByteReaderTest
         assertThrows(IndexOutOfBoundsException.class, () -> reader.seek(0).readBe32());
         assertThrows(IndexOutOfBoundsException.class, () -> reader.seek(0).read(4));
     }
+
+    @Test
+    public void readString()
+    {
+        ByteReader reader = new ByteReader(
+                Bytes.of('H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd'));
+
+        assertThat(reader.readString(5)).isEqualTo("Hello");
+        assertThat(reader.pos()).isEqualTo(5);
+        assertThat(reader.readString(1)).isEqualTo(" ");
+        assertThat(reader.readString(5)).isEqualTo("World");
+        assertThat(reader.eof()).isTrue();
+    }
+
+    @Test
+    public void readStringEmpty()
+    {
+        ByteReader reader = new ByteReader(Bytes.of('A', 'B', 'C'));
+
+        assertThat(reader.readString(0)).isEqualTo("");
+        assertThat(reader.pos()).isEqualTo(0);
+        assertThat(reader.readString(3)).isEqualTo("ABC");
+    }
 }

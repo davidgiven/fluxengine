@@ -158,6 +158,14 @@ public final class ByteReader implements Iterator<Byte>
         return (hi << 32) | lo;
     }
 
+    public String readString(int len)
+    {
+        StringBuilder sb = new StringBuilder();
+        while (len-- != 0)
+            sb.append((char) read8());
+        return sb.toString();
+    }
+
     private void checkReadable(int len)
     {
         if (len < 0 || pos + len > bytes.size())
