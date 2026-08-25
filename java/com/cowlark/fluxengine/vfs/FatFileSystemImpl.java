@@ -221,9 +221,7 @@ public class FatFileSystemImpl extends FileSystemImpl
         params.nRoot = nRoot;
         params.auSize = auSize;
         checkResult(fatFilesystem.mkfs("", params));
-        if (volumeName != null && !volumeName.isEmpty()) {
-            checkResult(fatFilesystem.setLabel(volumeName));
-        }
+        checkResult(fatFilesystem.setLabel(volumeName));
     }
 
     @Override
