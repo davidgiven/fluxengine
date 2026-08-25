@@ -90,4 +90,57 @@ public abstract class BlockDevice implements AutoCloseable
             putBlock(blockNumber++, block);
         }
     }
+
+    public Bytes getBytes(int offset, int length) throws IOException
+    {
+        int blockSize = getBlockSize();
+        Bytes result = new Bytes();
+        ByteWriter bw = new ByteWriter(result);
+
+        while (length != 0)
+        {
+            int blockNumber = offset / blockSize;
+            int blockOffset = offset % blockSize;
+            int blockLen = Math.min(blockOffset + length, blockSize) - blockOffset;
+            Bytes block = getBlock(blockNumber);
+
+            bw.write(block.slice(blockOffset, blockLen));
+            length -= blockLen;
+            offset += blockLen;
+        }
+
+        return result;
+    }
+
+    public void putBytes(int offset, Bytes data) throws IOException
+    {
+        int blockSize = getBlockSize();
+        int length = data.size();
+        ByteReader br = new ByteReader(data);
+
+        while (length != 0)
+        {
+            int blockNumber = offset / blockSize;
+            int blockOffset = offset % blockSize;
+            int blockLen = Math.min(blockOffset + length, blockSize) - blockOffset;
+
+            if ((blockOffset != 0) || (blockLen != blockSize))
+            {
+                /* Partial block; do a read-then-modify */
+
+                Bytes block = getBlock(blockNumber);
+                block.writer().seek(blockOffset).write(br.read(blockLen));
+                putBlock(blockNumber, block);
+            } else
+            {
+                /* Complete block; just write */
+
+                putBlock(blockNumber, br.read(blockLen));
+            }
+
+            length -= blockLen;
+            offset += blockLen;
+        }
+    }
+
 }
