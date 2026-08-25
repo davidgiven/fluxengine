@@ -21,6 +21,7 @@ import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import java.io.IOException;
+import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
@@ -130,10 +131,59 @@ public class FatFileSystemImplTest
     {
         impl.create(true, "LABEL");
         impl.createDirectory(Path.of("/dir1"));
+        assertThat(impl.list(Path.of("/"))).hasSize(1);
+        assertThat(impl.list(Path.of("/dir1"))).hasSize(0);
+
         impl.createDirectory(Path.of("/dir1", "dir2"));
+        assertThat(impl.list(Path.of("/"))).hasSize(1);
+        assertThat(impl.list(Path.of("/dir1"))).hasSize(1);
+       
         Dirent de = impl.getDirent(Path.of("/dir1/dir2"));
         assertThat(de.filename()).isEqualTo("dir2");
         assertThat(de.fileType()).isEqualTo(IS_DIR);
+    }
+
+    @Test
+    public void createDirectory_middleMissing() throws IOException
+    {
+        impl.create(true, "LABEL");
+        assertThrows(
+                NoSuchFileException.class,
+                () -> impl.createDirectory(Path.of("/dir1", "dir2", "dir3", "dir4")));
+    }
+
+    @Test
+    public void delete_file() throws IOException
+    {
+        impl.create(true, "LABEL");
+        impl.putFile(Path.of("/data"), new Bytes("Hello, world!"));
+        impl.deleteFile(Path.of("/data"));
+        assertThat(impl.list(Path.of("/"))).isEmpty();
+    }
+
+    @Test
+    public void delete_dir() throws IOException
+    {
+        impl.create(true, "LABEL");
+        impl.createDirectory(Path.of("/dir"));
+        impl.deleteFile(Path.of("/dir"));
+        assertThat(impl.list(Path.of("/"))).isEmpty();
+    }
+
+    @Test
+    public void delete_missing() throws IOException
+    {
+        impl.create(true, "LABEL");
+        assertThrows(NoSuchFileException.class, () -> impl.deleteFile(Path.of("/dir")));
+    }
+
+    @Test
+    public void delete_middle() throws IOException
+    {
+        impl.create(true, "LABEL");
+        impl.createDirectory(Path.of("/dir1"));
+        impl.createDirectory(Path.of("/dir1", "dir2"));
+        assertThrows(DirectoryNotEmptyException.class, () -> impl.deleteFile(Path.of("/dir1")));
     }
 
     @Test

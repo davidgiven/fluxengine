@@ -2,6 +2,7 @@ package com.cowlark.fluxengine.vfs;
 
 import static com.cowlark.fluxengine.vfs.FileSystemImpl.Capability.OP_CREATE;
 import static com.cowlark.fluxengine.vfs.FileSystemImpl.Capability.OP_CREATEDIR;
+import static com.cowlark.fluxengine.vfs.FileSystemImpl.Capability.OP_DELETE;
 import static com.cowlark.fluxengine.vfs.FileSystemImpl.Capability.OP_GETDIRENT;
 import static com.cowlark.fluxengine.vfs.FileSystemImpl.Capability.OP_GETFILE;
 import static com.cowlark.fluxengine.vfs.FileSystemImpl.Capability.OP_LIST;
@@ -25,6 +26,7 @@ import de.waldheinz.fs.fat.SuperFloppyFormatter;
 import lombok.SneakyThrows;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.FileSystemException;
 import java.nio.file.NoSuchFileException;
@@ -33,8 +35,14 @@ import java.nio.file.Path;
 
 public class FatFileSystemImpl extends FileSystemImpl
 {
-    private static final ImmutableSet<Capability> CAPABILITIES =
-            ImmutableSet.of(OP_CREATE, OP_LIST, OP_GETFILE, OP_PUTFILE, OP_GETDIRENT, OP_CREATEDIR);
+    private static final ImmutableSet<Capability> CAPABILITIES = ImmutableSet.of(
+            OP_CREATE,
+            OP_LIST,
+            OP_GETFILE,
+            OP_PUTFILE,
+            OP_GETDIRENT,
+            OP_CREATEDIR,
+            OP_DELETE);
 
     private final FatFsProto config;
     private final BlockDevice blockDevice;
@@ -127,7 +135,7 @@ public class FatFileSystemImpl extends FileSystemImpl
     public ImmutableMap<String, Dirent> list(Path path) throws IOException
     {
         mount();
-        FsDirectory dir = findDir(path.getParent());
+        FsDirectory dir = findDir(path);
 
         return Streams
                 .stream(dir)
@@ -152,18 +160,17 @@ public class FatFileSystemImpl extends FileSystemImpl
         mount();
         FsDirectory dir = findDir(path.getParent());
 
-        FsDirectory de;
         try
         {
-            de = dir.addDirectory(path.getFileName().toString()).getDirectory();
+            dir.addDirectory(path.getFileName().toString());
         } catch (IOException e)
         {
             if (e.getMessage().contains("already exists"))
                 throw new FileAlreadyExistsException("file already exists");
             throw e;
         }
-        de.flush();
-        fatFilesystem.flush();
+        dir.flush();
+        //        fatFilesystem.flush();
     }
 
     @Override
@@ -186,6 +193,22 @@ public class FatFileSystemImpl extends FileSystemImpl
         mount();
         FsDirectoryEntry de = findExistingEntry(path);
         return makeDirent(path.getParent(), de);
+    }
+
+    @Override
+    public void deleteFile(Path path) throws IOException
+    {
+        mount();
+        FsDirectory dir = findDir(path.getParent());
+
+        String leaf = path.getFileName().toString();
+        FsDirectoryEntry entry = dir.getEntry(leaf);
+        if (entry == null)
+            throw new NoSuchFileException("file not found");
+        if (entry.isDirectory() && entry.getDirectory().iterator().hasNext())
+            throw new DirectoryNotEmptyException("directory not empty");
+        dir.remove(leaf);
+        dir.flush();
     }
 
     @SneakyThrows
@@ -241,16 +264,27 @@ public class FatFileSystemImpl extends FileSystemImpl
             for (Path s : path)
             {
                 FsDirectoryEntry entry = dir.getEntry(s.toString());
+                if (entry == null)
+                    throw new NoSuchFileException("path element not found");
                 if (!entry.isDirectory())
                     throw new NotDirectoryException(String.format(
                             "'%s' is not a directory",
                             entry.getName()));
+                dir = entry.getDirectory();
             }
         return dir;
     }
 
     private void mount() throws IOException
     {
-        fatFilesystem = FileSystemFactory.create(fatDevice, false);
+        if (fatFilesystem == null)
+            fatFilesystem = FileSystemFactory.create(fatDevice, false);
+    }
+
+    @Override
+    public void flushChanges() throws IOException
+    {
+        if (fatFilesystem != null)
+            fatFilesystem.flush();
     }
 }

@@ -141,7 +141,7 @@ public abstract class FileSystemImpl implements AutoCloseable
     /**
      * Deletes a file or non-empty directory.
      */
-    public void deleteFile(Path path)
+    public void deleteFile(Path path) throws IOException
     {
         throw new UnsupportedOperationException();
     }
@@ -173,7 +173,7 @@ public abstract class FileSystemImpl implements AutoCloseable
     /**
      * Flushes any changes back to the disk.
      */
-    public void flushChanges()
+    public void flushChanges() throws IOException
     {
         throw new UnsupportedOperationException();
     }
