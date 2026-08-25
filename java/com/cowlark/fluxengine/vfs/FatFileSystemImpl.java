@@ -65,20 +65,17 @@ public class FatFileSystemImpl extends FileSystemImpl
         }
 
         @Override
-        public void read(long l, ByteBuffer byteBuffer) throws IOException
+        public void read(long offset, ByteBuffer byteBuffer) throws IOException
         {
-            int blockNumber = (int) l / underlying.getBlockSize();
-            Bytes bytes = underlying.getBlock(blockNumber);
-            byteBuffer.clear().put(bytes.toByteArray());
+            Bytes bytes = underlying.getBytes((int) offset, byteBuffer.remaining());
+            byteBuffer.put(bytes.toByteArray());
         }
 
         @Override
-        public void write(long l, ByteBuffer byteBuffer)
+        public void write(long offset, ByteBuffer byteBuffer)
                 throws ReadOnlyException, IOException, IllegalArgumentException
         {
-            int blockNumber = (int) l / underlying.getBlockSize();
-            Bytes bytes = new Bytes(byteBuffer.array());
-            underlying.putBlock(blockNumber, bytes);
+            underlying.putBytes((int) offset, new Bytes(byteBuffer));
         }
 
         @Override
@@ -139,6 +136,7 @@ public class FatFileSystemImpl extends FileSystemImpl
 
         return Streams
                 .stream(dir)
+                .filter(de -> !de.getName().equals(".") && !de.getName().equals(".."))
                 .collect(toImmutableMap(FsDirectoryEntry::getName, de -> makeDirent(path, de)));
     }
 
@@ -151,6 +149,7 @@ public class FatFileSystemImpl extends FileSystemImpl
         FsFile file = de.getFile();
         ByteBuffer buffer = ByteBuffer.allocate((int) file.getLength());
         file.read(0, buffer);
+        buffer.flip();
         return new Bytes(buffer);
     }
 
@@ -163,14 +162,14 @@ public class FatFileSystemImpl extends FileSystemImpl
         try
         {
             dir.addDirectory(path.getFileName().toString());
+            dir.flush();
         } catch (IOException e)
         {
             if (e.getMessage().contains("already exists"))
                 throw new FileAlreadyExistsException("file already exists");
             throw e;
         }
-        dir.flush();
-        //        fatFilesystem.flush();
+        fatFilesystem.flush();
     }
 
     @Override
@@ -205,8 +204,15 @@ public class FatFileSystemImpl extends FileSystemImpl
         FsDirectoryEntry entry = dir.getEntry(leaf);
         if (entry == null)
             throw new NoSuchFileException("file not found");
-        if (entry.isDirectory() && entry.getDirectory().iterator().hasNext())
-            throw new DirectoryNotEmptyException("directory not empty");
+        if (entry.isDirectory())
+        {
+            for (FsDirectoryEntry de : entry.getDirectory())
+            {
+                String name = de.getName();
+                if (!name.equals(".") && !name.equals(".."))
+                    throw new DirectoryNotEmptyException("directory not empty");
+            }
+        }
         dir.remove(leaf);
         dir.flush();
     }

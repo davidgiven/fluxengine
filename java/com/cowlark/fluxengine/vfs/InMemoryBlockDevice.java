@@ -11,6 +11,7 @@ public class InMemoryBlockDevice extends TrackedBlockDevice
     public InMemoryBlockDevice(DiskLayout diskLayout, Image image)
     {
         super(diskLayout);
+        image.addMissingSectors(diskLayout, true);
         this.image = image;
     }
 

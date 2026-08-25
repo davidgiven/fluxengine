@@ -66,7 +66,6 @@ public class FatFileSystemImplTest
     {
         impl.create(true, "LABEL");
         impl.putFile(Path.of("/data"), new Bytes("Hello, world!"));
-        blockDevice.commit();
         Bytes bytes = impl.getFile(Path.of("/data"));
         assertThat(bytes.reader().readString(13)).isEqualTo("Hello, world!");
     }
@@ -137,7 +136,7 @@ public class FatFileSystemImplTest
         impl.createDirectory(Path.of("/dir1", "dir2"));
         assertThat(impl.list(Path.of("/"))).hasSize(1);
         assertThat(impl.list(Path.of("/dir1"))).hasSize(1);
-       
+
         Dirent de = impl.getDirent(Path.of("/dir1/dir2"));
         assertThat(de.filename()).isEqualTo("dir2");
         assertThat(de.fileType()).isEqualTo(IS_DIR);
@@ -229,6 +228,22 @@ public class FatFileSystemImplTest
                         .put(Attributes.FILE_TYPE, "file")
                         .build())
                 .build());
+    }
+
+    @Test
+    public void flushActuallyFlushes() throws IOException
+    {
+        impl.create(true, "LABEL");
+        impl.createDirectory(Path.of("/dir1"));
+        impl.createDirectory(Path.of("/dir1/dir2"));
+        impl.createDirectory(Path.of("/dir1/dir2/dir3"));
+        impl.putFile(Path.of("/dir1/dir2/dir3/data"), new Bytes("Hello, world!"));
+        impl.flushChanges();
+
+        FatFileSystemImpl impl2 =
+                new FatFileSystemImpl(configProto.getFilesystem().getFatfs(), blockDevice);
+        Dirent de = impl2.getDirent(Path.of("/dir1/dir2/dir3/data"));
+        assertThat(de.filename()).isEqualTo("data");
     }
 
     /* Do not use --- for debugging the test only */
