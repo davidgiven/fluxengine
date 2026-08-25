@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableList;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import java.nio.ByteBuffer;
 import java.util.ListIterator;
 
 @RunWith(JUnit4.class)
@@ -231,5 +232,79 @@ public class BytesTest
             assertThat(b.intValue()).isEqualTo(expected++);
         }
         assertThat(expected).isEqualTo(4);
+    }
+
+    @Test
+    public void byteBufferEntireBackingArray()
+    {
+        byte[] array = new byte[]{1, 2, 3, 4};
+        ByteBuffer buffer = ByteBuffer.wrap(array);
+        Bytes bytes = new Bytes(buffer);
+
+        assertThat(bytes.toByteArray()).isEqualTo(new byte[]{1, 2, 3, 4});
+        assertThat(bytes.size()).isEqualTo(4);
+    }
+
+    @Test
+    public void byteBufferPartAtBeginning()
+    {
+        byte[] array = new byte[]{1, 2, 3, 4, 5};
+        ByteBuffer buffer = ByteBuffer.wrap(array);
+        buffer.limit(3);
+        Bytes bytes = new Bytes(buffer);
+
+        assertThat(bytes.toByteArray()).isEqualTo(new byte[]{1, 2, 3});
+        assertThat(bytes.size()).isEqualTo(3);
+    }
+
+    @Test
+    public void byteBufferPartNotAtBeginning()
+    {
+        byte[] array = new byte[]{9, 1, 2, 3, 9};
+        ByteBuffer buffer = ByteBuffer.wrap(array);
+        buffer.position(1);
+        buffer.limit(4);
+        Bytes bytes = new Bytes(buffer);
+
+        assertThat(bytes.toByteArray()).isEqualTo(new byte[]{1, 2, 3});
+        assertThat(bytes.size()).isEqualTo(3);
+    }
+
+    @Test
+    public void byteBufferSliceWithArrayOffset()
+    {
+        ByteBuffer base = ByteBuffer.allocate(10);
+        base.put(new byte[]{0, 0, 1, 2, 3, 4, 0, 0});
+        base.position(2);
+        base.limit(6);
+        ByteBuffer slice = base.slice();
+        Bytes bytes = new Bytes(slice);
+
+        assertThat(bytes.toByteArray()).isEqualTo(new byte[]{1, 2, 3, 4});
+        assertThat(bytes.size()).isEqualTo(4);
+    }
+
+    @Test
+    public void byteBufferWithArrayOffsetAndPosition()
+    {
+        byte[] backing = new byte[]{99, 99, 1, 2, 3, 99, 99};
+        ByteBuffer buffer = ByteBuffer.wrap(backing, 2, 3);
+        // wrap with offset creates buffer with position 2, limit 5
+        Bytes bytes = new Bytes(buffer);
+
+        assertThat(bytes.toByteArray()).isEqualTo(new byte[]{1, 2, 3});
+    }
+
+    @Test
+    public void byteBufferEmptyRemaining()
+    {
+        byte[] array = new byte[]{1, 2, 3};
+        ByteBuffer buffer = ByteBuffer.wrap(array);
+        buffer.position(3);
+        Bytes bytes = new Bytes(buffer);
+
+        assertThat(bytes.isEmpty()).isTrue();
+        assertThat(bytes.size()).isEqualTo(0);
+        assertThat(bytes.toByteArray()).isEqualTo(new byte[]{});
     }
 }
