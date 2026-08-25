@@ -20,6 +20,7 @@
 
 package org.elm_chan.ff;
 
+import java.util.Arrays;
 import java.util.function.LongSupplier;
 
 /**
@@ -55,6 +56,13 @@ public final class FatFs {
     public static final int FA_CREATE_ALWAYS = 0x08;
     public static final int FA_OPEN_ALWAYS = 0x10;
     public static final int FA_OPEN_APPEND = 0x30;
+
+    /* Format options (2nd argument of f_mkfs function) */
+    public static final int FM_FAT = 0x01 /* FAT volume */;
+    public static final int FM_FAT32 = 0x02 /* FAT32 volume */;
+    public static final int FM_EXFAT = 0x04 /* exFAT volume - pruned: FF_FS_EXFAT == 0, kept for API completeness */;
+    public static final int FM_ANY = 0x07 /* Any of above */;
+    public static final int FM_SFD = 0x08 /* Single partition FAT volume */;
 
     /*--------------------------------------------------------------------------*/
     /* Module Private Definitions                                                    */
@@ -150,7 +158,13 @@ public final class FatFs {
     private static final int MBR_Table = 446; /* MBR: Offset of partition table in the MBR */
     private static final int SZ_PTE = 16; /* MBR: Size of a partition table entry */
     private static final int PTE_Boot = 0; /* MBR PTE: Boot indicator */
+    private static final int PTE_StHead = 1; /* MBR PTE: Start head in CHS */
+    private static final int PTE_StSec = 2; /* MBR PTE: Start sector in CHS */
+    private static final int PTE_StCyl = 3; /* MBR PTE: Start cylinder in CHS */
     private static final int PTE_System = 4; /* MBR PTE: System ID */
+    private static final int PTE_EdHead = 5; /* MBR PTE: End head in CHS */
+    private static final int PTE_EdSec = 6; /* MBR PTE: End sector in CHS */
+    private static final int PTE_EdCyl = 7; /* MBR PTE: End cylinder in CHS */
     private static final int PTE_StLba = 8; /* MBR PTE: Start in LBA */
     private static final int PTE_SizLba = 12; /* MBR PTE: Size in LBA */
 
@@ -158,6 +172,10 @@ public final class FatFs {
     private static final int MAX_FAT12 = 0xFF5; /* Max FAT12 clusters (differs from specs, but right for real DOS/Windows behavior) */
     private static final int MAX_FAT16 = 0xFFF5; /* Max FAT16 clusters (differs from specs, but right for real DOS/Windows behavior) */
     private static final int MAX_FAT32 = 0x0FFFFFF5; /* Max FAT32 clusters (not defined in specs, practical limit) */
+
+    private static final int N_SEC_TRACK = 63; /* Sectors per track for determination of drive CHS */
+    private static final int[] cst = {1, 4, 16, 64, 256, 512, 0}; /* Cluster size boundary for FAT volume (4K sector unit) */
+    private static final int[] cst32 = {1, 2, 4, 8, 16, 32, 0}; /* Cluster size boundary for FAT32 volume (128K sector unit) */
 
     /* DBCS code range |----- 1st byte -----|  |----------- 2nd byte -----------| */
     /*                  <------>    <------>    <------>    <------>    <------>  */
@@ -1055,6 +1073,364 @@ public final class FatFs {
     private FResult validateDir(Dir dp) {
         if (dp == null || dp.fs == null) return FResult.FR_INVALID_OBJECT;
         return validateObject(dp.id, dp.fs);
+    }
+
+    /*-----------------------------------------------------------------------*/
+    /* Create partitions on the physical drive in format of MBR or GPT       */
+    /*-----------------------------------------------------------------------*/
+    private FResult createPartition(long[] plst, int sys, byte[] workBuf) {
+        /* Get physical drive size */
+        LongRef szDrvRef = new LongRef();
+        DResult dr = diskIo.diskIoctl(DiskIo.GET_SECTOR_COUNT, szDrvRef);
+        long szDrv;
+        if (dr == DResult.RES_OK) {
+            szDrv = szDrvRef.value;
+        } else {
+            int[] tmp = new int[1];
+            if (diskIo.diskIoctl(DiskIo.GET_SECTOR_COUNT, tmp) != DResult.RES_OK) return FResult.FR_DISK_ERR;
+            szDrv = tmp[0] & 0xFFFFFFFFL;
+        }
+        /* Create partitions in MBR format */
+        long szDrv32 = szDrv & 0xFFFFFFFFL;
+        int nSc = N_SEC_TRACK; /* Determine drive CHS without any consideration of the drive geometry */
+        int nHd = 8;
+        while (nHd != 0 && szDrv32 / nHd / nSc > 1024) {
+            nHd <<= 1;
+            if (nHd >= 256) nHd = 0;
+        }
+        if (nHd == 0) nHd = 255; /* Number of heads needs to be <256 */
+
+        Arrays.fill(workBuf, (byte) 0); /* Clear MBR */
+        int pte = MBR_Table; /* Partition table in the MBR */
+        long nxtAlloc32 = nSc;
+        for (int i = 0; i < 4 && nxtAlloc32 != 0 && nxtAlloc32 < szDrv32; i++) {
+            long szPart32 = (i < plst.length) ? (plst[i] & 0xFFFFFFFFL) : 0; /* Get partition size */
+            if (szPart32 <= 100) szPart32 = (szPart32 == 100) ? szDrv32 : szDrv32 / 100 * szPart32; /* Size in percentage? */
+            if (nxtAlloc32 + szPart32 > szDrv32 || nxtAlloc32 + szPart32 < nxtAlloc32) szPart32 = szDrv32 - nxtAlloc32; /* Clip at drive size */
+            if (szPart32 == 0) break; /* End of table or no sector to allocate? */
+
+            stDword(workBuf, pte + PTE_StLba, nxtAlloc32); /* Partition start LBA sector */
+            stDword(workBuf, pte + PTE_SizLba, szPart32); /* Size of partition [sector] */
+            workBuf[pte + PTE_System] = (byte) sys; /* System type */
+
+            int cy = (int) (nxtAlloc32 / nSc / nHd); /* Partition start CHS cylinder */
+            int hd = (int) (nxtAlloc32 / nSc % nHd); /* Partition start CHS head */
+            int sc = (int) (nxtAlloc32 % nSc + 1); /* Partition start CHS sector */
+            workBuf[pte + PTE_StHead] = (byte) hd;
+            workBuf[pte + PTE_StSec] = (byte) ((cy >> 2 & 0xC0) | sc);
+            workBuf[pte + PTE_StCyl] = (byte) cy;
+
+            cy = (int) ((nxtAlloc32 + szPart32 - 1) / nSc / nHd); /* Partition end CHS cylinder */
+            hd = (int) ((nxtAlloc32 + szPart32 - 1) / nSc % nHd); /* Partition end CHS head */
+            sc = (int) ((nxtAlloc32 + szPart32 - 1) % nSc + 1); /* Partition end CHS sector */
+            workBuf[pte + PTE_EdHead] = (byte) hd;
+            workBuf[pte + PTE_EdSec] = (byte) ((cy >> 2 & 0xC0) | sc);
+            workBuf[pte + PTE_EdCyl] = (byte) cy;
+
+            pte += SZ_PTE; /* Next entry */
+            nxtAlloc32 += szPart32;
+        }
+
+        stWord(workBuf, BS_55AA, 0xAA55); /* MBR signature */
+        if (diskIo.diskWrite(0, workBuf, 1) != DResult.RES_OK) return FResult.FR_DISK_ERR; /* Write it to the MBR */
+
+        return FResult.FR_OK;
+    }
+
+    /*-----------------------------------------------------------------------*/
+    /* API: Create FAT/exFAT volume                                          */
+    /*-----------------------------------------------------------------------*/
+    /**
+     * Create FAT volume. Deviation from C signature {@code f_mkfs(path, opt, work, len)}:
+     * work/len parameters are omitted; scratch buffer (one 512-byte sector) is allocated internally.
+     */
+    public FResult mkfs(String path, MkfsParm opt) {
+        /* Check mounted drive and clear work area */
+        String rem = stripDrive(path);
+        if (rem == null) return FResult.FR_INVALID_DRIVE;
+        this.fs_type = 0; /* Clear the fs object if mounted */
+        this.winsect = -1;
+        this.wflag = 0;
+        this.fsi_flag = 0;
+
+        /* Initialize the hosting physical drive */
+        int ds = diskIo.diskInitialize();
+        if ((ds & DiskIo.STA_NOINIT) != 0) return FResult.FR_NOT_READY;
+        if ((ds & DiskIo.STA_PROTECT) != 0) return FResult.FR_WRITE_PROTECTED;
+
+        /* Get physical drive parameters (sz_blk and ss) */
+        if (opt == null) opt = MkfsParm.defaultParm(); /* Use default parameter if it is not given */
+        long szBlk = opt.align & 0xFFFFFFFFL;
+        if (szBlk == 0) {
+            LongRef blkRef = new LongRef();
+            DResult blkRes = diskIo.diskIoctl(DiskIo.GET_BLOCK_SIZE, blkRef);
+            if (blkRes == DResult.RES_OK) {
+                szBlk = blkRef.value;
+            } else {
+                /* Try int[] fallback for backward compatibility */
+                int[] tmp = new int[1];
+                if (diskIo.diskIoctl(DiskIo.GET_BLOCK_SIZE, tmp) == DResult.RES_OK) {
+                    szBlk = tmp[0] & 0xFFFFFFFFL;
+                } else {
+                    szBlk = 0;
+                }
+            }
+        } /* Block size from the parameter or lower layer */
+        if (szBlk == 0 || szBlk > 0x8000 || (szBlk & (szBlk - 1)) != 0) szBlk = 1; /* Use default if the block size is invalid */
+        int ss = FF_MAX_SS;
+
+        /* Options for FAT sub-type and FAT parameters */
+        int fsopt = opt.fmt & (FM_ANY | FM_SFD);
+        int nFat = (opt.nFat >= 1 && opt.nFat <= 2) ? opt.nFat : 1;
+        int nRoot = (opt.nRoot >= 1 && opt.nRoot <= 32768 && (opt.nRoot % (ss / SZDIRE)) == 0) ? opt.nRoot : 512;
+        long szAu = (opt.auSize <= 0x1000000 && (opt.auSize & (opt.auSize - 1)) == 0) ? opt.auSize : 0;
+        szAu /= ss; /* Byte --> Sector */
+
+        /* Get working buffer */
+        byte[] buf = new byte[FF_MAX_SS]; /* Working buffer */
+        long szBuf = 1; /* Size of working buffer [sector] - deviation: fixed to 1 sector (C uses len/ss) */
+
+        /* Determine where the volume to be located (b_vol, sz_vol) */
+        long bVol = 0;
+        long szVol = 0;
+        /* The volume is associated with a physical drive */
+        {
+            LongRef volRef = new LongRef();
+            DResult volRes = diskIo.diskIoctl(DiskIo.GET_SECTOR_COUNT, volRef);
+            if (volRes != DResult.RES_OK) {
+                int[] tmp = new int[1];
+                if (diskIo.diskIoctl(DiskIo.GET_SECTOR_COUNT, tmp) == DResult.RES_OK) {
+                    szVol = tmp[0] & 0xFFFFFFFFL;
+                } else {
+                    return FResult.FR_DISK_ERR;
+                }
+            } else {
+                szVol = volRef.value;
+            }
+            if ((fsopt & FM_SFD) == 0) { /* To be partitioned? */
+                /* Create a single-partition on the drive in this function */
+                /* Partitioning is in MBR */
+                if (szVol > N_SEC_TRACK) {
+                    bVol = N_SEC_TRACK; szVol -= bVol; /* Estimated partition offset and size */
+                }
+            }
+        }
+        if (szVol < 128) return FResult.FR_MKFS_ABORTED; /* Check if volume size is >=128 sectors */
+
+        /* Now start to create an FAT volume at b_vol and sz_vol */
+
+        int fsty;
+        do { /* Pre-determine the FAT type */
+            if (szAu > 128) szAu = 128; /* Invalid AU for FAT/FAT32? */
+            if ((fsopt & FM_FAT32) != 0) { /* FAT32 possible? */
+                if ((fsopt & FM_FAT) == 0) { /* no-FAT? */
+                    fsty = FS_FAT32; break;
+                }
+            }
+            if ((fsopt & FM_FAT) == 0) return FResult.FR_INVALID_PARAMETER; /* no-FAT? */
+            fsty = FS_FAT16;
+        } while (false);
+
+        long vsn = (szVol + getFatTime()) & 0xFFFFFFFFL; /* VSN generated from current time and partition size */
+
+        /* Create an FAT/FAT32 volume */
+        long pau;
+        long nClst;
+        long szFat;
+        long szRsv;
+        long szDir;
+        long bFat;
+        long bData;
+        long sect;
+        long nsect;
+        long n;
+        int i;
+        {
+            do {
+                pau = szAu;
+                /* Pre-determine number of clusters and FAT sub-type */
+                if (fsty == FS_FAT32) { /* FAT32 volume */
+                    if (pau == 0) { /* AU auto-selection */
+                        n = szVol / 0x20000; /* Volume size in unit of 128KS */
+                        for (i = 0, pau = 1; cst32[i] != 0 && cst32[i] <= n; i++, pau <<= 1) ; /* Get from table */
+                    }
+                    nClst = szVol / pau; /* Number of clusters */
+                    szFat = (nClst * 4 + 8 + ss - 1) / ss; /* FAT size [sector] */
+                    szRsv = 32; /* Number of reserved sectors */
+                    szDir = 0; /* No static directory */
+                    if (nClst <= MAX_FAT16 || nClst > MAX_FAT32) return FResult.FR_MKFS_ABORTED;
+                } else { /* FAT volume */
+                    if (pau == 0) { /* au auto-selection */
+                        n = szVol / 0x1000; /* Volume size in unit of 4KS */
+                        for (i = 0, pau = 1; cst[i] != 0 && cst[i] <= n; i++, pau <<= 1) ; /* Get from table */
+                    }
+                    nClst = szVol / pau;
+                    if (nClst > MAX_FAT12) {
+                        n = nClst * 2 + 4; /* FAT size [byte] */
+                    } else {
+                        fsty = FS_FAT12;
+                        n = (nClst * 3 + 1) / 2 + 3; /* FAT size [byte] */
+                    }
+                    szFat = (n + ss - 1) / ss; /* FAT size [sector] */
+                    szRsv = 1; /* Number of reserved sectors */
+                    szDir = (long) nRoot * SZDIRE / ss; /* Root directory size [sector] */
+                }
+                bFat = bVol + szRsv; /* FAT base */
+                bData = bFat + szFat * nFat + szDir; /* Data base */
+
+                /* Align data area to erase block boundary (for flash memory media) */
+                n = (((bData + szBlk - 1) & ~(szBlk - 1)) - bData); /* Sectors to next nearest from current data base */
+                if (fsty == FS_FAT32) { /* FAT32: Move FAT */
+                    szRsv += n; bFat += n;
+                } else { /* FAT: Expand FAT */
+                    if (n % nFat != 0) { /* Adjust fractional error if needed */
+                        n--; szRsv++; bFat++;
+                    }
+                    szFat += n / nFat;
+                }
+
+                /* Determine number of clusters and final check of validity of the FAT sub-type */
+                if (szVol < bData + pau * 16 - bVol) return FResult.FR_MKFS_ABORTED; /* Too small volume? */
+                nClst = (szVol - szRsv - szFat * nFat - szDir) / pau;
+                if (fsty == FS_FAT32) {
+                    if (nClst <= MAX_FAT16) { /* Too few clusters for FAT32? */
+                        if (szAu == 0 && (szAu = pau / 2) != 0) continue; /* Adjust cluster size and retry */
+                        return FResult.FR_MKFS_ABORTED;
+                    }
+                }
+                if (fsty == FS_FAT16) {
+                    if (nClst > MAX_FAT16) { /* Too many clusters for FAT16 */
+                        if (szAu == 0 && (pau * 2) <= 64) {
+                            szAu = pau * 2; continue; /* Adjust cluster size and retry */
+                        }
+                        if ((fsopt & FM_FAT32) != 0) {
+                            fsty = FS_FAT32; continue; /* Switch type to FAT32 and retry */
+                        }
+                        if (szAu == 0 && (szAu = pau * 2) <= 128) continue; /* Adjust cluster size and retry */
+                        return FResult.FR_MKFS_ABORTED;
+                    }
+                    if (nClst <= MAX_FAT12) { /* Too few clusters for FAT16 */
+                        if (szAu == 0 && (szAu = pau * 2) <= 128) continue; /* Adjust cluster size and retry */
+                        return FResult.FR_MKFS_ABORTED;
+                    }
+                }
+                if (fsty == FS_FAT12 && nClst > MAX_FAT12) return FResult.FR_MKFS_ABORTED; /* Too many clusters for FAT12 */
+
+                /* Ok, it is the valid cluster configuration */
+                break;
+            } while (true);
+        }
+
+        /* Create FAT VBR */
+        Arrays.fill(buf, (byte) 0);
+        /* Boot jump code (x86), OEM name */
+        byte[] jumpOem = new byte[]{(byte) 0xEB, (byte) 0xFE, (byte) 0x90, (byte) 'M', (byte) 'S', (byte) 'D', (byte) 'O', (byte) 'S', (byte) '5', (byte) '.', (byte) '0'};
+        System.arraycopy(jumpOem, 0, buf, BS_JmpBoot, 11); /* Boot jump code (x86), OEM name */
+        stWord(buf, BPB_BytsPerSec, ss); /* Sector size [byte] */
+        buf[BPB_SecPerClus] = (byte) pau; /* Cluster size [sector] */
+        stWord(buf, BPB_RsvdSecCnt, (int) szRsv); /* Size of reserved area */
+        buf[BPB_NumFATs] = (byte) nFat; /* Number of FATs */
+        stWord(buf, BPB_RootEntCnt, (fsty == FS_FAT32) ? 0 : nRoot); /* Number of root directory entries */
+        if (szVol < 0x10000) {
+            stWord(buf, BPB_TotSec16, (int) szVol); /* Volume size in 16-bit LBA */
+        } else {
+            stDword(buf, BPB_TotSec32, szVol); /* Volume size in 32-bit LBA */
+        }
+        buf[BPB_Media] = (byte) 0xF8; /* Media descriptor byte */
+        stWord(buf, BPB_SecPerTrk, 63); /* Number of sectors per track (for int13) */
+        stWord(buf, BPB_NumHeads, 255); /* Number of heads (for int13) */
+        stDword(buf, BPB_HiddSec, bVol); /* Volume offset in the physical drive [sector] */
+        if (fsty == FS_FAT32) {
+            stDword(buf, BS_VolID32, vsn); /* VSN */
+            stDword(buf, BPB_FATSz32, szFat); /* FAT size [sector] */
+            stDword(buf, BPB_RootClus32, 2); /* Root directory cluster # (2) */
+            stWord(buf, BPB_FSInfo32, 1); /* Offset of FSINFO sector (VBR + 1) */
+            stWord(buf, BPB_BkBootSec32, 6); /* Offset of backup VBR (VBR + 6) */
+            buf[BS_DrvNum32] = (byte) 0x80; /* Drive number (for int13) */
+            buf[BS_BootSig32] = (byte) 0x29; /* Extended boot signature */
+            byte[] volLabel = "NO NAME    FAT32   ".getBytes(java.nio.charset.StandardCharsets.US_ASCII);
+            System.arraycopy(volLabel, 0, buf, BS_VolLab32, 19); /* Volume label, FAT signature */
+        } else {
+            stDword(buf, BS_VolID, vsn); /* VSN */
+            stWord(buf, BPB_FATSz16, (int) szFat); /* FAT size [sector] */
+            buf[BS_DrvNum] = (byte) 0x80; /* Drive number (for int13) */
+            buf[BS_BootSig] = (byte) 0x29; /* Extended boot signature */
+            byte[] volLabel = "NO NAME    FAT     ".getBytes(java.nio.charset.StandardCharsets.US_ASCII);
+            System.arraycopy(volLabel, 0, buf, BS_VolLab, 19); /* Volume label, FAT signature */
+        }
+        stWord(buf, BS_55AA, 0xAA55); /* Signature (offset is fixed here regardless of sector size) */
+        if (diskIo.diskWrite(bVol, buf, 1) != DResult.RES_OK) return FResult.FR_DISK_ERR; /* Write it to the VBR sector */
+
+        /* Create FSINFO record if needed */
+        if (fsty == FS_FAT32) {
+            if (diskIo.diskWrite(bVol + 6, buf, 1) != DResult.RES_OK) return FResult.FR_DISK_ERR; /* Write backup VBR (VBR + 6) */
+            Arrays.fill(buf, (byte) 0);
+            stDword(buf, FSI_LeadSig, 0x41615252L);
+            stDword(buf, FSI_StrucSig, 0x61417272L);
+            stDword(buf, FSI_Free_Count, nClst - 1); /* Number of free clusters */
+            stDword(buf, FSI_Nxt_Free, 2); /* Last allocated cluster# */
+            stWord(buf, BS_55AA, 0xAA55);
+            if (diskIo.diskWrite(bVol + 7, buf, 1) != DResult.RES_OK) return FResult.FR_DISK_ERR; /* Write backup FSINFO (VBR + 7) */
+            if (diskIo.diskWrite(bVol + 1, buf, 1) != DResult.RES_OK) return FResult.FR_DISK_ERR; /* Write original FSINFO (VBR + 1) */
+        }
+
+        /* Initialize FAT area */
+        Arrays.fill(buf, (byte) 0);
+        sect = bFat; /* FAT start sector */
+        for (i = 0; i < nFat; i++) { /* Initialize FATs each */
+            if (fsty == FS_FAT32) {
+                stDword(buf, 0, 0xFFFFFFF8L); /* FAT[0] */
+                stDword(buf, 4, 0xFFFFFFFFL); /* FAT[1] */
+                stDword(buf, 8, 0x0FFFFFFFL); /* FAT[2] (root directory at cluster# 2) */
+            } else {
+                stDword(buf, 0, (fsty == FS_FAT12) ? 0xFFFFF8L : 0xFFFFFFF8L); /* FAT[0] and FAT[1] */
+            }
+            nsect = szFat; /* Number of FAT sectors */
+            do { /* Fill FAT sectors */
+                n = (nsect > szBuf) ? szBuf : nsect;
+                if (diskIo.diskWrite(sect, buf, (int) n) != DResult.RES_OK) return FResult.FR_DISK_ERR;
+                Arrays.fill(buf, (byte) 0); /* Rest of FAT area is initially zero */
+                sect += n; nsect -= n;
+            } while (nsect != 0);
+            /* For next FAT, need to re-init first sector header if there is another FAT */
+            if (i + 1 < nFat) {
+                /* buf is already zeroed, next loop will set header again */
+            }
+        }
+
+        /* Initialize root directory (fill with zero) */
+        nsect = (fsty == FS_FAT32) ? pau : szDir; /* Number of root directory sectors */
+        do {
+            n = (nsect > szBuf) ? szBuf : nsect;
+            if (diskIo.diskWrite(sect, buf, (int) n) != DResult.RES_OK) return FResult.FR_DISK_ERR;
+            sect += n; nsect -= n;
+        } while (nsect != 0);
+
+        /* A FAT volume has been created here */
+
+        /* Determine system ID in the MBR partition table */
+        int sys;
+        if (fsty == FS_FAT32) {
+            sys = 0x0C; /* FAT32X */
+        } else if (szVol >= 0x10000) {
+            sys = 0x06; /* FAT12/16 (large) */
+        } else if (fsty == FS_FAT16) {
+            sys = 0x04; /* FAT16 */
+        } else {
+            sys = 0x01; /* FAT12 */
+        }
+
+        /* Update partition information */
+        /* Volume as a new single partition */
+        if ((fsopt & FM_SFD) == 0) { /* Create partition table if not in SFD format */
+            long[] lba = new long[]{szVol, 0};
+            FResult res = createPartition(lba, sys, buf);
+            if (res != FResult.FR_OK) return res;
+        }
+
+        if (diskIo.diskIoctl(DiskIo.CTRL_SYNC, null) != DResult.RES_OK) return FResult.FR_DISK_ERR;
+
+        return FResult.FR_OK;
     }
 
     //------------------- public API -------------------

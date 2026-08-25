@@ -76,8 +76,12 @@ public interface DiskIo {
 
     /**
      * Corresponds to disk_ioctl(pdrv, cmd, buff) - see diskio.h.
-     * Under the baked-in configuration only CTRL_SYNC is used by FatFs;
-     * other commands may return RES_PARERR.
+     * Under the baked-in configuration CTRL_SYNC is used for sync,
+     * and {@code GET_SECTOR_COUNT} / {@code GET_BLOCK_SIZE} are required for
+     * {@code f_mkfs} (mkfs). For {@code GET_SECTOR_COUNT} and {@code GET_BLOCK_SIZE}
+     * the {@code buff} may be a {@link LongRef} (preferred) or an {@code int[]} for
+     * backward compatibility; on success the referenced value is set to the sector/block count.
+     * Other commands may return RES_PARERR.
      */
     DResult diskIoctl(int cmd, Object buff);
 }

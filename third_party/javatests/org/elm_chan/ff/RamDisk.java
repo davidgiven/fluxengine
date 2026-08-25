@@ -30,6 +30,9 @@ public final class RamDisk implements DiskIo {
 
     @Override
     public int diskInitialize() {
+        if (writeProtected) {
+            return STA_PROTECT;
+        }
         return 0;
     }
 
@@ -73,17 +76,29 @@ public final class RamDisk implements DiskIo {
         if (cmd == CTRL_SYNC) {
             return DResult.RES_OK;
         }
-        if (cmd == GET_SECTOR_COUNT && buff instanceof int[]) {
-            ((int[]) buff)[0] = sectorCount;
-            return DResult.RES_OK;
+        if (cmd == GET_SECTOR_COUNT) {
+            if (buff instanceof LongRef) {
+                ((LongRef) buff).value = sectorCount;
+                return DResult.RES_OK;
+            }
+            if (buff instanceof int[]) {
+                ((int[]) buff)[0] = sectorCount;
+                return DResult.RES_OK;
+            }
         }
         if (cmd == GET_SECTOR_SIZE && buff instanceof int[]) {
             ((int[]) buff)[0] = 512;
             return DResult.RES_OK;
         }
-        if (cmd == GET_BLOCK_SIZE && buff instanceof int[]) {
-            ((int[]) buff)[0] = 1;
-            return DResult.RES_OK;
+        if (cmd == GET_BLOCK_SIZE) {
+            if (buff instanceof LongRef) {
+                ((LongRef) buff).value = 1;
+                return DResult.RES_OK;
+            }
+            if (buff instanceof int[]) {
+                ((int[]) buff)[0] = 1;
+                return DResult.RES_OK;
+            }
         }
         return DResult.RES_PARERR;
     }

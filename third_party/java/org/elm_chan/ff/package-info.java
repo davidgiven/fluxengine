@@ -8,7 +8,7 @@
  * documentation only.
  *
  * <p>Baked-in {@code ffconf.h} settings: {@code FF_FS_READONLY=0},
- * {@code FF_FS_MINIMIZE=0}, {@code FF_USE_FIND=0}, {@code FF_USE_MKFS=0},
+ * {@code FF_FS_MINIMIZE=0}, {@code FF_USE_FIND=0}, {@code FF_USE_MKFS=1 (enabled on request; dep/ffconf.h has 0)},
  * {@code FF_USE_FASTSEEK=0}, {@code FF_USE_EXPAND=0}, {@code FF_USE_CHMOD=0},
  * {@code FF_USE_LABEL=0}, {@code FF_USE_FORWARD=0}, {@code FF_USE_STRFUNC=0},
  * {@code FF_CODE_PAGE=932}, {@code FF_USE_LFN=0}, {@code FF_FS_RPATH=0},
@@ -22,6 +22,7 @@
  *   <li>Disk I/O is injected per-volume via {@link org.elm_chan.ff.DiskIo} (no {@code pdrv} table).</li>
  *   <li>{@code get_fattime()} is supplied as a {@code LongSupplier} to {@link org.elm_chan.ff.FatFs}.</li>
  *   <li>Out-parameters use {@link org.elm_chan.ff.IntRef}/{@link org.elm_chan.ff.LongRef}.</li>
+ *   <li>{@code f_mkfs(path, opt, work, len)} is exposed as {@code mkfs(path, opt)} — scratch buffer allocated internally (1 sector); work/len omitted.</li>
  * </ul>
  *
  * <p>Original FatFs license header is retained verbatim on each translated file.
