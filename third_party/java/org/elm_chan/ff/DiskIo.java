@@ -4,6 +4,8 @@
 
 package org.elm_chan.ff;
 
+import java.nio.ByteBuffer;
+
 /* Status of Disk Functions */
  /* Results of Disk Functions - see DResult enum */
 
@@ -75,12 +77,51 @@ public interface DiskIo {
     DResult diskWrite(long sector, byte[] buff, int count);
 
     /**
+     * Corresponds to disk_read with ByteBuffer - same as above but using ByteBuffer.
+     * Implementations should copy {@code count * 512} bytes between the device and
+     * {@code buff} at absolute offsets {@code 0 .. count*512-1} without reading or
+     * writing {@code buff.position()} or {@code buff.limit()}.
+     */
+    default DResult diskRead(long sector, ByteBuffer buff, int count) {
+        byte[] tmp = new byte[count * 512];
+        DResult res = diskRead(sector, tmp, count);
+        if (res == DResult.RES_OK) {
+            if (buff.hasArray()) {
+                System.arraycopy(tmp, 0, buff.array(), buff.arrayOffset(), tmp.length);
+            } else {
+                for (int i = 0; i < tmp.length; i++) {
+                    buff.put(i, tmp[i]);
+                }
+            }
+        }
+        return res;
+    }
+
+    /**
+     * Corresponds to disk_write with ByteBuffer.
+     * Copies {@code count * 512} bytes from {@code buff} at absolute offsets without
+     * touching position/limit.
+     */
+    default DResult diskWrite(long sector, ByteBuffer buff, int count) {
+        byte[] tmp = new byte[count * 512];
+        if (buff.hasArray()) {
+            System.arraycopy(buff.array(), buff.arrayOffset(), tmp, 0, tmp.length);
+        } else {
+            for (int i = 0; i < tmp.length; i++) {
+                tmp[i] = buff.get(i);
+            }
+        }
+        return diskWrite(sector, tmp, count);
+    }
+
+    /**
      * Corresponds to disk_ioctl(pdrv, cmd, buff) - see diskio.h.
      * Under the baked-in configuration CTRL_SYNC is used for sync,
      * and {@code GET_SECTOR_COUNT} / {@code GET_BLOCK_SIZE} are required for
      * {@code f_mkfs} (mkfs). For {@code GET_SECTOR_COUNT} and {@code GET_BLOCK_SIZE}
-     * the {@code buff} may be a {@link LongRef} (preferred) or an {@code int[]} for
-     * backward compatibility; on success the referenced value is set to the sector/block count.
+     * the {@code buff} should be a {@code long[1]} (single-element array, matching C
+     * {@code LBA_t*} / {@code DWORD*} out-parameter); an {@code int[1]} is also accepted for
+     * backward compatibility. On success {@code buff[0]} is set to the sector/block count.
      * Other commands may return RES_PARERR.
      */
     DResult diskIoctl(int cmd, Object buff);

@@ -20,6 +20,7 @@
 
 package org.elm_chan.ff;
 
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.function.LongSupplier;
 
@@ -1705,7 +1706,7 @@ public final class FatFs {
     /*-----------------------------------------------------------------------*/
     /* API: Read File                                                        */
     /*-----------------------------------------------------------------------*/
-    public FResult read(Fil fp, byte[] buff, int btr, int[] br) {
+    public FResult read(Fil fp, ByteBuffer buff, int btr, int[] br) {
         if (br != null) br[0] = 0;
         FResult res = validate(fp);
         if (res != FResult.FR_OK) return res;
@@ -1743,7 +1744,7 @@ public final class FatFs {
                         int idx = (int)(fp.sect - sect);
                         System.arraycopy(fp.buf, 0, tmp, idx * FF_MAX_SS, FF_MAX_SS);
                     }
-                    System.arraycopy(tmp, 0, buff, rbuffOff, cc * FF_MAX_SS);
+                    for (int i = 0; i < cc * FF_MAX_SS; i++) buff.put(rbuffOff + i, tmp[i]);
                     int rcnt = FF_MAX_SS * cc;
                     btr -= rcnt; rbuffOff += rcnt; brCnt += rcnt; fp.fptr += rcnt;
                     continue;
@@ -1759,17 +1760,21 @@ public final class FatFs {
             }
             int rcnt = FF_MAX_SS - (int)(fp.fptr % FF_MAX_SS);
             if (rcnt > btr) rcnt = btr;
-            System.arraycopy(fp.buf, (int)(fp.fptr % FF_MAX_SS), buff, rbuffOff, rcnt);
+            for (int i = 0; i < rcnt; i++) buff.put(rbuffOff + i, fp.buf[(int)(fp.fptr % FF_MAX_SS) + i]);
             btr -= rcnt; rbuffOff += rcnt; brCnt += rcnt; fp.fptr += rcnt;
         }
         if (br != null) br[0] = brCnt;
         return FResult.FR_OK;
     }
 
+    public FResult read(Fil fp, byte[] buff, int btr, int[] br) {
+        return read(fp, ByteBuffer.wrap(buff), btr, br);
+    }
+
     /*-----------------------------------------------------------------------*/
     /* API: Write File                                                       */
     /*-----------------------------------------------------------------------*/
-    public FResult write(Fil fp, byte[] buff, int btw, int[] bw) {
+    public FResult write(Fil fp, ByteBuffer buff, int btw, int[] bw) {
         if (bw != null) bw[0] = 0;
         FResult res = validate(fp);
         if (res != FResult.FR_OK) return res;
@@ -1806,7 +1811,7 @@ public final class FatFs {
                 if (cc > 0) {
                     if (csect + cc > csize) cc = csize - csect;
                     byte[] slice = new byte[cc * FF_MAX_SS];
-                    System.arraycopy(buff, wOff, slice, 0, cc * FF_MAX_SS);
+                    for (int i = 0; i < cc * FF_MAX_SS; i++) slice[i] = buff.get(wOff + i);
                     if (diskIo.diskWrite(sect, slice, cc) != DResult.RES_OK) { fp.err = FResult.FR_DISK_ERR.getValue(); return FResult.FR_DISK_ERR; }
                     if (fp.sect >= sect && fp.sect < sect + cc) {
                         System.arraycopy(slice, (int)((fp.sect - sect) * FF_MAX_SS), fp.buf, 0, FF_MAX_SS);
@@ -1827,7 +1832,7 @@ public final class FatFs {
             }
             int wcnt = FF_MAX_SS - (int)(fp.fptr % FF_MAX_SS);
             if (wcnt > btw) wcnt = btw;
-            System.arraycopy(buff, wOff, fp.buf, (int)(fp.fptr % FF_MAX_SS), wcnt);
+            for (int i = 0; i < wcnt; i++) fp.buf[(int)(fp.fptr % FF_MAX_SS) + i] = buff.get(wOff + i);
             fp.flag |= FA_DIRTY;
             btw -= wcnt; wOff += wcnt; bwCnt += wcnt; fp.fptr += wcnt;
             if (fp.fptr > fp.objsize) fp.objsize = fp.fptr;
@@ -1837,8 +1842,12 @@ public final class FatFs {
         return FResult.FR_OK;
     }
 
+    public FResult write(Fil fp, byte[] buff, int btw, int[] bw) {
+        return write(fp, ByteBuffer.wrap(buff), btw, bw);
+    }
+
     // Special handling for write direct second overload to avoid slice misuse
-    private FResult writeInternal(Fil fp, byte[] buff, int btw, int[] bw) { return write(fp, buff, btw, bw); }
+    private FResult writeInternal(Fil fp, byte[] buff, int btw, int[] bw) { return write(fp, ByteBuffer.wrap(buff), btw, bw); }
 
     /*-----------------------------------------------------------------------*/
     /* API: Seek File Read/Write Pointer                                     */
