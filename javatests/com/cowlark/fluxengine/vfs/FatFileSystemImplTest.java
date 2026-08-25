@@ -75,6 +75,73 @@ public class FatFileSystemImplTest
     }
 
     @Test
+    public void putFilesystemMetadata() throws IOException
+    {
+        impl.create(true, "LABEL");
+        impl.putFilesystemMetadata(ImmutableMap.of(Attributes.VOLUME_NAME, "NEWLABEL"));
+        assertThat(impl.getFilesystemMetadata().get(Attributes.VOLUME_NAME)).isEqualTo("NEWLABEL");
+    }
+
+    @Test
+    public void putFilesystemMetadata_replacesLabel() throws IOException
+    {
+        impl.create(true, "LABEL");
+        impl.putFilesystemMetadata(ImmutableMap.of(Attributes.VOLUME_NAME, "OTHER"));
+        impl.putFilesystemMetadata(ImmutableMap.of(Attributes.VOLUME_NAME, "FINAL"));
+        assertThat(impl.getFilesystemMetadata().get(Attributes.VOLUME_NAME)).isEqualTo("FINAL");
+    }
+
+    @Test
+    public void putFilesystemMetadata_emptyRemovesLabel() throws IOException
+    {
+        impl.create(true, "LABEL");
+        impl.putFilesystemMetadata(ImmutableMap.of(Attributes.VOLUME_NAME, ""));
+        assertThat(impl.getFilesystemMetadata().get(Attributes.VOLUME_NAME)).isEqualTo("");
+    }
+
+    @Test
+    public void putFilesystemMetadata_invalidKeys() throws IOException
+    {
+        impl.create(true, "LABEL");
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> impl.putFilesystemMetadata(ImmutableMap.of()));
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> impl.putFilesystemMetadata(ImmutableMap.of(Attributes.TOTAL_BLOCKS, "123")));
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> impl.putFilesystemMetadata(
+                        ImmutableMap.of(Attributes.VOLUME_NAME, "A", Attributes.TOTAL_BLOCKS, "123")));
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> impl.putFilesystemMetadata(
+                        ImmutableMap.of("unknown_key", "value")));
+    }
+
+    @Test
+    public void putFilesystemMetadata_persistsAfterFlush() throws IOException
+    {
+        impl.create(true, "LABEL");
+        impl.putFilesystemMetadata(ImmutableMap.of(Attributes.VOLUME_NAME, "PERSIST"));
+        impl.flushChanges();
+
+        FatFileSystemImpl impl2 =
+                new FatFileSystemImpl(configProto.getFilesystem().getFatfs(), blockDevice);
+        assertThat(impl2.getFilesystemMetadata().get(Attributes.VOLUME_NAME)).isEqualTo("PERSIST");
+    }
+
+    @Test
+    public void putFilesystemMetadata_invalidLabel() throws IOException
+    {
+        impl.create(true, "LABEL");
+        // Label with bad character '*' should be rejected (maps to InvalidPathException via FR_INVALID_NAME)
+        assertThrows(
+                java.nio.file.InvalidPathException.class,
+                () -> impl.putFilesystemMetadata(ImmutableMap.of(Attributes.VOLUME_NAME, "BAD*LABEL")));
+    }
+
+    @Test
     public void getFile() throws IOException
     {
         impl.create(true, "LABEL");

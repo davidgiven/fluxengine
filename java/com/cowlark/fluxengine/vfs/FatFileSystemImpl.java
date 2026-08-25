@@ -247,6 +247,17 @@ public class FatFileSystemImpl extends FileSystemImpl
     }
 
     @Override
+    public void putFilesystemMetadata(ImmutableMap<String, String> metadata) throws IOException
+    {
+        mount();
+
+        if (!metadata.keySet().equals(ImmutableSet.of(Attributes.VOLUME_NAME)))
+            throw new IllegalArgumentException("can't set this metadata key");
+
+        checkResult(fatFilesystem.setLabel(metadata.get(Attributes.VOLUME_NAME)));
+    }
+
+    @Override
     public ImmutableMap<String, Dirent> list(Path path) throws IOException
     {
         mount();
