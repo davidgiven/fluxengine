@@ -5,7 +5,9 @@ import static com.cowlark.fluxengine.vfs.FileSystemImpl.Capability.OP_CREATEDIR;
 import static com.cowlark.fluxengine.vfs.FileSystemImpl.Capability.OP_DELETE;
 import static com.cowlark.fluxengine.vfs.FileSystemImpl.Capability.OP_GETDIRENT;
 import static com.cowlark.fluxengine.vfs.FileSystemImpl.Capability.OP_GETFILE;
+import static com.cowlark.fluxengine.vfs.FileSystemImpl.Capability.OP_GETFSDATA;
 import static com.cowlark.fluxengine.vfs.FileSystemImpl.Capability.OP_LIST;
+import static com.cowlark.fluxengine.vfs.FileSystemImpl.Capability.OP_MOVE;
 import static com.cowlark.fluxengine.vfs.FileSystemImpl.Capability.OP_PUTFILE;
 import static com.cowlark.fluxengine.vfs.FileSystemImpl.FileType.IS_DIR;
 import static com.cowlark.fluxengine.vfs.FileSystemImpl.FileType.IS_FILE;
@@ -48,7 +50,9 @@ public class FatFileSystemImpl extends FileSystemImpl
             OP_PUTFILE,
             OP_GETDIRENT,
             OP_CREATEDIR,
-            OP_DELETE);
+            OP_DELETE,
+            OP_MOVE,
+            OP_GETFSDATA);
 
     private final FatFsProto config;
     private final BlockDevice blockDevice;
@@ -219,6 +223,25 @@ public class FatFileSystemImpl extends FileSystemImpl
         FResult res = fatFilesystem.mkfs("", params);
         if (res != FR_OK)
             throw new IOException("mkfs failed: " + res);
+    }
+
+    @Override
+    public ImmutableMap<String, String> getFilesystemMetadata() throws IOException
+    {
+        mount();
+        ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
+
+        long[] box = new long[1];
+        checkResult(fatFilesystem.getfree("", box));
+        long total = (fatFilesystem.n_fatent - 2) + (fatFilesystem.database / fatFilesystem.csize);
+        builder.put(Attributes.TOTAL_BLOCKS, Long.toString(total));
+        builder.put(Attributes.USED_BLOCKS, Long.toString(total - box[0]));
+        builder.put(
+                Attributes.BLOCK_SIZE,
+                Long.toString(fatFilesystem.csize * blockDevice.getBlockSize()));
+
+        return builder.build();
+
     }
 
     @Override

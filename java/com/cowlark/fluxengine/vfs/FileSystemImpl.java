@@ -77,7 +77,7 @@ public abstract class FileSystemImpl implements AutoCloseable
     /**
      * Get volume metadata.
      */
-    public ImmutableMap<String, String> getFilesystemMetadata()
+    public ImmutableMap<String, String> getFilesystemMetadata() throws IOException
     {
         throw new UnsupportedOperationException();
     }

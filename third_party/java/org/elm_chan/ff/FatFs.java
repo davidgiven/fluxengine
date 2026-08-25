@@ -2116,6 +2116,63 @@ public final class FatFs {
     }
 
     /*-----------------------------------------------------------------------*/
+    /* API: Get Volume Label                                                 */
+    /*-----------------------------------------------------------------------*/
+    public FResult getLabel(String path, String[] label, long[] vsn) {
+        String[] _pathArr = new String[]{path};
+        int vol = get_ldnumber(_pathArr);
+        if (vol < 0) return FResult.FR_INVALID_DRIVE;
+        FResult res = mount_volume(0);
+        if (res != FResult.FR_OK) return res;
+
+        /* Get volume label */
+        if (res == FResult.FR_OK && label != null && label.length > 0) {
+            Dir dj = new Dir();
+            dj.fs = this;
+            dj.sclust = 0; /* Open root directory */
+            res = dir_sdi(dj, 0);
+            if (res == FResult.FR_OK) {
+                res = dir_read(dj, 1); /* Find a volume label entry (DIR_READ_LABEL) */
+                if (res == FResult.FR_OK) {
+                    /* Extract volume label from AM_VOL entry */
+                    /* On the FAT/FAT32 volume */
+                    StringBuilder sb = new StringBuilder();
+                    for (int si = 0; si < 11; si++) {
+                        int wc = win[dj.dir_ptr + si] & 0xFF;
+                        sb.append((char) wc);
+                    }
+                    /* Truncate trailing spaces */
+                    String s = sb.toString();
+                    int di = s.length();
+                    while (di > 0 && s.charAt(di - 1) == ' ') di--;
+                    s = s.substring(0, di);
+                    label[0] = s;
+                }
+            }
+            if (res == FResult.FR_NO_FILE) { /* No label entry and return nul string */
+                label[0] = "";
+                res = FResult.FR_OK;
+            }
+        }
+
+        /* Get volume serial number */
+        if (res == FResult.FR_OK && vsn != null && vsn.length > 0) {
+            res = move_window(volbase); /* Load VBR */
+            if (res == FResult.FR_OK) {
+                int di;
+                /* FF_FS_EXFAT is disabled, so exFAT case is pruned */
+                if (fs_type == FS_FAT32) {
+                    di = BS_VolID32;
+                } else { /* FAT12/16 */
+                    di = (win[BS_BootSig] & 0xFF) == 0x29 ? BS_VolID : 0;
+                }
+                vsn[0] = (di != 0) ? (ld_32(win, di) & 0xFFFFFFFFL) : 0; /* Get VSN in the VBR */
+            }
+        }
+        return res;
+    }
+
+    /*-----------------------------------------------------------------------*/
     /* API: Delete a File/Directory                                          */
     /*-----------------------------------------------------------------------*/
     public FResult unlink(String path) {
