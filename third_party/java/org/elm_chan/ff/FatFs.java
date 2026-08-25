@@ -2173,6 +2173,81 @@ public final class FatFs {
     }
 
     /*-----------------------------------------------------------------------*/
+    /* API: Set Volume Label                                                 */
+    /*-----------------------------------------------------------------------*/
+    public FResult setLabel(String label) {
+        String[] _labelArr = new String[]{label};
+        int vol = get_ldnumber(_labelArr);
+        if (vol < 0) return FResult.FR_INVALID_DRIVE;
+        String l = _labelArr[0];
+        FResult res = mount_volume(FA_WRITE);
+        if (res != FResult.FR_OK) return res;
+
+        /* On the FAT/FAT32 volume (exFAT pruned) */
+        byte[] dirvn = new byte[11];
+        for (int i = 0; i < 11; i++) dirvn[i] = (byte) ' ';
+        int di = 0;
+        if (l != null) {
+            int si = 0;
+            while (si < l.length() && (l.charAt(si) & 0xFF) >= ' ') { /* Create volume label */
+                int wc = l.charAt(si++) & 0xFF;
+                if (dbc_1st(wc)) {
+                    if (si < l.length() && dbc_2nd(l.charAt(si) & 0xFF)) {
+                        int d = l.charAt(si++) & 0xFF;
+                        wc = wc << 8 | d;
+                    } else {
+                        wc = 0;
+                    }
+                }
+                if (IsLower(wc)) wc -= 0x20; /* To upper ASCII characters */
+                String badchr = "+.,;=[]/*:<>|\\\"?\u007F";
+                if (wc == 0 || badchr.indexOf((char) wc) >= 0 || di >= (wc >= 0x100 ? 10 : 11)) { /* Reject invalid characters for volume label */
+                    return FResult.FR_INVALID_NAME;
+                }
+                if (wc >= 0x100) dirvn[di++] = (byte) (wc >> 8);
+                dirvn[di++] = (byte) wc;
+            }
+            if (dirvn[0] == (byte) DDEM) return FResult.FR_INVALID_NAME; /* Reject illegal name (heading DDEM) */
+            while (di > 0 && dirvn[di - 1] == ' ') di--; /* Snip trailing spaces */
+        } else {
+            di = 0;
+        }
+
+        /* Set volume label */
+        Dir dj = new Dir();
+        dj.fs = this;
+        dj.sclust = 0; /* Open root directory */
+        res = dir_sdi(dj, 0);
+        if (res == FResult.FR_OK) {
+            res = dir_read(dj, 1); /* Get volume label entry (DIR_READ_LABEL) */
+            if (res == FResult.FR_OK) {
+                if (di != 0) {
+                    System.arraycopy(dirvn, 0, win, dj.dir_ptr, 11); /* Change the volume label */
+                } else {
+                    win[dj.dir_ptr] = (byte) DDEM; /* Remove the volume label */
+                }
+                wflag = 1;
+                res = sync_fs();
+            } else { /* No volume label entry or an error */
+                if (res == FResult.FR_NO_FILE) {
+                    res = FResult.FR_OK;
+                    if (di != 0) { /* Create a volume label entry */
+                        res = dir_alloc(dj, 1); /* Allocate an entry */
+                        if (res == FResult.FR_OK) {
+                            for (int i = 0; i < SZDIRE; i++) win[dj.dir_ptr + i] = 0; /* Clean the entry */
+                            win[dj.dir_ptr + DIR_Attr] = (byte) AM_VOL; /* Create volume label entry */
+                            System.arraycopy(dirvn, 0, win, dj.dir_ptr, 11);
+                            wflag = 1;
+                            res = sync_fs();
+                        }
+                    }
+                }
+            }
+        }
+        return res;
+    }
+
+    /*-----------------------------------------------------------------------*/
     /* API: Delete a File/Directory                                          */
     /*-----------------------------------------------------------------------*/
     public FResult unlink(String path) {

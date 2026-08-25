@@ -61,6 +61,20 @@ public class FatFileSystemImplTest
     }
 
     @Test
+    public void getFilesystemMetadata() throws IOException
+    {
+        impl.create(true, "LABEL");
+        ImmutableMap<String, String> metadata = impl.getFilesystemMetadata();
+        assertThat(metadata).isEqualTo(ImmutableMap
+                .builder()
+                .put(Attributes.VOLUME_NAME, "LABEL")
+                .put(Attributes.TOTAL_BLOCKS, "2880")
+                .put(Attributes.USED_BLOCKS, "42")
+                .put(Attributes.BLOCK_SIZE, "512")
+                .build());
+    }
+
+    @Test
     public void getFile() throws IOException
     {
         impl.create(true, "LABEL");

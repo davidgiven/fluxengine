@@ -220,9 +220,10 @@ public class FatFileSystemImpl extends FileSystemImpl
         }
         params.nRoot = nRoot;
         params.auSize = auSize;
-        FResult res = fatFilesystem.mkfs("", params);
-        if (res != FR_OK)
-            throw new IOException("mkfs failed: " + res);
+        checkResult(fatFilesystem.mkfs("", params));
+        if (volumeName != null && !volumeName.isEmpty()) {
+            checkResult(fatFilesystem.setLabel(volumeName));
+        }
     }
 
     @Override
@@ -231,17 +232,20 @@ public class FatFileSystemImpl extends FileSystemImpl
         mount();
         ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
 
-        long[] box = new long[1];
-        checkResult(fatFilesystem.getfree("", box));
+        String[] stringBox = new String[1];
+        long[] longBox = new long[1];
+        checkResult(fatFilesystem.getLabel("", stringBox, longBox));
+        builder.put(Attributes.VOLUME_NAME, stringBox[0]);
+
+        checkResult(fatFilesystem.getfree("", longBox));
         long total = (fatFilesystem.n_fatent - 2) + (fatFilesystem.database / fatFilesystem.csize);
         builder.put(Attributes.TOTAL_BLOCKS, Long.toString(total));
-        builder.put(Attributes.USED_BLOCKS, Long.toString(total - box[0]));
+        builder.put(Attributes.USED_BLOCKS, Long.toString(total - longBox[0]));
         builder.put(
                 Attributes.BLOCK_SIZE,
                 Long.toString(fatFilesystem.csize * blockDevice.getBlockSize()));
 
         return builder.build();
-
     }
 
     @Override
