@@ -326,6 +326,26 @@ public class FatFileSystemImplTest
         assertThat(de.filename()).isEqualTo("data");
     }
 
+    @Test
+    public void discardChanges() throws IOException
+    {
+        impl.create(true, "LABEL");
+        impl.createDirectory(Path.of("/dir"));
+        impl.flushChanges();
+        // check the directory exists after flush
+        assertThat(impl.list(Path.of("/"))).hasSize(1);
+        assertThat(impl.getDirent(Path.of("/dir")).fileType()).isEqualTo(IS_DIR);
+
+        impl.deleteFile(Path.of("/dir"));
+        assertThat(impl.list(Path.of("/"))).isEmpty();
+
+        impl.discardChanges();
+        // check that the directory still exists after discard
+        assertThat(impl.list(Path.of("/"))).hasSize(1);
+        Dirent de = impl.getDirent(Path.of("/dir"));
+        assertThat(de.fileType()).isEqualTo(IS_DIR);
+    }
+
     /* Do not use --- for debugging the test only */
     private void writeImage()
     {

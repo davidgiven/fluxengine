@@ -44,6 +44,7 @@ public abstract class TrackedBlockDevice extends BlockDevice
 
     protected abstract void populateTrack(Image destination, CylinderHead lch);
 
+    @Override
     public void commit()
     {
         changedData.getLogicalLocations().stream().map(ll -> ll.trackLocation()).forEach(lch -> {
@@ -52,8 +53,15 @@ public abstract class TrackedBlockDevice extends BlockDevice
         });
     }
 
+    @Override
     public void revert()
     {
         changedData = new Image();
+    }
+
+    @Override
+    public boolean needsCommit()
+    {
+        return !changedData.empty();
     }
 }

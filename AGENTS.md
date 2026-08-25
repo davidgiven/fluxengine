@@ -138,4 +138,4 @@ Useful commands:
 
 - Verify changes with `bazel build //java/...` and `bazel test //javatests/...` (and
   `bazel run` for CLI-visible behaviour) before finishing.
-- Do not commit unless asked.
+- Do not commit anything to the VCS; the user will handle commits manually.

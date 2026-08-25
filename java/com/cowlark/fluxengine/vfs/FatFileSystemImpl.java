@@ -9,6 +9,7 @@ import static com.cowlark.fluxengine.vfs.FileSystemImpl.Capability.OP_GETFSDATA;
 import static com.cowlark.fluxengine.vfs.FileSystemImpl.Capability.OP_LIST;
 import static com.cowlark.fluxengine.vfs.FileSystemImpl.Capability.OP_MOVE;
 import static com.cowlark.fluxengine.vfs.FileSystemImpl.Capability.OP_PUTFILE;
+import static com.cowlark.fluxengine.vfs.FileSystemImpl.Capability.OP_PUTFSDATA;
 import static com.cowlark.fluxengine.vfs.FileSystemImpl.FileType.IS_DIR;
 import static com.cowlark.fluxengine.vfs.FileSystemImpl.FileType.IS_FILE;
 import static org.elm_chan.ff.DResult.RES_ERROR;
@@ -52,7 +53,8 @@ public class FatFileSystemImpl extends FileSystemImpl
             OP_CREATEDIR,
             OP_DELETE,
             OP_MOVE,
-            OP_GETFSDATA);
+            OP_GETFSDATA,
+            OP_PUTFSDATA);
 
     private final FatFsProto config;
     private final BlockDevice blockDevice;
@@ -403,8 +405,22 @@ public class FatFileSystemImpl extends FileSystemImpl
     }
 
     @Override
+    public boolean needsFlushing()
+    {
+        return blockDevice.needsCommit();
+    }
+
+    @Override
     public void flushChanges() throws IOException
     {
+        blockDevice.commit();
+    }
+
+    @Override
+    public void discardChanges()
+    {
+        fatFilesystem.unmount("");
+        blockDevice.revert();
     }
 
     private static String toFatPath(Path path)

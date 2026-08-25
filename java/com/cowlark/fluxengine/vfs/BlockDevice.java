@@ -52,6 +52,12 @@ public abstract class BlockDevice implements AutoCloseable
 
     public abstract void putBlock(int blockNumber, Bytes block) throws FileSystemException;
 
+    public abstract void commit();
+
+    public abstract void revert();
+
+    public abstract boolean needsCommit();
+
     @Override
     public void close()
     {
