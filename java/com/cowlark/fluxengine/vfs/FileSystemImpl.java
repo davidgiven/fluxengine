@@ -149,7 +149,7 @@ public abstract class FileSystemImpl implements AutoCloseable
     /**
      * Moves a file (including renaming it).
      */
-    public void moveFile(Path oldName, Path newName)
+    public void moveFile(Path oldName, Path newName) throws IOException
     {
         throw new UnsupportedOperationException();
     }

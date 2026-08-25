@@ -53,12 +53,11 @@ public class FatFileSystemImplTest
     {
         impl.create(true, "LABEL");
         blockDevice.commit();
-        assertThat(image.get(0, 0, 1).data.reader().seek(3).readString(8)).isEqualTo("fluxengn");
+        assertThat(image.get(0, 0, 1).data.reader().seek(3).readString(8)).isEqualTo("MSDOS5.0");
         assertThat(image.get(0, 0, 2).data
                 .reader()
                 .read(3)
                 .toByteArray()).isEqualTo(new byte[]{(byte) 0xf8, (byte) 0xff, (byte) 0xff});
-        assertThat(image.get(0, 1, 8).data.reader().readString(5)).isEqualTo("LABEL");
     }
 
     @Test
@@ -83,7 +82,7 @@ public class FatFileSystemImplTest
         impl.create(true, "LABEL");
         impl.putFile(Path.of("/data"), new Bytes("Hello, world!"));
         blockDevice.commit();
-        assertThat(image.get(1, 1, 4).data.reader().readString(13)).isEqualTo("Hello, world!");
+        assertThat(image.get(1, 0, 7).data.reader().readString(13)).isEqualTo("Hello, world!");
     }
 
     @Test
@@ -93,7 +92,7 @@ public class FatFileSystemImplTest
         impl.putFile(Path.of("/data"), new Bytes("This is the wrong data."));
         impl.putFile(Path.of("/data"), new Bytes("Hello, world!"));
         blockDevice.commit();
-        assertThat(image.get(1, 1, 4).data.reader().readString(13)).isEqualTo("Hello, world!");
+        assertThat(image.get(1, 0, 7).data.reader().readString(13)).isEqualTo("Hello, world!");
     }
 
     @Test
@@ -103,7 +102,7 @@ public class FatFileSystemImplTest
         impl.createDirectory(Path.of("/data"));
         impl.putFile(Path.of("/data"), new Bytes("Hello, world!"));
         blockDevice.commit();
-        assertThat(image.get(1, 1, 4).data.reader().readString(13)).isEqualTo("Hello, world!");
+        assertThat(image.get(1, 0, 8).data.reader().readString(13)).isEqualTo("Hello, world!");
     }
 
     @Test

@@ -50,8 +50,9 @@ public final class Bytes implements List<Byte>
 
     private static byte[] bytesFromByteBuffer(ByteBuffer buffer)
     {
-        byte[] bytes = new byte[buffer.remaining()];
-        buffer.get(bytes);
+        ByteBuffer dup = buffer.duplicate();
+        byte[] bytes = new byte[dup.remaining()];
+        dup.get(bytes);
         return bytes;
     }
 

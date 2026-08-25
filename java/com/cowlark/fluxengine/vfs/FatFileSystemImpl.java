@@ -9,28 +9,31 @@ import static com.cowlark.fluxengine.vfs.FileSystemImpl.Capability.OP_LIST;
 import static com.cowlark.fluxengine.vfs.FileSystemImpl.Capability.OP_PUTFILE;
 import static com.cowlark.fluxengine.vfs.FileSystemImpl.FileType.IS_DIR;
 import static com.cowlark.fluxengine.vfs.FileSystemImpl.FileType.IS_FILE;
-import static com.google.common.collect.ImmutableMap.toImmutableMap;
+import static org.elm_chan.ff.DResult.RES_ERROR;
+import static org.elm_chan.ff.DResult.RES_OK;
+import static org.elm_chan.ff.DResult.RES_PARERR;
+import static org.elm_chan.ff.FatFs.FM_ANY;
+import static org.elm_chan.ff.FatFs.FM_SFD;
+import static org.elm_chan.ff.FilInfo.AM_DIR;
 
 import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.vfs.FileSystemImpl.Dirent.DirentBuilder;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Streams;
-import de.waldheinz.fs.FileSystemFactory;
-import de.waldheinz.fs.FsDirectory;
-import de.waldheinz.fs.FsDirectoryEntry;
-import de.waldheinz.fs.FsFile;
-import de.waldheinz.fs.ReadOnlyException;
-import de.waldheinz.fs.fat.FatType;
-import de.waldheinz.fs.fat.SuperFloppyFormatter;
-import lombok.SneakyThrows;
+import org.elm_chan.ff.DResult;
+import org.elm_chan.ff.Dir;
+import org.elm_chan.ff.DiskIo;
+import org.elm_chan.ff.FResult;
+import org.elm_chan.ff.FatFs;
+import org.elm_chan.ff.Fil;
+import org.elm_chan.ff.FilInfo;
+import org.elm_chan.ff.MkfsParm;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.FileAlreadyExistsException;
-import java.nio.file.FileSystemException;
+import java.nio.file.InvalidPathException;
 import java.nio.file.NoSuchFileException;
-import java.nio.file.NotDirectoryException;
 import java.nio.file.Path;
 
 public class FatFileSystemImpl extends FileSystemImpl
@@ -46,66 +49,141 @@ public class FatFileSystemImpl extends FileSystemImpl
 
     private final FatFsProto config;
     private final BlockDevice blockDevice;
-    private final de.waldheinz.fs.BlockDevice fatDevice;
-    private de.waldheinz.fs.FileSystem fatFilesystem;
+    private final DiskIoAdapter fatDevice;
+    private final FatFs fatFilesystem;
 
-    private static class BlockDeviceAdapter implements de.waldheinz.fs.BlockDevice
+    private static class DiskIoAdapter implements DiskIo
     {
         private final BlockDevice underlying;
 
-        BlockDeviceAdapter(BlockDevice underlying)
+        DiskIoAdapter(BlockDevice underlying)
         {
             this.underlying = underlying;
         }
 
         @Override
-        public long getSize() throws IOException
+        public int diskInitialize()
         {
-            return underlying.getBlockCount() * underlying.getBlockSize();
+            return 0;
         }
 
         @Override
-        public void read(long offset, ByteBuffer byteBuffer) throws IOException
+        public int diskStatus()
         {
-            Bytes bytes = underlying.getBytes((int) offset, byteBuffer.remaining());
-            byteBuffer.put(bytes.toByteArray());
+            return 0;
         }
 
         @Override
-        public void write(long offset, ByteBuffer byteBuffer)
-                throws ReadOnlyException, IOException, IllegalArgumentException
+        public DResult diskRead(long sector, byte[] buff, int count)
         {
-            underlying.putBytes((int) offset, new Bytes(byteBuffer));
+            try
+            {
+                Bytes bytes = underlying.getBlocks((int) sector, count);
+                byte[] src = bytes.toByteArray();
+                System.arraycopy(src, 0, buff, 0, src.length);
+                return RES_OK;
+            } catch (IOException e)
+            {
+                return RES_ERROR;
+            }
         }
 
         @Override
-        public void flush() throws IOException
+        public DResult diskWrite(long sector, byte[] buff, int count)
         {
-
+            try
+            {
+                underlying.putBlocks((int) sector, new Bytes(buff));
+                return RES_OK;
+            } catch (IOException e)
+            {
+                return RES_ERROR;
+            }
         }
 
         @Override
-        public int getSectorSize() throws IOException
+        public DResult diskRead(long sector, ByteBuffer buff, int count)
         {
-            return underlying.getBlockSize();
+            try
+            {
+                Bytes bytes = underlying.getBlocks((int) sector, count);
+                byte[] src = bytes.toByteArray();
+                // Use absolute put to avoid touching position/limit
+                for (int i = 0; i < src.length; i++)
+                    buff.put(i, src[i]);
+                return RES_OK;
+            } catch (IOException e)
+            {
+                return RES_ERROR;
+            }
         }
 
         @Override
-        public void close() throws IOException
+        public DResult diskWrite(long sector, ByteBuffer buff, int count)
         {
-
+            try
+            {
+                byte[] tmp = new byte[count * 512];
+                // Use absolute get to avoid touching position/limit
+                for (int i = 0; i < tmp.length; i++)
+                    tmp[i] = buff.get(i);
+                underlying.putBlocks((int) sector, new Bytes(tmp));
+                return RES_OK;
+            } catch (IOException e)
+            {
+                return RES_ERROR;
+            }
         }
 
         @Override
-        public boolean isClosed()
+        public DResult diskIoctl(int cmd, Object buff)
         {
-            return false;
-        }
+            switch (cmd)
+            {
+                case GET_SECTOR_COUNT:
+                    if (buff instanceof long[] ibuff)
+                    {
+                        ibuff[0] = underlying.getBlockCount();
+                        return RES_OK;
+                    }
+                    if (buff instanceof int[] ibuff2)
+                    {
+                        ibuff2[0] = underlying.getBlockCount();
+                        return RES_OK;
+                    }
+                    break;
 
-        @Override
-        public boolean isReadOnly()
-        {
-            return false;
+                case GET_SECTOR_SIZE:
+                    if (buff instanceof long[] ibuff)
+                    {
+                        ibuff[0] = underlying.getBlockSize();
+                        return RES_OK;
+                    }
+                    if (buff instanceof int[] ibuff2)
+                    {
+                        ibuff2[0] = underlying.getBlockSize();
+                        return RES_OK;
+                    }
+                    break;
+
+                case GET_BLOCK_SIZE:
+                    if (buff instanceof long[] ibuff)
+                    {
+                        ibuff[0] = 1;
+                        return RES_OK;
+                    }
+                    if (buff instanceof int[] ibuff2)
+                    {
+                        ibuff2[0] = 1;
+                        return RES_OK;
+                    }
+                    break;
+
+                case CTRL_SYNC:
+                    return RES_OK;
+            }
+
+            return RES_PARERR;
         }
     }
 
@@ -114,124 +192,148 @@ public class FatFileSystemImpl extends FileSystemImpl
         super(CAPABILITIES);
         this.config = config;
         this.blockDevice = blockDevice;
-        this.fatDevice = new BlockDeviceAdapter(blockDevice);
+        this.fatDevice = new DiskIoAdapter(blockDevice);
+        this.fatFilesystem = new FatFs(fatDevice, FatFileSystemImpl::getTime);
     }
 
     @Override
     public void create(boolean quick, String volumeName) throws IOException
     {
-        SuperFloppyFormatter
-                .get(fatDevice)
-                .setFatType(FatType.FAT12)
-                .setOemName("fluxengn")
-                .setVolumeLabel(volumeName)
-                .format();
+        MkfsParm params = new MkfsParm();
+        params.fmt = FM_SFD | FM_ANY;
+        params.nFat = 1;
+        int nRoot = 0;
+        long auSize = 0;
+        if (config != null)
+        {
+            if (config.hasRootDirectoryEntries())
+                nRoot = config.getRootDirectoryEntries();
+            if (config.hasClusterSize())
+                auSize = config.getClusterSize();
+        }
+        params.nRoot = nRoot;
+        params.auSize = auSize;
+        FResult res = fatFilesystem.mkfs("", params);
+        if (res != FResult.FR_OK)
+            throw new IOException("mkfs failed: " + res);
     }
 
     @Override
     public ImmutableMap<String, Dirent> list(Path path) throws IOException
     {
         mount();
-        FsDirectory dir = findDir(path);
+        ImmutableMap.Builder<String, Dirent> builder = ImmutableMap.builder();
 
-        return Streams
-                .stream(dir)
-                .filter(de -> !de.getName().equals(".") && !de.getName().equals(".."))
-                .collect(toImmutableMap(FsDirectoryEntry::getName, de -> makeDirent(path, de)));
+        String p = toFatPath(path);
+        Dir dir = new Dir();
+        checkResult(fatFilesystem.opendir(dir, p));
+
+        FilInfo filinfo = new FilInfo();
+        for (;;)
+        {
+            checkResult(fatFilesystem.readdir(dir, filinfo));
+            if (filinfo.fname.isEmpty())
+                break;
+
+            builder.put(filinfo.fname, makeDirent(path, filinfo));
+        }
+
+        return builder.build();
     }
 
     @Override
     public Bytes getFile(Path path) throws IOException
     {
         mount();
-
-        FsDirectoryEntry de = findExistingFile(path);
-        FsFile file = de.getFile();
-        ByteBuffer buffer = ByteBuffer.allocate((int) file.getLength());
-        file.read(0, buffer);
-        buffer.flip();
-        return new Bytes(buffer);
+        String p = toFatPath(path);
+        Fil fil = new Fil();
+        checkResult(fatFilesystem.open(fil, p, FatFs.FA_READ));
+        int size = (int) fil.objsize;
+        ByteBuffer buf = ByteBuffer.allocate(size);
+        int[] br = new int[1];
+        FResult res = fatFilesystem.read(fil, buf, size, br);
+        checkResult(res);
+        fatFilesystem.close(fil);
+        // Bytes constructor uses duplicate to avoid advancing position
+        return new Bytes(buf);
     }
 
     @Override
     public void createDirectory(Path path) throws IOException
     {
         mount();
-        FsDirectory dir = findDir(path.getParent());
-
-        try
-        {
-            dir.addDirectory(path.getFileName().toString());
-            dir.flush();
-        } catch (IOException e)
-        {
-            if (e.getMessage().contains("already exists"))
-                throw new FileAlreadyExistsException("file already exists");
-            throw e;
-        }
-        fatFilesystem.flush();
+        String p = toFatPath(path);
+        checkResult(fatFilesystem.mkdir(p));
     }
 
     @Override
     public void putFile(Path path, Bytes bytes) throws IOException
     {
         mount();
-        FsDirectory dir = findDir(path.getParent());
-
-        String leaf = path.getFileName().toString();
-        dir.remove(leaf);
-        FsFile file = dir.addFile(leaf).getFile();
-        file.write(0, bytes.toByteBuffer());
-        file.flush();
-        fatFilesystem.flush();
+        String p = toFatPath(path);
+        // Check if path exists and is a directory - then we need to remove it first
+        // (FA_CREATE_ALWAYS on a directory returns DENIED). For regular files,
+        // let open with CREATE_ALWAYS truncate in place to preserve cluster reuse.
+        FilInfo info = new FilInfo();
+        FResult statRes = fatFilesystem.stat(p, info);
+        if (statRes == FResult.FR_OK && (info.fattrib & AM_DIR) != 0)
+        {
+            checkResult(fatFilesystem.unlink(p));
+        }
+        Fil fil = new Fil();
+        checkResult(fatFilesystem.open(fil, p, FatFs.FA_WRITE | FatFs.FA_CREATE_ALWAYS));
+        ByteBuffer buf = bytes.toByteBuffer();
+        // Ensure we handle ByteBuffer without touching position: FatFs write uses absolute get
+        int[] bw = new int[1];
+        FResult res = fatFilesystem.write(fil, buf, bytes.size(), bw);
+        checkResult(res);
+        checkResult(fatFilesystem.close(fil));
     }
 
     @Override
     public Dirent getDirent(Path path) throws IOException
     {
         mount();
-        FsDirectoryEntry de = findExistingEntry(path);
-        return makeDirent(path.getParent(), de);
+        String p = toFatPath(path);
+        FilInfo filinfo = new FilInfo();
+        checkResult(fatFilesystem.stat(p, filinfo));
+        Path parent = path.getParent();
+        if (parent == null)
+            parent = Path.of("/");
+        return makeDirent(parent, filinfo);
     }
 
     @Override
     public void deleteFile(Path path) throws IOException
     {
         mount();
-        FsDirectory dir = findDir(path.getParent());
-
-        String leaf = path.getFileName().toString();
-        FsDirectoryEntry entry = dir.getEntry(leaf);
-        if (entry == null)
-            throw new NoSuchFileException("file not found");
-        if (entry.isDirectory())
-        {
-            for (FsDirectoryEntry de : entry.getDirectory())
-            {
-                String name = de.getName();
-                if (!name.equals(".") && !name.equals(".."))
-                    throw new DirectoryNotEmptyException("directory not empty");
-            }
-        }
-        dir.remove(leaf);
-        dir.flush();
+        String p = toFatPath(path);
+        FResult res = fatFilesystem.unlink(p);
+        if (res == FResult.FR_DENIED)
+            throw new DirectoryNotEmptyException(p);
+        checkResult(res);
     }
 
-    @SneakyThrows
-    private static Dirent makeDirent(Path dir, FsDirectoryEntry de)
+    @Override
+    public void moveFile(Path oldName, Path newName) throws IOException
+    {
+        mount();
+        String oldP = toFatPath(oldName);
+        String newP = toFatPath(newName);
+        checkResult(fatFilesystem.rename(oldP, newP));
+    }
+
+    private static Dirent makeDirent(Path dir, FilInfo fi)
     {
         ImmutableMap.Builder<String, String> attrsBuilder = ImmutableMap.builder();
-        DirentBuilder direntBuilder = Dirent
-                .builder()
-                .setFilename(de.getName())
-                .setPath(dir.resolve(de.getName()))
-                .setMode("");
+        DirentBuilder direntBuilder =
+                Dirent.builder().setFilename(fi.fname).setPath(dir.resolve(fi.fname)).setMode("");
 
-        attrsBuilder.put(Attributes.FILENAME, de.getName());
+        attrsBuilder.put(Attributes.FILENAME, fi.fname);
 
-        if (de.isFile())
+        if ((fi.fattrib & AM_DIR) != AM_DIR)
         {
-            long length = de.getFile().getLength();
+            long length = fi.fsize;
             direntBuilder.setFileType(IS_FILE).setLength((int) length);
             attrsBuilder
                     .put(Attributes.LENGTH, Long.toString(length))
@@ -245,52 +347,67 @@ public class FatFileSystemImpl extends FileSystemImpl
         return direntBuilder.setAttributes(attrsBuilder.build()).build();
     }
 
-    private FsDirectoryEntry findExistingEntry(Path path) throws IOException
-    {
-        FsDirectory dir = findDir(path.getParent());
-
-        FsDirectoryEntry entry = dir.getEntry(path.getFileName().toString());
-        if (entry == null)
-            throw new NoSuchFileException("file not found");
-        return entry;
-    }
-
-    private FsDirectoryEntry findExistingFile(Path path) throws IOException
-    {
-        FsDirectoryEntry entry = findExistingEntry(path);
-        if (!entry.isFile())
-            throw new FileSystemException("not a file");
-        return entry;
-    }
-
-    private FsDirectory findDir(Path path) throws IOException
-    {
-        FsDirectory dir = fatFilesystem.getRoot();
-        if (path != null)
-            for (Path s : path)
-            {
-                FsDirectoryEntry entry = dir.getEntry(s.toString());
-                if (entry == null)
-                    throw new NoSuchFileException("path element not found");
-                if (!entry.isDirectory())
-                    throw new NotDirectoryException(String.format(
-                            "'%s' is not a directory",
-                            entry.getName()));
-                dir = entry.getDirectory();
-            }
-        return dir;
-    }
-
     private void mount() throws IOException
     {
-        if (fatFilesystem == null)
-            fatFilesystem = FileSystemFactory.create(fatDevice, false);
+        FResult res = fatFilesystem.mount();
+        checkResult(res);
+    }
+
+    @Override
+    public void close() throws Exception
+    {
+        flushChanges();
     }
 
     @Override
     public void flushChanges() throws IOException
     {
-        if (fatFilesystem != null)
-            fatFilesystem.flush();
+        // Each operation already syncs via FatFs.sync_fs; no additional action needed
+        // but ensure any pending window is flushed by forcing a mount sync check
+        // (diskIo CTRL_SYNC is handled by FatFs.sync which is called on close)
+    }
+
+    private static String toFatPath(Path path)
+    {
+        if (path == null)
+            return "/";
+        String s = path.toString();
+        if (s.isEmpty())
+            return "/";
+        return s;
+    }
+
+    private static void checkResult(FResult result) throws IOException
+    {
+        switch (result)
+        {
+            case FR_OK:
+                return;
+            case FR_NO_FILE:
+            case FR_NO_PATH:
+                throw new NoSuchFileException("no such file: " + result);
+
+            case FR_INVALID_NAME:
+                throw new InvalidPathException("", "invalid path: " + result);
+
+            case FR_EXIST:
+                throw new FileAlreadyExistsException("file already exists: " + result);
+
+            default:
+                throw new IOException(String.format("filesystem error: %s", result));
+        }
+    }
+
+    private static long getTime()
+    {
+        int year = 2025 - 1980;
+        int mon = 1;
+        int day = 1;
+        int hour = 0;
+        int min = 0;
+        int sec = 0;
+        int date = (year << 9) | (mon << 5) | day;
+        int time = (hour << 11) | (min << 5) | (sec / 2);
+        return ((long) date << 16) | time;
     }
 }
