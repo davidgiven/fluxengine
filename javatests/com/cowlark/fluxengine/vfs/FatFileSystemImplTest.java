@@ -100,9 +100,9 @@ public class FatFileSystemImplTest
     {
         impl.create(true, "LABEL");
         impl.createDirectory(Path.of("/data"));
-        impl.putFile(Path.of("/data"), new Bytes("Hello, world!"));
-        blockDevice.commit();
-        assertThat(image.get(1, 0, 8).data.reader().readString(13)).isEqualTo("Hello, world!");
+        assertThrows(
+                FileAlreadyExistsException.class,
+                () -> impl.putFile(Path.of("/data"), new Bytes("Hello, world!")));
     }
 
     @Test

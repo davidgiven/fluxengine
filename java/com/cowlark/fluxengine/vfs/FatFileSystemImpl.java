@@ -12,6 +12,7 @@ import static com.cowlark.fluxengine.vfs.FileSystemImpl.FileType.IS_FILE;
 import static org.elm_chan.ff.DResult.RES_ERROR;
 import static org.elm_chan.ff.DResult.RES_OK;
 import static org.elm_chan.ff.DResult.RES_PARERR;
+import static org.elm_chan.ff.FResult.FR_OK;
 import static org.elm_chan.ff.FatFs.FM_ANY;
 import static org.elm_chan.ff.FatFs.FM_SFD;
 import static org.elm_chan.ff.FilInfo.AM_DIR;
@@ -30,11 +31,13 @@ import org.elm_chan.ff.FilInfo;
 import org.elm_chan.ff.MkfsParm;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.file.AccessDeniedException;
 import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.InvalidPathException;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 
 public class FatFileSystemImpl extends FileSystemImpl
 {
@@ -214,7 +217,7 @@ public class FatFileSystemImpl extends FileSystemImpl
         params.nRoot = nRoot;
         params.auSize = auSize;
         FResult res = fatFilesystem.mkfs("", params);
-        if (res != FResult.FR_OK)
+        if (res != FR_OK)
             throw new IOException("mkfs failed: " + res);
     }
 
@@ -229,7 +232,7 @@ public class FatFileSystemImpl extends FileSystemImpl
         checkResult(fatFilesystem.opendir(dir, p));
 
         FilInfo filinfo = new FilInfo();
-        for (;;)
+        for (; ; )
         {
             checkResult(fatFilesystem.readdir(dir, filinfo));
             if (filinfo.fname.isEmpty())
@@ -245,49 +248,53 @@ public class FatFileSystemImpl extends FileSystemImpl
     public Bytes getFile(Path path) throws IOException
     {
         mount();
-        String p = toFatPath(path);
         Fil fil = new Fil();
-        checkResult(fatFilesystem.open(fil, p, FatFs.FA_READ));
-        int size = (int) fil.objsize;
-        ByteBuffer buf = ByteBuffer.allocate(size);
-        int[] br = new int[1];
-        FResult res = fatFilesystem.read(fil, buf, size, br);
-        checkResult(res);
-        fatFilesystem.close(fil);
-        // Bytes constructor uses duplicate to avoid advancing position
-        return new Bytes(buf);
+
+        checkResult(fatFilesystem.open(fil, toFatPath(path), FatFs.FA_READ));
+        try
+        {
+            int size = (int) fil.objsize;
+            ByteBuffer buf = ByteBuffer.allocate(size);
+
+            int[] br = new int[1];
+            checkResult(fatFilesystem.read(fil, buf, size, br));
+            return new Bytes(buf);
+        } finally
+        {
+            fatFilesystem.close(fil);
+        }
     }
 
     @Override
     public void createDirectory(Path path) throws IOException
     {
         mount();
-        String p = toFatPath(path);
-        checkResult(fatFilesystem.mkdir(p));
+        checkResult(fatFilesystem.mkdir(toFatPath(path)));
     }
 
     @Override
     public void putFile(Path path, Bytes bytes) throws IOException
     {
         mount();
-        String p = toFatPath(path);
-        // Check if path exists and is a directory - then we need to remove it first
-        // (FA_CREATE_ALWAYS on a directory returns DENIED). For regular files,
-        // let open with CREATE_ALWAYS truncate in place to preserve cluster reuse.
-        FilInfo info = new FilInfo();
-        FResult statRes = fatFilesystem.stat(p, info);
-        if (statRes == FResult.FR_OK && (info.fattrib & AM_DIR) != 0)
-        {
-            checkResult(fatFilesystem.unlink(p));
-        }
+        String fatPath = toFatPath(path);
+
+        FilInfo filinfo = new FilInfo();
+        FResult res = fatFilesystem.stat(fatPath, filinfo);
+        if ((res == FR_OK) && ((filinfo.fattrib & AM_DIR) != 0))
+            throw new FileAlreadyExistsException("file already exists");
+
         Fil fil = new Fil();
-        checkResult(fatFilesystem.open(fil, p, FatFs.FA_WRITE | FatFs.FA_CREATE_ALWAYS));
-        ByteBuffer buf = bytes.toByteBuffer();
-        // Ensure we handle ByteBuffer without touching position: FatFs write uses absolute get
-        int[] bw = new int[1];
-        FResult res = fatFilesystem.write(fil, buf, bytes.size(), bw);
-        checkResult(res);
-        checkResult(fatFilesystem.close(fil));
+        checkResult(fatFilesystem.open(fil, fatPath, FatFs.FA_WRITE | FatFs.FA_CREATE_ALWAYS));
+        try
+        {
+            ByteBuffer buf = bytes.toByteBuffer();
+
+            int[] bw = new int[1];
+            checkResult(fatFilesystem.write(fil, buf, bytes.size(), bw));
+        } finally
+        {
+            checkResult(fatFilesystem.close(fil));
+        }
     }
 
     @Override
@@ -362,9 +369,6 @@ public class FatFileSystemImpl extends FileSystemImpl
     @Override
     public void flushChanges() throws IOException
     {
-        // Each operation already syncs via FatFs.sync_fs; no additional action needed
-        // but ensure any pending window is flushed by forcing a mount sync check
-        // (diskIo CTRL_SYNC is handled by FatFs.sync which is called on close)
     }
 
     private static String toFatPath(Path path)
@@ -393,6 +397,9 @@ public class FatFileSystemImpl extends FileSystemImpl
             case FR_EXIST:
                 throw new FileAlreadyExistsException("file already exists: " + result);
 
+            case FR_DENIED:
+                throw new AccessDeniedException("access denied");
+
             default:
                 throw new IOException(String.format("filesystem error: %s", result));
         }
@@ -400,14 +407,19 @@ public class FatFileSystemImpl extends FileSystemImpl
 
     private static long getTime()
     {
-        int year = 2025 - 1980;
-        int mon = 1;
-        int day = 1;
-        int hour = 0;
-        int min = 0;
-        int sec = 0;
+        LocalDateTime now = LocalDateTime.now();
+        int year = now.getYear() - 1980;
+        if (year < 0)
+            year = 0;
+        if (year > 127)
+            year = 127;
+        int mon = now.getMonthValue();
+        int day = now.getDayOfMonth();
+        int hour = now.getHour();
+        int min = now.getMinute();
+        int sec = now.getSecond();
         int date = (year << 9) | (mon << 5) | day;
         int time = (hour << 11) | (min << 5) | (sec / 2);
-        return ((long) date << 16) | time;
+        return ((long) date << 16) | (time & 0xFFFF);
     }
 }
