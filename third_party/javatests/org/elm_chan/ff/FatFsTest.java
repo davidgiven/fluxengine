@@ -44,10 +44,10 @@ public class FatFsTest {
         Fil fp = new Fil();
         FResult r = fs.open(fp, path, FatFs.FA_WRITE | FatFs.FA_CREATE_ALWAYS);
         assertThat(r).isEqualTo(FResult.FR_OK);
-        IntRef bw = new IntRef();
+        int[] bw = new int[1];
         r = fs.write(fp, data, data.length, bw);
         assertThat(r).isEqualTo(FResult.FR_OK);
-        assertThat(bw.value).isEqualTo(data.length);
+        assertThat(bw[0]).isEqualTo(data.length);
         r = fs.close(fp);
         assertThat(r).isEqualTo(FResult.FR_OK);
     }
@@ -62,10 +62,10 @@ public class FatFsTest {
         assertThat(r).isEqualTo(FResult.FR_OK);
         long size = fs.size(fp);
         byte[] buf = new byte[(int) size];
-        IntRef br = new IntRef();
+        int[] br = new int[1];
         r = fs.read(fp, buf, (int) size, br);
         assertThat(r).isEqualTo(FResult.FR_OK);
-        assertThat(br.value).isEqualTo((int) size);
+        assertThat(br[0]).isEqualTo((int) size);
         r = fs.close(fp);
         assertThat(r).isEqualTo(FResult.FR_OK);
         return buf;
@@ -322,10 +322,10 @@ public class FatFsTest {
         r = fs.lseek(fp, 7);
         assertThat(r).isEqualTo(FResult.FR_OK);
         byte[] buf = new byte[5];
-        IntRef br = new IntRef();
+        int[] br = new int[1];
         r = fs.read(fp, buf, 5, br);
         assertThat(r).isEqualTo(FResult.FR_OK);
-        assertThat(br.value).isEqualTo(5);
+        assertThat(br[0]).isEqualTo(5);
         assertThat(new String(buf, StandardCharsets.US_ASCII)).isEqualTo("world");
         r = fs.close(fp);
         assertThat(r).isEqualTo(FResult.FR_OK);
@@ -333,16 +333,16 @@ public class FatFsTest {
 
     @Test
     public void getfree() {
-        LongRef nclst = new LongRef();
+        long[] nclst = new long[1];
         FResult r = fs.getfree("/", nclst);
         assertThat(r).isEqualTo(FResult.FR_OK);
-        assertThat(nclst.value).isGreaterThan(0L);
+        assertThat(nclst[0]).isGreaterThan(0L);
         // After creating a file, free clusters should decrease
-        long before = nclst.value;
+        long before = nclst[0];
         putFile("/DATA", "Hello, world!");
         r = fs.getfree("/", nclst);
         assertThat(r).isEqualTo(FResult.FR_OK);
-        assertThat(nclst.value).isLessThan(before);
+        assertThat(nclst[0]).isLessThan(before);
     }
 
     @Test
@@ -379,5 +379,72 @@ public class FatFsTest {
         putFile("/BIGDAT", payload);
         byte[] read = getFile("/BIGDAT");
         assertThat(read).isEqualTo(payload);
+    }
+
+    @Test
+    public void lowercasePreservedViaNTres() {
+        // Create with lowercase name; SFN is upper but NT flag preserves case on readback
+        Fil fp = new Fil();
+        FResult r = fs.open(fp, "/lower.txt", FatFs.FA_WRITE | FatFs.FA_CREATE_ALWAYS);
+        assertThat(r).isEqualTo(FResult.FR_OK);
+        r = fs.close(fp);
+        assertThat(r).isEqualTo(FResult.FR_OK);
+
+        // readdir should return the name in the original case
+        java.util.List<String> names = listDir("/");
+        assertThat(names).contains("lower.txt");
+
+        // stat should find it case-insensitively via create_name upcasing
+        FilInfo fno = new FilInfo();
+        r = fs.stat("/LOWER.TXT", fno);
+        assertThat(r).isEqualTo(FResult.FR_OK);
+        assertThat(fno.fname).isEqualTo("lower.txt");
+
+        // get_fileinfo via stat on the exact lowercase path also works
+        FilInfo fno2 = new FilInfo();
+        r = fs.stat("/lower.txt", fno2);
+        assertThat(r).isEqualTo(FResult.FR_OK);
+        assertThat(fno2.fname).isEqualTo("lower.txt");
+    }
+
+    @Test
+    public void mkdirRollbackDoesNotLeakCluster() {
+        // Fill root directory until no free entry (FR_DENIED), assert cluster not leaked
+        long[] freeBefore = new long[1];
+        FResult r = fs.getfree("/", freeBefore);
+        assertThat(r).isEqualTo(FResult.FR_OK);
+
+        int created = 0;
+        while (true) {
+            String name = String.format("/F%05d", created);
+            r = fs.mkdir(name);
+            if (r == FResult.FR_DENIED) {
+                break;
+            }
+            assertThat(r).isEqualTo(FResult.FR_OK);
+            created++;
+            if (created > 600) {
+                // safety guard - should have hit DENIED by root limit (224 entries) long before
+                break;
+            }
+        }
+        assertThat(created).isGreaterThan(0);
+        // Must have failed due to directory full, not disk error
+        r = fs.mkdir("/FAIL01");
+        assertThat(r).isEqualTo(FResult.FR_DENIED);
+
+        long[] freeAfterFail = new long[1];
+        r = fs.getfree("/", freeAfterFail);
+        assertThat(r).isEqualTo(FResult.FR_OK);
+        // Created directories each consumed one cluster; the failing ones should not have consumed any
+        assertThat(freeAfterFail[0]).isEqualTo(freeBefore[0] - created);
+
+        // A second failing mkdir must not leak another cluster
+        FResult r2 = fs.mkdir("/FAIL02");
+        assertThat(r2).isEqualTo(FResult.FR_DENIED);
+        long[] freeAfterFail2 = new long[1];
+        r = fs.getfree("/", freeAfterFail2);
+        assertThat(r).isEqualTo(FResult.FR_OK);
+        assertThat(freeAfterFail2[0]).isEqualTo(freeAfterFail[0]);
     }
 }

@@ -36,7 +36,7 @@ public final class Dir {
     public long dptr; /* Current read/write offset */
     public long clust; /* Current cluster */
     public long sect; /* Current sector (0:no more item to read) */
-    public int dirPtr; /* Pointer to the directory item in the win[] in filesystem object */
+    public int dir_ptr; /* Pointer to the directory item in the win[] in filesystem object */
     public byte[] fn = new byte[12]; /* SFN (in/out) {body[0-7],ext[8-10],status[11]} */
     /* DWORD blk_ofs; */ /* Offset of current entry block being processed (0xFFFFFFFF:invalid) - pruned: FF_USE_LFN == 0, field omitted */
     /* const TCHAR *pat; */ /* Pointer to the name matching pattern - pruned: FF_USE_FIND == 0, field omitted */

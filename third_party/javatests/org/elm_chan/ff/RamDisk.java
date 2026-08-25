@@ -81,18 +81,32 @@ public final class RamDisk implements DiskIo {
                 ((LongRef) buff).value = sectorCount;
                 return DResult.RES_OK;
             }
+            if (buff instanceof long[]) {
+                ((long[]) buff)[0] = sectorCount;
+                return DResult.RES_OK;
+            }
             if (buff instanceof int[]) {
                 ((int[]) buff)[0] = sectorCount;
                 return DResult.RES_OK;
             }
         }
-        if (cmd == GET_SECTOR_SIZE && buff instanceof int[]) {
-            ((int[]) buff)[0] = 512;
-            return DResult.RES_OK;
+        if (cmd == GET_SECTOR_SIZE) {
+            if (buff instanceof long[]) {
+                ((long[]) buff)[0] = 512;
+                return DResult.RES_OK;
+            }
+            if (buff instanceof int[]) {
+                ((int[]) buff)[0] = 512;
+                return DResult.RES_OK;
+            }
         }
         if (cmd == GET_BLOCK_SIZE) {
             if (buff instanceof LongRef) {
                 ((LongRef) buff).value = 1;
+                return DResult.RES_OK;
+            }
+            if (buff instanceof long[]) {
+                ((long[]) buff)[0] = 1;
                 return DResult.RES_OK;
             }
             if (buff instanceof int[]) {

@@ -38,10 +38,10 @@ public class MkfsTest {
         r = fs.open(fp, "/HELLO.TXT", FatFs.FA_WRITE | FatFs.FA_CREATE_ALWAYS);
         assertThat(r).isEqualTo(FResult.FR_OK);
         byte[] data = "Hello mkfs".getBytes(StandardCharsets.US_ASCII);
-        IntRef bw = new IntRef();
+        int[] bw = new int[1];
         r = fs.write(fp, data, data.length, bw);
         assertThat(r).isEqualTo(FResult.FR_OK);
-        assertThat(bw.value).isEqualTo(data.length);
+        assertThat(bw[0]).isEqualTo(data.length);
         r = fs.close(fp);
         assertThat(r).isEqualTo(FResult.FR_OK);
 
@@ -49,7 +49,7 @@ public class MkfsTest {
         r = fs.open(fr, "/HELLO.TXT", FatFs.FA_READ);
         assertThat(r).isEqualTo(FResult.FR_OK);
         byte[] buf = new byte[data.length];
-        IntRef br = new IntRef();
+        int[] br = new int[1];
         r = fs.read(fr, buf, buf.length, br);
         assertThat(r).isEqualTo(FResult.FR_OK);
         assertThat(new String(buf, StandardCharsets.US_ASCII)).isEqualTo("Hello mkfs");
@@ -73,10 +73,10 @@ public class MkfsTest {
         assertThat(vbr[511] & 0xFF).isEqualTo(0xAA);
 
         // getfree sane
-        LongRef nclst = new LongRef();
+        long[] nclst = new long[1];
         r = fs.getfree("/", nclst);
         assertThat(r).isEqualTo(FResult.FR_OK);
-        assertThat(nclst.value).isGreaterThan(0L);
+        assertThat(nclst[0]).isGreaterThan(0L);
     }
 
     @Test
@@ -135,7 +135,7 @@ public class MkfsTest {
         assertThat(r).isEqualTo(FResult.FR_OK);
         byte[] payload = new byte[5000];
         for (int i = 0; i < payload.length; i++) payload[i] = (byte) (i & 0xFF);
-        IntRef bw = new IntRef();
+        int[] bw = new int[1];
         r = fs.write(fp, payload, payload.length, bw);
         assertThat(r).isEqualTo(FResult.FR_OK);
         r = fs.close(fp);
@@ -145,7 +145,7 @@ public class MkfsTest {
         r = fs.open(fr, "/BIG.TXT", FatFs.FA_READ);
         assertThat(r).isEqualTo(FResult.FR_OK);
         byte[] buf = new byte[payload.length];
-        IntRef br = new IntRef();
+        int[] br = new int[1];
         r = fs.read(fr, buf, buf.length, br);
         assertThat(r).isEqualTo(FResult.FR_OK);
         assertThat(buf).isEqualTo(payload);

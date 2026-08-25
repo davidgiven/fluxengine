@@ -43,8 +43,8 @@ public final class Fil {
     public long fptr; /* File read/write pointer (0 on open) */
     public long clust; /* Current cluster of fptr (invalid when fptr is 0) */
     public long sect; /* Sector number appearing in buf[] (0:invalid) */
-    public long dirSect; /* Sector number containing the directory entry (not used in exFAT) */
-    public int dirPtr; /* Pointer to the directory entry in the win[] (not used in exFAT) */
+    public long dir_sect; /* Sector number containing the directory entry (not used in exFAT) */
+    public int dir_ptr; /* Pointer to the directory entry in the win[] (not used in exFAT) */
     /* DWORD* cltbl; */ /* Pointer to the cluster link map table (nulled on open; set by application) - pruned: FF_USE_FASTSEEK == 0 */
     public byte[] buf = new byte[FatFs.FF_MAX_SS]; /* File private data read/write window */
 }
