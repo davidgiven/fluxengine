@@ -1,7 +1,7 @@
 package com.cowlark.fluxengine.vfs;
 
-import static com.cowlark.fluxengine.vfs.FileSystemImpl.FileType.IS_DIR;
-import static com.cowlark.fluxengine.vfs.FileSystemImpl.FileType.IS_FILE;
+import static com.cowlark.fluxengine.vfs.FileSystem.FileType.IS_DIR;
+import static com.cowlark.fluxengine.vfs.FileSystem.FileType.IS_FILE;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
@@ -12,7 +12,7 @@ import com.cowlark.fluxengine.data.DiskLayout;
 import com.cowlark.fluxengine.data.Image;
 import com.cowlark.fluxengine.imagewriter.ImageWriter;
 import com.cowlark.fluxengine.testing.TestHelpers;
-import com.cowlark.fluxengine.vfs.FileSystemImpl.Dirent;
+import com.cowlark.fluxengine.vfs.FileSystem.Dirent;
 import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.Rule;
@@ -28,7 +28,7 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 
 @RunWith(JUnit4.class)
-public class FatFileSystemImplTest
+public class FatFileSystemTest
 {
     @Rule public final TestRule loggerRule = TestHelpers.loggerRule();
 
@@ -36,7 +36,7 @@ public class FatFileSystemImplTest
     private DiskLayout diskLayout;
     private Image image;
     private InMemoryBlockDevice blockDevice;
-    private FatFileSystemImpl impl;
+    private FatFileSystem impl;
 
     @Before
     public void setup()
@@ -46,7 +46,7 @@ public class FatFileSystemImplTest
         diskLayout = new DiskLayout(configProto);
         image = new Image();
         blockDevice = new InMemoryBlockDevice(diskLayout, image);
-        impl = new FatFileSystemImpl(configProto.getFilesystem().getFatfs(), blockDevice);
+        impl = new FatFileSystem(configProto.getFilesystem().getFatfs(), blockDevice);
     }
 
     @Test
@@ -129,8 +129,8 @@ public class FatFileSystemImplTest
         impl.putFilesystemMetadata(ImmutableMap.of(Attributes.VOLUME_NAME, "PERSIST"));
         impl.flushChanges();
 
-        FatFileSystemImpl impl2 =
-                new FatFileSystemImpl(configProto.getFilesystem().getFatfs(), blockDevice);
+        FatFileSystem impl2 =
+                new FatFileSystem(configProto.getFilesystem().getFatfs(), blockDevice);
         assertThat(impl2.getFilesystemMetadata().get(Attributes.VOLUME_NAME)).isEqualTo("PERSIST");
     }
 
@@ -327,8 +327,8 @@ public class FatFileSystemImplTest
         impl.putFile(Path.of("/dir1/dir2/dir3/data"), new Bytes("Hello, world!"));
         impl.flushChanges();
 
-        FatFileSystemImpl impl2 =
-                new FatFileSystemImpl(configProto.getFilesystem().getFatfs(), blockDevice);
+        FatFileSystem impl2 =
+                new FatFileSystem(configProto.getFilesystem().getFatfs(), blockDevice);
         Dirent de = impl2.getDirent(Path.of("/dir1/dir2/dir3/data"));
         assertThat(de.filename()).isEqualTo("data");
     }

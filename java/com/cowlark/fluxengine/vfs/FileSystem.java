@@ -7,7 +7,7 @@ import lombok.Builder;
 import java.io.IOException;
 import java.nio.file.Path;
 
-public abstract class FileSystemImpl implements AutoCloseable
+public abstract class FileSystem implements AutoCloseable
 {
 
     public enum Capability
@@ -39,7 +39,7 @@ public abstract class FileSystemImpl implements AutoCloseable
 
     private final ImmutableSet<Capability> capabilities;
 
-    protected FileSystemImpl(ImmutableSet<Capability> capabilities)
+    protected FileSystem(ImmutableSet<Capability> capabilities)
     {
         this.capabilities = capabilities;
     }

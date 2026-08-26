@@ -18,8 +18,8 @@ java_test(
 )
 
 java_test(
-    name = "FatFileSystemImplTest",
-    srcs = ["FatFileSystemImplTest.java"],
+    name = "FatFileSystemTest",
+    srcs = ["FatFileSystemTest.java"],
     deps = [
         "//java/com/cowlark/fluxengine/config",
         "//java/com/cowlark/fluxengine/config:common_java_proto",
