@@ -447,4 +447,89 @@ public class FatFsTest {
         assertThat(r).isEqualTo(FResult.FR_OK);
         assertThat(freeAfterFail2[0]).isEqualTo(freeAfterFail[0]);
     }
+
+    @Test
+    public void renameFileInRoot() {
+        putFile("/OLD.TXT", "content old");
+        FResult r = fs.rename("/OLD.TXT", "/NEW.TXT");
+        assertThat(r).isEqualTo(FResult.FR_OK);
+        FilInfo fno = new FilInfo();
+        assertThat(fs.stat("/OLD.TXT", fno)).isEqualTo(FResult.FR_NO_FILE);
+        assertThat(fs.stat("/NEW.TXT", fno)).isEqualTo(FResult.FR_OK);
+        assertThat(new String(getFile("/NEW.TXT"), StandardCharsets.US_ASCII)).isEqualTo("content old");
+        assertThat(listDir("/")).contains("NEW.TXT");
+    }
+
+    @Test
+    public void renameDirectory() {
+        FResult r = fs.mkdir("/DIR1");
+        assertThat(r).isEqualTo(FResult.FR_OK);
+        putFile("/DIR1/FILE.TXT", "inside");
+        r = fs.rename("/DIR1", "/DIR2");
+        assertThat(r).isEqualTo(FResult.FR_OK);
+        FilInfo fno = new FilInfo();
+        assertThat(fs.stat("/DIR1", fno)).isEqualTo(FResult.FR_NO_FILE);
+        assertThat(fs.stat("/DIR2", fno)).isEqualTo(FResult.FR_OK);
+        assertThat(fno.fattrib & FilInfo.AM_DIR).isNotEqualTo(0);
+        assertThat(new String(getFile("/DIR2/FILE.TXT"), StandardCharsets.US_ASCII)).isEqualTo("inside");
+        assertThat(listDir("/")).contains("DIR2");
+    }
+
+    @Test
+    public void renameMoveFileIntoDirectory() {
+        putFile("/FILE.TXT", "hello");
+        FResult r = fs.mkdir("/DIR");
+        assertThat(r).isEqualTo(FResult.FR_OK);
+        r = fs.rename("/FILE.TXT", "/DIR/FILE.TXT");
+        assertThat(r).isEqualTo(FResult.FR_OK);
+        FilInfo fno = new FilInfo();
+        assertThat(fs.stat("/FILE.TXT", fno)).isEqualTo(FResult.FR_NO_FILE);
+        assertThat(new String(getFile("/DIR/FILE.TXT"), StandardCharsets.US_ASCII)).isEqualTo("hello");
+        assertThat(listDir("/")).contains("DIR");
+        assertThat(listDir("/DIR")).contains("FILE.TXT");
+    }
+
+    @Test
+    public void renameMoveDirectoryIntoItself() {
+        FResult r = fs.mkdir("/DIR");
+        assertThat(r).isEqualTo(FResult.FR_OK);
+        r = fs.mkdir("/DIR/SUB");
+        assertThat(r).isEqualTo(FResult.FR_OK);
+        // Moving /DIR into its own subtree should fail
+        r = fs.rename("/DIR", "/DIR/SUB/MOVED");
+        assertThat(r).isEqualTo(FResult.FR_INVALID_NAME);
+        // Also moving directly onto itself should fail
+        r = fs.rename("/DIR", "/DIR");
+        assertThat(r).isEqualTo(FResult.FR_INVALID_NAME);
+        // Original still exists intact
+        FilInfo fno = new FilInfo();
+        assertThat(fs.stat("/DIR", fno)).isEqualTo(FResult.FR_OK);
+        assertThat(fs.stat("/DIR/SUB", fno)).isEqualTo(FResult.FR_OK);
+    }
+
+    @Test
+    public void renameMoveFileOnTopOfAnotherFile() {
+        putFile("/A.TXT", "AAA");
+        putFile("/B.TXT", "BBB");
+        FResult r = fs.rename("/A.TXT", "/B.TXT");
+        assertThat(r).isEqualTo(FResult.FR_EXIST);
+        // Both files should still exist with original contents
+        assertThat(new String(getFile("/A.TXT"), StandardCharsets.US_ASCII)).isEqualTo("AAA");
+        assertThat(new String(getFile("/B.TXT"), StandardCharsets.US_ASCII)).isEqualTo("BBB");
+    }
+
+    @Test
+    public void renameMoveFileOnTopOfDirectory() {
+        putFile("/FILE.TXT", "data");
+        FResult r = fs.mkdir("/DIR");
+        assertThat(r).isEqualTo(FResult.FR_OK);
+        r = fs.rename("/FILE.TXT", "/DIR");
+        assertThat(r).isEqualTo(FResult.FR_EXIST);
+        // Also moving a directory onto a file should fail
+        r = fs.rename("/DIR", "/FILE.TXT");
+        assertThat(r).isEqualTo(FResult.FR_EXIST);
+        assertThat(new String(getFile("/FILE.TXT"), StandardCharsets.US_ASCII)).isEqualTo("data");
+        FilInfo fno = new FilInfo();
+        assertThat(fs.stat("/DIR", fno)).isEqualTo(FResult.FR_OK);
+    }
 }
