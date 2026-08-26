@@ -23,6 +23,7 @@ import org.junit.runners.JUnit4;
 import java.io.IOException;
 import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.InvalidPathException;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 
@@ -111,12 +112,14 @@ public class FatFileSystemImplTest
                 () -> impl.putFilesystemMetadata(ImmutableMap.of(Attributes.TOTAL_BLOCKS, "123")));
         assertThrows(
                 IllegalArgumentException.class,
-                () -> impl.putFilesystemMetadata(
-                        ImmutableMap.of(Attributes.VOLUME_NAME, "A", Attributes.TOTAL_BLOCKS, "123")));
+                () -> impl.putFilesystemMetadata(ImmutableMap.of(
+                        Attributes.VOLUME_NAME,
+                        "A",
+                        Attributes.TOTAL_BLOCKS,
+                        "123")));
         assertThrows(
                 IllegalArgumentException.class,
-                () -> impl.putFilesystemMetadata(
-                        ImmutableMap.of("unknown_key", "value")));
+                () -> impl.putFilesystemMetadata(ImmutableMap.of("unknown_key", "value")));
     }
 
     @Test
@@ -135,10 +138,14 @@ public class FatFileSystemImplTest
     public void putFilesystemMetadata_invalidLabel() throws IOException
     {
         impl.create(true, "LABEL");
-        // Label with bad character '*' should be rejected (maps to InvalidPathException via FR_INVALID_NAME)
+
+        /* Label with bad character '*' should be rejected (maps to InvalidPathException via
+        FR_INVALID_NAME) */
         assertThrows(
                 java.nio.file.InvalidPathException.class,
-                () -> impl.putFilesystemMetadata(ImmutableMap.of(Attributes.VOLUME_NAME, "BAD*LABEL")));
+                () -> impl.putFilesystemMetadata(ImmutableMap.of(
+                        Attributes.VOLUME_NAME,
+                        "BAD*LABEL")));
     }
 
     @Test
@@ -332,7 +339,8 @@ public class FatFileSystemImplTest
         impl.create(true, "LABEL");
         impl.createDirectory(Path.of("/dir"));
         impl.flushChanges();
-        // check the directory exists after flush
+
+        /* check the directory exists after flush */
         assertThat(impl.list(Path.of("/"))).hasSize(1);
         assertThat(impl.getDirent(Path.of("/dir")).fileType()).isEqualTo(IS_DIR);
 
@@ -340,10 +348,113 @@ public class FatFileSystemImplTest
         assertThat(impl.list(Path.of("/"))).isEmpty();
 
         impl.discardChanges();
-        // check that the directory still exists after discard
+
+        /* check that the directory still exists after discard */
         assertThat(impl.list(Path.of("/"))).hasSize(1);
         Dirent de = impl.getDirent(Path.of("/dir"));
         assertThat(de.fileType()).isEqualTo(IS_DIR);
+    }
+
+    @Test
+    public void moveFileInRoot() throws IOException
+    {
+        impl.create(true, "LABEL");
+        impl.putFile(Path.of("/old.txt"), new Bytes("content old"));
+        impl.moveFile(Path.of("/old.txt"), Path.of("/new.txt"));
+        assertThrows(NoSuchFileException.class, () -> impl.getFile(Path.of("/old.txt")));
+
+        assertThat(impl.getFile(Path.of("/new.txt")).reader().readString(11)).isEqualTo(
+                "content old");
+        assertThat(impl.list(Path.of("/"))).hasSize(1);
+        assertThat(impl.getDirent(Path.of("/new.txt")).fileType()).isEqualTo(IS_FILE);
+    }
+
+    @Test
+    public void moveDirectory() throws IOException
+    {
+        impl.create(true, "LABEL");
+        impl.createDirectory(Path.of("/dir1"));
+        impl.putFile(Path.of("/dir1/file.txt"), new Bytes("inside"));
+        impl.moveFile(Path.of("/dir1"), Path.of("/dir2"));
+        assertThrows(NoSuchFileException.class, () -> impl.getDirent(Path.of("/dir1")));
+
+        Dirent de = impl.getDirent(Path.of("/dir2"));
+        assertThat(de.fileType()).isEqualTo(IS_DIR);
+        assertThat(impl.getFile(Path.of("/dir2/file.txt")).reader().readString(6)).isEqualTo(
+                "inside");
+        assertThat(impl.list(Path.of("/"))).hasSize(1);
+    }
+
+    @Test
+    public void moveFileIntoDirectory() throws IOException
+    {
+        impl.create(true, "LABEL");
+        impl.putFile(Path.of("/file.txt"), new Bytes("hello"));
+        impl.createDirectory(Path.of("/dir"));
+        impl.moveFile(Path.of("/file.txt"), Path.of("/dir/file.txt"));
+        assertThrows(NoSuchFileException.class, () -> impl.getFile(Path.of("/file.txt")));
+
+        assertThat(impl
+                .getFile(Path.of("/dir/file.txt"))
+                .reader()
+                .readString(5)).isEqualTo("hello");
+        assertThat(impl.list(Path.of("/"))).hasSize(1);
+        assertThat(impl.list(Path.of("/dir"))).hasSize(1);
+    }
+
+    @Test
+    public void moveDirectoryIntoItself() throws IOException
+    {
+        impl.create(true, "LABEL");
+        impl.createDirectory(Path.of("/dir"));
+        impl.createDirectory(Path.of("/dir/sub"));
+
+        /* Moving /dir into its own subtree should fail (e.g., /dir -> /dir/sub/moved) */
+        assertThrows(
+                InvalidPathException.class,
+                () -> impl.moveFile(Path.of("/dir"), Path.of("/dir/sub/moved")));
+
+        /* Also moving directly onto itself should fail */
+        assertThrows(
+                InvalidPathException.class,
+                () -> impl.moveFile(Path.of("/dir"), Path.of("/dir")));
+
+        /* Original still exists and is intact */
+        assertThat(impl.getDirent(Path.of("/dir")).fileType()).isEqualTo(IS_DIR);
+        assertThat(impl.getDirent(Path.of("/dir/sub")).fileType()).isEqualTo(IS_DIR);
+    }
+
+    @Test
+    public void moveFileOnTopOfAnotherFile() throws IOException
+    {
+        impl.create(true, "LABEL");
+        impl.putFile(Path.of("/a.txt"), new Bytes("AAA"));
+        impl.putFile(Path.of("/b.txt"), new Bytes("BBB"));
+        assertThrows(
+                FileAlreadyExistsException.class,
+                () -> impl.moveFile(Path.of("/a.txt"), Path.of("/b.txt")));
+
+        /* Both files should still exist with original contents */
+        assertThat(impl.getFile(Path.of("/a.txt")).reader().readString(3)).isEqualTo("AAA");
+        assertThat(impl.getFile(Path.of("/b.txt")).reader().readString(3)).isEqualTo("BBB");
+    }
+
+    @Test
+    public void moveFileOnTopOfDirectory() throws IOException
+    {
+        impl.create(true, "LABEL");
+        impl.putFile(Path.of("/file.txt"), new Bytes("data"));
+        impl.createDirectory(Path.of("/dir"));
+        assertThrows(
+                FileAlreadyExistsException.class,
+                () -> impl.moveFile(Path.of("/file.txt"), Path.of("/dir")));
+
+        /* Also moving a directory onto a file should fail */
+        assertThrows(
+                FileAlreadyExistsException.class,
+                () -> impl.moveFile(Path.of("/dir"), Path.of("/file.txt")));
+        assertThat(impl.getFile(Path.of("/file.txt")).reader().readString(4)).isEqualTo("data");
+        assertThat(impl.getDirent(Path.of("/dir")).fileType()).isEqualTo(IS_DIR);
     }
 
     /* Do not use --- for debugging the test only */
