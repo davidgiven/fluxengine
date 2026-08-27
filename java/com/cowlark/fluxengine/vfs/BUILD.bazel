@@ -25,6 +25,7 @@ java_library(
         "//java/com/cowlark/fluxengine/algorithms",
         "//java/com/cowlark/fluxengine/core",
         "//java/com/cowlark/fluxengine/data",
+        "//third_party/java/com/github/adflib/adflib",
         "//third_party/java/org/elm_chan/ff",
         "@maven//:com_google_guava_guava",
         "@maven//:org_projectlombok_lombok",
