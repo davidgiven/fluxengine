@@ -199,10 +199,11 @@ public class AmigaFileSystem extends FileSystem
         if (volName.length() > 30)
             volName = volName.substring(0, 30);
 
-        int volType = AdfConstants.FS_FFS | AdfConstants.FSMASK_DIRCACHE;
-        // AmigaFfsProto is currently empty; default to FFS.
-        // To add filesystem type selection, extend the proto with a filesystemType field.
-        // For HDD vs floppy, check size
+        /* Match the old C++ amigaffs.cc which passes 0 (FS_OFS).
+         * Enabling DIRCACHE (via FSMASK_DIRCACHE) triggers buggy dir-cache
+         * paths in the adflib translation (AIOOBE in adfSetBlockFree,
+         * corrupted dir-cache blocks causing mount failures, etc.). */
+        int volType = AdfConstants.FS_OFS;
         AdfError rc;
         if (amigaDevice.devType == AdfConstants.DEVTYPE_HARDDISK)
         {
@@ -419,31 +420,32 @@ public class AmigaFileSystem extends FileSystem
         mount();
         String oldAmiga = toAmigaPath(oldName);
         String newAmiga = toAmigaPath(newName);
-        int oldParent = getParentBlock(oldAmiga);
-        String oldBase = getBaseName(oldAmiga);
-        int newParent = getParentBlock(newAmiga);
-        String newBase = getBaseName(newAmiga);
 
-        // Check if new already exists
-        Entry existing = findEntryOrNull(newAmiga);
-        if (existing != null)
-        {
-            throw new FileAlreadyExistsException(newName.toString());
-        }
-
-        // Check for moving directory into itself
+        /* Check for moving directory into itself — must come before the
+         * existing-check so that moving /dir onto /dir itself gives
+         * InvalidPathException rather than FileAlreadyExistsException. */
         Entry oldEntry = findEntry(oldAmiga);
         if (oldEntry.type == AdfConstants.ST_DIR)
         {
-            String oldNorm = oldAmiga;
-            String newNorm = newAmiga;
-            if (newNorm.equals(oldNorm) || newNorm.startsWith(oldNorm + "/"))
+            if (newAmiga.equals(oldAmiga) || newAmiga.startsWith(oldAmiga + "/"))
             {
                 throw new java.nio.file.InvalidPathException(
                         newName.toString(),
                         "cannot move directory into itself");
             }
         }
+
+        /* Check if target already exists */
+        Entry existing = findEntryOrNull(newAmiga);
+        if (existing != null)
+        {
+            throw new FileAlreadyExistsException(newName.toString());
+        }
+
+        int oldParent = getParentBlock(oldAmiga);
+        String oldBase = getBaseName(oldAmiga);
+        int newParent = getParentBlock(newAmiga);
+        String newBase = getBaseName(newAmiga);
 
         checkResult(AdfDir.adfRenameEntry(volume, oldParent, oldBase, newParent, newBase));
     }
