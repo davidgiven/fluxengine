@@ -22,7 +22,6 @@ import com.github.adflib.adflib.AdfFile;
 import com.github.adflib.adflib.AdfHd;
 import com.github.adflib.adflib.AdfList;
 import com.github.adflib.adflib.AdfRaw;
-import com.github.adflib.adflib.Adflib;
 import com.github.adflib.adflib.BRootBlock;
 import com.github.adflib.adflib.Device;
 import com.github.adflib.adflib.Entry;
@@ -36,6 +35,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.InvalidPathException;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -71,14 +71,10 @@ public class AmigaFileSystem extends FileSystem
             this.heads = 2;
             this.sectors = 11;
             if (size == 512 * 22 * 2 * 80)
-            {
                 this.sectors = 22;
-            }
             this.devType = AdfHd.adfDevType(this);
             if (this.devType == -1)
-            {
                 this.devType = AdfConstants.DEVTYPE_FLOPDD;
-            }
         }
 
         @Override
@@ -87,28 +83,23 @@ public class AmigaFileSystem extends FileSystem
             try
             {
                 int blockSize = underlying.getBlockSize();
-                int sectorsPerBlock = blockSize / 512;
-                // Handle 256-byte RDSK etc. via read-modify
+                /* Handle 256-byte RDSK etc. via read-modify */
                 if (size == 512)
                 {
                     Bytes bytes = underlying.getBlocks(n, 1);
                     byte[] src = bytes.toByteArray();
                     for (int i = 0; i < src.length && i < size; i++)
-                    {
                         buf.put(i, src[i]);
-                    }
                     return AdfError.RC_OK;
                 } else
                 {
-                    // Sub-sector (e.g., 256 for RDSK): read full block and slice
+                    /* Sub-sector (e.g., 256 for RDSK): read full block and slice */
                     int blockNum = n * size / blockSize;
                     int offsetInBlock = (n * size) % blockSize;
                     Bytes bytes = underlying.getBlocks(blockNum, 1);
                     byte[] src = bytes.toByteArray();
                     for (int i = 0; i < size; i++)
-                    {
                         buf.put(i, src[offsetInBlock + i]);
-                    }
                     return AdfError.RC_OK;
                 }
             } catch (IOException e)
@@ -133,22 +124,18 @@ public class AmigaFileSystem extends FileSystem
                 {
                     byte[] tmp = new byte[size];
                     for (int i = 0; i < size; i++)
-                    {
                         tmp[i] = buf.get(i);
-                    }
                     underlying.putBlocks(n, new Bytes(tmp));
                     return AdfError.RC_OK;
                 } else
                 {
-                    // Sub-sector write: read-modify-write full block
+                    /* Sub-sector write: read-modify-write full block */
                     int blockNum = n * size / blockSize;
                     int offsetInBlock = (n * size) % blockSize;
                     Bytes existing = underlying.getBlocks(blockNum, 1);
                     byte[] blockData = existing.toByteArray();
                     for (int i = 0; i < size; i++)
-                    {
                         blockData[offsetInBlock + i] = buf.get(i);
-                    }
                     underlying.putBlocks(blockNum, new Bytes(blockData));
                     return AdfError.RC_OK;
                 }
@@ -179,7 +166,7 @@ public class AmigaFileSystem extends FileSystem
         this.amigaDevice = new AmigaDevice(blockDevice);
     }
 
-    // Visible for testing
+    /* Visible for testing */
     Device getAmigaDevice()
     {
         return amigaDevice;
@@ -193,9 +180,9 @@ public class AmigaFileSystem extends FileSystem
     @Override
     public void create(boolean quick, String volumeName) throws IOException
     {
-        // Use adfCreateFlop for floppy, adfCreateVol for more control
+        /* Use adfCreateFlop for floppy, adfCreateVol for more control */
         String volName = volumeName != null ? volumeName : "empty";
-        // Truncate to 30 chars (Amiga vol name limit) and uppercase
+        /* Truncate to 30 chars (Amiga vol name limit) and uppercase */
         if (volName.length() > 30)
             volName = volName.substring(0, 30);
 
@@ -206,13 +193,10 @@ public class AmigaFileSystem extends FileSystem
         int volType = AdfConstants.FS_OFS;
         AdfError rc;
         if (amigaDevice.devType == AdfConstants.DEVTYPE_HARDDISK)
-        {
-            // For hard disk, need partition handling - simplify to single partition FFS
+            /* For hard disk, need partition handling - simplify to single partition FFS */
             rc = AdfHd.adfCreateFlop(amigaDevice, volName, volType);
-        } else
-        {
+        else
             rc = AdfHd.adfCreateFlop(amigaDevice, volName, volType);
-        }
         checkResult(rc);
         mount();
     }
@@ -224,11 +208,9 @@ public class AmigaFileSystem extends FileSystem
         String volName = volume.volName != null ? volume.volName : "";
         int freeBlocks = AdfBitm.adfCountFreeBlocks(volume);
         int totalBlocks = volume.lastBlock - volume.firstBlock + 1;
-        // Approximation: total blocks from device
+        /* Approximation: total blocks from device */
         if (totalBlocks <= 0)
-        {
             totalBlocks = amigaDevice.size / 512;
-        }
         return ImmutableMap
                 .<String, String>builder()
                 .put(Attributes.VOLUME_NAME, volName)
@@ -291,10 +273,13 @@ public class AmigaFileSystem extends FileSystem
         String amigaPath = toAmigaPath(path);
         Entry entry = findEntry(amigaPath);
         if (entry.type != AdfConstants.ST_FILE)
-        {
             throw new NoSuchFileException("not a file: " + path);
-        }
-        File file = AdfFile.adfOpenFile(volume, amigaPath, "r");
+        int parentBlock = getParentBlock(amigaPath);
+        String baseName = getBaseName(amigaPath);
+        volume.curDirPtr = parentBlock;
+
+        File file = AdfFile.adfOpenFile(volume, baseName, "r");
+        AdfDir.adfToRootDir(volume);
         if (file == null)
             throw new NoSuchFileException(path.toString());
         try
@@ -319,26 +304,30 @@ public class AmigaFileSystem extends FileSystem
     {
         mount();
         String amigaPath = toAmigaPath(path);
-        // If it's a directory, fail like FatFileSystem does
+
+        /* If it's a directory, fail like FatFileSystem does */
         Entry existing = findEntryOrNull(amigaPath);
         if (existing != null && existing.type == AdfConstants.ST_DIR)
-        {
             throw new FileAlreadyExistsException(path.toString());
-        }
-        // Remove existing file if present (like FatFileSystem's CREATE_ALWAYS)
+
+        /* Remove existing file if present (like FatFileSystem's CREATE_ALWAYS) */
         if (existing != null)
         {
             int parent = getParentBlock(amigaPath);
             String name = getBaseName(amigaPath);
             checkResult(AdfDir.adfRemoveEntry(volume, parent, name));
         }
-        File file = AdfFile.adfOpenFile(volume, amigaPath, "w");
+        int parentBlock = getParentBlock(amigaPath);
+        String baseName = getBaseName(amigaPath);
+        volume.curDirPtr = parentBlock;
+        File file = AdfFile.adfOpenFile(volume, baseName, "w");
+        AdfDir.adfToRootDir(volume);
         if (file == null)
             throw new IOException("cannot create file: " + path);
         try
         {
             ByteBuffer buf = bytes.toByteBuffer();
-            // Ensure we copy without touching position
+            /* Ensure we copy without touching position */
             ByteBuffer dup = buf.duplicate();
             int written = AdfFile.adfWriteFile(file, bytes.size(), dup);
             if (written != bytes.size())
@@ -378,9 +367,7 @@ public class AmigaFileSystem extends FileSystem
         Entry existing = AdfDir.adfFindEntry(volume, name);
         volume.curDirPtr = savedDirPtr;
         if (existing != null)
-        {
             throw new FileAlreadyExistsException(path.toString());
-        }
 
         checkResult(AdfDir.adfCreateDir(volume, parentBlock, name));
     }
@@ -393,7 +380,7 @@ public class AmigaFileSystem extends FileSystem
         Entry e = findEntry(amigaPath);
         if (e.type == AdfConstants.ST_DIR)
         {
-            // Check if directory is empty
+            /* Check if directory is empty */
             AdfList list = AdfDir.adfGetDirEnt(volume, e.sector);
             boolean empty = true;
             for (AdfList n = list; n != null; n = n.next)
@@ -426,21 +413,15 @@ public class AmigaFileSystem extends FileSystem
          * InvalidPathException rather than FileAlreadyExistsException. */
         Entry oldEntry = findEntry(oldAmiga);
         if (oldEntry.type == AdfConstants.ST_DIR)
-        {
             if (newAmiga.equals(oldAmiga) || newAmiga.startsWith(oldAmiga + "/"))
-            {
-                throw new java.nio.file.InvalidPathException(
+                throw new InvalidPathException(
                         newName.toString(),
                         "cannot move directory into itself");
-            }
-        }
 
         /* Check if target already exists */
         Entry existing = findEntryOrNull(newAmiga);
         if (existing != null)
-        {
             throw new FileAlreadyExistsException(newName.toString());
-        }
 
         int oldParent = getParentBlock(oldAmiga);
         String oldBase = getBaseName(oldAmiga);
@@ -448,6 +429,44 @@ public class AmigaFileSystem extends FileSystem
         String newBase = getBaseName(newAmiga);
 
         checkResult(AdfDir.adfRenameEntry(volume, oldParent, oldBase, newParent, newBase));
+    }
+
+    @Override
+    public void close() throws Exception
+    {
+        flushChanges();
+    }
+
+    @Override
+    public boolean needsFlushing()
+    {
+        return blockDevice.needsCommit();
+    }
+
+    @Override
+    public void flushChanges() throws IOException
+    {
+        blockDevice.commit();
+
+        /* Unmount the volume after flushing so adflib's internal state
+         * (bitmap cache, etc.) is reset. The next operation will
+         * re-mount via mount() which calls adfMountDev + adfMount. */
+        if (volume != null)
+        {
+            AdfDisk.adfUnMount(volume);
+            volume = null;
+        }
+    }
+
+    @Override
+    public void discardChanges()
+    {
+        if (volume != null)
+        {
+            AdfDisk.adfUnMount(volume);
+            volume = null;
+        }
+        blockDevice.revert();
     }
 
     private static Dirent makeDirent(Path dir, Entry e)
@@ -472,50 +491,15 @@ public class AmigaFileSystem extends FileSystem
     {
         if (volume != null && volume.mounted)
             return;
+
         /* Populate volList/nVol/geometry from current disk state.
          * On a fresh instance (without create()), adfCreateFlop was never called,
          * so volList is empty and AdfDisk.adfMount would return null. */
+
         AdfHd.adfMountDev(amigaDevice);
         volume = AdfDisk.adfMount(amigaDevice, 0, false);
         if (volume == null)
             throw new IOException("mount failed");
-    }
-
-    @Override
-    public void close() throws Exception
-    {
-        flushChanges();
-    }
-
-    @Override
-    public boolean needsFlushing()
-    {
-        return blockDevice.needsCommit();
-    }
-
-    @Override
-    public void flushChanges() throws IOException
-    {
-        blockDevice.commit();
-        /* Unmount the volume after flushing so adflib's internal state
-         * (bitmap cache, etc.) is reset. The next operation will
-         * re-mount via mount() which calls adfMountDev + adfMount. */
-        if (volume != null)
-        {
-            AdfDisk.adfUnMount(volume);
-            volume = null;
-        }
-    }
-
-    @Override
-    public void discardChanges()
-    {
-        if (volume != null)
-        {
-            AdfDisk.adfUnMount(volume);
-            volume = null;
-        }
-        blockDevice.revert();
     }
 
     private Entry findEntry(String amigaPath) throws IOException
@@ -529,12 +513,14 @@ public class AmigaFileSystem extends FileSystem
     private Entry findEntryOrNull(String amigaPath)
     {
         if (amigaPath.equals("/") || amigaPath.isEmpty())
-            return null; // root has no Entry, but treat as found for dir ops
-        // Use adfFindEntry which searches from current dir? We need to handle absolute paths
-        // adfFindEntry expects name relative to vol.curDirPtr, but we can use absolute by
-        // resetting to root
+            return null; /* root has no Entry, but treat as found for dir ops */
+
+        /* Use adfFindEntry which searches from current dir? We need to handle
+         * absolute paths.  adfFindEntry expects name relative to vol.curDirPtr,
+         * but we can use absolute by resetting to root. */
         AdfDir.adfToRootDir(volume);
-        // Split path into components and walk
+
+        /* Split path into components and walk */
         String[] parts = amigaPath.split("/");
         Entry cur = null;
         for (String part : parts)
@@ -543,33 +529,33 @@ public class AmigaFileSystem extends FileSystem
                 continue;
             cur = AdfDir.adfFindEntry(volume, part);
             if (cur == null)
-                return null;
-            // If not last part, need to change dir to this entry's sector for next lookup
-            // For simplicity, use adfChangeDir to descend if entry is dir and not last
-            // But adfFindEntry already searches current dir, so we need to update curDirPtr
-            // Instead, just keep cur and for next iteration, change dir
-            if (!part.equals(parts[parts.length - 1]) && cur.type == AdfConstants.ST_DIR)
             {
-                // Change to this dir for next component
-                // AdfDir.adfChangeDir expects name, but we can manually set curDirPtr
-                volume.curDirPtr = cur.sector;
+                AdfDir.adfToRootDir(volume);
+                return null;
             }
+
+            /* If not last part, need to change dir to this entry's sector for
+             * next lookup.  For simplicity, use adfChangeDir to descend if entry
+             * is dir and not last.  But adfFindEntry already searches current
+             * dir, so we need to update curDirPtr.  Instead, just keep cur and
+             * for next iteration, change dir. */
+            if (!part.equals(parts[parts.length - 1]) && cur.type == AdfConstants.ST_DIR)
+                volume.curDirPtr = cur.sector;
         }
-        // Restore to root after search
+
+        /* Restore to root after search */
         AdfDir.adfToRootDir(volume);
         return cur;
     }
 
     private int resolveDir(String amigaPath) throws IOException
     {
-        if (amigaPath.equals("/") || amigaPath.isEmpty())
-        {
-            return volume.curDirPtr; // actually root, but after adfToRootDir, curDirPtr is root
-        }
         AdfDir.adfToRootDir(volume);
-        String[] parts = amigaPath.split("/");
+        if (amigaPath.equals("/") || amigaPath.isEmpty())
+            return volume.curDirPtr;
+
         int cur = volume.curDirPtr;
-        for (String part : parts)
+        for (String part : amigaPath.split("/"))
         {
             if (part.isEmpty())
                 continue;
@@ -581,6 +567,7 @@ public class AmigaFileSystem extends FileSystem
             cur = e.sector;
             volume.curDirPtr = cur;
         }
+
         int res = cur;
         AdfDir.adfToRootDir(volume);
         return res;
@@ -615,6 +602,7 @@ public class AmigaFileSystem extends FileSystem
         String s = path.toString();
         if (s.isEmpty())
             return "";
+
         /* Strip leading "/" — adflib functions expect bare filenames
          * like "data" or "dir1/dir2", not "/data".  findEntry/resolveDir
          * split on "/" and handle both forms, but adfOpenFile hashes the
