@@ -497,6 +497,14 @@ public class AmigaFileSystem extends FileSystem
     public void flushChanges() throws IOException
     {
         blockDevice.commit();
+        /* Unmount the volume after flushing so adflib's internal state
+         * (bitmap cache, etc.) is reset. The next operation will
+         * re-mount via mount() which calls adfMountDev + adfMount. */
+        if (volume != null)
+        {
+            AdfDisk.adfUnMount(volume);
+            volume = null;
+        }
     }
 
     @Override

@@ -37,6 +37,21 @@ java_test(
 )
 
 java_test(
+    name = "TrackedBlockDeviceTest",
+    srcs = ["TrackedBlockDeviceTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/config",
+        "//java/com/cowlark/fluxengine/config:config_java_proto",
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/data",
+        "//java/com/cowlark/fluxengine/vfs",
+        "//javatests/com/cowlark/fluxengine/testing",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
     name = "FatFileSystemTest",
     srcs = ["FatFileSystemTest.java"],
     deps = [
