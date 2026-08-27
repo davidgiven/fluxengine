@@ -368,6 +368,19 @@ public class AmigaFileSystem extends FileSystem
         String parentPath = getParentPath(amigaPath);
         String name = getBaseName(amigaPath);
         int parentBlock = resolveDir(parentPath);
+
+        /* Check if name already exists in parent directory before creating.
+         * adfCreateDir returns RC_ERROR for both "name exists" and "no sector",
+         * so we need an explicit check to throw FileAlreadyExistsException. */
+        int savedDirPtr = volume.curDirPtr;
+        volume.curDirPtr = parentBlock;
+        Entry existing = AdfDir.adfFindEntry(volume, name);
+        volume.curDirPtr = savedDirPtr;
+        if (existing != null)
+        {
+            throw new FileAlreadyExistsException(path.toString());
+        }
+
         checkResult(AdfDir.adfCreateDir(volume, parentBlock, name));
     }
 
@@ -457,6 +470,10 @@ public class AmigaFileSystem extends FileSystem
     {
         if (volume != null && volume.mounted)
             return;
+        /* Populate volList/nVol/geometry from current disk state.
+         * On a fresh instance (without create()), adfCreateFlop was never called,
+         * so volList is empty and AdfDisk.adfMount would return null. */
+        AdfHd.adfMountDev(amigaDevice);
         volume = AdfDisk.adfMount(amigaDevice, 0, false);
         if (volume == null)
             throw new IOException("mount failed");
@@ -584,13 +601,16 @@ public class AmigaFileSystem extends FileSystem
     private static String toAmigaPath(Path path)
     {
         if (path == null)
-            return "/";
+            return "";
         String s = path.toString();
         if (s.isEmpty())
-            return "/";
-        // Amiga uses "/" as separator as well, keep as is
-        // Remove leading "/" for adflib's relative handling, but keep "/" for root
-        // Our helpers handle leading "/" by stripping
+            return "";
+        /* Strip leading "/" — adflib functions expect bare filenames
+         * like "data" or "dir1/dir2", not "/data".  findEntry/resolveDir
+         * split on "/" and handle both forms, but adfOpenFile hashes the
+         * raw name string, so "/data" != "data" in the hash table. */
+        if (s.startsWith("/"))
+            s = s.substring(1);
         return s;
     }
 
