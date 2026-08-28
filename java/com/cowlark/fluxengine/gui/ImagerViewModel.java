@@ -345,7 +345,7 @@ public class ImagerViewModel
 
         String device = getSelectedDevice().get();
         if (device.equals(DEVICE_SERIALPORT))
-            builder.set("usb.port", device);
+            builder.set("usb.greaseweazle.port", device);
         else if (device.equals(DEVICE_FLUXFILE))
         {
             String fluxfile = getSelectedFluxFile().get();
