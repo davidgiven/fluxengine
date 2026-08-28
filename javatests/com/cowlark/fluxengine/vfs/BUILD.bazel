@@ -101,3 +101,15 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "AppleSingleDoubleTest",
+    srcs = ["AppleSingleDoubleTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/vfs:apple_single_double_java_lib",
+        "@maven//:com_google_guava_guava",
+        "@maven//:com_google_truth_truth",
+        "@maven//:io_kaitai_kaitai_struct_runtime",
+        "@maven//:junit_junit",
+    ],
+)

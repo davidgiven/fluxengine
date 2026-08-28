@@ -1,6 +1,18 @@
+load("@rules_scala//scala:scala.bzl", "scala_binary")
 load("//:corpus.bzl", "define_corpus_tests")
 
 package(default_visibility = ["//visibility:public"])
+
+# Utility used for compiling ksy files into Java.
+
+scala_binary(
+    name = "ksc_binary",
+    main_class = "io.kaitai.struct.JavaMain",
+    visibility = ["//visibility:public"],
+    runtime_deps = [
+        "@maven//:io_kaitai_kaitai_struct_compiler_2_13",
+    ],
+)
 
 # Root aliases for running/building the application
 alias(
