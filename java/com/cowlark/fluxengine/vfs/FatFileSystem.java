@@ -39,7 +39,6 @@ import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.InvalidPathException;
 import java.nio.file.NoSuchFileException;
-import java.nio.file.Path;
 import java.time.LocalDateTime;
 
 public class FatFileSystem extends FileSystem
@@ -260,7 +259,7 @@ public class FatFileSystem extends FileSystem
     }
 
     @Override
-    public ImmutableMap<String, Dirent> list(Path path) throws IOException
+    public ImmutableMap<String, Dirent> list(VfsPath path) throws IOException
     {
         mount();
         ImmutableMap.Builder<String, Dirent> builder = ImmutableMap.builder();
@@ -283,7 +282,7 @@ public class FatFileSystem extends FileSystem
     }
 
     @Override
-    public Bytes getFile(Path path) throws IOException
+    public Bytes getFile(VfsPath path) throws IOException
     {
         mount();
         Fil fil = new Fil();
@@ -304,14 +303,14 @@ public class FatFileSystem extends FileSystem
     }
 
     @Override
-    public void createDirectory(Path path) throws IOException
+    public void createDirectory(VfsPath path) throws IOException
     {
         mount();
         checkResult(fatFilesystem.mkdir(toFatPath(path)));
     }
 
     @Override
-    public void putFile(Path path, Bytes bytes) throws IOException
+    public void putFile(VfsPath path, Bytes bytes) throws IOException
     {
         mount();
         String fatPath = toFatPath(path);
@@ -336,20 +335,20 @@ public class FatFileSystem extends FileSystem
     }
 
     @Override
-    public Dirent getDirent(Path path) throws IOException
+    public Dirent getDirent(VfsPath path) throws IOException
     {
         mount();
         String p = toFatPath(path);
         FilInfo filinfo = new FilInfo();
         checkResult(fatFilesystem.stat(p, filinfo));
-        Path parent = path.getParent();
+        VfsPath parent = path.getParent();
         if (parent == null)
-            parent = Path.of("/");
+            parent = VfsPath.of("/");
         return makeDirent(parent, filinfo);
     }
 
     @Override
-    public void deleteFile(Path path) throws IOException
+    public void deleteFile(VfsPath path) throws IOException
     {
         mount();
         String p = toFatPath(path);
@@ -360,7 +359,7 @@ public class FatFileSystem extends FileSystem
     }
 
     @Override
-    public void moveFile(Path oldName, Path newName) throws IOException
+    public void moveFile(VfsPath oldName, VfsPath newName) throws IOException
     {
         mount();
         String oldP = toFatPath(oldName);
@@ -368,7 +367,7 @@ public class FatFileSystem extends FileSystem
         checkResult(fatFilesystem.rename(oldP, newP));
     }
 
-    private static Dirent makeDirent(Path dir, FilInfo fi)
+    private static Dirent makeDirent(VfsPath dir, FilInfo fi)
     {
         ImmutableMap.Builder<String, String> attrsBuilder = ImmutableMap.builder();
         DirentBuilder direntBuilder =
@@ -423,14 +422,11 @@ public class FatFileSystem extends FileSystem
         blockDevice.revert();
     }
 
-    private static String toFatPath(Path path)
+    private static String toFatPath(VfsPath path)
     {
         if (path == null)
             return "/";
-        String s = path.toString();
-        if (s.isEmpty())
-            return "/";
-        return s;
+        return path.toString();
     }
 
     private static void checkResult(FResult result) throws IOException

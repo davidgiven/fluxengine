@@ -37,6 +37,17 @@ java_test(
 )
 
 java_test(
+    name = "VfsPathTest",
+    srcs = ["VfsPathTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/vfs",
+        "@maven//:com_google_guava_guava",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
     name = "TrackedBlockDeviceTest",
     srcs = ["TrackedBlockDeviceTest.java"],
     deps = [

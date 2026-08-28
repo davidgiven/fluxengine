@@ -37,7 +37,6 @@ import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.InvalidPathException;
 import java.nio.file.NoSuchFileException;
-import java.nio.file.Path;
 import java.util.Arrays;
 
 public class AmigaFileSystem extends FileSystem
@@ -247,11 +246,10 @@ public class AmigaFileSystem extends FileSystem
     }
 
     @Override
-    public ImmutableMap<String, Dirent> list(Path path) throws IOException
+    public ImmutableMap<String, Dirent> list(VfsPath path) throws IOException
     {
         mount();
-        String amigaPath = toAmigaPath(path);
-        int parentBlock = resolveDir(amigaPath);
+        int parentBlock = resolveDir(path);
 
         AdfList list = AdfDir.adfGetDirEnt(volume, parentBlock);
         ImmutableMap.Builder<String, Dirent> builder = ImmutableMap.builder();
@@ -267,15 +265,14 @@ public class AmigaFileSystem extends FileSystem
     }
 
     @Override
-    public Bytes getFile(Path path) throws IOException
+    public Bytes getFile(VfsPath path) throws IOException
     {
         mount();
-        String amigaPath = toAmigaPath(path);
-        Entry entry = findEntry(amigaPath);
+        Entry entry = findEntry(path);
         if (entry.type != AdfConstants.ST_FILE)
             throw new NoSuchFileException("not a file: " + path);
-        int parentBlock = getParentBlock(amigaPath);
-        String baseName = getBaseName(amigaPath);
+        int parentBlock = getParentBlock(path);
+        String baseName = path.getName();
         volume.curDirPtr = parentBlock;
 
         File file = AdfFile.adfOpenFile(volume, baseName, "r");
@@ -300,25 +297,24 @@ public class AmigaFileSystem extends FileSystem
     }
 
     @Override
-    public void putFile(Path path, Bytes bytes) throws IOException
+    public void putFile(VfsPath path, Bytes bytes) throws IOException
     {
         mount();
-        String amigaPath = toAmigaPath(path);
 
         /* If it's a directory, fail like FatFileSystem does */
-        Entry existing = findEntryOrNull(amigaPath);
+        Entry existing = findEntryOrNull(path);
         if (existing != null && existing.type == AdfConstants.ST_DIR)
             throw new FileAlreadyExistsException(path.toString());
 
         /* Remove existing file if present (like FatFileSystem's CREATE_ALWAYS) */
         if (existing != null)
         {
-            int parent = getParentBlock(amigaPath);
-            String name = getBaseName(amigaPath);
+            int parent = getParentBlock(path);
+            String name = path.getName();
             checkResult(AdfDir.adfRemoveEntry(volume, parent, name));
         }
-        int parentBlock = getParentBlock(amigaPath);
-        String baseName = getBaseName(amigaPath);
+        int parentBlock = getParentBlock(path);
+        String baseName = path.getName();
         volume.curDirPtr = parentBlock;
         File file = AdfFile.adfOpenFile(volume, baseName, "w");
         AdfDir.adfToRootDir(volume);
@@ -339,24 +335,24 @@ public class AmigaFileSystem extends FileSystem
     }
 
     @Override
-    public Dirent getDirent(Path path) throws IOException
+    public Dirent getDirent(VfsPath path) throws IOException
     {
         mount();
-        String amigaPath = toAmigaPath(path);
-        Entry e = findEntry(amigaPath);
-        Path parent = path.getParent();
+        Entry e = findEntry(path);
+        VfsPath parent = path.getParent();
         if (parent == null)
-            parent = Path.of("/");
+            parent = VfsPath.of("/");
         return makeDirent(parent, e);
     }
 
     @Override
-    public void createDirectory(Path path) throws IOException
+    public void createDirectory(VfsPath path) throws IOException
     {
         mount();
-        String amigaPath = toAmigaPath(path);
-        String parentPath = getParentPath(amigaPath);
-        String name = getBaseName(amigaPath);
+        VfsPath parentPath = path.getParent();
+        if (parentPath == null)
+            parentPath = VfsPath.of("/");
+        String name = path.getName();
         int parentBlock = resolveDir(parentPath);
 
         /* Check if name already exists in parent directory before creating.
@@ -373,11 +369,10 @@ public class AmigaFileSystem extends FileSystem
     }
 
     @Override
-    public void deleteFile(Path path) throws IOException
+    public void deleteFile(VfsPath path) throws IOException
     {
         mount();
-        String amigaPath = toAmigaPath(path);
-        Entry e = findEntry(amigaPath);
+        Entry e = findEntry(path);
         if (e.type == AdfConstants.ST_DIR)
         {
             /* Check if directory is empty */
@@ -396,37 +391,35 @@ public class AmigaFileSystem extends FileSystem
             if (!empty)
                 throw new DirectoryNotEmptyException(path.toString());
         }
-        int parent = getParentBlock(amigaPath);
-        String name = getBaseName(amigaPath);
+        int parent = getParentBlock(path);
+        String name = path.getName();
         checkResult(AdfDir.adfRemoveEntry(volume, parent, name));
     }
 
     @Override
-    public void moveFile(Path oldName, Path newName) throws IOException
+    public void moveFile(VfsPath oldName, VfsPath newName) throws IOException
     {
         mount();
-        String oldAmiga = toAmigaPath(oldName);
-        String newAmiga = toAmigaPath(newName);
 
         /* Check for moving directory into itself — must come before the
          * existing-check so that moving /dir onto /dir itself gives
          * InvalidPathException rather than FileAlreadyExistsException. */
-        Entry oldEntry = findEntry(oldAmiga);
+        Entry oldEntry = findEntry(oldName);
         if (oldEntry.type == AdfConstants.ST_DIR)
-            if (newAmiga.equals(oldAmiga) || newAmiga.startsWith(oldAmiga + "/"))
+            if (newName.equals(oldName) || newName.toString().startsWith(oldName.toString() + "/"))
                 throw new InvalidPathException(
                         newName.toString(),
                         "cannot move directory into itself");
 
         /* Check if target already exists */
-        Entry existing = findEntryOrNull(newAmiga);
+        Entry existing = findEntryOrNull(newName);
         if (existing != null)
             throw new FileAlreadyExistsException(newName.toString());
 
-        int oldParent = getParentBlock(oldAmiga);
-        String oldBase = getBaseName(oldAmiga);
-        int newParent = getParentBlock(newAmiga);
-        String newBase = getBaseName(newAmiga);
+        int oldParent = getParentBlock(oldName);
+        String oldBase = oldName.getName();
+        int newParent = getParentBlock(newName);
+        String newBase = newName.getName();
 
         checkResult(AdfDir.adfRenameEntry(volume, oldParent, oldBase, newParent, newBase));
     }
@@ -469,7 +462,7 @@ public class AmigaFileSystem extends FileSystem
         blockDevice.revert();
     }
 
-    private static Dirent makeDirent(Path dir, Entry e)
+    private static Dirent makeDirent(VfsPath dir, Entry e)
     {
         ImmutableMap.Builder<String, String> attrs = ImmutableMap.builder();
         Dirent.DirentBuilder b =
@@ -502,17 +495,17 @@ public class AmigaFileSystem extends FileSystem
             throw new IOException("mount failed");
     }
 
-    private Entry findEntry(String amigaPath) throws IOException
+    private Entry findEntry(VfsPath path) throws IOException
     {
-        Entry e = findEntryOrNull(amigaPath);
+        Entry e = findEntryOrNull(path);
         if (e == null)
-            throw new NoSuchFileException(amigaPath);
+            throw new NoSuchFileException(path.toString());
         return e;
     }
 
-    private Entry findEntryOrNull(String amigaPath)
+    private Entry findEntryOrNull(VfsPath path)
     {
-        if (amigaPath.equals("/") || amigaPath.isEmpty())
+        if (path.segments().isEmpty())
             return null; /* root has no Entry, but treat as found for dir ops */
 
         /* Use adfFindEntry which searches from current dir? We need to handle
@@ -520,13 +513,12 @@ public class AmigaFileSystem extends FileSystem
          * but we can use absolute by resetting to root. */
         AdfDir.adfToRootDir(volume);
 
-        /* Split path into components and walk */
-        String[] parts = amigaPath.split("/");
+        /* Walk the path segments */
+        int n = path.segments().size();
         Entry cur = null;
-        for (String part : parts)
+        for (int i = 0; i < n; i++)
         {
-            if (part.isEmpty())
-                continue;
+            String part = path.segments().get(i);
             cur = AdfDir.adfFindEntry(volume, part);
             if (cur == null)
             {
@@ -539,7 +531,7 @@ public class AmigaFileSystem extends FileSystem
              * is dir and not last.  But adfFindEntry already searches current
              * dir, so we need to update curDirPtr.  Instead, just keep cur and
              * for next iteration, change dir. */
-            if (!part.equals(parts[parts.length - 1]) && cur.type == AdfConstants.ST_DIR)
+            if (i != n - 1 && cur.type == AdfConstants.ST_DIR)
                 volume.curDirPtr = cur.sector;
         }
 
@@ -548,20 +540,18 @@ public class AmigaFileSystem extends FileSystem
         return cur;
     }
 
-    private int resolveDir(String amigaPath) throws IOException
+    private int resolveDir(VfsPath path) throws IOException
     {
         AdfDir.adfToRootDir(volume);
-        if (amigaPath.equals("/") || amigaPath.isEmpty())
+        if (path.segments().isEmpty())
             return volume.curDirPtr;
 
         int cur = volume.curDirPtr;
-        for (String part : amigaPath.split("/"))
+        for (String part : path.segments())
         {
-            if (part.isEmpty())
-                continue;
             Entry e = AdfDir.adfFindEntry(volume, part);
             if (e == null)
-                throw new NoSuchFileException(amigaPath);
+                throw new NoSuchFileException(path.toString());
             if (e.type != AdfConstants.ST_DIR)
                 throw new NoSuchFileException("not a directory: " + part);
             cur = e.sector;
@@ -573,43 +563,12 @@ public class AmigaFileSystem extends FileSystem
         return res;
     }
 
-    private int getParentBlock(String amigaPath) throws IOException
+    private int getParentBlock(VfsPath path) throws IOException
     {
-        String parentPath = getParentPath(amigaPath);
-        return resolveDir(parentPath);
-    }
-
-    private static String getParentPath(String path)
-    {
-        int slash = path.lastIndexOf('/');
-        if (slash <= 0)
-            return "/";
-        return path.substring(0, slash);
-    }
-
-    private static String getBaseName(String path)
-    {
-        int slash = path.lastIndexOf('/');
-        if (slash < 0)
-            return path;
-        return path.substring(slash + 1);
-    }
-
-    private static String toAmigaPath(Path path)
-    {
-        if (path == null)
-            return "";
-        String s = path.toString();
-        if (s.isEmpty())
-            return "";
-
-        /* Strip leading "/" — adflib functions expect bare filenames
-         * like "data" or "dir1/dir2", not "/data".  findEntry/resolveDir
-         * split on "/" and handle both forms, but adfOpenFile hashes the
-         * raw name string, so "/data" != "data" in the hash table. */
-        if (s.startsWith("/"))
-            s = s.substring(1);
-        return s;
+        VfsPath parent = path.getParent();
+        if (parent == null)
+            parent = VfsPath.of("/");
+        return resolveDir(parent);
     }
 
     private static void checkResult(AdfError rc) throws IOException

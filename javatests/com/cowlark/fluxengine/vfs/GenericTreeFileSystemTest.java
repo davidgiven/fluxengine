@@ -14,7 +14,6 @@ import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.InvalidPathException;
 import java.nio.file.NoSuchFileException;
-import java.nio.file.Path;
 
 public abstract class GenericTreeFileSystemTest
 {
@@ -27,8 +26,8 @@ public abstract class GenericTreeFileSystemTest
     public void getFile() throws IOException
     {
         impl.create(true, "LABEL");
-        impl.putFile(Path.of("/data"), new Bytes("Hello, world!"));
-        Bytes bytes = impl.getFile(Path.of("/data"));
+        impl.putFile(VfsPath.of("/data"), new Bytes("Hello, world!"));
+        Bytes bytes = impl.getFile(VfsPath.of("/data"));
         assertThat(bytes.reader().readString(13)).isEqualTo("Hello, world!");
     }
 
@@ -36,16 +35,16 @@ public abstract class GenericTreeFileSystemTest
     public void getFile_missing() throws IOException
     {
         impl.create(true, "LABEL");
-        assertThrows(NoSuchFileException.class, () -> impl.getFile(Path.of("/data")));
+        assertThrows(NoSuchFileException.class, () -> impl.getFile(VfsPath.of("/data")));
     }
 
     @Test
     public void putGetFile() throws IOException
     {
         impl.create(true, "LABEL");
-        impl.putFile(Path.of("/data"), new Bytes("Hello, world!"));
+        impl.putFile(VfsPath.of("/data"), new Bytes("Hello, world!"));
 
-        Bytes output = impl.getFile(Path.of("/data"));
+        Bytes output = impl.getFile(VfsPath.of("/data"));
         assertThat(output).isEqualTo(new Bytes("Hello, world!"));
     }
 
@@ -53,10 +52,10 @@ public abstract class GenericTreeFileSystemTest
     public void putFile_replaces() throws IOException
     {
         impl.create(true, "LABEL");
-        impl.putFile(Path.of("/data"), new Bytes("This is the wrong data."));
-        impl.putFile(Path.of("/data"), new Bytes("Hello, world!"));
+        impl.putFile(VfsPath.of("/data"), new Bytes("This is the wrong data."));
+        impl.putFile(VfsPath.of("/data"), new Bytes("Hello, world!"));
 
-        Bytes output = impl.getFile(Path.of("/data"));
+        Bytes output = impl.getFile(VfsPath.of("/data"));
         assertThat(output).isEqualTo(new Bytes("Hello, world!"));
     }
 
@@ -64,18 +63,18 @@ public abstract class GenericTreeFileSystemTest
     public void putFile_onDirectory() throws IOException
     {
         impl.create(true, "LABEL");
-        impl.createDirectory(Path.of("/data"));
+        impl.createDirectory(VfsPath.of("/data"));
         assertThrows(
                 FileAlreadyExistsException.class,
-                () -> impl.putFile(Path.of("/data"), new Bytes("Hello, world!")));
+                () -> impl.putFile(VfsPath.of("/data"), new Bytes("Hello, world!")));
     }
 
     @Test
     public void createDirectory() throws IOException
     {
         impl.create(true, "LABEL");
-        impl.createDirectory(Path.of("/dir"));
-        Dirent de = impl.getDirent(Path.of("/dir"));
+        impl.createDirectory(VfsPath.of("/dir"));
+        Dirent de = impl.getDirent(VfsPath.of("/dir"));
         assertThat(de.fileType()).isEqualTo(IS_DIR);
     }
 
@@ -83,25 +82,25 @@ public abstract class GenericTreeFileSystemTest
     public void createDirectory_fileExists() throws IOException
     {
         impl.create(true, "LABEL");
-        impl.putFile(Path.of("/data"), new Bytes("Hello, world!"));
+        impl.putFile(VfsPath.of("/data"), new Bytes("Hello, world!"));
         assertThrows(
                 FileAlreadyExistsException.class,
-                () -> impl.createDirectory(Path.of("/data")));
+                () -> impl.createDirectory(VfsPath.of("/data")));
     }
 
     @Test
     public void createDirectory_nested() throws IOException
     {
         impl.create(true, "LABEL");
-        impl.createDirectory(Path.of("/dir1"));
-        assertThat(impl.list(Path.of("/"))).hasSize(1);
-        assertThat(impl.list(Path.of("/dir1"))).hasSize(0);
+        impl.createDirectory(VfsPath.of("/dir1"));
+        assertThat(impl.list(VfsPath.of("/"))).hasSize(1);
+        assertThat(impl.list(VfsPath.of("/dir1"))).hasSize(0);
 
-        impl.createDirectory(Path.of("/dir1", "dir2"));
-        assertThat(impl.list(Path.of("/"))).hasSize(1);
-        assertThat(impl.list(Path.of("/dir1"))).hasSize(1);
+        impl.createDirectory(VfsPath.of("/dir1", "dir2"));
+        assertThat(impl.list(VfsPath.of("/"))).hasSize(1);
+        assertThat(impl.list(VfsPath.of("/dir1"))).hasSize(1);
 
-        Dirent de = impl.getDirent(Path.of("/dir1/dir2"));
+        Dirent de = impl.getDirent(VfsPath.of("/dir1/dir2"));
         assertThat(de.filename()).isEqualTo("dir2");
         assertThat(de.fileType()).isEqualTo(IS_DIR);
     }
@@ -112,53 +111,53 @@ public abstract class GenericTreeFileSystemTest
         impl.create(true, "LABEL");
         assertThrows(
                 NoSuchFileException.class,
-                () -> impl.createDirectory(Path.of("/dir1", "dir2", "dir3", "dir4")));
+                () -> impl.createDirectory(VfsPath.of("/dir1", "dir2", "dir3", "dir4")));
     }
 
     @Test
     public void delete_file() throws IOException
     {
         impl.create(true, "LABEL");
-        impl.putFile(Path.of("/data"), new Bytes("Hello, world!"));
-        impl.deleteFile(Path.of("/data"));
-        assertThat(impl.list(Path.of("/"))).isEmpty();
+        impl.putFile(VfsPath.of("/data"), new Bytes("Hello, world!"));
+        impl.deleteFile(VfsPath.of("/data"));
+        assertThat(impl.list(VfsPath.of("/"))).isEmpty();
     }
 
     @Test
     public void delete_dir() throws IOException
     {
         impl.create(true, "LABEL");
-        impl.createDirectory(Path.of("/dir"));
-        impl.deleteFile(Path.of("/dir"));
-        assertThat(impl.list(Path.of("/"))).isEmpty();
+        impl.createDirectory(VfsPath.of("/dir"));
+        impl.deleteFile(VfsPath.of("/dir"));
+        assertThat(impl.list(VfsPath.of("/"))).isEmpty();
     }
 
     @Test
     public void delete_missing() throws IOException
     {
         impl.create(true, "LABEL");
-        assertThrows(NoSuchFileException.class, () -> impl.deleteFile(Path.of("/dir")));
+        assertThrows(NoSuchFileException.class, () -> impl.deleteFile(VfsPath.of("/dir")));
     }
 
     @Test
     public void delete_middle() throws IOException
     {
         impl.create(true, "LABEL");
-        impl.createDirectory(Path.of("/dir1"));
-        impl.createDirectory(Path.of("/dir1", "dir2"));
-        assertThrows(DirectoryNotEmptyException.class, () -> impl.deleteFile(Path.of("/dir1")));
+        impl.createDirectory(VfsPath.of("/dir1"));
+        impl.createDirectory(VfsPath.of("/dir1", "dir2"));
+        assertThrows(DirectoryNotEmptyException.class, () -> impl.deleteFile(VfsPath.of("/dir1")));
     }
 
     @Test
     public void listFiles() throws IOException
     {
         impl.create(true, "LABEL");
-        impl.putFile(Path.of("/data"), new Bytes("Hello, world!"));
-        ImmutableMap<String, Dirent> files = impl.list(Path.of("/"));
+        impl.putFile(VfsPath.of("/data"), new Bytes("Hello, world!"));
+        ImmutableMap<String, Dirent> files = impl.list(VfsPath.of("/"));
         assertThat(files).hasSize(1);
         assertThat(files.get("data")).isEqualTo(Dirent
                 .builder()
-                .setPath(Path.of("/data"))
+                .setPath(VfsPath.of("/data"))
                 .setFilename("data")
                 .setLength(13)
                 .setFileType(IS_FILE)
@@ -176,11 +175,11 @@ public abstract class GenericTreeFileSystemTest
     public void getDirent() throws IOException
     {
         impl.create(true, "LABEL");
-        impl.putFile(Path.of("/data"), new Bytes("Hello, world!"));
-        Dirent de = impl.getDirent(Path.of("/data"));
+        impl.putFile(VfsPath.of("/data"), new Bytes("Hello, world!"));
+        Dirent de = impl.getDirent(VfsPath.of("/data"));
         assertThat(de).isEqualTo(Dirent
                 .builder()
-                .setPath(Path.of("/data"))
+                .setPath(VfsPath.of("/data"))
                 .setFilename("data")
                 .setLength(13)
                 .setFileType(IS_FILE)
@@ -198,14 +197,14 @@ public abstract class GenericTreeFileSystemTest
     public void flushActuallyFlushes() throws IOException
     {
         impl.create(true, "LABEL");
-        impl.createDirectory(Path.of("/dir1"));
-        impl.createDirectory(Path.of("/dir1/dir2"));
-        impl.createDirectory(Path.of("/dir1/dir2/dir3"));
-        impl.putFile(Path.of("/dir1/dir2/dir3/data"), new Bytes("Hello, world!"));
+        impl.createDirectory(VfsPath.of("/dir1"));
+        impl.createDirectory(VfsPath.of("/dir1/dir2"));
+        impl.createDirectory(VfsPath.of("/dir1/dir2/dir3"));
+        impl.putFile(VfsPath.of("/dir1/dir2/dir3/data"), new Bytes("Hello, world!"));
         impl.flushChanges();
 
         createTestFilesystem();
-        Dirent de = impl.getDirent(Path.of("/dir1/dir2/dir3/data"));
+        Dirent de = impl.getDirent(VfsPath.of("/dir1/dir2/dir3/data"));
         assertThat(de.filename()).isEqualTo("data");
     }
 
@@ -213,21 +212,21 @@ public abstract class GenericTreeFileSystemTest
     public void discardChanges() throws IOException
     {
         impl.create(true, "LABEL");
-        impl.createDirectory(Path.of("/dir"));
+        impl.createDirectory(VfsPath.of("/dir"));
         impl.flushChanges();
 
         /* check the directory exists after flush */
-        assertThat(impl.list(Path.of("/"))).hasSize(1);
-        assertThat(impl.getDirent(Path.of("/dir")).fileType()).isEqualTo(IS_DIR);
+        assertThat(impl.list(VfsPath.of("/"))).hasSize(1);
+        assertThat(impl.getDirent(VfsPath.of("/dir")).fileType()).isEqualTo(IS_DIR);
 
-        impl.deleteFile(Path.of("/dir"));
-        assertThat(impl.list(Path.of("/"))).isEmpty();
+        impl.deleteFile(VfsPath.of("/dir"));
+        assertThat(impl.list(VfsPath.of("/"))).isEmpty();
 
         impl.discardChanges();
 
         /* check that the directory still exists after discard */
-        assertThat(impl.list(Path.of("/"))).hasSize(1);
-        Dirent de = impl.getDirent(Path.of("/dir"));
+        assertThat(impl.list(VfsPath.of("/"))).hasSize(1);
+        Dirent de = impl.getDirent(VfsPath.of("/dir"));
         assertThat(de.fileType()).isEqualTo(IS_DIR);
     }
 
@@ -235,101 +234,101 @@ public abstract class GenericTreeFileSystemTest
     public void moveFileInRoot() throws IOException
     {
         impl.create(true, "LABEL");
-        impl.putFile(Path.of("/old.txt"), new Bytes("content old"));
-        impl.moveFile(Path.of("/old.txt"), Path.of("/new.txt"));
-        assertThrows(NoSuchFileException.class, () -> impl.getFile(Path.of("/old.txt")));
+        impl.putFile(VfsPath.of("/old.txt"), new Bytes("content old"));
+        impl.moveFile(VfsPath.of("/old.txt"), VfsPath.of("/new.txt"));
+        assertThrows(NoSuchFileException.class, () -> impl.getFile(VfsPath.of("/old.txt")));
 
-        assertThat(impl.getFile(Path.of("/new.txt")).reader().readString(11)).isEqualTo(
+        assertThat(impl.getFile(VfsPath.of("/new.txt")).reader().readString(11)).isEqualTo(
                 "content old");
-        assertThat(impl.list(Path.of("/"))).hasSize(1);
-        assertThat(impl.getDirent(Path.of("/new.txt")).fileType()).isEqualTo(IS_FILE);
+        assertThat(impl.list(VfsPath.of("/"))).hasSize(1);
+        assertThat(impl.getDirent(VfsPath.of("/new.txt")).fileType()).isEqualTo(IS_FILE);
     }
 
     @Test
     public void moveDirectory() throws IOException
     {
         impl.create(true, "LABEL");
-        impl.createDirectory(Path.of("/dir1"));
-        impl.putFile(Path.of("/dir1/file.txt"), new Bytes("inside"));
-        impl.moveFile(Path.of("/dir1"), Path.of("/dir2"));
-        assertThrows(NoSuchFileException.class, () -> impl.getDirent(Path.of("/dir1")));
+        impl.createDirectory(VfsPath.of("/dir1"));
+        impl.putFile(VfsPath.of("/dir1/file.txt"), new Bytes("inside"));
+        impl.moveFile(VfsPath.of("/dir1"), VfsPath.of("/dir2"));
+        assertThrows(NoSuchFileException.class, () -> impl.getDirent(VfsPath.of("/dir1")));
 
-        Dirent de = impl.getDirent(Path.of("/dir2"));
+        Dirent de = impl.getDirent(VfsPath.of("/dir2"));
         assertThat(de.fileType()).isEqualTo(IS_DIR);
-        assertThat(impl.getFile(Path.of("/dir2/file.txt")).reader().readString(6)).isEqualTo(
+        assertThat(impl.getFile(VfsPath.of("/dir2/file.txt")).reader().readString(6)).isEqualTo(
                 "inside");
-        assertThat(impl.list(Path.of("/"))).hasSize(1);
+        assertThat(impl.list(VfsPath.of("/"))).hasSize(1);
     }
 
     @Test
     public void moveFileIntoDirectory() throws IOException
     {
         impl.create(true, "LABEL");
-        impl.putFile(Path.of("/file.txt"), new Bytes("hello"));
-        impl.createDirectory(Path.of("/dir"));
-        impl.moveFile(Path.of("/file.txt"), Path.of("/dir/file.txt"));
-        assertThrows(NoSuchFileException.class, () -> impl.getFile(Path.of("/file.txt")));
+        impl.putFile(VfsPath.of("/file.txt"), new Bytes("hello"));
+        impl.createDirectory(VfsPath.of("/dir"));
+        impl.moveFile(VfsPath.of("/file.txt"), VfsPath.of("/dir/file.txt"));
+        assertThrows(NoSuchFileException.class, () -> impl.getFile(VfsPath.of("/file.txt")));
 
         assertThat(impl
-                .getFile(Path.of("/dir/file.txt"))
+                .getFile(VfsPath.of("/dir/file.txt"))
                 .reader()
                 .readString(5)).isEqualTo("hello");
-        assertThat(impl.list(Path.of("/"))).hasSize(1);
-        assertThat(impl.list(Path.of("/dir"))).hasSize(1);
+        assertThat(impl.list(VfsPath.of("/"))).hasSize(1);
+        assertThat(impl.list(VfsPath.of("/dir"))).hasSize(1);
     }
 
     @Test
     public void moveDirectoryIntoItself() throws IOException
     {
         impl.create(true, "LABEL");
-        impl.createDirectory(Path.of("/dir"));
-        impl.createDirectory(Path.of("/dir/sub"));
+        impl.createDirectory(VfsPath.of("/dir"));
+        impl.createDirectory(VfsPath.of("/dir/sub"));
 
         /* Moving /dir into its own subtree should fail (e.g., /dir -> /dir/sub/moved) */
         assertThrows(
                 InvalidPathException.class,
-                () -> impl.moveFile(Path.of("/dir"), Path.of("/dir/sub/moved")));
+                () -> impl.moveFile(VfsPath.of("/dir"), VfsPath.of("/dir/sub/moved")));
 
         /* Also moving directly onto itself should fail */
         assertThrows(
                 InvalidPathException.class,
-                () -> impl.moveFile(Path.of("/dir"), Path.of("/dir")));
+                () -> impl.moveFile(VfsPath.of("/dir"), VfsPath.of("/dir")));
 
         /* Original still exists and is intact */
-        assertThat(impl.getDirent(Path.of("/dir")).fileType()).isEqualTo(IS_DIR);
-        assertThat(impl.getDirent(Path.of("/dir/sub")).fileType()).isEqualTo(IS_DIR);
+        assertThat(impl.getDirent(VfsPath.of("/dir")).fileType()).isEqualTo(IS_DIR);
+        assertThat(impl.getDirent(VfsPath.of("/dir/sub")).fileType()).isEqualTo(IS_DIR);
     }
 
     @Test
     public void moveFileOnTopOfAnotherFile() throws IOException
     {
         impl.create(true, "LABEL");
-        impl.putFile(Path.of("/a.txt"), new Bytes("AAA"));
-        impl.putFile(Path.of("/b.txt"), new Bytes("BBB"));
+        impl.putFile(VfsPath.of("/a.txt"), new Bytes("AAA"));
+        impl.putFile(VfsPath.of("/b.txt"), new Bytes("BBB"));
         assertThrows(
                 FileAlreadyExistsException.class,
-                () -> impl.moveFile(Path.of("/a.txt"), Path.of("/b.txt")));
+                () -> impl.moveFile(VfsPath.of("/a.txt"), VfsPath.of("/b.txt")));
 
         /* Both files should still exist with original contents */
-        assertThat(impl.getFile(Path.of("/a.txt")).reader().readString(3)).isEqualTo("AAA");
-        assertThat(impl.getFile(Path.of("/b.txt")).reader().readString(3)).isEqualTo("BBB");
+        assertThat(impl.getFile(VfsPath.of("/a.txt")).reader().readString(3)).isEqualTo("AAA");
+        assertThat(impl.getFile(VfsPath.of("/b.txt")).reader().readString(3)).isEqualTo("BBB");
     }
 
     @Test
     public void moveFileOnTopOfDirectory() throws IOException
     {
         impl.create(true, "LABEL");
-        impl.putFile(Path.of("/file.txt"), new Bytes("data"));
-        impl.createDirectory(Path.of("/dir"));
+        impl.putFile(VfsPath.of("/file.txt"), new Bytes("data"));
+        impl.createDirectory(VfsPath.of("/dir"));
         assertThrows(
                 FileAlreadyExistsException.class,
-                () -> impl.moveFile(Path.of("/file.txt"), Path.of("/dir")));
+                () -> impl.moveFile(VfsPath.of("/file.txt"), VfsPath.of("/dir")));
 
         /* Also moving a directory onto a file should fail */
         assertThrows(
                 FileAlreadyExistsException.class,
-                () -> impl.moveFile(Path.of("/dir"), Path.of("/file.txt")));
-        assertThat(impl.getFile(Path.of("/file.txt")).reader().readString(4)).isEqualTo("data");
-        assertThat(impl.getDirent(Path.of("/dir")).fileType()).isEqualTo(IS_DIR);
+                () -> impl.moveFile(VfsPath.of("/dir"), VfsPath.of("/file.txt")));
+        assertThat(impl.getFile(VfsPath.of("/file.txt")).reader().readString(4)).isEqualTo("data");
+        assertThat(impl.getDirent(VfsPath.of("/dir")).fileType()).isEqualTo(IS_DIR);
     }
 }

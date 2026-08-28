@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import lombok.Builder;
 import java.io.IOException;
-import java.nio.file.Path;
 
 public abstract class FileSystem implements AutoCloseable
 {
@@ -32,7 +31,7 @@ public abstract class FileSystem implements AutoCloseable
     }
 
     @Builder(setterPrefix = "set")
-    public record Dirent(Path path, String filename, int length, String mode, FileType fileType,
+    public record Dirent(VfsPath path, String filename, int length, String mode, FileType fileType,
                          ImmutableMap<String, String> attributes)
     {
     }
@@ -93,7 +92,7 @@ public abstract class FileSystem implements AutoCloseable
     /**
      * List files in a given directory.
      */
-    public ImmutableMap<String, Dirent> list(Path path) throws IOException
+    public ImmutableMap<String, Dirent> list(VfsPath path) throws IOException
     {
         throw new UnsupportedOperationException();
     }
@@ -101,7 +100,7 @@ public abstract class FileSystem implements AutoCloseable
     /**
      * Read a file.
      */
-    public Bytes getFile(Path path) throws IOException
+    public Bytes getFile(VfsPath path) throws IOException
     {
         throw new UnsupportedOperationException();
     }
@@ -109,7 +108,7 @@ public abstract class FileSystem implements AutoCloseable
     /**
      * Write a file.
      */
-    public void putFile(Path path, Bytes bytes) throws IOException
+    public void putFile(VfsPath path, Bytes bytes) throws IOException
     {
         throw new UnsupportedOperationException();
     }
@@ -117,7 +116,7 @@ public abstract class FileSystem implements AutoCloseable
     /**
      * Get a single file dirent (which includes the metadata).
      */
-    public Dirent getDirent(Path path) throws IOException
+    public Dirent getDirent(VfsPath path) throws IOException
     {
         throw new UnsupportedOperationException();
     }
@@ -125,7 +124,7 @@ public abstract class FileSystem implements AutoCloseable
     /**
      * Update file metadata.
      */
-    public void putFileMetadata(Path path, ImmutableMap<String, String> metadata)
+    public void putFileMetadata(VfsPath path, ImmutableMap<String, String> metadata)
     {
         throw new UnsupportedOperationException();
     }
@@ -133,7 +132,7 @@ public abstract class FileSystem implements AutoCloseable
     /**
      * Creates a directory.
      */
-    public void createDirectory(Path path) throws IOException
+    public void createDirectory(VfsPath path) throws IOException
     {
         throw new UnsupportedOperationException();
     }
@@ -141,7 +140,7 @@ public abstract class FileSystem implements AutoCloseable
     /**
      * Deletes a file or non-empty directory.
      */
-    public void deleteFile(Path path) throws IOException
+    public void deleteFile(VfsPath path) throws IOException
     {
         throw new UnsupportedOperationException();
     }
@@ -149,7 +148,7 @@ public abstract class FileSystem implements AutoCloseable
     /**
      * Moves a file (including renaming it).
      */
-    public void moveFile(Path oldName, Path newName) throws IOException
+    public void moveFile(VfsPath oldName, VfsPath newName) throws IOException
     {
         throw new UnsupportedOperationException();
     }
