@@ -180,7 +180,7 @@ public abstract class FileSystem implements AutoCloseable
     /**
      * Discards any pending changes.
      */
-    public void discardChanges()
+    public void discardChanges() throws IOException
     {
         throw new UnsupportedOperationException();
     }

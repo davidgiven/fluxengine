@@ -1,5 +1,6 @@
 package com.cowlark.fluxengine.core;
 
+import java.security.InvalidParameterException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -64,6 +65,16 @@ public final class ByteReader implements Iterator<Byte>
         Bytes slice = bytes.slice(pos, len);
         pos += len;
         return slice;
+    }
+
+    public void readInto(byte[] buffer, int length)
+    {
+        if (length > buffer.length)
+            throw new InvalidParameterException("length out of bounds");
+
+        checkReadable(length);
+        System.arraycopy(bytes.storage.data, bytes.low, buffer, 0, length);
+        pos += length;
     }
 
     public int read8()

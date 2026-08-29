@@ -5,6 +5,7 @@ import static org.junit.Assert.assertThrows;
 
 import com.cowlark.fluxengine.config.ConfigBuilder;
 import com.cowlark.fluxengine.config.ConfigProto;
+import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.data.DiskLayout;
 import com.cowlark.fluxengine.data.Image;
 import com.cowlark.fluxengine.imagewriter.ImageWriter;
@@ -42,6 +43,12 @@ public class FatFileSystemTest extends GenericTreeFileSystemTest
     {
         blockDevice = new InMemoryBlockDevice(diskLayout, image);
         impl = new FatFileSystem(configProto.getFilesystem().getFatfs(), blockDevice);
+    }
+
+    @Override
+    protected Bytes getTestFileData(String contents)
+    {
+        return new Bytes(contents);
     }
 
     @Test

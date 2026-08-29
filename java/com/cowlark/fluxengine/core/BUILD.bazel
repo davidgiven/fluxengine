@@ -6,18 +6,8 @@ java_library(
     name = "core",
     srcs = glob(
         ["*.java"],
-        exclude = ["Kaitai*.java"],
     ),
     deps = [
         "@maven//:com_google_guava_guava",
-    ],
-)
-
-java_library(
-    name = "kaitailib",
-    srcs = glob(["Kaitai*.java"]),
-    deps = [
-        ":core",
-        "@maven//:io_kaitai_kaitai_struct_runtime",
     ],
 )

@@ -21,9 +21,9 @@ import java.util.zip.Inflater;
  */
 public final class Bytes implements List<Byte>
 {
-    private Storage storage;
-    private int low;
-    private int high;
+    Storage storage;
+    int low;
+    int high;
 
     public Bytes()
     {
@@ -659,7 +659,7 @@ public final class Bytes implements List<Byte>
         storage.data = newData;
     }
 
-    private static final class Storage
+    static final class Storage
     {
         byte[] data;
         int refcount;

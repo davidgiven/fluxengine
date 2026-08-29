@@ -44,6 +44,12 @@ public class AmigaFileSystemTest extends GenericTreeFileSystemTest
         impl = new AmigaFileSystem(configProto.getFilesystem().getAmigaffs(), blockDevice);
     }
 
+    @Override
+    protected Bytes getTestFileData(String contents)
+    {
+        return new Bytes(contents);
+    }
+
     @Test
     public void createFilesystem() throws IOException
     {

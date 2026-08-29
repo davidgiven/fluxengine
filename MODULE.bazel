@@ -3,9 +3,8 @@ bazel_dep(name = "rules_java", version = "9.1.0")
 bazel_dep(name = "rules_jvm_external", version = "6.7")
 bazel_dep(name = "rules_proto", version = "7.1.0")
 bazel_dep(name = "protobuf", version = "33.4", repo_name = "com_google_protobuf")
-bazel_dep(name = "rules_scala", version = "7.2.6")
 
-http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 maven = use_extension("@rules_jvm_external//:extensions.bzl", "maven")
 maven.install(
@@ -35,23 +34,10 @@ maven.install(
         "net.bytebuddy:byte-buddy-agent:1.17.7",
         "org.objenesis:objenesis:3.3",
         "org.slf4j:slf4j-simple:2.0.17",
-        "io.kaitai:kaitai-struct-runtime:0.11",
-        "io.kaitai:kaitai-struct-compiler_2.13:0.11",
+        "org.indunet:fastproto:4.1.0",
     ],
     repositories = [
         "https://repo1.maven.org/maven2",
     ],
 )
 use_repo(maven, "maven")
-
-scala_config = use_extension(
-    "@rules_scala//scala/extensions:config.bzl",
-    "scala_config",
-)
-scala_config.settings(scala_version = "2.13.18")
-
-scala_deps = use_extension(
-    "@rules_scala//scala/extensions:deps.bzl",
-    "scala_deps",
-)
-scala_deps.scala()

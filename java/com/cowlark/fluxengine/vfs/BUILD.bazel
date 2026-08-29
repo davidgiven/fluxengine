@@ -1,7 +1,6 @@
 load("@com_google_protobuf//bazel:java_proto_library.bzl", "java_proto_library")
 load("@rules_java//java:defs.bzl", "java_library")
 load("@rules_proto//proto:defs.bzl", "proto_library")
-load("//:kaitai.bzl", "kaitai_java_library")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -17,28 +16,21 @@ java_proto_library(
     deps = [":vfs_proto"],
 )
 
-kaitai_java_library(
-    name = "apple_single_double_java_lib",
-    srcs = ["apple_single_double.ksy"],
-    java_package = "io.kaitai.formats",
-    deps = [
-        "@maven//:io_kaitai_kaitai_struct_runtime",
-    ],
-)
-
 java_library(
     name = "vfs",
     srcs = glob(["*.java"]),
     plugins = ["//java/com/cowlark/fluxengine/wiring:lombok_plugin"],
     deps = [
-        ":apple_single_double_java_lib",
         ":vfs_java_proto",
         "//java/com/cowlark/fluxengine/algorithms",
         "//java/com/cowlark/fluxengine/core",
         "//java/com/cowlark/fluxengine/data",
         "//third_party/java/com/github/adflib/adflib",
         "//third_party/java/org/elm_chan/ff",
+        "//third_party/java/org/mars/hfsutils",
         "@maven//:com_google_guava_guava",
+        "@maven//:org_indunet_fastproto",
+        "@maven//:org_indunet_fastproto_core",
         "@maven//:org_projectlombok_lombok",
         "@maven//:org_slf4j_slf4j_api",
     ],

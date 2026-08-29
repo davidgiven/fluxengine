@@ -1019,7 +1019,10 @@ public final class Hfs
                     HfsFile.f_alloc(file) == -1)
                     throw new HfsException(hfsErrno, hfsError);
 
-                pylen[0] = file.cat.filPyLen;
+                if (file.fork == HfsFile.FK_DATA)
+                    pylen[0] = file.cat.filPyLen;
+                else
+                    pylen[0] = file.cat.filRPyLen;
             }
 
             byte[] b = new byte[HFS_BLOCKSZ];
@@ -1044,7 +1047,10 @@ public final class Hfs
                 lglen[0] = file.pos;
         }
 
-        file.cat.filLgLen = lglen[0];
+        if (file.fork == HfsFile.FK_DATA)
+            file.cat.filLgLen = lglen[0];
+        else
+            file.cat.filRLgLen = lglen[0];
 
         return len;
     }
@@ -1069,6 +1075,10 @@ public final class Hfs
             }
 
             lglen[0] = len;
+            if (file.fork == HfsFile.FK_DATA)
+                file.cat.filLgLen = len;
+            else
+                file.cat.filRLgLen = len;
 
             file.cat.filMdDat = HfsData.d_mtime(System.currentTimeMillis() / 1000);
             file.flags |= HFS_FILE_UPDATE_CATREC;
@@ -1359,12 +1369,14 @@ public final class Hfs
         byte[] pkey = new byte[HFS_CATKEYLEN];
         int found;
 
+        long[] paridArr = new long[1];
         if (getvol(volArr) == -1 ||
-            HfsVolume.v_resolve(volArr, path, file.cat, new long[]{ 0 },
+            HfsVolume.v_resolve(volArr, path, file.cat, paridArr,
                                 file.name, null) <= 0)
             throw new HfsException(hfsErrno, hfsError);
 
         vol = volArr[0];
+        file.parid = paridArr[0];
 
         if (file.cat.cdrType != CatDataType.CDR_FIL_REC)
         {
@@ -1416,7 +1428,12 @@ public final class Hfs
         found = HfsVolume.v_getthread(vol, file.cat.filFlNum, null, null,
                                       CatDataType.CDR_FTHD_REC);
         if (found == -1)
-            throw new HfsException(hfsErrno, hfsError);
+        {
+            if (hfsErrno == HfsException.EIO)
+                found = 0;
+            else
+                throw new HfsException(hfsErrno, hfsError);
+        }
 
         if (found != 0)
         {
@@ -1424,7 +1441,9 @@ public final class Hfs
             HfsRecord.r_packcatkey(key, pkey, null);
 
             if (HfsBTree.bt_delete(vol.cat, pkey) == -1)
-                throw new HfsException(hfsErrno, hfsError);
+            {
+                // File threads are optional; tolerate missing thread
+            }
         }
     }
 

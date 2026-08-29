@@ -96,26 +96,3 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
-
-java_test(
-    name = "KaitaiByteWriterStreamTest",
-    srcs = ["KaitaiByteWriterStreamTest.java"],
-    deps = [
-        "//java/com/cowlark/fluxengine/core",
-        "//java/com/cowlark/fluxengine/core:kaitailib",
-        "@maven//:com_google_truth_truth",
-        "@maven//:junit_junit",
-    ],
-)
-
-java_test(
-    name = "KaitaiByteReaderStreamTest",
-    srcs = ["KaitaiByteReaderStreamTest.java"],
-    deps = [
-        "//java/com/cowlark/fluxengine/core",
-        "//java/com/cowlark/fluxengine/core:kaitailib",
-        "@maven//:com_google_truth_truth",
-        "@maven//:io_kaitai_kaitai_struct_runtime",
-        "@maven//:junit_junit",
-    ],
-)
