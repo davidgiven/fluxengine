@@ -1,13 +1,14 @@
 package com.cowlark.fluxengine.vfs;
 
 import static com.cowlark.fluxengine.vfs.Filesystem.FileType.IS_DIR;
-import static com.cowlark.fluxengine.vfs.Filesystem.FileType.IS_FILE;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
 import com.cowlark.fluxengine.core.Bytes;
+import com.cowlark.fluxengine.vfs.Filesystem.Capability;
 import com.cowlark.fluxengine.vfs.Filesystem.Dirent;
 import com.google.common.collect.ImmutableMap;
+import org.junit.Assume;
 import org.junit.Test;
 import java.io.IOException;
 import java.nio.file.DirectoryNotEmptyException;
@@ -15,53 +16,18 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.InvalidPathException;
 import java.nio.file.NoSuchFileException;
 
-public abstract class GenericTreeFilesystemTest
+public abstract class GenericTreeFilesystemTest extends GenericFilesystemTest
 {
-    protected BlockDevice blockDevice;
-    protected Filesystem impl;
-
-    public abstract void createTestFilesystem();
-
-    protected abstract Bytes getTestFileData(String contents);
-
-    protected Bytes getTestFileData()
+    private void assumeTree(Capability... caps)
     {
-        return getTestFileData("Test data!");
-    }
-
-    @Test
-    public void getFile_missing() throws IOException
-    {
-        impl.create(true, "LABEL");
-        assertThrows(NoSuchFileException.class, () -> impl.getFile(VfsPath.of("/data")));
-    }
-
-    @Test
-    public void putGetFile() throws IOException
-    {
-        impl.create(true, "LABEL");
-        Bytes expected = getTestFileData();
-        impl.putFile(VfsPath.of("/data"), expected);
-
-        Bytes output = impl.getFile(VfsPath.of("/data"));
-        assertThat(output).isEqualTo(expected);
-    }
-
-    @Test
-    public void putFile_replaces() throws IOException
-    {
-        impl.create(true, "LABEL");
-        impl.putFile(VfsPath.of("/data"), getTestFileData("This is the wrong data."));
-        Bytes expected = getTestFileData();
-        impl.putFile(VfsPath.of("/data"), expected);
-
-        Bytes output = impl.getFile(VfsPath.of("/data"));
-        assertThat(output).isEqualTo(expected);
+        for (Capability c : caps)
+            Assume.assumeTrue(impl.getCapabilities().contains(c));
     }
 
     @Test
     public void putFile_onDirectory() throws IOException
     {
+        assumeTree(Capability.OP_CREATE, Capability.OP_CREATEDIR, Capability.OP_PUTFILE);
         impl.create(true, "LABEL");
         impl.createDirectory(VfsPath.of("/data"));
         assertThrows(
@@ -72,6 +38,7 @@ public abstract class GenericTreeFilesystemTest
     @Test
     public void createDirectory() throws IOException
     {
+        assumeTree(Capability.OP_CREATE, Capability.OP_CREATEDIR, Capability.OP_GETDIRENT);
         impl.create(true, "LABEL");
         impl.createDirectory(VfsPath.of("/dir"));
         Dirent de = impl.getDirent(VfsPath.of("/dir"));
@@ -81,6 +48,7 @@ public abstract class GenericTreeFilesystemTest
     @Test
     public void createDirectory_fileExists() throws IOException
     {
+        assumeTree(Capability.OP_CREATE, Capability.OP_PUTFILE, Capability.OP_CREATEDIR);
         impl.create(true, "LABEL");
         impl.putFile(VfsPath.of("/data"), getTestFileData());
         assertThrows(
@@ -91,6 +59,11 @@ public abstract class GenericTreeFilesystemTest
     @Test
     public void createDirectory_nested() throws IOException
     {
+        assumeTree(
+                Capability.OP_CREATE,
+                Capability.OP_CREATEDIR,
+                Capability.OP_LIST,
+                Capability.OP_GETDIRENT);
         impl.create(true, "LABEL");
         impl.createDirectory(VfsPath.of("/dir1"));
         assertThat(impl.list(VfsPath.of("/"))).hasSize(1);
@@ -108,6 +81,7 @@ public abstract class GenericTreeFilesystemTest
     @Test
     public void createDirectory_middleMissing() throws IOException
     {
+        assumeTree(Capability.OP_CREATE, Capability.OP_CREATEDIR);
         impl.create(true, "LABEL");
         assertThrows(
                 NoSuchFileException.class,
@@ -115,17 +89,13 @@ public abstract class GenericTreeFilesystemTest
     }
 
     @Test
-    public void delete_file() throws IOException
-    {
-        impl.create(true, "LABEL");
-        impl.putFile(VfsPath.of("/data"), getTestFileData());
-        impl.deleteFile(VfsPath.of("/data"));
-        assertThat(impl.list(VfsPath.of("/"))).isEmpty();
-    }
-
-    @Test
     public void delete_dir() throws IOException
     {
+        assumeTree(
+                Capability.OP_CREATE,
+                Capability.OP_CREATEDIR,
+                Capability.OP_DELETE,
+                Capability.OP_LIST);
         impl.create(true, "LABEL");
         impl.createDirectory(VfsPath.of("/dir"));
         impl.deleteFile(VfsPath.of("/dir"));
@@ -133,15 +103,9 @@ public abstract class GenericTreeFilesystemTest
     }
 
     @Test
-    public void delete_missing() throws IOException
-    {
-        impl.create(true, "LABEL");
-        assertThrows(NoSuchFileException.class, () -> impl.deleteFile(VfsPath.of("/dir")));
-    }
-
-    @Test
     public void delete_middle() throws IOException
     {
+        assumeTree(Capability.OP_CREATE, Capability.OP_CREATEDIR, Capability.OP_DELETE);
         impl.create(true, "LABEL");
         impl.createDirectory(VfsPath.of("/dir1"));
         impl.createDirectory(VfsPath.of("/dir1", "dir2"));
@@ -149,48 +113,23 @@ public abstract class GenericTreeFilesystemTest
     }
 
     @Test
-    public void listFiles() throws IOException
+    public void listDirectories() throws IOException
     {
+        assumeTree(Capability.OP_CREATE, Capability.OP_CREATEDIR, Capability.OP_LIST);
         impl.create(true, "LABEL");
-        Bytes expected = getTestFileData();
-        impl.putFile(VfsPath.of("/data"), expected);
+        impl.createDirectory(VfsPath.of("/dir"));
         ImmutableMap<String, Dirent> files = impl.list(VfsPath.of("/"));
         assertThat(files).hasSize(1);
-        assertThat(files.get("data")).isEqualTo(Dirent
+        assertThat(files.get("dir")).isEqualTo(Dirent
                 .builder()
-                .setPath(VfsPath.of("/data"))
-                .setFilename("data")
-                .setLength(expected.size())
-                .setFileType(IS_FILE)
+                .setPath(VfsPath.of("/dir"))
+                .setFilename("dir")
+                .setFileType(IS_DIR)
                 .setMode("")
                 .setAttributes(ImmutableMap
                         .<String, String>builder()
-                        .put(Attributes.FILENAME, "data")
-                        .put(Attributes.LENGTH, Integer.toString(expected.size()))
-                        .put(Attributes.FILE_TYPE, "file")
-                        .build())
-                .build());
-    }
-
-    @Test
-    public void getDirent() throws IOException
-    {
-        impl.create(true, "LABEL");
-        Bytes expected = getTestFileData();
-        impl.putFile(VfsPath.of("/data"), expected);
-        Dirent de = impl.getDirent(VfsPath.of("/data"));
-        assertThat(de).isEqualTo(Dirent
-                .builder()
-                .setPath(VfsPath.of("/data"))
-                .setFilename("data")
-                .setLength(expected.size())
-                .setFileType(IS_FILE)
-                .setMode("")
-                .setAttributes(ImmutableMap
-                        .<String, String>builder()
-                        .put(Attributes.FILENAME, "data")
-                        .put(Attributes.LENGTH, Integer.toString(expected.size()))
-                        .put(Attributes.FILE_TYPE, "file")
+                        .put(Attributes.FILENAME, "dir")
+                        .put(Attributes.FILE_TYPE, "dir")
                         .build())
                 .build());
     }
@@ -198,6 +137,11 @@ public abstract class GenericTreeFilesystemTest
     @Test
     public void flushActuallyFlushes() throws IOException
     {
+        assumeTree(
+                Capability.OP_CREATE,
+                Capability.OP_CREATEDIR,
+                Capability.OP_PUTFILE,
+                Capability.OP_GETDIRENT);
         impl.create(true, "LABEL");
         impl.createDirectory(VfsPath.of("/dir1"));
         impl.createDirectory(VfsPath.of("/dir1/dir2"));
@@ -213,6 +157,12 @@ public abstract class GenericTreeFilesystemTest
     @Test
     public void discardChanges() throws IOException
     {
+        assumeTree(
+                Capability.OP_CREATE,
+                Capability.OP_CREATEDIR,
+                Capability.OP_LIST,
+                Capability.OP_GETDIRENT,
+                Capability.OP_DELETE);
         impl.create(true, "LABEL");
         impl.createDirectory(VfsPath.of("/dir"));
         impl.flushChanges();
@@ -233,22 +183,16 @@ public abstract class GenericTreeFilesystemTest
     }
 
     @Test
-    public void moveFileInRoot() throws IOException
-    {
-        impl.create(true, "LABEL");
-        Bytes data = getTestFileData("content old");
-        impl.putFile(VfsPath.of("/old.txt"), data);
-        impl.moveFile(VfsPath.of("/old.txt"), VfsPath.of("/new.txt"));
-        assertThrows(NoSuchFileException.class, () -> impl.getFile(VfsPath.of("/old.txt")));
-
-        assertThat(impl.getFile(VfsPath.of("/new.txt"))).isEqualTo(data);
-        assertThat(impl.list(VfsPath.of("/"))).hasSize(1);
-        assertThat(impl.getDirent(VfsPath.of("/new.txt")).fileType()).isEqualTo(IS_FILE);
-    }
-
-    @Test
     public void moveDirectory() throws IOException
     {
+        assumeTree(
+                Capability.OP_CREATE,
+                Capability.OP_CREATEDIR,
+                Capability.OP_PUTFILE,
+                Capability.OP_MOVE,
+                Capability.OP_GETDIRENT,
+                Capability.OP_GETFILE,
+                Capability.OP_LIST);
         impl.create(true, "LABEL");
         impl.createDirectory(VfsPath.of("/dir1"));
         Bytes data = getTestFileData("inside");
@@ -265,6 +209,13 @@ public abstract class GenericTreeFilesystemTest
     @Test
     public void moveFileIntoDirectory() throws IOException
     {
+        assumeTree(
+                Capability.OP_CREATE,
+                Capability.OP_PUTFILE,
+                Capability.OP_CREATEDIR,
+                Capability.OP_MOVE,
+                Capability.OP_GETFILE,
+                Capability.OP_LIST);
         impl.create(true, "LABEL");
         Bytes data = getTestFileData("hello");
         impl.putFile(VfsPath.of("/file.txt"), data);
@@ -280,6 +231,11 @@ public abstract class GenericTreeFilesystemTest
     @Test
     public void moveDirectoryIntoItself() throws IOException
     {
+        assumeTree(
+                Capability.OP_CREATE,
+                Capability.OP_CREATEDIR,
+                Capability.OP_MOVE,
+                Capability.OP_GETDIRENT);
         impl.create(true, "LABEL");
         impl.createDirectory(VfsPath.of("/dir"));
         impl.createDirectory(VfsPath.of("/dir/sub"));
@@ -302,6 +258,11 @@ public abstract class GenericTreeFilesystemTest
     @Test
     public void moveFileOnTopOfAnotherFile() throws IOException
     {
+        assumeTree(
+                Capability.OP_CREATE,
+                Capability.OP_PUTFILE,
+                Capability.OP_MOVE,
+                Capability.OP_GETFILE);
         impl.create(true, "LABEL");
         Bytes a = getTestFileData("AAA");
         Bytes b = getTestFileData("BBB");
@@ -319,6 +280,13 @@ public abstract class GenericTreeFilesystemTest
     @Test
     public void moveFileOnTopOfDirectory() throws IOException
     {
+        assumeTree(
+                Capability.OP_CREATE,
+                Capability.OP_PUTFILE,
+                Capability.OP_CREATEDIR,
+                Capability.OP_MOVE,
+                Capability.OP_GETFILE,
+                Capability.OP_GETDIRENT);
         impl.create(true, "LABEL");
         Bytes data = getTestFileData("data");
         impl.putFile(VfsPath.of("/file.txt"), data);

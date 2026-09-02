@@ -4,7 +4,10 @@ package(default_visibility = ["//visibility:public"])
 
 java_library(
     name = "testlib",
-    srcs = ["GenericTreeFilesystemTest.java"],
+    srcs = [
+        "GenericFilesystemTest.java",
+        "GenericTreeFilesystemTest.java",
+    ],
     deps = [
         "//java/com/cowlark/fluxengine/config",
         "//java/com/cowlark/fluxengine/config:common_java_proto",
@@ -117,6 +120,26 @@ java_test(
         "//java/com/cowlark/fluxengine/vfs",
         "//javatests/com/cowlark/fluxengine/testing",
         "//third_party/java/org/mars/hfsutils",
+        "@maven//:com_google_guava_guava",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "AcornDfsFilesystemTest",
+    srcs = ["AcornDfsFilesystemTest.java"],
+    deps = [
+        ":testlib",
+        "//java/com/cowlark/fluxengine/config",
+        "//java/com/cowlark/fluxengine/config:common_java_proto",
+        "//java/com/cowlark/fluxengine/config:config_java_proto",
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/data",
+        "//java/com/cowlark/fluxengine/imagewriter",
+        "//java/com/cowlark/fluxengine/imagewriter:imagewriter_java_proto",
+        "//java/com/cowlark/fluxengine/vfs",
+        "//javatests/com/cowlark/fluxengine/testing",
         "@maven//:com_google_guava_guava",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",

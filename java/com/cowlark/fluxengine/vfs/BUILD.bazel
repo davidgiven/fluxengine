@@ -29,6 +29,7 @@ java_library(
         "//third_party/java/org/elm_chan/ff",
         "//third_party/java/org/mars/hfsutils",
         "@maven//:com_google_guava_guava",
+        "@maven//:org_apache_commons_commons_lang3",
         "@maven//:org_indunet_fastproto",
         "@maven//:org_indunet_fastproto_core",
         "@maven//:org_projectlombok_lombok",
