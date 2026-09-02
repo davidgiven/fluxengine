@@ -4,7 +4,7 @@ package(default_visibility = ["//visibility:public"])
 
 java_library(
     name = "testlib",
-    srcs = ["GenericTreeFileSystemTest.java"],
+    srcs = ["GenericTreeFilesystemTest.java"],
     deps = [
         "//java/com/cowlark/fluxengine/config",
         "//java/com/cowlark/fluxengine/config:common_java_proto",
@@ -63,8 +63,8 @@ java_test(
 )
 
 java_test(
-    name = "FatFileSystemTest",
-    srcs = ["FatFileSystemTest.java"],
+    name = "FatFilesystemTest",
+    srcs = ["FatFilesystemTest.java"],
     deps = [
         ":testlib",
         "//java/com/cowlark/fluxengine/config",
@@ -83,8 +83,8 @@ java_test(
 )
 
 java_test(
-    name = "AmigaFileSystemTest",
-    srcs = ["AmigaFileSystemTest.java"],
+    name = "AmigaFilesystemTest",
+    srcs = ["AmigaFilesystemTest.java"],
     deps = [
         ":testlib",
         "//java/com/cowlark/fluxengine/config",

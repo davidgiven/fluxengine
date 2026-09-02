@@ -6,7 +6,7 @@ import com.google.common.collect.ImmutableSet;
 import lombok.Builder;
 import java.io.IOException;
 
-public abstract class FileSystem implements AutoCloseable
+public abstract class Filesystem implements AutoCloseable
 {
 
     public enum Capability
@@ -38,7 +38,7 @@ public abstract class FileSystem implements AutoCloseable
 
     private final ImmutableSet<Capability> capabilities;
 
-    protected FileSystem(ImmutableSet<Capability> capabilities)
+    protected Filesystem(ImmutableSet<Capability> capabilities)
     {
         this.capabilities = capabilities;
     }

@@ -1,16 +1,16 @@
 package com.cowlark.fluxengine.vfs;
 
-import static com.cowlark.fluxengine.vfs.FileSystem.Capability.OP_CREATE;
-import static com.cowlark.fluxengine.vfs.FileSystem.Capability.OP_CREATEDIR;
-import static com.cowlark.fluxengine.vfs.FileSystem.Capability.OP_DELETE;
-import static com.cowlark.fluxengine.vfs.FileSystem.Capability.OP_GETDIRENT;
-import static com.cowlark.fluxengine.vfs.FileSystem.Capability.OP_GETFILE;
-import static com.cowlark.fluxengine.vfs.FileSystem.Capability.OP_GETFSDATA;
-import static com.cowlark.fluxengine.vfs.FileSystem.Capability.OP_LIST;
-import static com.cowlark.fluxengine.vfs.FileSystem.Capability.OP_MOVE;
-import static com.cowlark.fluxengine.vfs.FileSystem.Capability.OP_PUTFILE;
-import static com.cowlark.fluxengine.vfs.FileSystem.FileType.IS_DIR;
-import static com.cowlark.fluxengine.vfs.FileSystem.FileType.IS_FILE;
+import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_CREATE;
+import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_CREATEDIR;
+import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_DELETE;
+import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_GETDIRENT;
+import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_GETFILE;
+import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_GETFSDATA;
+import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_LIST;
+import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_MOVE;
+import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_PUTFILE;
+import static com.cowlark.fluxengine.vfs.Filesystem.FileType.IS_DIR;
+import static com.cowlark.fluxengine.vfs.Filesystem.FileType.IS_FILE;
 
 import com.cowlark.fluxengine.core.Bytes;
 import com.github.adflib.adflib.AdfBitm;
@@ -39,7 +39,7 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.NoSuchFileException;
 import java.util.Arrays;
 
-public class AmigaFileSystem extends FileSystem
+public class AmigaFilesystem extends Filesystem
 {
     private static final ImmutableSet<Capability> CAPABILITIES = ImmutableSet.of(
             OP_CREATE,
@@ -157,7 +157,7 @@ public class AmigaFileSystem extends FileSystem
         }
     }
 
-    public AmigaFileSystem(AmigaFfsProto config, BlockDevice blockDevice)
+    public AmigaFilesystem(AmigaFfsProto config, BlockDevice blockDevice)
     {
         super(CAPABILITIES);
         this.config = config;

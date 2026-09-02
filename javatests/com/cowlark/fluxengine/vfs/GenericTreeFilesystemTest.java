@@ -1,12 +1,12 @@
 package com.cowlark.fluxengine.vfs;
 
-import static com.cowlark.fluxengine.vfs.FileSystem.FileType.IS_DIR;
-import static com.cowlark.fluxengine.vfs.FileSystem.FileType.IS_FILE;
+import static com.cowlark.fluxengine.vfs.Filesystem.FileType.IS_DIR;
+import static com.cowlark.fluxengine.vfs.Filesystem.FileType.IS_FILE;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
 import com.cowlark.fluxengine.core.Bytes;
-import com.cowlark.fluxengine.vfs.FileSystem.Dirent;
+import com.cowlark.fluxengine.vfs.Filesystem.Dirent;
 import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
 import java.io.IOException;
@@ -15,10 +15,10 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.InvalidPathException;
 import java.nio.file.NoSuchFileException;
 
-public abstract class GenericTreeFileSystemTest
+public abstract class GenericTreeFilesystemTest
 {
     protected BlockDevice blockDevice;
-    protected FileSystem impl;
+    protected Filesystem impl;
 
     public abstract void createTestFilesystem();
 

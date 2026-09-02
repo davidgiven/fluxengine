@@ -8,19 +8,18 @@ import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.data.DiskLayout;
 import com.cowlark.fluxengine.data.Image;
-import com.cowlark.fluxengine.imagewriter.ImageWriter;
 import com.cowlark.fluxengine.testing.TestHelpers;
 import com.google.common.collect.ImmutableMap;
+import java.io.IOException;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import java.io.IOException;
 
 @RunWith(JUnit4.class)
-public class FatFileSystemTest extends GenericTreeFileSystemTest
+public class AmigaFilesystemTest extends GenericTreeFilesystemTest
 {
     @Rule public final TestRule loggerRule = TestHelpers.loggerRule();
 
@@ -32,7 +31,7 @@ public class FatFileSystemTest extends GenericTreeFileSystemTest
     public void setup()
     {
         configProto =
-                new ConfigBuilder().loadConfigFile("ibm").withImageWriter("/tmp/out.img").build();
+                new ConfigBuilder().loadConfigFile("amiga").withImageWriter("/tmp/out.img").build();
         diskLayout = new DiskLayout(configProto);
         image = new Image();
         createTestFilesystem();
@@ -42,7 +41,7 @@ public class FatFileSystemTest extends GenericTreeFileSystemTest
     public void createTestFilesystem()
     {
         blockDevice = new InMemoryBlockDevice(diskLayout, image);
-        impl = new FatFileSystem(configProto.getFilesystem().getFatfs(), blockDevice);
+        impl = new AmigaFilesystem(configProto.getFilesystem().getAmigaffs(), blockDevice);
     }
 
     @Override
@@ -56,11 +55,19 @@ public class FatFileSystemTest extends GenericTreeFileSystemTest
     {
         impl.create(true, "LABEL");
         blockDevice.commit();
-        assertThat(image.get(0, 0, 1).data.reader().seek(3).readString(8)).isEqualTo("MSDOS5.0");
-        assertThat(image.get(0, 0, 2).data
-                .reader()
-                .read(3)
-                .toByteArray()).isEqualTo(new byte[]{(byte) 0xf8, (byte) 0xff, (byte) 0xff});
+
+        /*
+         * ADF disk layout for 880KB (1760 sectors, 0-based):
+         *   Boot block:  logical sector 0  → CHS(0, 0, 0)  — "DOS" magic at offset 0
+         *   Root block:  logical sector 880 → CHS(40, 0, 0) — T_HEADER=2 at offset 0
+         */
+        Bytes sec0 = image.get(0, 0, 0).data;
+        assertThat(sec0.reader().seek(0).readString(3)).isEqualTo("DOS");
+
+        /* Root block at CHS(40, 0, 0) = logical sector 880 for 1760-sector ADF */
+        Bytes rootBlock = image.get(40, 0, 0).data;
+        int blockType = rootBlock.reader().seek(0).readBe32();
+        assertThat(blockType).isEqualTo(2); /* T_HEADER = 2 */
     }
 
     @Test
@@ -68,13 +75,12 @@ public class FatFileSystemTest extends GenericTreeFileSystemTest
     {
         impl.create(true, "LABEL");
         ImmutableMap<String, String> metadata = impl.getFilesystemMetadata();
-        assertThat(metadata).isEqualTo(ImmutableMap
-                .builder()
-                .put(Attributes.VOLUME_NAME, "LABEL")
-                .put(Attributes.TOTAL_BLOCKS, "2880")
-                .put(Attributes.USED_BLOCKS, "42")
-                .put(Attributes.BLOCK_SIZE, "512")
-                .build());
+        assertThat(metadata.get(Attributes.VOLUME_NAME)).isEqualTo("LABEL");
+        assertThat(metadata.get(Attributes.BLOCK_SIZE)).isEqualTo("512");
+        int totalBlocks = Integer.parseInt(metadata.get(Attributes.TOTAL_BLOCKS));
+        assertThat(totalBlocks).isGreaterThan(0);
+        int usedBlocks = Integer.parseInt(metadata.get(Attributes.USED_BLOCKS));
+        assertThat(usedBlocks).isAtLeast(0);
     }
 
     @Test
@@ -131,28 +137,8 @@ public class FatFileSystemTest extends GenericTreeFileSystemTest
         impl.putFilesystemMetadata(ImmutableMap.of(Attributes.VOLUME_NAME, "PERSIST"));
         impl.flushChanges();
 
-        FatFileSystem impl2 =
-                new FatFileSystem(configProto.getFilesystem().getFatfs(), blockDevice);
+        AmigaFilesystem impl2 =
+                new AmigaFilesystem(configProto.getFilesystem().getAmigaffs(), blockDevice);
         assertThat(impl2.getFilesystemMetadata().get(Attributes.VOLUME_NAME)).isEqualTo("PERSIST");
-    }
-
-    @Test
-    public void putFilesystemMetadata_invalidLabel() throws IOException
-    {
-        impl.create(true, "LABEL");
-
-        /* Label with bad character '*' should be rejected (maps to InvalidPathException via
-        FR_INVALID_NAME) */
-        assertThrows(
-                java.nio.file.InvalidPathException.class,
-                () -> impl.putFilesystemMetadata(ImmutableMap.of(
-                        Attributes.VOLUME_NAME,
-                        "BAD*LABEL")));
-    }
-
-    /* Do not use --- for debugging the test only */
-    private void writeImage()
-    {
-        ImageWriter.create(configProto).writeImage(image);
     }
 }

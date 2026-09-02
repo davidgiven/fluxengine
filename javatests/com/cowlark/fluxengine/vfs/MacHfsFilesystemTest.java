@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 @RunWith(JUnit4.class)
-public class MacHfsFilesystemTest extends GenericTreeFileSystemTest
+public class MacHfsFilesystemTest extends GenericTreeFilesystemTest
 {
     @Rule public final TestRule loggerRule = TestHelpers.loggerRule();
 

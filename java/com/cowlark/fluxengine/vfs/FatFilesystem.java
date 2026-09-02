@@ -1,17 +1,17 @@
 package com.cowlark.fluxengine.vfs;
 
-import static com.cowlark.fluxengine.vfs.FileSystem.Capability.OP_CREATE;
-import static com.cowlark.fluxengine.vfs.FileSystem.Capability.OP_CREATEDIR;
-import static com.cowlark.fluxengine.vfs.FileSystem.Capability.OP_DELETE;
-import static com.cowlark.fluxengine.vfs.FileSystem.Capability.OP_GETDIRENT;
-import static com.cowlark.fluxengine.vfs.FileSystem.Capability.OP_GETFILE;
-import static com.cowlark.fluxengine.vfs.FileSystem.Capability.OP_GETFSDATA;
-import static com.cowlark.fluxengine.vfs.FileSystem.Capability.OP_LIST;
-import static com.cowlark.fluxengine.vfs.FileSystem.Capability.OP_MOVE;
-import static com.cowlark.fluxengine.vfs.FileSystem.Capability.OP_PUTFILE;
-import static com.cowlark.fluxengine.vfs.FileSystem.Capability.OP_PUTFSDATA;
-import static com.cowlark.fluxengine.vfs.FileSystem.FileType.IS_DIR;
-import static com.cowlark.fluxengine.vfs.FileSystem.FileType.IS_FILE;
+import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_CREATE;
+import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_CREATEDIR;
+import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_DELETE;
+import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_GETDIRENT;
+import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_GETFILE;
+import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_GETFSDATA;
+import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_LIST;
+import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_MOVE;
+import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_PUTFILE;
+import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_PUTFSDATA;
+import static com.cowlark.fluxengine.vfs.Filesystem.FileType.IS_DIR;
+import static com.cowlark.fluxengine.vfs.Filesystem.FileType.IS_FILE;
 import static org.elm_chan.ff.DResult.RES_ERROR;
 import static org.elm_chan.ff.DResult.RES_OK;
 import static org.elm_chan.ff.DResult.RES_PARERR;
@@ -21,7 +21,7 @@ import static org.elm_chan.ff.FatFs.FM_SFD;
 import static org.elm_chan.ff.FilInfo.AM_DIR;
 
 import com.cowlark.fluxengine.core.Bytes;
-import com.cowlark.fluxengine.vfs.FileSystem.Dirent.DirentBuilder;
+import com.cowlark.fluxengine.vfs.Filesystem.Dirent.DirentBuilder;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.elm_chan.ff.DResult;
@@ -41,7 +41,7 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.NoSuchFileException;
 import java.time.LocalDateTime;
 
-public class FatFileSystem extends FileSystem
+public class FatFilesystem extends Filesystem
 {
     private static final ImmutableSet<Capability> CAPABILITIES = ImmutableSet.of(
             OP_CREATE,
@@ -195,13 +195,13 @@ public class FatFileSystem extends FileSystem
         }
     }
 
-    public FatFileSystem(FatFsProto config, BlockDevice blockDevice)
+    public FatFilesystem(FatFsProto config, BlockDevice blockDevice)
     {
         super(CAPABILITIES);
         this.config = config;
         this.blockDevice = blockDevice;
         this.fatDevice = new DiskIoAdapter(blockDevice);
-        this.fatFilesystem = new FatFs(fatDevice, FatFileSystem::getTime);
+        this.fatFilesystem = new FatFs(fatDevice, FatFilesystem::getTime);
     }
 
     @Override

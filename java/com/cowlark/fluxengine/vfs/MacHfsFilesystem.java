@@ -1,14 +1,14 @@
 package com.cowlark.fluxengine.vfs;
 
-import static com.cowlark.fluxengine.vfs.FileSystem.Capability.OP_CREATE;
-import static com.cowlark.fluxengine.vfs.FileSystem.Capability.OP_CREATEDIR;
-import static com.cowlark.fluxengine.vfs.FileSystem.Capability.OP_DELETE;
-import static com.cowlark.fluxengine.vfs.FileSystem.Capability.OP_GETDIRENT;
-import static com.cowlark.fluxengine.vfs.FileSystem.Capability.OP_GETFILE;
-import static com.cowlark.fluxengine.vfs.FileSystem.Capability.OP_GETFSDATA;
-import static com.cowlark.fluxengine.vfs.FileSystem.Capability.OP_LIST;
-import static com.cowlark.fluxengine.vfs.FileSystem.Capability.OP_MOVE;
-import static com.cowlark.fluxengine.vfs.FileSystem.Capability.OP_PUTFILE;
+import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_CREATE;
+import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_CREATEDIR;
+import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_DELETE;
+import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_GETDIRENT;
+import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_GETFILE;
+import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_GETFSDATA;
+import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_LIST;
+import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_MOVE;
+import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_PUTFILE;
 import static org.mars.hfsutils.HfsConstants.FK_DATA;
 import static org.mars.hfsutils.HfsConstants.FK_RSRC;
 import static org.mars.hfsutils.HfsConstants.HFS_BLOCKSZ;
@@ -34,7 +34,7 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.InvalidPathException;
 import java.nio.file.NoSuchFileException;
 
-public class MacHfsFilesystem extends FileSystem
+public class MacHfsFilesystem extends Filesystem
 {
     private static final ImmutableSet<Capability> CAPABILITIES = ImmutableSet.of(
             OP_CREATE,
@@ -229,7 +229,8 @@ public class MacHfsFilesystem extends FileSystem
             {
                 AppleSingle as = new AppleSingle();
                 as.type = new Bytes(new String(ent.uFile.type).getBytes(StandardCharsets.UTF_8));
-                as.creator = new Bytes(new String(ent.uFile.creator).getBytes(StandardCharsets.UTF_8));
+                as.creator =
+                        new Bytes(new String(ent.uFile.creator).getBytes(StandardCharsets.UTF_8));
                 as.data = new Bytes(readFork(fh, FK_DATA, ent.uFile.dsize));
                 as.rsrc = new Bytes(readFork(fh, FK_RSRC, ent.uFile.rsize));
                 return as.render();
@@ -414,7 +415,8 @@ public class MacHfsFilesystem extends FileSystem
                 Dirent ent = getDirent(oldName);
                 if (ent.fileType() == FileType.IS_DIR)
                     throw new InvalidPathException(
-                            newName.toString(), "can't move directory inside itself");
+                            newName.toString(),
+                            "can't move directory inside itself");
             } catch (NoSuchFileException e)
             {
                 // Old doesn't exist, let HFS handle
