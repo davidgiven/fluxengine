@@ -23,8 +23,13 @@ java_library(
     deps = [
         ":vfs_java_proto",
         "//java/com/cowlark/fluxengine/algorithms",
+        "//java/com/cowlark/fluxengine/config",
+        "//java/com/cowlark/fluxengine/config:common_java_proto",
+        "//java/com/cowlark/fluxengine/config:config_java_proto",
         "//java/com/cowlark/fluxengine/core",
         "//java/com/cowlark/fluxengine/data",
+        "//java/com/cowlark/fluxengine/imagereader",
+        "//java/com/cowlark/fluxengine/imagewriter",
         "//third_party/java/com/github/adflib/adflib",
         "//third_party/java/org/elm_chan/ff",
         "//third_party/java/org/mars/hfsutils",

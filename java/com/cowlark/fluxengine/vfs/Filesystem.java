@@ -1,13 +1,18 @@
 package com.cowlark.fluxengine.vfs;
 
+import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.core.Bytes;
+import com.cowlark.fluxengine.core.Logger;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import lombok.Builder;
+import org.slf4j.LoggerFactory;
 import java.io.IOException;
+import java.util.function.Consumer;
 
 public abstract class Filesystem implements AutoCloseable
 {
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(Filesystem.class);
 
     private final ImmutableSet<Capability> capabilities;
 
@@ -184,4 +189,15 @@ public abstract class Filesystem implements AutoCloseable
                          ImmutableMap<String, String> attributes)
     {
     }
+
+    public static void doWithFilesystem(ConfigProto config, Consumer<Filesystem> callback)
+    {
+        FilesystemOperation op = new FilesystemOperation(callback);
+        op.setConfig(config);
+        op.create().blockingSubscribe(
+                Logger::log, e -> {
+                    logger.atError().setCause(e).log("filesystem thread failed");
+                });
+    }
+
 }
