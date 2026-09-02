@@ -23,9 +23,11 @@ public class CpmFilesystemTest extends GenericFilesystemTest
     @Before
     public void setup()
     {
-        ConfigBuilder builder = new ConfigBuilder().loadConfigFile("ampro");
-        builder.applyOption("800", "");
-        configProto = builder.withImageWriter("/tmp/out.img").build();
+        configProto = new ConfigBuilder()
+                .loadConfigFile("ampro")
+                .applyOption("800", "")
+                .withImageWriter("/tmp/out.img")
+                .build();
         diskLayout = new DiskLayout(configProto);
         image = new Image();
         createTestFilesystem();

@@ -23,9 +23,11 @@ public class AppleDosFilesystemTest extends GenericFilesystemTest
     @Before
     public void setup()
     {
-        ConfigBuilder builder = new ConfigBuilder().loadConfigFile("apple2");
-        builder.applyOption("appledos", "");
-        configProto = builder.withImageWriter("/tmp/out.img").build();
+        configProto = new ConfigBuilder()
+                .loadConfigFile("apple2")
+                .applyOption("appledos", "")
+                .withImageWriter("/tmp/out.img")
+                .build();
         diskLayout = new DiskLayout(configProto);
         image = new Image();
         createTestFilesystem();

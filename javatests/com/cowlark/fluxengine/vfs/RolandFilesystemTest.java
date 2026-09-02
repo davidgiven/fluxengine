@@ -23,7 +23,10 @@ public class RolandFilesystemTest extends GenericFilesystemTest
     @Before
     public void setup()
     {
-        configProto = new ConfigBuilder().loadConfigFile("rolandd20").withImageWriter("/tmp/out.img").build();
+        configProto = new ConfigBuilder()
+                .loadConfigFile("rolandd20")
+                .withImageWriter("/tmp/out.img")
+                .build();
         diskLayout = new DiskLayout(configProto);
         image = new Image();
         createTestFilesystem();

@@ -60,141 +60,6 @@ public class FatFilesystem extends Filesystem
     private final DiskIoAdapter fatDevice;
     private final FatFs fatFilesystem;
 
-    private static class DiskIoAdapter implements DiskIo
-    {
-        private final BlockDevice underlying;
-
-        DiskIoAdapter(BlockDevice underlying)
-        {
-            this.underlying = underlying;
-        }
-
-        @Override
-        public int diskInitialize()
-        {
-            return 0;
-        }
-
-        @Override
-        public int diskStatus()
-        {
-            return 0;
-        }
-
-        @Override
-        public DResult diskRead(long sector, byte[] buff, int count)
-        {
-            try
-            {
-                Bytes bytes = underlying.getBlocks((int) sector, count);
-                byte[] src = bytes.toByteArray();
-                System.arraycopy(src, 0, buff, 0, src.length);
-                return RES_OK;
-            } catch (IOException e)
-            {
-                return RES_ERROR;
-            }
-        }
-
-        @Override
-        public DResult diskWrite(long sector, byte[] buff, int count)
-        {
-            try
-            {
-                underlying.putBlocks((int) sector, new Bytes(buff));
-                return RES_OK;
-            } catch (IOException e)
-            {
-                return RES_ERROR;
-            }
-        }
-
-        @Override
-        public DResult diskRead(long sector, ByteBuffer buff, int count)
-        {
-            try
-            {
-                Bytes bytes = underlying.getBlocks((int) sector, count);
-                byte[] src = bytes.toByteArray();
-                // Use absolute put to avoid touching position/limit
-                for (int i = 0; i < src.length; i++)
-                    buff.put(i, src[i]);
-                return RES_OK;
-            } catch (IOException e)
-            {
-                return RES_ERROR;
-            }
-        }
-
-        @Override
-        public DResult diskWrite(long sector, ByteBuffer buff, int count)
-        {
-            try
-            {
-                byte[] tmp = new byte[count * 512];
-                // Use absolute get to avoid touching position/limit
-                for (int i = 0; i < tmp.length; i++)
-                    tmp[i] = buff.get(i);
-                underlying.putBlocks((int) sector, new Bytes(tmp));
-                return RES_OK;
-            } catch (IOException e)
-            {
-                return RES_ERROR;
-            }
-        }
-
-        @Override
-        public DResult diskIoctl(int cmd, Object buff)
-        {
-            switch (cmd)
-            {
-                case GET_SECTOR_COUNT:
-                    if (buff instanceof long[] ibuff)
-                    {
-                        ibuff[0] = underlying.getBlockCount();
-                        return RES_OK;
-                    }
-                    if (buff instanceof int[] ibuff2)
-                    {
-                        ibuff2[0] = underlying.getBlockCount();
-                        return RES_OK;
-                    }
-                    break;
-
-                case GET_SECTOR_SIZE:
-                    if (buff instanceof long[] ibuff)
-                    {
-                        ibuff[0] = underlying.getBlockSize();
-                        return RES_OK;
-                    }
-                    if (buff instanceof int[] ibuff2)
-                    {
-                        ibuff2[0] = underlying.getBlockSize();
-                        return RES_OK;
-                    }
-                    break;
-
-                case GET_BLOCK_SIZE:
-                    if (buff instanceof long[] ibuff)
-                    {
-                        ibuff[0] = 1;
-                        return RES_OK;
-                    }
-                    if (buff instanceof int[] ibuff2)
-                    {
-                        ibuff2[0] = 1;
-                        return RES_OK;
-                    }
-                    break;
-
-                case CTRL_SYNC:
-                    return RES_OK;
-            }
-
-            return RES_PARERR;
-        }
-    }
-
     public FatFilesystem(FatFsProto config, BlockDevice blockDevice)
     {
         super(CAPABILITIES);
@@ -202,6 +67,79 @@ public class FatFilesystem extends Filesystem
         this.blockDevice = blockDevice;
         this.fatDevice = new DiskIoAdapter(blockDevice);
         this.fatFilesystem = new FatFs(fatDevice, FatFilesystem::getTime);
+    }
+
+    private static Dirent makeDirent(VfsPath dir, FilInfo fi)
+    {
+        ImmutableMap.Builder<String, String> attrsBuilder = ImmutableMap.builder();
+        DirentBuilder direntBuilder =
+                Dirent.builder().setFilename(fi.fname).setPath(dir.resolve(fi.fname)).setMode("");
+
+        attrsBuilder.put(Attributes.FILENAME, fi.fname);
+
+        if ((fi.fattrib & AM_DIR) != AM_DIR)
+        {
+            long length = fi.fsize;
+            direntBuilder.setFileType(IS_FILE).setLength((int) length);
+            attrsBuilder
+                    .put(Attributes.LENGTH, Long.toString(length))
+                    .put(Attributes.FILE_TYPE, "file");
+        } else
+        {
+            direntBuilder.setFileType(IS_DIR);
+            attrsBuilder.put(Attributes.FILE_TYPE, "dir");
+        }
+
+        return direntBuilder.setAttributes(attrsBuilder.build()).build();
+    }
+
+    private static String toFatPath(VfsPath path)
+    {
+        if (path == null)
+            return "/";
+        return path.toString();
+    }
+
+    private static void checkResult(FResult result) throws IOException
+    {
+        switch (result)
+        {
+            case FR_OK:
+                return;
+            case FR_NO_FILE:
+            case FR_NO_PATH:
+                throw new NoSuchFileException("no such file: " + result);
+
+            case FR_INVALID_NAME:
+                throw new InvalidPathException("", "invalid path: " + result);
+
+            case FR_EXIST:
+                throw new FileAlreadyExistsException("file already exists: " + result);
+
+            case FR_DENIED:
+                throw new AccessDeniedException("access denied");
+
+            default:
+                throw new IOException(String.format("filesystem error: %s", result));
+        }
+    }
+
+    private static long getTime()
+    {
+        LocalDateTime now = LocalDateTime.now();
+        int year = now.getYear() - 1980;
+        if (year < 0)
+            year = 0;
+        if (year > 127)
+            year = 127;
+        int mon = now.getMonthValue();
+        int day = now.getDayOfMonth();
+        int hour = now.getHour();
+        int min = now.getMinute();
+        int sec = now.getSecond();
+        int date = (year << 9) | (mon << 5) | day;
+        int time = (hour << 11) | (min << 5) | (sec / 2);
+        return ((long) date << 16) | (time & 0xFFFF);
     }
 
     @Override
@@ -367,30 +305,6 @@ public class FatFilesystem extends Filesystem
         checkResult(fatFilesystem.rename(oldP, newP));
     }
 
-    private static Dirent makeDirent(VfsPath dir, FilInfo fi)
-    {
-        ImmutableMap.Builder<String, String> attrsBuilder = ImmutableMap.builder();
-        DirentBuilder direntBuilder =
-                Dirent.builder().setFilename(fi.fname).setPath(dir.resolve(fi.fname)).setMode("");
-
-        attrsBuilder.put(Attributes.FILENAME, fi.fname);
-
-        if ((fi.fattrib & AM_DIR) != AM_DIR)
-        {
-            long length = fi.fsize;
-            direntBuilder.setFileType(IS_FILE).setLength((int) length);
-            attrsBuilder
-                    .put(Attributes.LENGTH, Long.toString(length))
-                    .put(Attributes.FILE_TYPE, "file");
-        } else
-        {
-            direntBuilder.setFileType(IS_DIR);
-            attrsBuilder.put(Attributes.FILE_TYPE, "dir");
-        }
-
-        return direntBuilder.setAttributes(attrsBuilder.build()).build();
-    }
-
     private void mount() throws IOException
     {
         FResult res = fatFilesystem.mount();
@@ -422,52 +336,138 @@ public class FatFilesystem extends Filesystem
         blockDevice.revert();
     }
 
-    private static String toFatPath(VfsPath path)
+    private static class DiskIoAdapter implements DiskIo
     {
-        if (path == null)
-            return "/";
-        return path.toString();
-    }
+        private final BlockDevice underlying;
 
-    private static void checkResult(FResult result) throws IOException
-    {
-        switch (result)
+        DiskIoAdapter(BlockDevice underlying)
         {
-            case FR_OK:
-                return;
-            case FR_NO_FILE:
-            case FR_NO_PATH:
-                throw new NoSuchFileException("no such file: " + result);
-
-            case FR_INVALID_NAME:
-                throw new InvalidPathException("", "invalid path: " + result);
-
-            case FR_EXIST:
-                throw new FileAlreadyExistsException("file already exists: " + result);
-
-            case FR_DENIED:
-                throw new AccessDeniedException("access denied");
-
-            default:
-                throw new IOException(String.format("filesystem error: %s", result));
+            this.underlying = underlying;
         }
-    }
 
-    private static long getTime()
-    {
-        LocalDateTime now = LocalDateTime.now();
-        int year = now.getYear() - 1980;
-        if (year < 0)
-            year = 0;
-        if (year > 127)
-            year = 127;
-        int mon = now.getMonthValue();
-        int day = now.getDayOfMonth();
-        int hour = now.getHour();
-        int min = now.getMinute();
-        int sec = now.getSecond();
-        int date = (year << 9) | (mon << 5) | day;
-        int time = (hour << 11) | (min << 5) | (sec / 2);
-        return ((long) date << 16) | (time & 0xFFFF);
+        @Override
+        public int diskInitialize()
+        {
+            return 0;
+        }
+
+        @Override
+        public int diskStatus()
+        {
+            return 0;
+        }
+
+        @Override
+        public DResult diskRead(long sector, byte[] buff, int count)
+        {
+            try
+            {
+                Bytes bytes = underlying.getBlocks((int) sector, count);
+                byte[] src = bytes.toByteArray();
+                System.arraycopy(src, 0, buff, 0, src.length);
+                return RES_OK;
+            } catch (IOException e)
+            {
+                return RES_ERROR;
+            }
+        }
+
+        @Override
+        public DResult diskWrite(long sector, byte[] buff, int count)
+        {
+            try
+            {
+                underlying.putBlocks((int) sector, new Bytes(buff));
+                return RES_OK;
+            } catch (IOException e)
+            {
+                return RES_ERROR;
+            }
+        }
+
+        @Override
+        public DResult diskRead(long sector, ByteBuffer buff, int count)
+        {
+            try
+            {
+                Bytes bytes = underlying.getBlocks((int) sector, count);
+                byte[] src = bytes.toByteArray();
+                // Use absolute put to avoid touching position/limit
+                for (int i = 0; i < src.length; i++)
+                    buff.put(i, src[i]);
+                return RES_OK;
+            } catch (IOException e)
+            {
+                return RES_ERROR;
+            }
+        }
+
+        @Override
+        public DResult diskWrite(long sector, ByteBuffer buff, int count)
+        {
+            try
+            {
+                byte[] tmp = new byte[count * 512];
+                // Use absolute get to avoid touching position/limit
+                for (int i = 0; i < tmp.length; i++)
+                    tmp[i] = buff.get(i);
+                underlying.putBlocks((int) sector, new Bytes(tmp));
+                return RES_OK;
+            } catch (IOException e)
+            {
+                return RES_ERROR;
+            }
+        }
+
+        @Override
+        public DResult diskIoctl(int cmd, Object buff)
+        {
+            switch (cmd)
+            {
+                case GET_SECTOR_COUNT:
+                    if (buff instanceof long[] ibuff)
+                    {
+                        ibuff[0] = underlying.getBlockCount();
+                        return RES_OK;
+                    }
+                    if (buff instanceof int[] ibuff2)
+                    {
+                        ibuff2[0] = underlying.getBlockCount();
+                        return RES_OK;
+                    }
+                    break;
+
+                case GET_SECTOR_SIZE:
+                    if (buff instanceof long[] ibuff)
+                    {
+                        ibuff[0] = underlying.getBlockSize();
+                        return RES_OK;
+                    }
+                    if (buff instanceof int[] ibuff2)
+                    {
+                        ibuff2[0] = underlying.getBlockSize();
+                        return RES_OK;
+                    }
+                    break;
+
+                case GET_BLOCK_SIZE:
+                    if (buff instanceof long[] ibuff)
+                    {
+                        ibuff[0] = 1;
+                        return RES_OK;
+                    }
+                    if (buff instanceof int[] ibuff2)
+                    {
+                        ibuff2[0] = 1;
+                        return RES_OK;
+                    }
+                    break;
+
+                case CTRL_SYNC:
+                    return RES_OK;
+            }
+
+            return RES_PARERR;
+        }
     }
 }

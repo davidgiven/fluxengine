@@ -23,7 +23,10 @@ public class ProdosFilesystemTest extends GenericFilesystemTest
     @Before
     public void setup()
     {
-        configProto = new ConfigBuilder().loadConfigFile("apple2").withImageWriter("/tmp/out.img").build();
+        configProto = new ConfigBuilder()
+                .loadConfigFile("apple2")
+                .withImageWriter("/tmp/out.img")
+                .build();
         diskLayout = new DiskLayout(configProto);
         image = new Image();
         createTestFilesystem();

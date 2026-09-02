@@ -60,7 +60,9 @@ public class VfsPathTest
     {
         assertThat(VfsPath.of("/").resolve("data")).isEqualTo(VfsPath.of("/data"));
         assertThat(VfsPath.of("/dir1").resolve("dir2")).isEqualTo(VfsPath.of("/dir1/dir2"));
-        assertThat(VfsPath.of("/dir1").resolve("dir2/dir3")).isEqualTo(VfsPath.of("/dir1/dir2/dir3"));
+        assertThat(VfsPath
+                .of("/dir1")
+                .resolve("dir2/dir3")).isEqualTo(VfsPath.of("/dir1/dir2/dir3"));
         assertThat(VfsPath.of("/dir1").resolve("")).isEqualTo(VfsPath.of("/dir1"));
     }
 

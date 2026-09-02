@@ -188,8 +188,7 @@ public class InMemoryBlockDeviceTest
         Bytes result = device.getBlock(0);
         assertThat(result.toByteArray()).isEqualTo(newData.toByteArray());
         // Adjacent block unchanged
-        assertThat(device.getBlock(1).toByteArray())
-                .isEqualTo(sequentialBlock(50).toByteArray());
+        assertThat(device.getBlock(1).toByteArray()).isEqualTo(sequentialBlock(50).toByteArray());
     }
 
     @Test
@@ -213,8 +212,7 @@ public class InMemoryBlockDeviceTest
 
         assertThat(block0.toByteArray()).isEqualTo(expected.toByteArray());
         // Next block unchanged
-        assertThat(device.getBlock(1).toByteArray())
-                .isEqualTo(sequentialBlock(50).toByteArray());
+        assertThat(device.getBlock(1).toByteArray()).isEqualTo(sequentialBlock(50).toByteArray());
     }
 
     @Test

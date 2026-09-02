@@ -21,7 +21,8 @@ import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ZDosFilesystem extends Filesystem {
+public class ZDosFilesystem extends Filesystem
+{
     private static final ImmutableSet<Capability> CAPABILITIES =
             ImmutableSet.of(OP_GETFSDATA, OP_LIST, OP_GETFILE, OP_GETDIRENT);
 
@@ -40,27 +41,39 @@ public class ZDosFilesystem extends Filesystem {
     private final ZDosProto config;
     private final BlockDevice blockDevice;
 
-    private static String convertTime(String zdosTime) {
+    public ZDosFilesystem(ZDosProto config, BlockDevice blockDevice)
+    {
+        super(CAPABILITIES);
+        this.config = config;
+        this.blockDevice = blockDevice;
+    }
+
+    private static String convertTime(String zdosTime)
+    {
         if (zdosTime == null || zdosTime.length() < 6)
             return "";
         String yy = zdosTime.substring(0, 2);
         String mm = zdosTime.substring(2, 4);
         String dd = zdosTime.substring(4, 6);
-        try {
+        try
+        {
             int y = Integer.parseInt(yy);
             int m = Integer.parseInt(mm);
             int d = Integer.parseInt(dd);
             int year = (y >= 69) ? 1900 + y : 2000 + y;
             // Validate and format as %FT%T%z with time 00:00:00+0000
             return String.format("%04d-%02d-%02dT00:00:00+0000", year, m, d);
-        } catch (NumberFormatException e) {
+        } catch (NumberFormatException e)
+        {
             return zdosTime;
         }
     }
 
-    private static String fileTypeString(int type) {
+    private static String fileTypeString(int type)
+    {
         int masked = type & 0xf0;
-        switch (masked) {
+        switch (masked)
+        {
             case 0:
                 return "INVALID";
             case ZDOS_TYPE_DATA:
@@ -76,17 +89,109 @@ public class ZDosFilesystem extends Filesystem {
         }
     }
 
-    private static int toBlockNumber(int sectorId, int track, int sectorsPerTrack) {
+    private static int toBlockNumber(int sectorId, int track, int sectorsPerTrack)
+    {
         return track * sectorsPerTrack + sectorId;
     }
 
-    private static int readBlockNumber(ByteReader br, int sectorsPerTrack) {
+    private static int readBlockNumber(ByteReader br, int sectorsPerTrack)
+    {
         int sectorId = br.read8() & 0xff;
         int track = br.read8() & 0xff;
         return toBlockNumber(sectorId, track, sectorsPerTrack);
     }
 
-    private class ZDosDescriptor {
+    @Override
+    public void check()
+    {
+    }
+
+    @Override
+    public ImmutableMap<String, String> getFilesystemMetadata() throws IOException
+    {
+        ZDosDirectory dir = new ZDosDirectory();
+        ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
+        builder.put(Attributes.VOLUME_NAME, "");
+        builder.put(Attributes.TOTAL_BLOCKS, Integer.toString(dir.totalBlocks));
+        builder.put(Attributes.USED_BLOCKS, Integer.toString(dir.usedBlocks));
+        builder.put(Attributes.BLOCK_SIZE, "128");
+        return builder.build();
+    }
+
+    @Override
+    public ImmutableMap<String, Dirent> list(VfsPath path) throws IOException
+    {
+        if (!path.isRoot())
+            throw new NoSuchFileException(path.toString());
+
+        ZDosDirectory dir = new ZDosDirectory();
+        ImmutableMap.Builder<String, Dirent> builder = ImmutableMap.builder();
+        for (ZDosDirentEntry de : dir.dirents)
+            builder.put(de.filename, de.dirent);
+        return builder.build();
+    }
+
+    @Override
+    public Dirent getDirent(VfsPath path) throws IOException
+    {
+        if (path.segments().size() != 1)
+            throw new InvalidPathException(path.toString(), "Bad path");
+
+        ZDosDirectory dir = new ZDosDirectory();
+        String wanted = path.segments().get(0);
+        return dir.findFile(wanted).dirent;
+    }
+
+    @Override
+    public Bytes getFile(VfsPath path) throws IOException
+    {
+        if (path.segments().size() != 1)
+            throw new InvalidPathException(path.toString(), "Bad path");
+
+        ZDosDirectory dir = new ZDosDirectory();
+        String wanted = path.segments().get(0);
+        ZDosDirentEntry de = dir.findFile(wanted);
+        de.descriptor.rewind();
+
+        Bytes data = new Bytes();
+        ByteWriter bw = new ByteWriter(data);
+        while (!de.descriptor.eof)
+        {
+            Bytes rec = de.descriptor.readRecord();
+            bw.write(rec);
+        }
+        if (data.size() > de.length)
+            data.resize(de.length);
+        return data;
+    }
+
+    @Override
+    public void close() throws Exception
+    {
+        flushChanges();
+    }
+
+    @Override
+    public boolean needsFlushing()
+    {
+        return blockDevice.needsCommit();
+    }
+
+    @Override
+    public void flushChanges() throws IOException
+    {
+        blockDevice.commit();
+    }
+
+    @Override
+    public void discardChanges() throws IOException
+    {
+        blockDevice.revert();
+    }
+
+    private class ZDosDescriptor
+    {
+        private final int sectorsPerTrack;
         int firstRecord;
         int type;
         int recordCount;
@@ -96,13 +201,11 @@ public class ZDosFilesystem extends Filesystem {
         int lastRecordSize;
         String ctime;
         String mtime;
-
         int currentRecord;
         boolean eof;
 
-        private final int sectorsPerTrack;
-
-        ZDosDescriptor(int block, int sectorsPerTrack) throws IOException {
+        ZDosDescriptor(int block, int sectorsPerTrack) throws IOException
+        {
             this.sectorsPerTrack = sectorsPerTrack;
             Bytes bytes = blockDevice.getBlock(block);
             ByteReader br = new ByteReader(bytes);
@@ -125,12 +228,14 @@ public class ZDosFilesystem extends Filesystem {
             rewind();
         }
 
-        void rewind() {
+        void rewind()
+        {
             currentRecord = firstRecord;
             eof = false;
         }
 
-        Bytes readRecord() throws IOException {
+        Bytes readRecord() throws IOException
+        {
             if (eof)
                 throw new IllegalStateException("eof");
             int count = recordSize / 0x80;
@@ -138,7 +243,8 @@ public class ZDosFilesystem extends Filesystem {
             Bytes result = new Bytes();
             ByteWriter bw = new ByteWriter(result);
 
-            while (count-- > 0) {
+            while (count-- > 0)
+            {
                 Bytes sector = blockDevice.getBlock(currentRecord);
                 ByteReader br = new ByteReader(sector);
 
@@ -156,7 +262,8 @@ public class ZDosFilesystem extends Filesystem {
         }
     }
 
-    private class ZDosDirentEntry {
+    private class ZDosDirentEntry
+    {
         String filename;
         int descriptorBlock;
         ZDosDescriptor descriptor;
@@ -165,7 +272,8 @@ public class ZDosFilesystem extends Filesystem {
         Dirent dirent;
 
         ZDosDirentEntry(String filename, int descriptorBlock, int sectorsPerTrack)
-                throws IOException {
+                throws IOException
+        {
             this.filename = filename;
             this.descriptorBlock = descriptorBlock;
             this.descriptor = new ZDosDescriptor(descriptorBlock, sectorsPerTrack);
@@ -173,8 +281,8 @@ public class ZDosFilesystem extends Filesystem {
             if (descriptor.recordCount == 0)
                 length = 0;
             else
-                length = (descriptor.recordCount - 1) * descriptor.recordSize
-                        + descriptor.lastRecordSize;
+                length = (descriptor.recordCount - 1) * descriptor.recordSize +
+                        descriptor.lastRecordSize;
 
             StringBuilder sb = new StringBuilder();
             if ((descriptor.properties & ZDOS_MODE_FORCE) != 0)
@@ -206,7 +314,8 @@ public class ZDosFilesystem extends Filesystem {
             attrs.put("zdos.ctime", convertTime(descriptor.ctime));
             attrs.put("zdos.mtime", convertTime(descriptor.mtime));
 
-            dirent = Dirent.builder()
+            dirent = Dirent
+                    .builder()
                     .setPath(VfsPath.of("/").resolve(filename))
                     .setFilename(filename)
                     .setLength(length)
@@ -217,13 +326,15 @@ public class ZDosFilesystem extends Filesystem {
         }
     }
 
-    private class ZDosDirectory {
+    private class ZDosDirectory
+    {
         int sectorsPerTrack;
         int totalBlocks;
         int usedBlocks;
         List<ZDosDirentEntry> dirents = new ArrayList<>();
 
-        ZDosDirectory() throws IOException {
+        ZDosDirectory() throws IOException
+        {
             CylinderHead ch = new CylinderHead(0, 0);
             LogicalTrackLayout ltl = blockDevice.diskLayout.layoutByLogicalLocation.get(ch);
             if (ltl == null)
@@ -232,7 +343,8 @@ public class ZDosFilesystem extends Filesystem {
 
             int track = 0;
             int sector = 0;
-            if (config != null && config.hasFilesystemStart()) {
+            if (config != null && config.hasFilesystemStart())
+            {
                 track = config.getFilesystemStart().getTrack();
                 sector = config.getFilesystemStart().getSector();
             }
@@ -243,10 +355,12 @@ public class ZDosFilesystem extends Filesystem {
 
             totalBlocks = blockDevice.getBlockCount();
             usedBlocks = (zd.recordCount * zd.recordSize) / 0x80 + 1;
-            while (!zd.eof) {
+            while (!zd.eof)
+            {
                 Bytes bytes = zd.readRecord();
                 ByteReader br = new ByteReader(bytes);
-                for (;;) {
+                for (; ; )
+                {
                     if (br.eof())
                         break;
                     int len = br.read8() & 0xff;
@@ -256,110 +370,28 @@ public class ZDosFilesystem extends Filesystem {
                     if (br.remaining() < nameLen)
                         break;
                     Bytes nameBytes = br.read(nameLen);
-                    String entryFilename = new String(nameBytes.toByteArray(),
-                            StandardCharsets.ISO_8859_1);
+                    String entryFilename =
+                            new String(nameBytes.toByteArray(), StandardCharsets.ISO_8859_1);
                     if (br.remaining() < 2)
                         break;
                     int descriptorBlock = readBlockNumber(br, sectorsPerTrack);
 
                     ZDosDirentEntry de =
                             new ZDosDirentEntry(entryFilename, descriptorBlock, sectorsPerTrack);
-                    usedBlocks += (de.descriptor.recordCount * de.descriptor.recordSize) / 0x80
-                            + 1;
+                    usedBlocks += (de.descriptor.recordCount * de.descriptor.recordSize) / 0x80 + 1;
                     dirents.add(de);
                 }
             }
         }
 
-        ZDosDirentEntry findFile(String wanted) throws IOException {
-            for (ZDosDirentEntry de : dirents) {
+        ZDosDirentEntry findFile(String wanted) throws IOException
+        {
+            for (ZDosDirentEntry de : dirents)
+            {
                 if (de.filename.equals(wanted))
                     return de;
             }
             throw new NoSuchFileException(wanted);
         }
-    }
-
-    public ZDosFilesystem(ZDosProto config, BlockDevice blockDevice) {
-        super(CAPABILITIES);
-        this.config = config;
-        this.blockDevice = blockDevice;
-    }
-
-    @Override
-    public void check() {}
-
-    @Override
-    public ImmutableMap<String, String> getFilesystemMetadata() throws IOException {
-        ZDosDirectory dir = new ZDosDirectory();
-        ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
-        builder.put(Attributes.VOLUME_NAME, "");
-        builder.put(Attributes.TOTAL_BLOCKS, Integer.toString(dir.totalBlocks));
-        builder.put(Attributes.USED_BLOCKS, Integer.toString(dir.usedBlocks));
-        builder.put(Attributes.BLOCK_SIZE, "128");
-        return builder.build();
-    }
-
-    @Override
-    public ImmutableMap<String, Dirent> list(VfsPath path) throws IOException {
-        if (!path.isRoot())
-            throw new NoSuchFileException(path.toString());
-
-        ZDosDirectory dir = new ZDosDirectory();
-        ImmutableMap.Builder<String, Dirent> builder = ImmutableMap.builder();
-        for (ZDosDirentEntry de : dir.dirents)
-            builder.put(de.filename, de.dirent);
-        return builder.build();
-    }
-
-    @Override
-    public Dirent getDirent(VfsPath path) throws IOException {
-        if (path.segments().size() != 1)
-            throw new InvalidPathException(path.toString(), "Bad path");
-
-        ZDosDirectory dir = new ZDosDirectory();
-        String wanted = path.segments().get(0);
-        return dir.findFile(wanted).dirent;
-    }
-
-    @Override
-    public Bytes getFile(VfsPath path) throws IOException {
-        if (path.segments().size() != 1)
-            throw new InvalidPathException(path.toString(), "Bad path");
-
-        ZDosDirectory dir = new ZDosDirectory();
-        String wanted = path.segments().get(0);
-        ZDosDirentEntry de = dir.findFile(wanted);
-        de.descriptor.rewind();
-
-        Bytes data = new Bytes();
-        ByteWriter bw = new ByteWriter(data);
-        while (!de.descriptor.eof) {
-            Bytes rec = de.descriptor.readRecord();
-            bw.write(rec);
-        }
-        if (data.size() > de.length)
-            data.resize(de.length);
-        return data;
-    }
-
-    @Override
-    public void close() throws Exception {
-        flushChanges();
-    }
-
-    @Override
-    public boolean needsFlushing() {
-        return blockDevice.needsCommit();
-    }
-
-    @Override
-    public void flushChanges() throws IOException {
-        blockDevice.commit();
-    }
-
-    @Override
-    public void discardChanges() throws IOException {
-        blockDevice.revert();
     }
 }

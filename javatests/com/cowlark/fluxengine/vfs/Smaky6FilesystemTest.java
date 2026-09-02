@@ -23,7 +23,10 @@ public class Smaky6FilesystemTest extends GenericFilesystemTest
     @Before
     public void setup()
     {
-        configProto = new ConfigBuilder().loadConfigFile("smaky6").withImageWriter("/tmp/out.img").build();
+        configProto = new ConfigBuilder()
+                .loadConfigFile("smaky6")
+                .withImageWriter("/tmp/out.img")
+                .build();
         diskLayout = new DiskLayout(configProto);
         image = new Image();
         createTestFilesystem();

@@ -23,9 +23,11 @@ public class LifFilesystemTest extends GenericFilesystemTest
     @Before
     public void setup()
     {
-        ConfigBuilder builder = new ConfigBuilder().loadConfigFile("hplif");
-        builder.applyOption("770", "");
-        configProto = builder.withImageWriter("/tmp/out.img").build();
+        configProto = new ConfigBuilder()
+                .loadConfigFile("hplif")
+                .applyOption("770", "")
+                .withImageWriter("/tmp/out.img")
+                .build();
         diskLayout = new DiskLayout(configProto);
         image = new Image();
         createTestFilesystem();

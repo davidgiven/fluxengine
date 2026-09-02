@@ -52,117 +52,42 @@ public class AmigaFilesystem extends Filesystem
             OP_MOVE,
             OP_GETFSDATA);
 
-    private final AmigaFfsProto config;
     private final BlockDevice blockDevice;
     private final Device amigaDevice;
     private Volume volume;
 
-    private class AmigaDevice extends Device
-    {
-        private final BlockDevice underlying;
-
-        AmigaDevice(BlockDevice underlying)
-        {
-            this.underlying = underlying;
-            this.size = underlying.getBlockCount() * underlying.getBlockSize();
-            this.readOnly = false;
-            this.cylinders = 80;
-            this.heads = 2;
-            this.sectors = 11;
-            if (size == 512 * 22 * 2 * 80)
-                this.sectors = 22;
-            this.devType = AdfHd.adfDevType(this);
-            if (this.devType == -1)
-                this.devType = AdfConstants.DEVTYPE_FLOPDD;
-        }
-
-        @Override
-        public AdfError adfReadSector(int n, int size, ByteBuffer buf)
-        {
-            try
-            {
-                int blockSize = underlying.getBlockSize();
-                /* Handle 256-byte RDSK etc. via read-modify */
-                if (size == 512)
-                {
-                    Bytes bytes = underlying.getBlocks(n, 1);
-                    byte[] src = bytes.toByteArray();
-                    for (int i = 0; i < src.length && i < size; i++)
-                        buf.put(i, src[i]);
-                    return AdfError.RC_OK;
-                } else
-                {
-                    /* Sub-sector (e.g., 256 for RDSK): read full block and slice */
-                    int blockNum = n * size / blockSize;
-                    int offsetInBlock = (n * size) % blockSize;
-                    Bytes bytes = underlying.getBlocks(blockNum, 1);
-                    byte[] src = bytes.toByteArray();
-                    for (int i = 0; i < size; i++)
-                        buf.put(i, src[offsetInBlock + i]);
-                    return AdfError.RC_OK;
-                }
-            } catch (IOException e)
-            {
-                return AdfError.RC_ERROR;
-            }
-        }
-
-        @Override
-        public AdfError adfReadSector(int n, int size, byte[] buf)
-        {
-            return adfReadSector(n, size, ByteBuffer.wrap(buf).order(ByteOrder.BIG_ENDIAN));
-        }
-
-        @Override
-        public AdfError adfWriteSector(int n, int size, ByteBuffer buf)
-        {
-            try
-            {
-                int blockSize = underlying.getBlockSize();
-                if (size == 512 && size == blockSize)
-                {
-                    byte[] tmp = new byte[size];
-                    for (int i = 0; i < size; i++)
-                        tmp[i] = buf.get(i);
-                    underlying.putBlocks(n, new Bytes(tmp));
-                    return AdfError.RC_OK;
-                } else
-                {
-                    /* Sub-sector write: read-modify-write full block */
-                    int blockNum = n * size / blockSize;
-                    int offsetInBlock = (n * size) % blockSize;
-                    Bytes existing = underlying.getBlocks(blockNum, 1);
-                    byte[] blockData = existing.toByteArray();
-                    for (int i = 0; i < size; i++)
-                        blockData[offsetInBlock + i] = buf.get(i);
-                    underlying.putBlocks(blockNum, new Bytes(blockData));
-                    return AdfError.RC_OK;
-                }
-            } catch (IOException e)
-            {
-                return AdfError.RC_ERROR;
-            }
-        }
-
-        @Override
-        public AdfError adfWriteSector(int n, int size, byte[] buf)
-        {
-            return adfWriteSector(n, size, ByteBuffer.wrap(buf).order(ByteOrder.BIG_ENDIAN));
-        }
-
-        @Override
-        public AdfError adfReleaseDevice()
-        {
-            return AdfError.RC_OK;
-        }
-    }
-
     public AmigaFilesystem(AmigaFfsProto config, BlockDevice blockDevice)
     {
         super(CAPABILITIES);
-        this.config = config;
         this.blockDevice = blockDevice;
         this.amigaDevice = new AmigaDevice(blockDevice);
+    }
+
+    private static Dirent makeDirent(VfsPath dir, Entry e)
+    {
+        ImmutableMap.Builder<String, String> attrs = ImmutableMap.builder();
+        Dirent.DirentBuilder b =
+                Dirent.builder().setFilename(e.name).setPath(dir.resolve(e.name)).setMode("");
+        attrs.put(Attributes.FILENAME, e.name);
+        if (e.type == AdfConstants.ST_FILE)
+        {
+            b.setFileType(IS_FILE).setLength((int) e.size);
+            attrs.put(Attributes.LENGTH, Long.toString(e.size)).put(Attributes.FILE_TYPE, "file");
+        } else
+        {
+            b.setFileType(IS_DIR);
+            attrs.put(Attributes.FILE_TYPE, "dir");
+        }
+        return b.setAttributes(attrs.build()).build();
+    }
+
+    private static void checkResult(AdfError rc) throws IOException
+    {
+        if (rc == AdfError.RC_OK)
+            return;
+        if (rc == AdfError.RC_ERROR)
+            throw new IOException("filesystem error: " + rc);
+        throw new IOException("filesystem error: " + rc);
     }
 
     /* Visible for testing */
@@ -462,24 +387,6 @@ public class AmigaFilesystem extends Filesystem
         blockDevice.revert();
     }
 
-    private static Dirent makeDirent(VfsPath dir, Entry e)
-    {
-        ImmutableMap.Builder<String, String> attrs = ImmutableMap.builder();
-        Dirent.DirentBuilder b =
-                Dirent.builder().setFilename(e.name).setPath(dir.resolve(e.name)).setMode("");
-        attrs.put(Attributes.FILENAME, e.name);
-        if (e.type == AdfConstants.ST_FILE)
-        {
-            b.setFileType(IS_FILE).setLength((int) e.size);
-            attrs.put(Attributes.LENGTH, Long.toString(e.size)).put(Attributes.FILE_TYPE, "file");
-        } else
-        {
-            b.setFileType(IS_DIR);
-            attrs.put(Attributes.FILE_TYPE, "dir");
-        }
-        return b.setAttributes(attrs.build()).build();
-    }
-
     private void mount() throws IOException
     {
         if (volume != null && volume.mounted)
@@ -571,12 +478,103 @@ public class AmigaFilesystem extends Filesystem
         return resolveDir(parent);
     }
 
-    private static void checkResult(AdfError rc) throws IOException
+    private class AmigaDevice extends Device
     {
-        if (rc == AdfError.RC_OK)
-            return;
-        if (rc == AdfError.RC_ERROR)
-            throw new IOException("filesystem error: " + rc);
-        throw new IOException("filesystem error: " + rc);
+        private final BlockDevice underlying;
+
+        AmigaDevice(BlockDevice underlying)
+        {
+            this.underlying = underlying;
+            this.size = underlying.getBlockCount() * underlying.getBlockSize();
+            this.readOnly = false;
+            this.cylinders = 80;
+            this.heads = 2;
+            this.sectors = 11;
+            if (size == 512 * 22 * 2 * 80)
+                this.sectors = 22;
+            this.devType = AdfHd.adfDevType(this);
+            if (this.devType == -1)
+                this.devType = AdfConstants.DEVTYPE_FLOPDD;
+        }
+
+        @Override
+        public AdfError adfReadSector(int n, int size, ByteBuffer buf)
+        {
+            try
+            {
+                int blockSize = underlying.getBlockSize();
+                /* Handle 256-byte RDSK etc. via read-modify */
+                if (size == 512)
+                {
+                    Bytes bytes = underlying.getBlocks(n, 1);
+                    byte[] src = bytes.toByteArray();
+                    for (int i = 0; i < src.length && i < size; i++)
+                        buf.put(i, src[i]);
+                    return AdfError.RC_OK;
+                } else
+                {
+                    /* Sub-sector (e.g., 256 for RDSK): read full block and slice */
+                    int blockNum = n * size / blockSize;
+                    int offsetInBlock = (n * size) % blockSize;
+                    Bytes bytes = underlying.getBlocks(blockNum, 1);
+                    byte[] src = bytes.toByteArray();
+                    for (int i = 0; i < size; i++)
+                        buf.put(i, src[offsetInBlock + i]);
+                    return AdfError.RC_OK;
+                }
+            } catch (IOException e)
+            {
+                return AdfError.RC_ERROR;
+            }
+        }
+
+        @Override
+        public AdfError adfReadSector(int n, int size, byte[] buf)
+        {
+            return adfReadSector(n, size, ByteBuffer.wrap(buf).order(ByteOrder.BIG_ENDIAN));
+        }
+
+        @Override
+        public AdfError adfWriteSector(int n, int size, ByteBuffer buf)
+        {
+            try
+            {
+                int blockSize = underlying.getBlockSize();
+                if (size == 512 && size == blockSize)
+                {
+                    byte[] tmp = new byte[size];
+                    for (int i = 0; i < size; i++)
+                        tmp[i] = buf.get(i);
+                    underlying.putBlocks(n, new Bytes(tmp));
+                    return AdfError.RC_OK;
+                } else
+                {
+                    /* Sub-sector write: read-modify-write full block */
+                    int blockNum = n * size / blockSize;
+                    int offsetInBlock = (n * size) % blockSize;
+                    Bytes existing = underlying.getBlocks(blockNum, 1);
+                    byte[] blockData = existing.toByteArray();
+                    for (int i = 0; i < size; i++)
+                        blockData[offsetInBlock + i] = buf.get(i);
+                    underlying.putBlocks(blockNum, new Bytes(blockData));
+                    return AdfError.RC_OK;
+                }
+            } catch (IOException e)
+            {
+                return AdfError.RC_ERROR;
+            }
+        }
+
+        @Override
+        public AdfError adfWriteSector(int n, int size, byte[] buf)
+        {
+            return adfWriteSector(n, size, ByteBuffer.wrap(buf).order(ByteOrder.BIG_ENDIAN));
+        }
+
+        @Override
+        public AdfError adfReleaseDevice()
+        {
+            return AdfError.RC_OK;
+        }
     }
 }

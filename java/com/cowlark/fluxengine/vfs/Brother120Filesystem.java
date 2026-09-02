@@ -23,8 +23,91 @@ public class Brother120Filesystem extends Filesystem
     private static final ImmutableSet<Capability> CAPABILITIES =
             ImmutableSet.of(OP_GETFSDATA, OP_LIST, OP_GETFILE, OP_GETDIRENT);
 
-    private final Brother120FsProto config;
     private final BlockDevice blockDevice;
+
+    public Brother120Filesystem(Brother120FsProto config, BlockDevice blockDevice)
+    {
+        super(CAPABILITIES);
+        this.blockDevice = blockDevice;
+    }
+
+    @Override
+    public void check()
+    {
+    }
+
+    @Override
+    public ImmutableMap<String, String> getFilesystemMetadata() throws IOException
+    {
+        BrotherDirectory dir = new BrotherDirectory();
+        ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
+        builder.put(Attributes.VOLUME_NAME, "");
+        builder.put(Attributes.TOTAL_BLOCKS, Integer.toString(blockDevice.getBlockCount()));
+        builder.put(Attributes.USED_BLOCKS, Integer.toString(dir.usedSectors));
+        builder.put(Attributes.BLOCK_SIZE, "256");
+        return builder.build();
+    }
+
+    @Override
+    public ImmutableMap<String, Dirent> list(VfsPath path) throws IOException
+    {
+        if (!path.isRoot())
+            throw new NoSuchFileException(path.toString());
+
+        BrotherDirectory dir = new BrotherDirectory();
+        ImmutableMap.Builder<String, Dirent> builder = ImmutableMap.builder();
+        for (BrotherDirent de : dir.dirents)
+            builder.put(de.filename, de.dirent);
+        return builder.build();
+    }
+
+    @Override
+    public Bytes getFile(VfsPath path) throws IOException
+    {
+        BrotherDirectory dir = new BrotherDirectory();
+        BrotherDirent de = dir.findFile(path);
+
+        int sector = de.startSector;
+        Bytes data = new Bytes();
+        ByteWriter bw = new ByteWriter(data);
+        while (sector != 0 && sector != 0xffff)
+        {
+            bw.write(blockDevice.getBlock(sector - 1));
+            sector = dir.fat.get(sector) & 0xffff;
+        }
+        return data;
+    }
+
+    @Override
+    public Dirent getDirent(VfsPath path) throws IOException
+    {
+        BrotherDirectory dir = new BrotherDirectory();
+        return dir.findFile(path).dirent;
+    }
+
+    @Override
+    public void close() throws Exception
+    {
+        flushChanges();
+    }
+
+    @Override
+    public boolean needsFlushing()
+    {
+        return blockDevice.needsCommit();
+    }
+
+    @Override
+    public void flushChanges() throws IOException
+    {
+        blockDevice.commit();
+    }
+
+    @Override
+    public void discardChanges() throws IOException
+    {
+        blockDevice.revert();
+    }
 
     private static class BrotherDirent
     {
@@ -133,90 +216,5 @@ public class Brother120Filesystem extends Filesystem
 
             throw new NoSuchFileException(path.toString());
         }
-    }
-
-    public Brother120Filesystem(Brother120FsProto config, BlockDevice blockDevice)
-    {
-        super(CAPABILITIES);
-        this.config = config;
-        this.blockDevice = blockDevice;
-    }
-
-    @Override
-    public void check()
-    {
-    }
-
-    @Override
-    public ImmutableMap<String, String> getFilesystemMetadata() throws IOException
-    {
-        BrotherDirectory dir = new BrotherDirectory();
-        ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
-        builder.put(Attributes.VOLUME_NAME, "");
-        builder.put(Attributes.TOTAL_BLOCKS, Integer.toString(blockDevice.getBlockCount()));
-        builder.put(Attributes.USED_BLOCKS, Integer.toString(dir.usedSectors));
-        builder.put(Attributes.BLOCK_SIZE, "256");
-        return builder.build();
-    }
-
-    @Override
-    public ImmutableMap<String, Dirent> list(VfsPath path) throws IOException
-    {
-        if (!path.isRoot())
-            throw new NoSuchFileException(path.toString());
-
-        BrotherDirectory dir = new BrotherDirectory();
-        ImmutableMap.Builder<String, Dirent> builder = ImmutableMap.builder();
-        for (BrotherDirent de : dir.dirents)
-            builder.put(de.filename, de.dirent);
-        return builder.build();
-    }
-
-    @Override
-    public Bytes getFile(VfsPath path) throws IOException
-    {
-        BrotherDirectory dir = new BrotherDirectory();
-        BrotherDirent de = dir.findFile(path);
-
-        int sector = de.startSector;
-        Bytes data = new Bytes();
-        ByteWriter bw = new ByteWriter(data);
-        while (sector != 0 && sector != 0xffff)
-        {
-            bw.write(blockDevice.getBlock(sector - 1));
-            sector = dir.fat.get(sector) & 0xffff;
-        }
-        return data;
-    }
-
-    @Override
-    public Dirent getDirent(VfsPath path) throws IOException
-    {
-        BrotherDirectory dir = new BrotherDirectory();
-        return dir.findFile(path).dirent;
-    }
-
-    @Override
-    public void close() throws Exception
-    {
-        flushChanges();
-    }
-
-    @Override
-    public boolean needsFlushing()
-    {
-        return blockDevice.needsCommit();
-    }
-
-    @Override
-    public void flushChanges() throws IOException
-    {
-        blockDevice.commit();
-    }
-
-    @Override
-    public void discardChanges() throws IOException
-    {
-        blockDevice.revert();
     }
 }

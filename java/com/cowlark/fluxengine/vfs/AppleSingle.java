@@ -14,20 +14,6 @@ public class AppleSingle
 
     private static final int APPLESINGLE_MAGIC = 0x00051600;
     private static final int APPLESINGLE_VERSION = 0x00020000;
-
-    public static class InvalidFileException extends IllegalArgumentException
-    {
-        public InvalidFileException()
-        {
-            super("invalid AppleSingle file");
-        }
-
-        public InvalidFileException(String message)
-        {
-            super(message);
-        }
-    }
-
     public Bytes data = new Bytes();
     public Bytes rsrc = new Bytes();
     public Bytes type = new Bytes();
@@ -103,5 +89,18 @@ public class AppleSingle
         bw.write(rsrc);
 
         return result;
+    }
+
+    public static class InvalidFileException extends IllegalArgumentException
+    {
+        public InvalidFileException()
+        {
+            super("invalid AppleSingle file");
+        }
+
+        public InvalidFileException(String message)
+        {
+            super(message);
+        }
     }
 }

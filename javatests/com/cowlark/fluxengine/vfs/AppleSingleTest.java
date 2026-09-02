@@ -23,8 +23,8 @@ public class AppleSingleTest
     @Test
     public void invalidFileExceptionIsIllegalArgumentException()
     {
-        assertThat(AppleSingle.InvalidFileException.class.getSuperclass())
-                .isEqualTo(IllegalArgumentException.class);
+        assertThat(AppleSingle.InvalidFileException.class.getSuperclass()).isEqualTo(
+                IllegalArgumentException.class);
     }
 
     @Test
@@ -37,7 +37,8 @@ public class AppleSingleTest
         original.creator = new Bytes("FLOP".getBytes(StandardCharsets.UTF_8));
 
         Bytes rendered = original.render();
-        assertThat(rendered.size()).isEqualTo(AppleSingle.OVERHEAD + original.data.size() + original.rsrc.size());
+        assertThat(rendered.size()).isEqualTo(
+                AppleSingle.OVERHEAD + original.data.size() + original.rsrc.size());
 
         AppleSingle parsed = new AppleSingle();
         parsed.parse(rendered);
@@ -71,8 +72,10 @@ public class AppleSingleTest
     public void typeCreatorPaddingAndTruncation()
     {
         AppleSingle as = new AppleSingle();
-        as.type = new Bytes("AB".getBytes(StandardCharsets.UTF_8)); // 2 bytes -> padded to 4 on render
-        as.creator = new Bytes("TOOLONG".getBytes(StandardCharsets.UTF_8)); // 7 bytes -> truncated to 4
+        as.type = new Bytes("AB".getBytes(StandardCharsets.UTF_8)); // 2 bytes -> padded to 4 on
+        // render
+        as.creator =
+                new Bytes("TOOLONG".getBytes(StandardCharsets.UTF_8)); // 7 bytes -> truncated to 4
         as.data = new Bytes("d".getBytes(StandardCharsets.UTF_8));
         as.rsrc = new Bytes();
 
@@ -151,8 +154,10 @@ public class AppleSingleTest
         bw.write("ZZ".getBytes(StandardCharsets.UTF_8));
 
         // But easier: just test that our normal render with an appended unknown entry doesn't break
-        // Simpler: take normal rendered and inject unknown entry via rebuilding with correct offsets
-        // For this test, manually construct minimal valid file with unknown entry and verify parse succeeds
+        // Simpler: take normal rendered and inject unknown entry via rebuilding with correct
+        // offsets
+        // For this test, manually construct minimal valid file with unknown entry and verify
+        // parse succeeds
         Bytes simple = new Bytes();
         ByteWriter sw = new ByteWriter(simple);
         sw.writeBe32(0x00051600);
@@ -176,7 +181,8 @@ public class AppleSingleTest
     @Test
     public void parseAndRenderWithKnownBytes()
     {
-        // Verify byte-level layout matches C++ render: magic, version, 16 zero, 3 entries, finder, data, rsrc
+        // Verify byte-level layout matches C++ render: magic, version, 16 zero, 3 entries,
+        // finder, data, rsrc
         AppleSingle as = new AppleSingle();
         as.type = new Bytes("TEXT".getBytes(StandardCharsets.UTF_8));
         as.creator = new Bytes("ttxt".getBytes(StandardCharsets.UTF_8));

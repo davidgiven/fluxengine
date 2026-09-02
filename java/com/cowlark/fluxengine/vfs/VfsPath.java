@@ -45,25 +45,33 @@ public final class VfsPath
         }
     }
 
-    /** The root directory, {@code /}. */
+    /**
+     * The root directory, {@code /}.
+     */
     public static VfsPath root()
     {
         return new VfsPath(ImmutableList.of());
     }
 
-    /** Whether this is the root directory. */
+    /**
+     * Whether this is the root directory.
+     */
     public boolean isRoot()
     {
         return segments.isEmpty();
     }
 
-    /** The path segments, e.g. {@code [dir1, dir2]} for {@code /dir1/dir2}. */
+    /**
+     * The path segments, e.g. {@code [dir1, dir2]} for {@code /dir1/dir2}.
+     */
     public ImmutableList<String> segments()
     {
         return segments;
     }
 
-    /** The parent directory, or {@code null} for the root. */
+    /**
+     * The parent directory, or {@code null} for the root.
+     */
     public VfsPath getParent()
     {
         if (segments.isEmpty())
@@ -73,7 +81,9 @@ public final class VfsPath
         return new VfsPath(segments.subList(0, segments.size() - 1));
     }
 
-    /** The final path component, or {@code null} for the root. */
+    /**
+     * The final path component, or {@code null} for the root.
+     */
     public String getName()
     {
         if (segments.isEmpty())
@@ -81,7 +91,9 @@ public final class VfsPath
         return segments.get(segments.size() - 1);
     }
 
-    /** Resolve a relative path component against this path. */
+    /**
+     * Resolve a relative path component against this path.
+     */
     public VfsPath resolve(String child)
     {
         ImmutableList.Builder<String> builder = ImmutableList.builder();

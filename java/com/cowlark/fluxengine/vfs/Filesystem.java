@@ -9,33 +9,6 @@ import java.io.IOException;
 public abstract class Filesystem implements AutoCloseable
 {
 
-    public enum Capability
-    {
-        OP_CREATE,
-        OP_CHECK,
-        OP_LIST,
-        OP_GETFILE,
-        OP_PUTFILE,
-        OP_GETDIRENT,
-        OP_CREATEDIR,
-        OP_DELETE,
-        OP_GETFSDATA,
-        OP_PUTFSDATA,
-        OP_PUTATTRS,
-        OP_MOVE;
-    }
-
-    public enum FileType
-    {
-        IS_FILE, IS_DIR
-    }
-
-    @Builder(setterPrefix = "set")
-    public record Dirent(VfsPath path, String filename, int length, String mode, FileType fileType,
-                         ImmutableMap<String, String> attributes)
-    {
-    }
-
     private final ImmutableSet<Capability> capabilities;
 
     protected Filesystem(ImmutableSet<Capability> capabilities)
@@ -183,5 +156,32 @@ public abstract class Filesystem implements AutoCloseable
     public void discardChanges() throws IOException
     {
         throw new UnsupportedOperationException();
+    }
+
+    public enum Capability
+    {
+        OP_CREATE,
+        OP_CHECK,
+        OP_LIST,
+        OP_GETFILE,
+        OP_PUTFILE,
+        OP_GETDIRENT,
+        OP_CREATEDIR,
+        OP_DELETE,
+        OP_GETFSDATA,
+        OP_PUTFSDATA,
+        OP_PUTATTRS,
+        OP_MOVE;
+    }
+
+    public enum FileType
+    {
+        IS_FILE, IS_DIR
+    }
+
+    @Builder(setterPrefix = "set")
+    public record Dirent(VfsPath path, String filename, int length, String mode, FileType fileType,
+                         ImmutableMap<String, String> attributes)
+    {
     }
 }

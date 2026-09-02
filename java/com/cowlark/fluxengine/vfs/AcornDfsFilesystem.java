@@ -6,8 +6,8 @@ import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_GETFSDATA;
 import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_LIST;
 import static com.cowlark.fluxengine.vfs.Filesystem.FileType.IS_FILE;
 
-import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.core.ByteWriter;
+import com.cowlark.fluxengine.core.Bytes;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.apache.commons.lang3.StringUtils;
@@ -25,6 +25,93 @@ public class AcornDfsFilesystem extends Filesystem
 
     private final AcornDfsProto config;
     private final BlockDevice blockDevice;
+
+    public AcornDfsFilesystem(AcornDfsProto config, BlockDevice blockDevice)
+    {
+        super(CAPABILITIES);
+        this.config = config;
+        this.blockDevice = blockDevice;
+    }
+
+    @Override
+    public void check()
+    {
+    }
+
+    @Override
+    public ImmutableMap<String, String> getFilesystemMetadata() throws IOException
+    {
+        AcornDfsDirectory dir = new AcornDfsDirectory();
+        ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
+        builder.put(Attributes.VOLUME_NAME, dir.volumeName);
+        builder.put(Attributes.TOTAL_BLOCKS, Integer.toString(blockDevice.getBlockCount()));
+        builder.put(Attributes.USED_BLOCKS, Integer.toString(dir.usedSectors));
+        builder.put(Attributes.BLOCK_SIZE, "256");
+        return builder.build();
+    }
+
+    @Override
+    public ImmutableMap<String, Dirent> list(VfsPath path) throws IOException
+    {
+        if (!path.isRoot())
+            throw new NoSuchFileException(path.toString());
+
+        AcornDfsDirectory dir = new AcornDfsDirectory();
+        ImmutableMap.Builder<String, Dirent> builder = ImmutableMap.builder();
+        for (DirEntry de : dir.dirents)
+            builder.put(de.filename, de.dirent);
+        return builder.build();
+    }
+
+    @Override
+    public Bytes getFile(VfsPath path) throws IOException
+    {
+        AcornDfsDirectory dir = new AcornDfsDirectory();
+        DirEntry de = dir.findFile(path);
+
+        int sectors = (de.length + 255) / 256;
+        Bytes data = new Bytes();
+        ByteWriter bw = new ByteWriter(data);
+        for (int i = 0; i < sectors; i++)
+        {
+            Bytes sector = blockDevice.getBlock(de.startSector + i);
+            bw.write(sector);
+        }
+        if (data.size() > de.length)
+            data.resize(de.length);
+        return data;
+    }
+
+    @Override
+    public Dirent getDirent(VfsPath path) throws IOException
+    {
+        AcornDfsDirectory dir = new AcornDfsDirectory();
+        return dir.findFile(path).dirent;
+    }
+
+    @Override
+    public void close() throws Exception
+    {
+        flushChanges();
+    }
+
+    @Override
+    public boolean needsFlushing()
+    {
+        return blockDevice.needsCommit();
+    }
+
+    @Override
+    public void flushChanges() throws IOException
+    {
+        blockDevice.commit();
+    }
+
+    @Override
+    public void discardChanges() throws IOException
+    {
+        blockDevice.revert();
+    }
 
     private static class DirEntry
     {
@@ -145,92 +232,5 @@ public class AcornDfsFilesystem extends Filesystem
             de.dirent = dirent;
             return de;
         }
-    }
-
-    public AcornDfsFilesystem(AcornDfsProto config, BlockDevice blockDevice)
-    {
-        super(CAPABILITIES);
-        this.config = config;
-        this.blockDevice = blockDevice;
-    }
-
-    @Override
-    public void check()
-    {
-    }
-
-    @Override
-    public ImmutableMap<String, String> getFilesystemMetadata() throws IOException
-    {
-        AcornDfsDirectory dir = new AcornDfsDirectory();
-        ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
-        builder.put(Attributes.VOLUME_NAME, dir.volumeName);
-        builder.put(Attributes.TOTAL_BLOCKS, Integer.toString(blockDevice.getBlockCount()));
-        builder.put(Attributes.USED_BLOCKS, Integer.toString(dir.usedSectors));
-        builder.put(Attributes.BLOCK_SIZE, "256");
-        return builder.build();
-    }
-
-    @Override
-    public ImmutableMap<String, Dirent> list(VfsPath path) throws IOException
-    {
-        if (!path.isRoot())
-            throw new NoSuchFileException(path.toString());
-
-        AcornDfsDirectory dir = new AcornDfsDirectory();
-        ImmutableMap.Builder<String, Dirent> builder = ImmutableMap.builder();
-        for (DirEntry de : dir.dirents)
-            builder.put(de.filename, de.dirent);
-        return builder.build();
-    }
-
-    @Override
-    public Bytes getFile(VfsPath path) throws IOException
-    {
-        AcornDfsDirectory dir = new AcornDfsDirectory();
-        DirEntry de = dir.findFile(path);
-
-        int sectors = (de.length + 255) / 256;
-        Bytes data = new Bytes();
-        ByteWriter bw = new ByteWriter(data);
-        for (int i = 0; i < sectors; i++)
-        {
-            Bytes sector = blockDevice.getBlock(de.startSector + i);
-            bw.write(sector);
-        }
-        if (data.size() > de.length)
-            data.resize(de.length);
-        return data;
-    }
-
-    @Override
-    public Dirent getDirent(VfsPath path) throws IOException
-    {
-        AcornDfsDirectory dir = new AcornDfsDirectory();
-        return dir.findFile(path).dirent;
-    }
-
-    @Override
-    public void close() throws Exception
-    {
-        flushChanges();
-    }
-
-    @Override
-    public boolean needsFlushing()
-    {
-        return blockDevice.needsCommit();
-    }
-
-    @Override
-    public void flushChanges() throws IOException
-    {
-        blockDevice.commit();
-    }
-
-    @Override
-    public void discardChanges() throws IOException
-    {
-        blockDevice.revert();
     }
 }

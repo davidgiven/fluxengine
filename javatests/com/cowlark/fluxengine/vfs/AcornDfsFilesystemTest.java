@@ -2,7 +2,6 @@ package com.cowlark.fluxengine.vfs;
 
 import com.cowlark.fluxengine.config.ConfigBuilder;
 import com.cowlark.fluxengine.config.ConfigProto;
-import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.data.DiskLayout;
 import com.cowlark.fluxengine.data.Image;
 import com.cowlark.fluxengine.testing.TestHelpers;

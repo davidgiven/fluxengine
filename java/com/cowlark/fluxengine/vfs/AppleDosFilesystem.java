@@ -11,13 +11,13 @@ import com.cowlark.fluxengine.core.ByteWriter;
 import com.cowlark.fluxengine.core.Bytes;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import org.apache.commons.lang3.StringUtils;
 import java.io.IOException;
 import java.nio.file.FileSystemException;
 import java.nio.file.InvalidPathException;
 import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.lang3.StringUtils;
 
 public class AppleDosFilesystem extends Filesystem
 {
@@ -31,16 +31,6 @@ public class AppleDosFilesystem extends Filesystem
 
     private Bytes _vtoc;
     private List<AppledosEntry> _dirents = new ArrayList<>();
-
-    private static class AppledosEntry
-    {
-        String filename;
-        int track;
-        int sector;
-        int flags;
-        int length;
-        Dirent dirent;
-    }
 
     public AppleDosFilesystem(AppledosProto config, BlockDevice blockDevice)
     {
@@ -64,8 +54,8 @@ public class AppleDosFilesystem extends Filesystem
     private void mount() throws IOException
     {
         _vtoc = getAppleSector(VTOC_BLOCK);
-        if ((_vtoc.getByte(0x27) != 122) || (_vtoc.getByte(0x36) != 0)
-                || (_vtoc.getByte(0x37) != 1))
+        if ((_vtoc.getByte(0x27) != 122) || (_vtoc.getByte(0x36) != 0) ||
+                (_vtoc.getByte(0x37) != 1))
             throw new FileSystemException("Invalid filesystem");
 
         _dirents.clear();
@@ -106,7 +96,8 @@ public class AppleDosFilesystem extends Filesystem
                     attrs.put(Attributes.FILE_TYPE, "file");
                     attrs.put("appledos.flags", String.format("0x%x", fFlags));
 
-                    Dirent dirent = Dirent.builder()
+                    Dirent dirent = Dirent
+                            .builder()
                             .setPath(VfsPath.of("/").resolve(filename))
                             .setFilename(filename)
                             .setLength(fLength)
@@ -241,5 +232,15 @@ public class AppleDosFilesystem extends Filesystem
     public void discardChanges() throws IOException
     {
         blockDevice.revert();
+    }
+
+    private static class AppledosEntry
+    {
+        String filename;
+        int track;
+        int sector;
+        int flags;
+        int length;
+        Dirent dirent;
     }
 }

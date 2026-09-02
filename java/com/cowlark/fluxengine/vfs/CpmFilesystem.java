@@ -30,89 +30,6 @@ public class CpmFilesystem extends Filesystem
 
     private final CpmFsProto config;
     private final BlockDevice blockDevice;
-
-    private static class Entry
-    {
-        int index;
-        String filename;
-        String mode;
-        int user;
-        int extent;
-        int records;
-        List<Integer> allocationMap;
-        boolean deleted;
-
-        Entry(Bytes bytes, int mapEntrySize, int index)
-        {
-            this.index = index;
-            allocationMap = new ArrayList<>();
-
-            int b0 = bytes.getByte(0) & 0xff;
-            if (b0 == 0xe5)
-                deleted = true;
-
-            user = b0 & 0x0f;
-
-            {
-                StringBuilder ss = new StringBuilder();
-                for (int i = 1; i <= 8; i++)
-                {
-                    int c = bytes.getByte(i) & 0x7f;
-                    if (c == ' ')
-                        break;
-                    ss.append((char) c);
-                }
-                for (int i = 9; i <= 11; i++)
-                {
-                    int c = bytes.getByte(i) & 0x7f;
-                    if (c == ' ')
-                        break;
-                    if (i == 9)
-                        ss.append('.');
-                    ss.append((char) c);
-                }
-                filename = ss.toString();
-            }
-
-            {
-                StringBuilder ss = new StringBuilder();
-                if ((bytes.getByte(9) & 0x80) != 0)
-                    ss.append('R');
-                if ((bytes.getByte(10) & 0x80) != 0)
-                    ss.append('S');
-                if ((bytes.getByte(11) & 0x80) != 0)
-                    ss.append('A');
-                mode = ss.toString();
-            }
-
-            extent = (bytes.getByte(12) & 0xff) | ((bytes.getByte(14) & 0xff) << 5);
-            records = bytes.getByte(15) & 0xff;
-
-            ByteReader br = new ByteReader(bytes);
-            br.seek(16);
-            switch (mapEntrySize)
-            {
-                case 1:
-                    for (int i = 0; i < 16; i++)
-                        allocationMap.add(br.read8() & 0xff);
-                    break;
-
-                case 2:
-                    for (int i = 0; i < 8; i++)
-                        allocationMap.add(br.readLe16() & 0xffff);
-                    break;
-
-                default:
-                    break;
-            }
-        }
-
-        String combinedFilename()
-        {
-            return String.format("%d:%s", user, filename);
-        }
-    }
-
     private long filesystemStartOffset;
     private int sectorSize;
     private int blockSectors;
@@ -176,7 +93,8 @@ public class CpmFilesystem extends Filesystem
         {
             long min = Long.MAX_VALUE;
             Long found = null;
-            for (Map.Entry<LogicalLocation, Long> e : blockDevice.diskLayout.sectorOffsetByLogicalSectorLocation.entrySet())
+            for (Map.Entry<LogicalLocation, Long> e :
+                    blockDevice.diskLayout.sectorOffsetByLogicalSectorLocation.entrySet())
             {
                 LogicalLocation ll = e.getKey();
                 if (ll.logicalCylinder() == track && ll.logicalHead() == side)
@@ -192,7 +110,8 @@ public class CpmFilesystem extends Filesystem
             if (found != null)
                 off = found;
             else
-                throw new FileSystemException("Invalid filesystem: filesystem_start not found: " + loc);
+                throw new FileSystemException(
+                        "Invalid filesystem: filesystem_start not found: " + loc);
         }
         filesystemStartOffset = off;
 
@@ -320,7 +239,8 @@ public class CpmFilesystem extends Filesystem
             attrs.put(Attributes.FILE_TYPE, "file");
             attrs.put(Attributes.MODE, mode);
 
-            Dirent dirent = Dirent.builder()
+            Dirent dirent = Dirent
+                    .builder()
                     .setPath(VfsPath.of("/").resolve(combined))
                     .setFilename(combined)
                     .setLength(length)
@@ -360,7 +280,7 @@ public class CpmFilesystem extends Filesystem
         ByteWriter bw = new ByteWriter(data);
         int logicalExtent = 0;
 
-        for (;;)
+        for (; ; )
         {
             Entry found = null;
             for (int d = 0; d < config.getDirEntries(); d++)
@@ -441,5 +361,87 @@ public class CpmFilesystem extends Filesystem
     public void discardChanges() throws IOException
     {
         blockDevice.revert();
+    }
+
+    private static class Entry
+    {
+        int index;
+        String filename;
+        String mode;
+        int user;
+        int extent;
+        int records;
+        List<Integer> allocationMap;
+        boolean deleted;
+
+        Entry(Bytes bytes, int mapEntrySize, int index)
+        {
+            this.index = index;
+            allocationMap = new ArrayList<>();
+
+            int b0 = bytes.getByte(0) & 0xff;
+            if (b0 == 0xe5)
+                deleted = true;
+
+            user = b0 & 0x0f;
+
+            {
+                StringBuilder ss = new StringBuilder();
+                for (int i = 1; i <= 8; i++)
+                {
+                    int c = bytes.getByte(i) & 0x7f;
+                    if (c == ' ')
+                        break;
+                    ss.append((char) c);
+                }
+                for (int i = 9; i <= 11; i++)
+                {
+                    int c = bytes.getByte(i) & 0x7f;
+                    if (c == ' ')
+                        break;
+                    if (i == 9)
+                        ss.append('.');
+                    ss.append((char) c);
+                }
+                filename = ss.toString();
+            }
+
+            {
+                StringBuilder ss = new StringBuilder();
+                if ((bytes.getByte(9) & 0x80) != 0)
+                    ss.append('R');
+                if ((bytes.getByte(10) & 0x80) != 0)
+                    ss.append('S');
+                if ((bytes.getByte(11) & 0x80) != 0)
+                    ss.append('A');
+                mode = ss.toString();
+            }
+
+            extent = (bytes.getByte(12) & 0xff) | ((bytes.getByte(14) & 0xff) << 5);
+            records = bytes.getByte(15) & 0xff;
+
+            ByteReader br = new ByteReader(bytes);
+            br.seek(16);
+            switch (mapEntrySize)
+            {
+                case 1:
+                    for (int i = 0; i < 16; i++)
+                        allocationMap.add(br.read8() & 0xff);
+                    break;
+
+                case 2:
+                    for (int i = 0; i < 8; i++)
+                        allocationMap.add(br.readLe16() & 0xffff);
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        String combinedFilename()
+        {
+            return String.format("%d:%s", user, filename);
+        }
     }
 }

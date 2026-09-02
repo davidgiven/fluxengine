@@ -46,75 +46,7 @@ public class MacHfsFilesystem extends Filesystem
             OP_DELETE,
             OP_MOVE,
             OP_GETFSDATA);
-
-    private static class HfsOsAdapter extends HfsOs
-    {
-        private final BlockDevice underlying;
-        private final String mountPath;
-        int seekPos;
-
-        HfsOsAdapter(BlockDevice underlying, String mountPath)
-        {
-            this.underlying = underlying;
-            this.mountPath = mountPath;
-        }
-
-        @Override
-        public int open(String path, int mode)
-        {
-            return 0;
-        }
-
-        @Override
-        public int close()
-        {
-            return 0;
-        }
-
-        @Override
-        public int same(String path)
-        {
-            return mountPath.equals(path) ? 1 : 0;
-        }
-
-        @Override
-        public long seek(long offset)
-        {
-            int totalBlocks = underlying.getBlockCount();
-            if (offset == -1)
-                return totalBlocks;
-            if (offset < 0 || offset > totalBlocks)
-                return -1;
-            seekPos = (int) offset;
-            return offset;
-        }
-
-        @Override
-        @SneakyThrows
-        public long read(byte[] buf, long len)
-        {
-            Bytes data = underlying.getBlocks(seekPos, (int) len);
-            byte[] src = data.toByteArray();
-            System.arraycopy(src, 0, buf, 0, (int) len * HFS_BLOCKSZ);
-            seekPos += len;
-            return len;
-        }
-
-        @Override
-        @SneakyThrows
-        public long write(byte[] buf, long len)
-        {
-            byte[] toWrite = new byte[(int) len * HFS_BLOCKSZ];
-            System.arraycopy(buf, 0, toWrite, 0, toWrite.length);
-            Bytes data = new Bytes(toWrite);
-            underlying.putBlocks(seekPos, data);
-            seekPos += len;
-            return len;
-        }
-    }
-
     private final BlockDevice blockDevice;
-    private final MacHfsProto config;
     private final HfsOs hfsos;
     private final String mountPath;
     private HfsVol volume;
@@ -127,7 +59,6 @@ public class MacHfsFilesystem extends Filesystem
     public MacHfsFilesystem(MacHfsProto config, BlockDevice blockDevice)
     {
         super(CAPABILITIES);
-        this.config = config;
         this.blockDevice = blockDevice;
         this.mountPath = "vol-" + System.identityHashCode(blockDevice);
         this.hfsos = new HfsOsAdapter(blockDevice, mountPath);
@@ -559,5 +490,71 @@ public class MacHfsFilesystem extends Filesystem
             sb.append(c);
         }
         return sb.toString();
+    }
+
+    private static class HfsOsAdapter extends HfsOs
+    {
+        private final BlockDevice underlying;
+        private final String mountPath;
+        int seekPos;
+
+        HfsOsAdapter(BlockDevice underlying, String mountPath)
+        {
+            this.underlying = underlying;
+            this.mountPath = mountPath;
+        }
+
+        @Override
+        public int open(String path, int mode)
+        {
+            return 0;
+        }
+
+        @Override
+        public int close()
+        {
+            return 0;
+        }
+
+        @Override
+        public int same(String path)
+        {
+            return mountPath.equals(path) ? 1 : 0;
+        }
+
+        @Override
+        public long seek(long offset)
+        {
+            int totalBlocks = underlying.getBlockCount();
+            if (offset == -1)
+                return totalBlocks;
+            if (offset < 0 || offset > totalBlocks)
+                return -1;
+            seekPos = (int) offset;
+            return offset;
+        }
+
+        @Override
+        @SneakyThrows
+        public long read(byte[] buf, long len)
+        {
+            Bytes data = underlying.getBlocks(seekPos, (int) len);
+            byte[] src = data.toByteArray();
+            System.arraycopy(src, 0, buf, 0, (int) len * HFS_BLOCKSZ);
+            seekPos += len;
+            return len;
+        }
+
+        @Override
+        @SneakyThrows
+        public long write(byte[] buf, long len)
+        {
+            byte[] toWrite = new byte[(int) len * HFS_BLOCKSZ];
+            System.arraycopy(buf, 0, toWrite, 0, toWrite.length);
+            Bytes data = new Bytes(toWrite);
+            underlying.putBlocks(seekPos, data);
+            seekPos += len;
+            return len;
+        }
     }
 }
