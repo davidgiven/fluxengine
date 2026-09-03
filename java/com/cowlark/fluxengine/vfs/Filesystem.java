@@ -3,12 +3,12 @@ package com.cowlark.fluxengine.vfs;
 import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.core.Logger;
+import com.cowlark.fluxengine.vfs.FilesystemOperation.FilesystemCaller;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import lombok.Builder;
 import org.slf4j.LoggerFactory;
 import java.io.IOException;
-import java.util.function.Consumer;
 
 public abstract class Filesystem implements AutoCloseable
 {
@@ -190,7 +190,7 @@ public abstract class Filesystem implements AutoCloseable
     {
     }
 
-    public static void doWithFilesystem(ConfigProto config, Consumer<Filesystem> callback)
+    public static void doWithFilesystem(ConfigProto config, FilesystemCaller callback)
     {
         FilesystemOperation op = new FilesystemOperation(callback);
         op.setConfig(config);
@@ -199,5 +199,4 @@ public abstract class Filesystem implements AutoCloseable
                     logger.atError().setCause(e).log("filesystem thread failed");
                 });
     }
-
 }

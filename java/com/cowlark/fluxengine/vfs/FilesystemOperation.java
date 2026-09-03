@@ -3,18 +3,20 @@ package com.cowlark.fluxengine.vfs;
 import com.cowlark.fluxengine.algorithms.ReadWriteFluxOperation;
 import com.cowlark.fluxengine.config.ConfigException;
 import com.cowlark.fluxengine.config.FluxSourceSinkType;
-import java.util.function.Consumer;
+import lombok.SneakyThrows;
+import java.io.IOException;
 
 public class FilesystemOperation extends ReadWriteFluxOperation
 {
-    private final Consumer<Filesystem> callback;
+    private final FilesystemCaller callback;
 
-    public FilesystemOperation(Consumer<Filesystem> callback)
+    public FilesystemOperation(FilesystemCaller callback)
     {
         this.callback = callback;
     }
 
     @Override
+    @SneakyThrows
     public void run()
     {
         BlockDevice blockDevice;
@@ -46,5 +48,10 @@ public class FilesystemOperation extends ReadWriteFluxOperation
         };
 
         callback.accept(filesystem);
+    }
+
+    public interface FilesystemCaller
+    {
+        void accept(Filesystem fs) throws IOException;
     }
 }

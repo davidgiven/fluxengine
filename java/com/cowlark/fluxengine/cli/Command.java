@@ -28,7 +28,7 @@ public interface Command
 
     ImmutableMap<String, Supplier<? extends Command>> VFSABLES = ImmutableMap
             .<String, Supplier<? extends Command>>builder()
-            .put("ls", stub("ls", "Show files on disk (or image)."))
+            .put("ls", VfsLsCommand::new)
             .put("mv", stub("mv", "Rename a file on a disk (or image)."))
             .put("rm", stub("rm", "Deletes a file (or directory) off a disk (or image)."))
             .put("getfile", stub("getfile", "Read a file off a disk (or image)."))
@@ -49,9 +49,7 @@ public interface Command
             .put("test", () -> new CommandGroup(TESTABLES, "Various testing commands."))
             .put(
                     "fluxfile",
-                    () -> new CommandGroup(
-                            FLUXFILEABLES,
-                            "Flux file manipulation operations."))
+                    () -> new CommandGroup(FLUXFILEABLES, "Flux file manipulation operations."))
             .put(
                     "vfs",
                     () -> new CommandGroup(VFSABLES, "File system manipulation commands."))

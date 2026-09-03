@@ -25,6 +25,7 @@ java_library(
         "//java/com/cowlark/fluxengine/imagereader",
         "//java/com/cowlark/fluxengine/imagewriter",
         "//java/com/cowlark/fluxengine/usb",
+        "//java/com/cowlark/fluxengine/vfs",
         "//java/com/cowlark/fluxengine/wiring",
         "@maven//:com_google_guava_guava",
         "@maven//:org_apache_commons_commons_csv",
