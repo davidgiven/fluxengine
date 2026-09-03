@@ -91,6 +91,8 @@ java_library(
         "@maven//:com_google_guava_guava",
         "@maven//:com_jayway_jsonpath_json_path",
         "@maven//:javax_usb_usb_api",
+        "@maven//:net_java_dev_jna_jna",
+        "@maven//:net_java_dev_jna_jna_platform",
         "@maven//:org_projectlombok_lombok",
         "@maven//:org_usb4java_usb4java_javax",
     ],

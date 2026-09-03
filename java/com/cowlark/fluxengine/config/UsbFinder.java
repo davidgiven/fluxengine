@@ -7,10 +7,12 @@ import com.google.common.collect.Iterables;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import org.usb4java.javax.Services;
+import javax.usb.UsbDevice;
 import javax.usb.UsbDeviceDescriptor;
 import javax.usb.UsbException;
 import javax.usb.UsbHub;
 import javax.usb.UsbServices;
+import java.io.UnsupportedEncodingException;
 import java.util.Set;
 
 public class UsbFinder
@@ -21,12 +23,12 @@ public class UsbFinder
     private static final Set<Integer> VALID_DEVICES =
             Set.of(GREASEWEAZLE_ID, FLUXENGINE_ID, APPLESAUCE_ID);
 
-    private static String getSerialNumber(javax.usb.UsbDevice device)
+    private static String getSerialNumber(UsbDevice device)
     {
         try
         {
-            return device.getSerialNumberString();
-        } catch (UsbException | java.io.UnsupportedEncodingException e)
+            return HackyUsbSerialNumberResolver.resolve(device);
+        } catch (UsbException | UnsupportedEncodingException e)
         {
             return "n/a";
         }
@@ -79,7 +81,7 @@ public class UsbFinder
     {
         for (Object o : hub.getAttachedUsbDevices())
         {
-            javax.usb.UsbDevice usbDevice = (javax.usb.UsbDevice) o;
+            UsbDevice usbDevice = (UsbDevice) o;
             if (usbDevice.isUsbHub())
                 walkHub((UsbHub) usbDevice, candidates);
 
@@ -148,7 +150,7 @@ public class UsbFinder
     public static final class CandidateDevice
     {
         public DeviceType type;
-        public javax.usb.UsbDevice device;
+        public UsbDevice device;
         public int id;
         public String serial;
         public String serialPort;
