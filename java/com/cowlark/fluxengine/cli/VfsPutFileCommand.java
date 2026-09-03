@@ -59,7 +59,6 @@ public class VfsPutFileCommand extends AbstractVfsCommand
         Filesystem.doWithFilesystem(
                 config, fs -> {
                     fs.putFile(VfsPath.of(pathString), data);
-                    fs.flushChanges();
                 });
     }
 }

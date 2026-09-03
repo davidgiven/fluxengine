@@ -47,7 +47,14 @@ public class FilesystemOperation extends ReadWriteFluxOperation
             case ROLAND -> new RolandFilesystem(fsConfig.getRoland(), blockDevice);
         };
 
-        callback.accept(filesystem);
+        try
+        {
+            callback.accept(filesystem);
+            filesystem.flushChanges();
+        } catch (Exception e)
+        {
+            filesystem.discardChanges();
+        }
     }
 
     public interface FilesystemCaller

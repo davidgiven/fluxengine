@@ -42,7 +42,6 @@ public class VfsRmCommand extends AbstractVfsCommand
         Filesystem.doWithFilesystem(
                 config, fs -> {
                     fs.deleteFile(VfsPath.of(pathString));
-                    fs.flushChanges();
                 });
     }
 }

@@ -42,7 +42,6 @@ public class VfsMkdirCommand extends AbstractVfsCommand
         Filesystem.doWithFilesystem(
                 config, fs -> {
                     fs.createDirectory(VfsPath.of(pathString));
-                    fs.flushChanges();
                 });
     }
 }

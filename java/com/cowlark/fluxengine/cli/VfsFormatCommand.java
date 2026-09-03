@@ -44,7 +44,6 @@ public class VfsFormatCommand extends AbstractVfsCommand
         Filesystem.doWithFilesystem(
                 config, fs -> {
                     fs.create(quickFlag.get(), volumeNameFlag.get());
-                    fs.flushChanges();
                 });
     }
 }

@@ -52,7 +52,6 @@ public class VfsMvCommand extends AbstractVfsCommand
         Filesystem.doWithFilesystem(
                 config, fs -> {
                     fs.moveFile(VfsPath.of(oldString), VfsPath.of(newString));
-                    fs.flushChanges();
                 });
     }
 }

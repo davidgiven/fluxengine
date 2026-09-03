@@ -33,4 +33,28 @@ public class Utils
             pos += 16;
         }
     }
+
+    public static String quoteString(String s)
+    {
+        boolean spaces = s.contains(" ");
+        if (!spaces && !s.contains("\\") && !s.contains("'") && !s.contains("\""))
+            return s;
+
+        StringBuilder ss = new StringBuilder();
+        if (spaces)
+            ss.append('"');
+
+        for (int i = 0; i < s.length(); i++)
+        {
+            char c = s.charAt(i);
+            if ((c == '\\') || (c == '"') || (c == '!'))
+                ss.append('\\');
+            ss.append(c);
+        }
+
+        if (spaces)
+            ss.append('"');
+
+        return ss.toString();
+    }
 }
