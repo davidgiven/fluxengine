@@ -29,16 +29,14 @@ public interface Command
     ImmutableMap<String, Supplier<? extends Command>> VFSABLES = ImmutableMap
             .<String, Supplier<? extends Command>>builder()
             .put("ls", VfsLsCommand::new)
-            .put("mv", stub("mv", "Rename a file on a disk (or image)."))
-            .put("rm", stub("rm", "Deletes a file (or directory) off a disk (or image)."))
-            .put("getfile", stub("getfile", "Read a file off a disk (or image)."))
-            .put("getfileinfo", stub("getfileinfo", "Read file metadata off a disk (or image)."))
-            .put("putfile", stub("putfile", "Write a file to disk (or image)."))
-            .put("mkdir", stub("mkdir", "Create a directory on disk (or image)."))
-            .put(
-                    "getdiskinfo",
-                    stub("getdiskinfo", "Read volume metadata off a disk (or image)."))
-            .put("format", stub("format", "Format a disk and make a file system on it."))
+            .put("mv", VfsMvCommand::new)
+            .put("rm", VfsRmCommand::new)
+            .put("getfile", VfsGetFileCommand::new)
+            .put("getfileinfo", VfsGetFileInfoCommand::new)
+            .put("putfile", VfsPutFileCommand::new)
+            .put("mkdir", VfsMkdirCommand::new)
+            .put("getdiskinfo", VfsGetDiskInfoCommand::new)
+            .put("format", VfsFormatCommand::new)
             .build();
 
     ImmutableMap<String, Supplier<? extends Command>> COMMANDS = ImmutableMap
@@ -49,7 +47,9 @@ public interface Command
             .put("test", () -> new CommandGroup(TESTABLES, "Various testing commands."))
             .put(
                     "fluxfile",
-                    () -> new CommandGroup(FLUXFILEABLES, "Flux file manipulation operations."))
+                    () -> new CommandGroup(
+                            FLUXFILEABLES,
+                            "Flux file manipulation operations."))
             .put(
                     "vfs",
                     () -> new CommandGroup(VFSABLES, "File system manipulation commands."))
@@ -87,11 +87,6 @@ public interface Command
         }
 
         return false;
-    }
-
-    static Supplier<? extends Command> stub(String name, String help)
-    {
-        return () -> new StubCommand(name, help);
     }
 
     String getHelp();
