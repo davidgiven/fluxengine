@@ -1,9 +1,13 @@
 package com.cowlark.fluxengine.cli;
 
 import com.cowlark.fluxengine.config.ConfigBuilder;
+import com.cowlark.fluxengine.core.Logger;
+import com.cowlark.fluxengine.core.flags.ActionFlag;
+import com.cowlark.fluxengine.core.flags.BoolFlag;
 import com.cowlark.fluxengine.core.flags.FlagGroup;
 import com.cowlark.fluxengine.core.flags.StringFlag;
 import com.cowlark.fluxengine.core.flags.ValueFlag;
+import org.apache.commons.lang3.function.Consumers;
 
 public abstract class AbstractVfsCommand implements Command
 {
@@ -22,6 +26,13 @@ public abstract class AbstractVfsCommand implements Command
             .setName("-f")
             .setHelpText("flux source/sink to work on")
             .build();
+    protected ValueFlag<Boolean> loggingFlag = BoolFlag
+            .builder()
+            .setGroup(vfsFlags)
+            .setName("--logging")
+            .setHelpText("enable verbose logging")
+            .setDefaultValue(false)
+            .build();
 
     protected void applyVfsFlags(ConfigBuilder builder)
     {
@@ -34,6 +45,12 @@ public abstract class AbstractVfsCommand implements Command
         {
             builder.withFluxSource(fluxFlag.get());
             builder.withFluxSink(fluxFlag.get());
+        }
+
+        if (!loggingFlag.get())
+        {
+            Logger.setLogger(Consumers.nop());
+            System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "ERROR");
         }
     }
 }

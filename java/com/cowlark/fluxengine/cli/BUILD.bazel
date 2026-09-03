@@ -29,5 +29,6 @@ java_library(
         "//java/com/cowlark/fluxengine/wiring",
         "@maven//:com_google_guava_guava",
         "@maven//:org_apache_commons_commons_csv",
+        "@maven//:org_apache_commons_commons_lang3",
     ],
 )
