@@ -347,7 +347,7 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
         return rgr;
     }
 
-    private void readAndDecodeTrack(
+    public void readAndDecodeTrack(
             LogicalTrackLayout ltl,
             List<Track> tracks,
             List<Sector> combinedSectors)

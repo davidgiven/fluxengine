@@ -43,6 +43,19 @@ public class Sector
         this.records = other.records;
     }
 
+    public Sector copyFrom(Sector other)
+    {
+        this.status = other.status;
+        this.clockNs = other.clockNs;
+        this.headerStartTimeNs = other.headerStartTimeNs;
+        this.headerEndTimeNs = other.headerEndTimeNs;
+        this.dataStartTimeNs = other.dataStartTimeNs;
+        this.dataEndTimeNs = other.dataEndTimeNs;
+        this.data = other.data;
+        this.records = other.records;
+        return this;
+    }
+
     public static String statusToString(Status status)
     {
         switch (status)

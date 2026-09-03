@@ -10,8 +10,8 @@ import java.nio.file.FileSystemException;
 
 public abstract class TrackedBlockDevice extends BlockDevice
 {
-    private Image originalData;
-    private Image changedData;
+    protected Image originalData;
+    protected Image changedData;
 
     public TrackedBlockDevice(
             DiskLayout diskLayout)
@@ -51,6 +51,7 @@ public abstract class TrackedBlockDevice extends BlockDevice
             commitTrack(changedData, lch);
             copySectors(changedData, originalData, lch);
         });
+        changedData = new Image();
     }
 
     @Override
