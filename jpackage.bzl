@@ -97,9 +97,11 @@ def _jpackage_impl(ctx):
             export TMPDIR HOME
             WIN_CONSOLE=""
             if [ "{package_type}" = "msi" ]; then WIN_CONSOLE="--win-console"; fi
+            LINUX_PACKAGE_NAME=""
+            if [ "{package_type}" = "deb" ] || [ "{package_type}" = "rpm" ]; then LINUX_PACKAGE_NAME="--linux-package-name {package_name}"; fi
             "{jpackage}" -J-Djava.io.tmpdir="$(pwd)/workdir/tmp" --type {package_type} \
                 --name "{package_name}" \
-                --linux-package-name "{package_name}" \
+                $LINUX_PACKAGE_NAME \
                 --app-version "{app_version}" \
                 --input "$(pwd)/workdir/input" \
                 --main-jar "{main_jar}" \
