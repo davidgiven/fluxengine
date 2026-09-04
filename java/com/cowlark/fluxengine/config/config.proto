@@ -44,7 +44,7 @@ message ConfigProto
   optional DecoderProto decoder = 14;
   optional UsbProto usb = 15;
 
-  optional string tracks = 16;
+  optional string tracks = 16 [(help) = "which logical tracks to read or write (overrides the disk format)"];;
   optional bool verify_writes = 27 [(help) = "verify writes where possible", default = true];
 
   optional FilesystemProto filesystem = 18;

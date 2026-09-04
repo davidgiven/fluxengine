@@ -11,6 +11,7 @@ import com.cowlark.fluxengine.data.Disk;
 import com.cowlark.fluxengine.data.DiskLayout;
 import com.cowlark.fluxengine.data.Fluxmap;
 import com.cowlark.fluxengine.data.Image;
+import com.cowlark.fluxengine.data.Locations;
 import com.cowlark.fluxengine.data.LogicalLocation;
 import com.cowlark.fluxengine.data.LogicalTrackLayout;
 import com.cowlark.fluxengine.data.PhysicalTrackLayout;
@@ -26,6 +27,7 @@ import com.cowlark.fluxengine.fluxsource.FluxSourceIterator;
 import com.cowlark.fluxengine.imagereader.ImageReader;
 import com.cowlark.fluxengine.imagewriter.ImageWriter;
 import com.cowlark.fluxengine.usb.UsbFactory;
+import com.google.common.base.Strings;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableCollection;
@@ -383,7 +385,33 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
         }
     }
 
-    public void readDisk(Disk disk)
+    public ImmutableList<CylinderHead> computeLogicalLocations()
+    {
+        if (Strings.isNullOrEmpty(configProto.getTracks()))
+            return getDiskLayout().logicalLocations;
+
+        return Locations.parseCylinderHeadsString(configProto.getTracks());
+    }
+
+    public ImmutableList<CylinderHead> computePhysicalLocations()
+    {
+        ImmutableList.Builder<CylinderHead> physicalLocations = ImmutableList.builder();
+
+        for (CylinderHead logicalLocation : computeLogicalLocations())
+        {
+            LogicalTrackLayout ltl = getDiskLayout().layoutByLogicalLocation.get(logicalLocation);
+            if (ltl == null)
+                throw new FluxEngineException(
+                        "attempt to read or write track which isn't part of the format");
+
+            for (int i = 0; i < ltl.groupSize; i++)
+                physicalLocations.add(new CylinderHead(ltl.physicalCylinder + i, ltl.physicalHead));
+        }
+
+        return physicalLocations.build();
+    }
+
+    public void readDisk(Disk disk, ImmutableList<CylinderHead> logicalLocations)
     {
         FluxSinkFactory outputFluxSinkFactory = null;
         if (getConfig().getDecoder().hasCopyFluxTo())
@@ -399,15 +427,8 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
         }
 
         Map<CylinderHead, List<Track>> tracksByLogicalLocation = new HashMap<>();
-        for (Map.Entry<CylinderHead, Track> entry : disk.tracksByPhysicalLocation.entries())
-        {
-            Track track = entry.getValue();
-            tracksByLogicalLocation
-                    .computeIfAbsent(
-                            new CylinderHead(track.ltl.logicalCylinder, track.ltl.logicalHead),
-                            k -> new ArrayList<>())
-                    .add(track);
-        }
+        for (CylinderHead lch : logicalLocations)
+            tracksByLogicalLocation.put(lch, new ArrayList<>());
 
         Logger.log(new BeginOperationLogMessage("Reading and decoding disk"));
 
@@ -420,11 +441,10 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
                 null)
         {
             int index = 0;
-            for (Map.Entry<CylinderHead, LogicalTrackLayout> entry :
-                    getDiskLayout().layoutByLogicalLocation.entrySet())
+            for (CylinderHead logicalLocation : logicalLocations)
             {
-                CylinderHead logicalLocation = entry.getKey();
-                LogicalTrackLayout ltl = entry.getValue();
+                LogicalTrackLayout ltl =
+                        getDiskLayout().layoutByLogicalLocation.get(logicalLocation);
                 Logger.log(new OperationProgressLogMessage(
                         index * 100 / getDiskLayout().layoutByLogicalLocation.size()));
                 index++;
@@ -530,6 +550,11 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
         Logger.log(new EndOperationLogMessage("Read complete"));
     }
 
+    public void readDisk(Disk disk)
+    {
+        readDisk(disk, computeLogicalLocations());
+    }
+
     public Disk readDisk()
     {
         Disk disk = new Disk();
@@ -632,7 +657,7 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
                     if (!iterator.hasNext())
                         return null;
                     return iterator.next();
-                }, ltl -> true, getDiskLayout().logicalLocations);
+                }, ltl -> true, computeLogicalLocations());
     }
 
     private void writeTracks(
@@ -832,7 +857,7 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
 
     public void writeDisk(Disk disk)
     {
-        writeDisk(disk, disk.diskLayout.layoutByLogicalLocation.keySet());
+        writeDisk(disk, computeLogicalLocations());
     }
 
     enum ReadResult

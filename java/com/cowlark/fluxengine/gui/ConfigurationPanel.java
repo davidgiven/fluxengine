@@ -13,7 +13,9 @@ import static swingtree.UI.of;
 import static swingtree.UI.panel;
 import static swingtree.UIFactoryMethods.button;
 import static swingtree.UIFactoryMethods.comboBox;
+import static swingtree.UIFactoryMethods.scrollPane;
 import static swingtree.UIFactoryMethods.separator;
+import static swingtree.UIFactoryMethods.textArea;
 
 import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.config.OptionApplicabilityHint;
@@ -195,6 +197,7 @@ public class ConfigurationPanel extends JPanel
 
         panel = buildFormatPane(panel);
         panel = buildDevicesPane(panel);
+        panel = buildAdvancedPane(panel);
 
         revalidate();
         repaint();
@@ -325,6 +328,13 @@ public class ConfigurationPanel extends JPanel
 
         panel = emitOptions(panel, model.getOptionsForDevice(), GLOBAL_CONFIG, applicabilities);
         return panel;
+    }
+
+    private UIForPanel<ConfigurationPanel> buildAdvancedPane(UIForPanel<ConfigurationPanel> panel)
+    {
+        return panel
+                .add("span 2, growx, wrap", namedSeparator("Advanced settings"))
+                .add("span 2, grow, push", scrollPane().add(textArea(model.getAdvancedSettings())));
     }
 
     /* A renderer which shows each device entry with the placeholder icon

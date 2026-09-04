@@ -1,5 +1,6 @@
 package com.cowlark.fluxengine.gui;
 
+import static com.cowlark.fluxengine.gui.PreferencesReaderWriter.ADVANCED_SETTINGS;
 import static com.cowlark.fluxengine.gui.PreferencesReaderWriter.DEVICE;
 import static com.cowlark.fluxengine.gui.PreferencesReaderWriter.DEVICE_FLUXFILE;
 import static com.cowlark.fluxengine.gui.PreferencesReaderWriter.DEVICE_OPTIONS;
@@ -51,6 +52,11 @@ public class ImagerViewModel
 {
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(ImagerViewModel.class);
 
+    private static final String DEFAULT_ADVANCED_SETTINGS = """
+            # Enter any additional preferences here. For example:
+            # decoder.retries=0
+            """;
+
     private final PreferencesReaderWriter preferencesReaderWriter;
 
     @Getter private Var<String> statusMessage = Var.of("Ready");
@@ -58,6 +64,7 @@ public class ImagerViewModel
     @Getter private Var<String> selectedDevice;
     @Getter private Var<String> selectedFluxFile;
     @Getter private Var<String> selectedSerialPort;
+    @Getter private Var<String> advancedSettings;
     @Getter private Var<Integer> selectedDrive;
 
     @Getter private Var<Image> diskImage = Var.of(new Image());
@@ -81,6 +88,7 @@ public class ImagerViewModel
         selectedDevice = makeStringPreference(DEVICE, DEVICE_FLUXFILE);
         selectedFluxFile = makeStringPreference(DEVICE_FLUXFILE, "");
         selectedSerialPort = makeStringPreference(DEVICE_SERIALPORT, "");
+        advancedSettings = makeStringPreference(ADVANCED_SETTINGS, DEFAULT_ADVANCED_SETTINGS);
         selectedDrive = makeIntegerPreference(DRIVE, 0);
 
         refreshUsbDevices();
@@ -359,6 +367,8 @@ public class ImagerViewModel
             builder.withFluxSource(drive);
             builder.withFluxSink(drive);
         }
+
+        builder.applyOptions(advancedSettings.get());
 
         return builder;
     }

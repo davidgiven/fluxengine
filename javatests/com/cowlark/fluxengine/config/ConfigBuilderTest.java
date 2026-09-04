@@ -1,12 +1,15 @@
 package com.cowlark.fluxengine.config;
 
+import static com.cowlark.fluxengine.testing.TestHelpers.loggerRule;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
 import com.cowlark.fluxengine.core.FluxEngineException;
 import com.cowlark.fluxengine.core.flags.FlagGroup;
 import com.google.common.collect.ImmutableList;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import java.io.IOException;
@@ -16,8 +19,7 @@ import java.nio.file.Path;
 @RunWith(JUnit4.class)
 public class ConfigBuilderTest
 {
-    @org.junit.Rule public final org.junit.rules.TestRule loggerRule =
-            com.cowlark.fluxengine.testing.TestHelpers.loggerRule();
+    @Rule public final TestRule loggerRule = loggerRule();
 
     /* ConfigBuilder defaults to a drive flux source, which makes build()
      * select a USB device; stub the serial so no hardware is needed. */
@@ -419,5 +421,134 @@ public class ConfigBuilderTest
     public void withFluxSourceUnrecognisedThrows()
     {
         assertThrows(ConfigException.class, () -> builder().withFluxSource("bogus"));
+    }
+
+    @Test
+    public void applyOptionsParsesSingleOption()
+    {
+        ConfigBuilder builder = builder().loadConfigFile("_global_options");
+        builder.applyOptions("drivetype=40");
+        assertThat(builder.build().getDrive().getTracks()).isEqualTo("c0-40h0-1");
+    }
+
+    @Test
+    public void applyOptionsHandlesWhitespaceAroundEquals()
+    {
+        ConfigBuilder builder = builder().loadConfigFile("_global_options");
+        builder.applyOptions("  drivetype  =  40  ");
+        assertThat(builder.build().getDrive().getTracks()).isEqualTo("c0-40h0-1");
+    }
+
+    @Test
+    public void applyOptionsIgnoresCommentsAndBlankLines()
+    {
+        ConfigBuilder builder = builder().loadConfigFile("_global_options");
+        builder.applyOptions("# comment\n\n   # another comment\n drivetype=40 \n\n");
+        assertThat(builder.build().getDrive().getTracks()).isEqualTo("c0-40h0-1");
+    }
+
+    @Test
+    public void applyOptionsParsesMultipleOptions()
+    {
+        ConfigBuilder builder = builder().loadConfigFile("_global_options");
+        builder.applyOptions("drivetype=40\ndrivespeed=300");
+        assertThat(builder.build().getDrive().getTracks()).isEqualTo("c0-40h0-1");
+        assertThat(builder.build().getDrive().getRotationalPeriodMs()).isEqualTo(200);
+    }
+
+    @Test
+    public void applyOptionsThrowsOnMissingEquals()
+    {
+        ConfigBuilder builder = builder().loadConfigFile("_global_options");
+        assertThrows(ConfigException.class, () -> builder.applyOptions("badoption"));
+        assertThrows(ConfigException.class, () -> builder.applyOptions("drivetype 40"));
+        assertThrows(ConfigException.class, () -> builder.applyOptions("hd"));
+    }
+
+    @Test
+    public void applyOptionsThrowsOnEmptyKey()
+    {
+        ConfigBuilder builder = builder().loadConfigFile("_global_options");
+        assertThrows(ConfigException.class, () -> builder.applyOptions("=40"));
+        assertThrows(ConfigException.class, () -> builder.applyOptions("   =40"));
+        assertThrows(ConfigException.class, () -> builder.applyOptions("= value"));
+    }
+
+    @Test
+    public void applyOptionsHandlesCommentWithLeadingWhitespace()
+    {
+        ConfigBuilder builder = builder().loadConfigFile("_global_options");
+        builder.applyOptions("   # comment with leading space\ndrivetype=40");
+        assertThat(builder.build().getDrive().getTracks()).isEqualTo("c0-40h0-1");
+    }
+
+    @Test
+    public void applyOptionsEmptyAndNullIsNoOp()
+    {
+        ConfigBuilder builder = builder().loadConfigFile("_global_options");
+        builder.applyOptions("");
+        builder.applyOptions("   \n\n");
+        builder.applyOptions(null);
+        // default drivetype 80 should still apply
+        assertThat(builder.build().getDrive().getTracks()).isEqualTo("c0-80h0-1");
+    }
+
+    @Test
+    public void applyOptionsValueWhitespaceIsTrimmed()
+    {
+        ConfigBuilder builder = builder().loadConfigFile("_global_options");
+        builder.applyOptions("drivetype=  40   ");
+        assertThat(builder.build().getDrive().getTracks()).isEqualTo("c0-40h0-1");
+    }
+
+    @Test
+    public void applyOptionsHandlesConfigKey()
+    {
+        ConfigBuilder builder = builder();
+        builder.applyOptions("tracks=c0-40h0-1");
+        assertThat(builder.build().getTracks()).isEqualTo("c0-40h0-1");
+    }
+
+    @Test
+    public void applyOptionsHandlesDottedConfigKey()
+    {
+        ConfigBuilder builder = builder();
+        builder.applyOptions("drive.drive=1");
+        assertThat(builder.build().getDrive().getDrive()).isEqualTo(1);
+    }
+
+    @Test
+    public void applyOptionsConfigKeyWithWhitespace()
+    {
+        ConfigBuilder builder = builder();
+        builder.applyOptions("  drive.drive  =  1  ");
+        assertThat(builder.build().getDrive().getDrive()).isEqualTo(1);
+    }
+
+    @Test
+    public void applyOptionsMixedOptionAndConfig()
+    {
+        ConfigBuilder builder = builder().loadConfigFile("_global_options");
+        builder.applyOptions("drivetype=40\ndrive.drive=1");
+        ConfigProto proto = builder.build();
+        assertThat(proto.getDrive().getTracks()).isEqualTo("c0-40h0-1");
+        assertThat(proto.getDrive().getDrive()).isEqualTo(1);
+    }
+
+    @Test
+    public void applyOptionsThrowsOnUnknownKey()
+    {
+        ConfigBuilder builder = builder().loadConfigFile("_global_options");
+        assertThrows(ConfigException.class, () -> builder.applyOptions("nosuchkey=value"));
+        assertThrows(ConfigException.class, () -> builder.applyOptions("nosuch.config.key=value"));
+    }
+
+    @Test
+    public void applyOptionsConfigKeyFallsBackFromOption()
+    {
+        // 'decoder.retries' is a config key, not an option – ensure fallback works
+        ConfigBuilder builder = builder();
+        builder.applyOptions("decoder.retries=5");
+        assertThat(builder.build().getDecoder().getRetries()).isEqualTo(5);
     }
 }

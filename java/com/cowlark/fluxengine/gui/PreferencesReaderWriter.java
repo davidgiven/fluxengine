@@ -16,6 +16,7 @@ public class PreferencesReaderWriter
     static final String FORMAT = "format";
     static final String DEVICE = "device";
     static final String DRIVE = "drive";
+    static final String ADVANCED_SETTINGS = "advanced_settings";
 
     static final String DEVICE_FLUXFILE = "fluxfile";
     static final String DEVICE_SERIALPORT = "serialport";

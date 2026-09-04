@@ -35,18 +35,13 @@ public class ConfigFlagGroup extends FlagGroup
         if (key.startsWith("--"))
         {
             String path = key.substring(2);
-            try
+            if (builder.isConfigKey(path))
             {
-                /* This is a config key. */
-                builder.get(path);
                 return ActionFlag
                         .builder()
                         .setGroup(this)
                         .setValueCallback(value -> builder.set(path, value))
                         .build();
-            } catch (ProtoPathNotFoundException e)
-            {
-                /* Not a config key. */
             }
         }
 
@@ -57,22 +52,26 @@ public class ConfigFlagGroup extends FlagGroup
 
         if (key.startsWith("--"))
         {
-            /* Not a config key or registered flag: this is an option name;
-             * look it up (throws if unknown). */
             String path = key.substring(2);
-            ConfigBuilder.OptionInfo option = builder.findOption(path);
-            if (option.usesValue())
-                return ActionFlag
-                        .builder()
-                        .setGroup(this)
-                        .setValueCallback(arg -> builder.applyOption(option, arg))
-                        .build();
-            else
-                return ActionFlag
-                        .builder()
-                        .setGroup(this)
-                        .setVoidCallback(() -> builder.applyOption(option, null))
-                        .build();
+            ConfigBuilder.OptionInfo option = builder.tryFindOption(path);
+            if (option != null)
+            {
+                if (option.usesValue())
+                    return ActionFlag
+                            .builder()
+                            .setGroup(this)
+                            .setValueCallback(arg -> builder.applyOption(option, arg))
+                            .build();
+                else
+                    return ActionFlag
+                            .builder()
+                            .setGroup(this)
+                            .setVoidCallback(() -> builder.applyOption(option, null))
+                            .build();
+            }
+            // Not a config key, registered flag, or option: preserve original
+            // throwing behaviour for unknown flags.
+            builder.findOption(path);
         }
 
         return null;

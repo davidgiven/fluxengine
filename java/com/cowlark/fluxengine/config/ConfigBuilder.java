@@ -300,6 +300,19 @@ public class ConfigBuilder
      * key only. */
     public OptionInfo findOption(String name)
     {
+        OptionInfo info = tryFindOption(name);
+        if (info != null)
+            return info;
+        throw new ConfigException(String.format("option %s not found", name));
+    }
+
+    /**
+     * Tries to find an option by name, returning null if not found. Shared
+     * helper for {@link #findOption} and {@link ConfigFlagGroup} / {@link
+     * #applyOptions} to avoid duplicate lookup logic.
+     */
+    public OptionInfo tryFindOption(String name)
+    {
         /* First look for any individual options. */
 
         for (OptionProto option : proto.getOptionList())
@@ -331,7 +344,41 @@ public class ConfigBuilder
                 return new OptionInfo(optionGroup, null, true);
         }
 
-        throw new ConfigException(String.format("option %s not found", name));
+        return null;
+    }
+
+    /**
+     * Returns true if {@code path} is a valid config proto path (i.e. {@link
+     * #get} would succeed). Used to distinguish config keys from option names.
+     */
+    public boolean isConfigKey(String path)
+    {
+        try
+        {
+            get(path);
+            return true;
+        } catch (ConfigException e)
+        {
+            return false;
+        }
+    }
+
+    /**
+     * Applies a key=value pair where the key may be an option name or a config
+     * proto path. Tries option first; if not an option, falls back to config
+     * path (mirrors {@link ConfigFlagGroup#findFlag} but option-first).
+     */
+    public ConfigBuilder applyOptionOrSet(String key, String value)
+    {
+        OptionInfo info = tryFindOption(key);
+        if (info != null)
+            return applyOption(info, value);
+
+        // Not an option – try as config key.
+        // ProtoPath.set will throw ConfigException / ProtoPathNotFoundException
+        // if the path is invalid; let it propagate.
+        set(key, value);
+        return this;
     }
 
     public ConfigBuilder applyOption(String key, String value)
@@ -376,6 +423,47 @@ public class ConfigBuilder
         Logger.log(new OptionLogMessage("user option", optionProto));
         proto.mergeFrom(optionProto.getConfig());
 
+        return this;
+    }
+
+    public ConfigBuilder applyOptions(String options)
+    {
+        if (options == null || options.isEmpty())
+            return this;
+
+        String[] lines = options.split("\\R", -1);
+        for (int i = 0; i < lines.length; i++)
+        {
+            String line = lines[i];
+            String trimmed = line.trim();
+            if (trimmed.isEmpty())
+                continue;
+            if (trimmed.startsWith("#"))
+                continue;
+
+            int eq = line.indexOf('=');
+            if (eq == -1)
+                throw new ConfigException(
+                        String.format("parse error at line %d: '%s': missing '='", i + 1, line));
+
+            String key = line.substring(0, eq).trim();
+            String value = line.substring(eq + 1).trim();
+
+            if (key.isEmpty())
+                throw new ConfigException(
+                        String.format("parse error at line %d: '%s': empty key", i + 1, line));
+
+            try
+            {
+                applyOptionOrSet(key, value);
+            } catch (ConfigException e)
+            {
+                if (e.getMessage() != null && e.getMessage().startsWith("parse error at line"))
+                    throw e;
+                throw new ConfigException(
+                        String.format("parse error at line %d: '%s': %s", i + 1, line, e.getMessage()), e);
+            }
+        }
         return this;
     }
 
