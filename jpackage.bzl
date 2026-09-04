@@ -70,6 +70,11 @@ def _jpackage_impl(ctx):
     # rpmbuild (invoked by jpackage for --type rpm) creates its temp scripts in
     # /var/tmp by default, which is read-only in the sandbox, so point it at the
     # scratch dir via a ~/.rpmmacros file.
+    #
+    # The main launcher is the CLI `fluxengine` (flagged --win-console for
+    # Windows). The GUI `fluxengine-gui` is an --add-launcher whose desktop
+    # file's Name is defined in fluxengine-gui.properties ("FluxEngine") and
+    # supplied via --resource-dir to avoid post-processing.
     ctx.actions.run_shell(
         outputs = [out],
         inputs = [jar] + [f for (_, f) in launchers] +\
@@ -78,31 +83,29 @@ def _jpackage_impl(ctx):
         use_default_shell_env = True,
         command = """
             rm -rf workdir
-            mkdir -p workdir/input workdir/tmp workdir/dest workdir/home workdir/rpmbuild
+            mkdir -p workdir/input workdir/tmp workdir/dest workdir/home workdir/rpmbuild workdir/resources
             cp -L "{jar}" workdir/input/
             chmod u+w workdir/input/*
+            printf '[Desktop Entry]\nName=FluxEngine\nComment=FluxEngine\nExec=APPLICATION_LAUNCHER\nIcon=APPLICATION_ICON\nTerminal=false\nType=Application\nCategories=DEPLOY_BUNDLE_CATEGORY\n' > workdir/resources/fluxengine-gui.desktop
             if [ "{package_type}" = "rpm" ]; then
                 WORKTMP="$(pwd)/workdir/tmp"
                 RPMPREFIX="$(pwd)/workdir/rpmbuild"
-                cat > workdir/home/.rpmmacros <<EOF
-%_tmppath $WORKTMP
-%_builddir $RPMPREFIX/BUILD
-%_buildrootdir $RPMPREFIX/BUILDROOT
-%_sourcedir $RPMPREFIX/SOURCES
-%_specdir $RPMPREFIX/SPECS
-%_srcrpmdir $RPMPREFIX/SRPMS
-%_rpmdir $RPMPREFIX/RPMS
-EOF
+                printf '%%_tmppath %s\n%%_builddir %s/BUILD\n%%_buildrootdir %s/BUILDROOT\n%%_sourcedir %s/SOURCES\n%%_specdir %s/SPECS\n%%_srcrpmdir %s/SRPMS\n%%_rpmdir %s/RPMS\n' "$WORKTMP" "$RPMPREFIX" "$RPMPREFIX" "$RPMPREFIX" "$RPMPREFIX" "$RPMPREFIX" "$RPMPREFIX" > workdir/home/.rpmmacros
             fi
             TMPDIR="$(pwd)/workdir/tmp"
             HOME="$(pwd)/workdir/home"
             export TMPDIR HOME
+            WIN_CONSOLE=""
+            if [ "{package_type}" = "msi" ]; then WIN_CONSOLE="--win-console"; fi
             "{jpackage}" -J-Djava.io.tmpdir="$(pwd)/workdir/tmp" --type {package_type} \
                 --name "{package_name}" \
+                --linux-package-name "{package_name}" \
                 --app-version "{app_version}" \
                 --input "$(pwd)/workdir/input" \
                 --main-jar "{main_jar}" \
                 --main-class "{main_class}" \
+                $WIN_CONSOLE \
+                --resource-dir "$(pwd)/workdir/resources" \
                 {add_launcher_args} \
                 --jlink-options "--strip-debug --no-header-files --no-man-pages --strip-native-commands" \
                 --dest "$(pwd)/workdir/dest"
@@ -141,6 +144,10 @@ def _jpackage_app_image_impl(ctx):
     # plain directory under the execroot (which is writable in the sandbox),
     # then tar the result up. The sandbox input jar is a symlink to a read-only
     # file, so dereference it (cp -L) and make the copy writable.
+    #
+    # The main launcher is the CLI `fluxengine` (--win-console) and the GUI
+    # `fluxengine-gui` is an --add-launcher. The GUI desktop file's Name is
+    # supplied via --resource-dir (fluxengine-gui.desktop with Name=FluxEngine).
     ctx.actions.run_shell(
         outputs = [out],
         inputs = [jar] + [f for (_, f) in launchers] +\
@@ -149,9 +156,10 @@ def _jpackage_app_image_impl(ctx):
         use_default_shell_env = True,
         command = """
             rm -rf workdir
-            mkdir -p workdir/input workdir/tmp workdir/dest workdir/home
+            mkdir -p workdir/input workdir/tmp workdir/dest workdir/home workdir/resources
             cp -L "{jar}" workdir/input/
             chmod u+w workdir/input/*
+            printf '[Desktop Entry]\nName=FluxEngine\nComment=FluxEngine\nExec=APPLICATION_LAUNCHER\nIcon=APPLICATION_ICON\nTerminal=false\nType=Application\nCategories=DEPLOY_BUNDLE_CATEGORY\n' > workdir/resources/fluxengine-gui.desktop
             TMPDIR="$(pwd)/workdir/tmp"
             HOME="$(pwd)/workdir/home"
             export TMPDIR HOME
@@ -161,6 +169,7 @@ def _jpackage_app_image_impl(ctx):
                 --input "$(pwd)/workdir/input" \
                 --main-jar "{main_jar}" \
                 --main-class "{main_class}" \
+                --resource-dir "$(pwd)/workdir/resources" \
                 {add_launcher_args} \
                 --jlink-options "--strip-debug --no-header-files --no-man-pages --strip-native-commands" \
                 --dest "$(pwd)/workdir/dest"
@@ -193,15 +202,16 @@ _jpackage_attrs = {
     ),
     "main_class": attr.string(
         mandatory = True,
+        doc = "Main class for the main launcher (the CLI).",
     ),
     "extra_launchers": attr.label_list(
         allow_files = [".properties"],
-        doc = "jpackage launcher properties files for additional launchers; " +
+        doc = "jpackage launcher properties files; " +
               "each launcher is named after the file (minus its .properties suffix).",
     ),
     "launcher_icon": attr.label(
         allow_single_file = [".png", ".ico", ".icns"],
-        doc = "Icon for all additional launchers, added to each launcher's " +
+        doc = "Icon for all launchers, added to each launcher's " +
               "properties as an icon= entry. jpackage requires .png on Linux, " +
               ".ico on Windows and .icns on macOS.",
     ),
