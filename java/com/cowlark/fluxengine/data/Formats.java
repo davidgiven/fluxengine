@@ -14,8 +14,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The built-in format configurations, loaded on demand from the classpath
- * resources generated from the textpb files in src/formats, ported from the
- * C++ `formats` map in lib/config.
+ * resources generated from the textpb files in java/com/cowlark/fluxengine/arch,
+ * ported from the C++ `formats` map in lib/config.
  */
 public final class Formats
 {
