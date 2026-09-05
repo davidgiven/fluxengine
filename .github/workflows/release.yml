@@ -30,6 +30,10 @@ jobs:
         run: |
           cd fluxengine
           bazel test //... //:fluxengine_deb //:fluxengine_rpm //:fluxengine_app_image --test_output=errors
+          mv fluxengine/bazel-bin/java/com/cowlark/fluxengine/fluxengine_1.0.0.deb fluxengine-1.0.0.${{ runner.arch }}.deb
+          mv fluxengine/bazel-bin/java/com/cowlark/fluxengine/fluxengine_1.0.0.rpm fluxengine-1.0.0.${{ runner.arch }}.rpm
+          mv fluxengine/bazel-bin/java/com/cowlark/fluxengine/fluxengine_1.0.0.tar.xz fluxengine-1.0.0.${{ runner.arch }}.tar.xz
+
 
       - name: date
         run: |
@@ -50,9 +54,9 @@ jobs:
           token: ${{ github.token }}
           tag: dev
           assets: |
-            fluxengine.deb
-            fluxengine.rpm
-            fluxengine.tar.xz
+            fluxengine-1.0.0.${{ runner.arch }}.deb
+            fluxengine-1.0.0.${{ runner.arch }}.rpm
+            fluxengine-1.0.0.${{ runner.arch }}.tar.xz
           fail-if-no-assets: false
 
       - name: release
@@ -60,9 +64,9 @@ jobs:
         with:
           name: Development build ${{ env.RELEASE_DATE }}
           files: |
-            fluxengine/bazel-bin/java/com/cowlark/fluxengine/fluxengine_1.0.0.deb
-            fluxengine/bazel-bin/java/com/cowlark/fluxengine/fluxengine_1.0.0.rpm
-            fluxengine/bazel-bin/java/com/cowlark/fluxengine/fluxengine_1.0.0.tar.xz
+            fluxengine-1.0.0.${{ runner.arch }}.deb
+            fluxengine-1.0.0.${{ runner.arch }}.rpm
+            fluxengine-1.0.0.${{ runner.arch }}.tar.xz
           tag_name: dev
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -90,6 +94,7 @@ jobs:
         run: |
           cd fluxengine
           bazel test //... //:fluxengine_dmg --test_output=errors
+          mv fluxengine/bazel-bin/java/com/cowlark/fluxengine/fluxengine_1.0.0.dmg fluxengine_1.0.0.${{ runner.arch }}.dmg
 
       - name: date
         run: |
@@ -110,7 +115,7 @@ jobs:
           token: ${{ github.token }}
           tag: dev
           assets: |
-            fluxengine.dmg
+            fluxengine_1.0.0.${{ runner.arch }}.dmg
           fail-if-no-assets: false
 
       - name: release
@@ -118,7 +123,7 @@ jobs:
         with:
           name: Development build ${{ env.RELEASE_DATE }}
           files: |
-            fluxengine/bazel-bin/java/com/cowlark/fluxengine/fluxengine_1.0.0.dmg
+            fluxengine_1.0.0.${{ runner.arch }}.dmg
           tag_name: dev
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -160,6 +165,7 @@ jobs:
               --action_env=INCLUDE `
               --action_env=LIB `
               --action_env=LIBPATH
+          ren fluxengine\bazel-bin\java\com\cowlark\fluxengine\fluxengine_1.0.0.msi fluxengine-1.0.0.${{ runner.arch }}.msi
 
       - name: date
         run: |
@@ -180,7 +186,7 @@ jobs:
           token: ${{ github.token }}
           tag: dev
           assets: |
-            fluxengine.msi
+            fluxengine-1.0.0.${{ runner.arch }}.msi
           fail-if-no-assets: false
 
       - name: release
@@ -188,7 +194,7 @@ jobs:
         with:
           name: Development build ${{ env.RELEASE_DATE }}
           files: |
-            fluxengine/bazel-bin/java/com/cowlark/fluxengine/fluxengine_1.0.0.msi
+            fluxengine-1.0.0.${{ runner.arch }}.msi
           tag_name: dev
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
