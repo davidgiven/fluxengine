@@ -4,42 +4,34 @@ Building the client
 The client software is where the intelligence, such as it is, is. It doesn't need the FluxEngine hardware, and will work
 either with it, a Greaseweazle, or (to a limited extent) an Applesauce.
 
-The CLI is pretty generic libusb stuff and should build and run on pretty much anything; the GUI is based on ImHex and
-will work wherever ImHex does. Support platforms for the FluxEngine client include Windows, Linux and OSX as
-well, although on Windows it'll need MSYS2 and mingw32. You'll need to
-install some support packages.
+It's all written in Java and built with bazel and should work anywhere where bazel is available. Dependencies are pulled
+at build time from maven (standard bazel techniques for doing off-line builds apply).
 
-  - For Linux, see the dockerfiles in
-    [tests/docker](https://github.com/davidgiven/fluxengine/tree/master/tests/docker).
-    These are the source of truth for the dependencies and provide a known-good
-    build script.
-  - For OSX or Homebrew, see the Github CI scripts in
-    [.github/workflows/release.yml](https://github.com/davidgiven/fluxengine/blob/master/.github/workflows/release.yml).
-    These are a little harder to read (I haven't figured out how to do Windows or
-    OSX docker yet).
+To build it:
 
-Windows and Linux (and other Unixes) build by just doing `make`. OSX builds by
-doing `gmake` (we're using a feature which the elderly default make in OSX
-doesn't have). Parallel builds will be detected automatically.
+- Get [bazelisk](https://github.com/bazelbuild/bazelisk), which is a small tool which wraps bazel
+- Get a JDK
+- Run `bazelisk build //:fluxengine`
 
-**Note for system packagers:** During the build, some remote dependencies will
-be pulled in automatically, so you'll need a network connection. If you don't
-want this to happen, you can vendor the appropriate dependencies by placing
-them in the `dep/r` directory. Look at the `gitrepository` lines in
-[build/dep/build.py](https://github.com/davidgiven/fluxengine/blob/ab/dep/build.py)
-to see what goes where.
+You should end up with an executable in `bazel-bin/java/com/cowlark/fluxengine/fluxengine`. However, this does require
+the associated jar file and so isn't easy to install anywhere. You should probably do one of these instead:
 
-You should end up with some executables in the current directory. The command line version
-is called `fluxengine` or `fluxengine.exe` depending on your platform,
-and the ImHex-based GUI will be `fluxengine-gui` or `fluxengine-gui.exe`.
-They have
-minimal dependencies and you should be able to put it anywhere. The other
-binaries may also be of interest.
+- `bazelisk build //:fluxengine_deb` (for Debian/Ubuntu systems)
+- `bazelisk build //:fluxengine_rpm` (for Red Hat/Fedora systems)
+- `bazelisk build //:fluxengine_app_image` (for generic Linux systems) (this isn't an AppImage binary, it's a Java app
+  image, which is a `tar.xz` file you can just unzip somewhere and run)
+- `bazelisk build //:fluxengine_dmg` (for OSX systems)
+- `bazelisk build //:fluxengine_msi` (for Windows systems)
 
-Potential issues:
+After building, it'll tell you where the resulting installer lives. You can't cross compile; you'll need to run this on
+the platform you're intending to build for.
 
-  - Complaints about a missing `libudev` on Windows? Make sure you're using the
-  mingw Python rather than the msys Python.
+If you're doing development, you can also do this:
+
+- `bazelisk run //:fluxengine -- $ARGUMENTS`
+
+...which will build and then run the program. Replace `$ARGUMENTS` with the arguments to pass to the program. Use `gui`
+to run the GUI.
 
 If it doesn't build, please [get in
 touch](https://github.com/davidgiven/fluxengine/issues/new).
