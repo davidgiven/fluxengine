@@ -105,7 +105,7 @@ option_group {
 		}
 	}
 	option {
-		name: "160SSDD"
+		name: "160sssd"
 		comment: '160kB 40-track single-sided'
 
 		config {

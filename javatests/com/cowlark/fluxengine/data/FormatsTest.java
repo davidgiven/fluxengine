@@ -35,7 +35,7 @@ public class FormatsTest
     @Test
     public void returnsAllConfigNames()
     {
-        assertThat(Formats.all()).hasSize(36);
+        assertThat(Formats.all()).hasSize(37);
         assertThat(Formats.all()).contains("ibm");
         assertThat(Formats.all()).contains("_global_options");
     }
