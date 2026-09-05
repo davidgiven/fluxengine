@@ -1,5 +1,5 @@
 load("@rules_java//java:defs.bzl", "java_binary")
-load("//:jpackage.bzl", "jpackage", "jpackage_app_image")
+load("//scripts:jpackage.bzl", "jpackage", "jpackage_app_image")
 
 package(default_visibility = ["//visibility:public"])
 

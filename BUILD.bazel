@@ -1,4 +1,4 @@
-load("//:corpus.bzl", "define_corpus_tests")
+load("//scripts:corpus.bzl", "define_corpus_tests")
 
 package(default_visibility = ["//visibility:public"])
 
