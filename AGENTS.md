@@ -51,51 +51,6 @@ Useful commands:
   type is `unsupported`, which makes the rule produce an empty target (so `bazel build
   //java/...` still works everywhere).
 
-## Lombok builders
-
-- The flag classes live in `com.cowlark.fluxengine.core.flags` (one class per file: `Flag`,
-  `FlagGroup`, `Flags`, `ActionFlag`, `SettableFlag`, `ValueFlag`, `StringFlag`, `IntFlag`,
-  `HexIntFlag`, `DoubleFlag`, `BoolFlag`). Construct flag instances with
-  `XxxFlag.builder().setGroup(g).setNames(names).setHelpText(h).build()` rather than
-  constructors. `@Builder(setterPrefix = "set")` on the private all-args constructor
-  generates the `setX` methods (the ctor param is named `helpText` for `setHelpText`). The
-  `core/flags` BUILD defines a `lombok_plugin` (`generates_api = True`, wired via
-  `plugins`); lombok is also a compile-time `dep` so the `import lombok.Builder;` resolves.
-- Lombok doesn't run under Turbine, and generated classes don't reach the header jar, so
-  `.bazelrc` sets `--experimental_java_header_compilation=false`.
-- Pattern: put `@Builder` on a private all-args constructor. `@Builder.Default` can't supply
-  custom defaults on parameters (illegal `= value` syntax, and defaults to 0/null/false),
-  so normalize defaults in the constructor body (e.g. `defaultValue != null ? defaultValue :
-  ""`). `FlagGroup.addFlag(this)` happens in the base `Flag` constructor, so `build()`
-  registers the flag.
-- The `names` parameter is annotated `@Singular`, so builders offer `setName("--foo")`
-  (one name at a time), `setNames(collection)`, and `clearNames()` — Lombok can't generate a
-  varargs setter, and `@SuperBuilder` is unusable here because its auto-generated constructor
-  can't run the `addFlag` side-effect, so `@Singular` avoids hand-writing a builder per class.
-- `HexIntFlag` extends `ValueFlag<Integer>` directly (not `IntFlag`): two `@Builder`s would
-  both generate a static `builder()` and clash via hiding.
-
-## Flags parsing
-
-- Parsing is done by the static `Flags.parse(ImmutableList<String> argv, FlagGroup... groups)` /
-  `Flags.parseWithFilenames(ImmutableList<String> argv, Predicate<String> callback,
-  FlagGroup... groups)` (both also accept `ImmutableList<FlagGroup>`). It first runs
-  `FlagGroup.initialise` over every root group (recursive duplicate-name check
-  into a shared `Set`, marking groups initialised), then walks argv and resolves each flag via
-  `FlagGroup.findFlag(key)`, which scans the group's own flags then recurses into its parents.
-  `Flags.parse` calls `flag.set(value)` and only consumes a space-separated value when
-  `useThat && flag.hasArgument()`. `findFlag` is public and overridable so a group can
-  intercept/absorb flags (e.g. a config group) before they fall through to its parents.
-- `parseWithFilenames` returns `ImmutableList` (Guava). Duplicate flag names throw
-  `IllegalStateException`; unknown flags throw `FluxEngineException`.
-- `ConfigFlagGroup` (config package) overrides `findFlag` to intercept dotted `--key.subkey=value`
-  arguments: it strips the leading `--` and routes them to `ConfigBuilder.set(path, value)`,
-  which delegates to `ProtoPath.set(builder, path, value)`. `ProtoPath` resolves the dotted
-  path (with optional `field[4]` indices) against the `ConfigProto` builder via
-  `com.google.protobuf` reflection, creating intermediate messages and coercing the string
-  value (int/uint/long/float/double/bool/enum) as needed. Unknown paths and bad values throw
-  `ConfigException`.
-
 ## CLI
 
 - Commands live in `com.cowlark.fluxengine.cli` and implement the `Command` interface
