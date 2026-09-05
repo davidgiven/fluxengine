@@ -427,8 +427,16 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
         }
 
         Map<CylinderHead, List<Track>> tracksByLogicalLocation = new HashMap<>();
-        for (CylinderHead lch : logicalLocations)
-            tracksByLogicalLocation.put(lch, new ArrayList<>());
+        for (CylinderHead pch : computePhysicalLocations())
+        {
+            PhysicalTrackLayout ptl = getDiskLayout().layoutByPhysicalLocation.get(pch);
+            CylinderHead lch = new CylinderHead(
+                    ptl.logicalTrackLayout.logicalCylinder,
+                    ptl.logicalTrackLayout.logicalHead);
+            tracksByLogicalLocation
+                    .computeIfAbsent(lch, ch -> new ArrayList<>())
+                    .addAll(disk.tracksByPhysicalLocation.get(pch));
+        }
 
         Logger.log(new BeginOperationLogMessage("Reading and decoding disk"));
 
