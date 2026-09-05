@@ -5,9 +5,9 @@ import com.cowlark.fluxengine.core.Bits;
 import com.cowlark.fluxengine.core.ByteReader;
 import com.cowlark.fluxengine.core.ByteWriter;
 import com.cowlark.fluxengine.core.Bytes;
+import com.cowlark.fluxengine.data.CylinderHeadSector;
 import com.cowlark.fluxengine.data.FluxMatchers;
 import com.cowlark.fluxengine.data.FluxPattern;
-import com.cowlark.fluxengine.data.LogicalLocation;
 import com.cowlark.fluxengine.data.Sector;
 import com.cowlark.fluxengine.decoders.Decoder;
 import com.cowlark.fluxengine.decoders.DecoderProto;
@@ -121,7 +121,8 @@ public class Victor9kDecoder extends Decoder
         int logicalCylinder = rawTrack & 0x7f;
         int logicalHead = rawTrack >> 7;
         int wantChecksum = (bytes.getByte(0) & 0xff) + (bytes.getByte(1) & 0xff);
-        sector.location = new LogicalLocation(logicalCylinder, logicalHead, logicalSector);
+        sector.logicalLocation =
+                new CylinderHeadSector(logicalCylinder, logicalHead, logicalSector);
         if ((logicalSector > 20) || (logicalCylinder > 85) || (logicalHead > 1))
             return;
 

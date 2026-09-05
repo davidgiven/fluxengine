@@ -94,15 +94,15 @@ public class MicropolisEncoder extends Encoder
             int gotChecksum = MicropolisDecoder.micropolisChecksum(sector.data.slice(1, 2 + 266));
             if (wantChecksum != gotChecksum)
                 System.err.println(
-                        "Warning: checksum incorrect. Sector: " + sector.location.logicalSector());
+                        "Warning: checksum incorrect. Sector: " + sector.logicalLocation.sector());
             sectorData = sector.data;
         } else
         {
             sectorData = new Bytes(0);
             ByteWriter writer = sectorData.writer();
             writer.write8(0xff); /* Sync */
-            writer.write8(sector.location.logicalCylinder());
-            writer.write8(sector.location.logicalSector());
+            writer.write8(sector.logicalLocation.cylinder());
+            writer.write8(sector.logicalLocation.sector());
             for (int i = 0; i < 10; i++)
                 writer.write8(0); /* Padding */
             writer.write(sector.data);

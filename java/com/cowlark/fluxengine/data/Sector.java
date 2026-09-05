@@ -9,7 +9,7 @@ import java.util.List;
  */
 public class Sector
 {
-    public LogicalLocation location;
+    public CylinderHeadSector logicalLocation;
 
     /* The logical location of this sector. */
     public Status status = Status.INTERNAL_ERROR;
@@ -23,14 +23,14 @@ public class Sector
     public Bytes data = new Bytes();
     public List<Record> records = new ArrayList<>();
 
-    public Sector(LogicalLocation location)
+    public Sector(CylinderHeadSector logicalLocation)
     {
-        this.location = location;
+        this.logicalLocation = logicalLocation;
     }
 
     public Sector(Sector other)
     {
-        this.location = other.location;
+        this.logicalLocation = other.logicalLocation;
         this.status = other.status;
         this.position = other.position;
         this.clockNs = other.clockNs;
@@ -41,19 +41,6 @@ public class Sector
         this.physicalLocation = other.physicalLocation;
         this.data = other.data;
         this.records = other.records;
-    }
-
-    public Sector copyFrom(Sector other)
-    {
-        this.status = other.status;
-        this.clockNs = other.clockNs;
-        this.headerStartTimeNs = other.headerStartTimeNs;
-        this.headerEndTimeNs = other.headerEndTimeNs;
-        this.dataStartTimeNs = other.dataStartTimeNs;
-        this.dataEndTimeNs = other.dataEndTimeNs;
-        this.data = other.data;
-        this.records = other.records;
-        return this;
     }
 
     public static String statusToString(Status status)
@@ -106,6 +93,19 @@ public class Sector
         if (value.equals("conflicting data"))
             return Status.CONFLICT;
         return Status.INTERNAL_ERROR;
+    }
+
+    public Sector copyFrom(Sector other)
+    {
+        this.status = other.status;
+        this.clockNs = other.clockNs;
+        this.headerStartTimeNs = other.headerStartTimeNs;
+        this.headerEndTimeNs = other.headerEndTimeNs;
+        this.dataStartTimeNs = other.dataStartTimeNs;
+        this.dataEndTimeNs = other.dataEndTimeNs;
+        this.data = other.data;
+        this.records = other.records;
+        return this;
     }
 
     public enum Status

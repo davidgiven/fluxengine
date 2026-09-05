@@ -21,10 +21,10 @@ class TrackDrawer
     final Point2D.Double pos;
     final Track track;
     final ImmutableSortedSet<Double> indexMarks;
-    double rotationalPeriodNs;
     final double degreesPerNano;
     final double trackRadius;
     final double trackSpacing;
+    double rotationalPeriodNs;
     boolean badData = false;
 
     @Builder(setterPrefix = "set")

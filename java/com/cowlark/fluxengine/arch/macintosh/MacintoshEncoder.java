@@ -256,10 +256,10 @@ public class MacintoshEncoder extends Encoder
             writeBits(bits, cursor, 0xff3fcff3fcffL, 6 * 8); /* sync */
         writeBits(bits, cursor, Macintosh.MAC_SECTOR_RECORD, 3 * 8);
 
-        int encodedTrack = sector.location.logicalCylinder() & 0x3f;
-        int encodedSector = sector.location.logicalSector();
+        int encodedTrack = sector.logicalLocation.cylinder() & 0x3f;
+        int encodedSector = sector.logicalLocation.sector();
         int encodedSide =
-                encodeSide(sector.location.logicalCylinder(), sector.location.logicalHead());
+                encodeSide(sector.logicalLocation.cylinder(), sector.logicalLocation.head());
         int formatByte = Macintosh.MAC_FORMAT_BYTE;
         int headerChecksum = (encodedTrack ^ encodedSector ^ encodedSide ^ formatByte) & 0x3f;
 
@@ -272,7 +272,7 @@ public class MacintoshEncoder extends Encoder
         writeBits(bits, cursor, 0xdeaaff, 3 * 8);
         writeBits(bits, cursor, 0xff3fcff3fcffL, 6 * 8); /* sync */
         writeBits(bits, cursor, Macintosh.MAC_DATA_RECORD, 3 * 8);
-        writeBits(bits, cursor, encodeDataGcr(sector.location.logicalSector()), 1 * 8);
+        writeBits(bits, cursor, encodeDataGcr(sector.logicalLocation.sector()), 1 * 8);
 
         Bytes wireData = sector.data.slice(512, 12).concat(sector.data.slice(0, 512));
         Bytes crazy = encodeCrazyData(wireData);

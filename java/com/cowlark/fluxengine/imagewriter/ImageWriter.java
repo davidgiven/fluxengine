@@ -1,7 +1,6 @@
 package com.cowlark.fluxengine.imagewriter;
 
 import com.cowlark.fluxengine.config.ConfigProto;
-import com.cowlark.fluxengine.config.ImageReaderWriterType;
 import com.cowlark.fluxengine.core.FluxEngineException;
 import com.cowlark.fluxengine.data.Geometry;
 import com.cowlark.fluxengine.data.Image;
@@ -101,9 +100,9 @@ public abstract class ImageWriter implements AutoCloseable
                 printer.printRecord(
                         sector.physicalLocation != null ? sector.physicalLocation.cylinder() : -1,
                         sector.physicalLocation != null ? sector.physicalLocation.head() : -1,
-                        sector.location.logicalSector(),
-                        sector.location.logicalCylinder(),
-                        sector.location.logicalHead(),
+                        sector.logicalLocation.sector(),
+                        sector.logicalLocation.cylinder(),
+                        sector.logicalLocation.head(),
                         sector.clockNs,
                         sector.headerStartTimeNs,
                         sector.headerEndTimeNs,

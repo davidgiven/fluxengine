@@ -1,9 +1,9 @@
 package com.cowlark.fluxengine.vfs;
 
 import com.cowlark.fluxengine.data.CylinderHead;
+import com.cowlark.fluxengine.data.CylinderHeadSector;
 import com.cowlark.fluxengine.data.Disk;
 import com.cowlark.fluxengine.data.Image;
-import com.cowlark.fluxengine.data.LogicalLocation;
 import com.cowlark.fluxengine.data.LogicalTrackLayout;
 import com.cowlark.fluxengine.data.Sector;
 import com.cowlark.fluxengine.data.Track;
@@ -27,8 +27,8 @@ public class FluxBlockDevice extends TrackedBlockDevice
         Image merged = new Image();
         for (int sectorId : ltl.diskSectorOrder)
         {
-            LogicalLocation loc =
-                    new LogicalLocation(ltl.logicalCylinder, ltl.logicalHead, sectorId);
+            CylinderHeadSector loc =
+                    new CylinderHeadSector(ltl.logicalCylinder, ltl.logicalHead, sectorId);
             Sector sector = null;
             if (source.contains(loc))
                 sector = source.get(loc);
@@ -59,6 +59,6 @@ public class FluxBlockDevice extends TrackedBlockDevice
         fso.readAndDecodeTrack(ltl, trackFluxes, trackSectors);
 
         for (Sector sector : trackSectors)
-            destination.put(sector.location).copyFrom(sector);
+            destination.put(sector.logicalLocation).copyFrom(sector);
     }
 }

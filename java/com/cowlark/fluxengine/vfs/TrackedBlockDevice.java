@@ -2,9 +2,9 @@ package com.cowlark.fluxengine.vfs;
 
 import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.data.CylinderHead;
+import com.cowlark.fluxengine.data.CylinderHeadSector;
 import com.cowlark.fluxengine.data.DiskLayout;
 import com.cowlark.fluxengine.data.Image;
-import com.cowlark.fluxengine.data.LogicalLocation;
 import java.io.IOException;
 import java.nio.file.FileSystemException;
 
@@ -24,7 +24,7 @@ public abstract class TrackedBlockDevice extends BlockDevice
     @Override
     public Bytes getBlock(int blockNumber) throws IOException
     {
-        LogicalLocation ll = getLocationOfBlock(blockNumber);
+        CylinderHeadSector ll = getLocationOfBlock(blockNumber);
         if (changedData.contains(ll))
             return changedData.get(ll).data;
         if (originalData.contains(ll))
@@ -36,7 +36,7 @@ public abstract class TrackedBlockDevice extends BlockDevice
     @Override
     public void putBlock(int blockNumber, Bytes block) throws FileSystemException
     {
-        LogicalLocation ll = getLocationOfBlock(blockNumber);
+        CylinderHeadSector ll = getLocationOfBlock(blockNumber);
         changedData.put(ll).data = block;
     }
 

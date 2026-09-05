@@ -4,11 +4,11 @@ import static com.cowlark.fluxengine.wiring.FluxEngine.F_BIT_PULSE;
 
 import com.cowlark.fluxengine.core.Bits;
 import com.cowlark.fluxengine.data.CylinderHead;
+import com.cowlark.fluxengine.data.CylinderHeadSector;
 import com.cowlark.fluxengine.data.FluxMatcher;
 import com.cowlark.fluxengine.data.FluxPosition;
 import com.cowlark.fluxengine.data.Fluxmap;
 import com.cowlark.fluxengine.data.FluxmapReader;
-import com.cowlark.fluxengine.data.LogicalLocation;
 import com.cowlark.fluxengine.data.LogicalTrackLayout;
 import com.cowlark.fluxengine.data.PhysicalTrackLayout;
 import com.cowlark.fluxengine.data.Record;
@@ -106,7 +106,7 @@ public abstract class Decoder
 
     private void newSector()
     {
-        sector = new Sector(new LogicalLocation(0, 0, 0));
+        sector = new Sector(new CylinderHeadSector(0, 0, 0));
         sector.physicalLocation =
                 new CylinderHead(trackdata.ptl.physicalCylinder, trackdata.ptl.physicalHead);
         sector.status = Sector.Status.MISSING;

@@ -3,8 +3,8 @@ package com.cowlark.fluxengine.arch.zilogmcz;
 import com.cowlark.fluxengine.core.Bits;
 import com.cowlark.fluxengine.core.ByteReader;
 import com.cowlark.fluxengine.core.Bytes;
+import com.cowlark.fluxengine.data.CylinderHeadSector;
 import com.cowlark.fluxengine.data.FluxPattern;
-import com.cowlark.fluxengine.data.LogicalLocation;
 import com.cowlark.fluxengine.data.Sector;
 import com.cowlark.fluxengine.decoders.Decoder;
 import com.cowlark.fluxengine.decoders.DecoderProto;
@@ -42,7 +42,8 @@ public class ZilogMczDecoder extends Decoder
         int logicalSector = br.read8() & 0x1f;
         int logicalHead = 0;
         int logicalCylinder = br.read8() & 0x7f;
-        sector.location = new LogicalLocation(logicalCylinder, logicalHead, logicalSector);
+        sector.logicalLocation =
+                new CylinderHeadSector(logicalCylinder, logicalHead, logicalSector);
         if (logicalSector > 31)
             return;
         if (logicalCylinder > 80)

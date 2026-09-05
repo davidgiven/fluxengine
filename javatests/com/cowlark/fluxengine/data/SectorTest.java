@@ -12,9 +12,9 @@ public class SectorTest
     @Test
     public void defaultsAreEmptySector()
     {
-        Sector sector = new Sector(new LogicalLocation(0, 0, 0));
+        Sector sector = new Sector(new CylinderHeadSector(0, 0, 0));
 
-        assertThat(sector.location).isEqualTo(new LogicalLocation(0, 0, 0));
+        assertThat(sector.logicalLocation).isEqualTo(new CylinderHeadSector(0, 0, 0));
         assertThat(sector.status).isEqualTo(Sector.Status.INTERNAL_ERROR);
         assertThat(sector.position).isEqualTo(0);
         assertThat(sector.clockNs).isEqualTo(0.0);
@@ -30,11 +30,11 @@ public class SectorTest
     @Test
     public void holdsLogicalLocation()
     {
-        LogicalLocation location = new LogicalLocation(1, 2, 3);
+        CylinderHeadSector location = new CylinderHeadSector(1, 2, 3);
         Sector sector = new Sector(location);
 
-        assertThat(sector.location).isSameInstanceAs(location);
-        assertThat(sector.location.trackLocation()).isEqualTo(new CylinderHead(1, 2));
+        assertThat(sector.logicalLocation).isSameInstanceAs(location);
+        assertThat(sector.logicalLocation.trackLocation()).isEqualTo(new CylinderHead(1, 2));
     }
 
     @Test

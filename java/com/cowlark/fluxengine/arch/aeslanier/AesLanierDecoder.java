@@ -7,8 +7,8 @@ import static com.cowlark.fluxengine.external.Crc.MODBUS_POLY_REF;
 
 import com.cowlark.fluxengine.core.Bits;
 import com.cowlark.fluxengine.core.Bytes;
+import com.cowlark.fluxengine.data.CylinderHeadSector;
 import com.cowlark.fluxengine.data.FluxPattern;
-import com.cowlark.fluxengine.data.LogicalLocation;
 import com.cowlark.fluxengine.data.Sector;
 import com.cowlark.fluxengine.decoders.Decoder;
 import com.cowlark.fluxengine.decoders.DecoderProto;
@@ -48,8 +48,8 @@ public class AesLanierDecoder extends Decoder
         Bytes bytes = FmMfm.decodeFmMfm(rawbits).slice(0, AESLANIER_RECORD_SIZE);
         Bytes reversed = bytes.reverseBits();
 
-        sector.location =
-                new LogicalLocation(reversed.getByte(1) & 0xff, 0, reversed.getByte(2) & 0xff);
+        sector.logicalLocation =
+                new CylinderHeadSector(reversed.getByte(1) & 0xff, 0, reversed.getByte(2) & 0xff);
 
         /* Check header 'checksum' (which seems far too simple to mean much). */
 

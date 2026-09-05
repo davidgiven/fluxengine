@@ -81,9 +81,9 @@ public class D88ImageWriter extends ImageWriter
             {
                 Bytes sectorBytes = new Bytes();
                 ByteWriter sectorWriter = sectorBytes.writer();
-                sectorWriter.write8(sector.location.logicalCylinder());
-                sectorWriter.write8(sector.location.logicalHead());
-                sectorWriter.write8(sector.location.logicalSector());
+                sectorWriter.write8(sector.logicalLocation.cylinder());
+                sectorWriter.write8(sector.logicalLocation.head());
+                sectorWriter.write8(sector.logicalLocation.sector());
                 sectorWriter.write8(24 - countlZero(sector.data.size()));
                 sectorWriter.writeLe16(sectors.size());
                 sectorWriter.write8(0x00); /* always write mfm */

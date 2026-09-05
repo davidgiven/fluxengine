@@ -12,7 +12,7 @@ public class ImageTest
 {
     private static Sector makeSector(int cylinder, int head, int sector, int size)
     {
-        Sector s = new Sector(new LogicalLocation(cylinder, head, sector));
+        Sector s = new Sector(new CylinderHeadSector(cylinder, head, sector));
         s.data = new Bytes(size);
         return s;
     }
@@ -33,9 +33,9 @@ public class ImageTest
 
         Sector sector = image.put(0, 0, 3);
         assertThat(image.contains(0, 0, 3)).isTrue();
-        assertThat(image.contains(new LogicalLocation(0, 0, 3))).isTrue();
+        assertThat(image.contains(new CylinderHeadSector(0, 0, 3))).isTrue();
         assertThat(image.get(0, 0, 3)).isSameInstanceAs(sector);
-        assertThat(image.get(new LogicalLocation(0, 0, 3))).isSameInstanceAs(sector);
+        assertThat(image.get(new CylinderHeadSector(0, 0, 3))).isSameInstanceAs(sector);
 
         image.erase(0, 0, 3);
         assertThat(image.contains(0, 0, 3)).isFalse();
@@ -103,8 +103,8 @@ public class ImageTest
         for (Sector sector : image)
         {
             assertThat(sector.physicalLocation).isNotNull();
-            assertThat(sector.physicalLocation.cylinder()).isEqualTo(sector.location.logicalCylinder());
-            assertThat(sector.physicalLocation.head()).isEqualTo(sector.location.logicalHead());
+            assertThat(sector.physicalLocation.cylinder()).isEqualTo(sector.logicalLocation.cylinder());
+            assertThat(sector.physicalLocation.head()).isEqualTo(sector.logicalLocation.head());
         }
     }
 }

@@ -17,13 +17,20 @@ public abstract class FluxOperation<T extends FluxOperation<T>> implements Runna
     /* Serialises all operations across the whole program: only one may run at
      * a time, because the hardware doesn't cope with concurrent access. */
     private static final Object lock = new Object();
+    protected ConfigProto configProto = null;
     private boolean started = false;
     private Thread workerThread;
-    protected ConfigProto configProto = null;
     private boolean disposed = false;
 
     protected FluxOperation()
     {
+    }
+
+    /* Requests that the current operation terminate as soon as possible, at
+     * its next testForEmergencyStop checkpoint. */
+    public static void requestEmergencyStop()
+    {
+        Common.setEmergencyStop(true);
     }
 
     public ConfigProto getConfig()
@@ -93,13 +100,6 @@ public abstract class FluxOperation<T extends FluxOperation<T>> implements Runna
                 Logger.setLogger(oldLogger);
             }
         }
-    }
-
-    /* Requests that the current operation terminate as soon as possible, at
-     * its next testForEmergencyStop checkpoint. */
-    public static void requestEmergencyStop()
-    {
-        Common.setEmergencyStop(true);
     }
 
     /* Disposes the factory, releasing any AutoCloseable resources it holds.

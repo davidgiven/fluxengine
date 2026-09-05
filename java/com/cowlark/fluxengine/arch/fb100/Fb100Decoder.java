@@ -3,8 +3,8 @@ package com.cowlark.fluxengine.arch.fb100;
 import com.cowlark.fluxengine.core.Bits;
 import com.cowlark.fluxengine.core.ByteReader;
 import com.cowlark.fluxengine.core.Bytes;
+import com.cowlark.fluxengine.data.CylinderHeadSector;
 import com.cowlark.fluxengine.data.FluxPattern;
-import com.cowlark.fluxengine.data.LogicalLocation;
 import com.cowlark.fluxengine.data.Sector;
 import com.cowlark.fluxengine.decoders.Decoder;
 import com.cowlark.fluxengine.decoders.DecoderProto;
@@ -133,7 +133,8 @@ public class Fb100Decoder extends Decoder
         int logicalCylinder = abssector >> 1;
         int logicalHead = 0;
         int logicalSector = abssector & 1;
-        sector.location = new LogicalLocation(logicalCylinder, logicalHead, logicalSector);
+        sector.logicalLocation =
+                new CylinderHeadSector(logicalCylinder, logicalHead, logicalSector);
 
         Bytes data = new Bytes();
         data.writer().write(id.slice(5, 12)).write(payload);

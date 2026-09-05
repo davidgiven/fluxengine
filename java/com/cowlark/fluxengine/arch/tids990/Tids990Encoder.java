@@ -97,10 +97,10 @@ public class Tids990Encoder extends Encoder
 
                 writeBytes(12, 0x55);
                 bw.write8(am1Unencoded);
-                bw.write8(sectorData.location.logicalHead() << 3);
-                bw.write8(sectorData.location.logicalCylinder());
+                bw.write8(sectorData.logicalLocation.head() << 3);
+                bw.write8(sectorData.logicalLocation.cylinder());
                 bw.write8(config.getSectorCount());
-                bw.write8(sectorData.location.logicalSector());
+                bw.write8(sectorData.logicalLocation.sector());
                 bw.writeBe16(sectorData.data.size());
                 int crc = Crc.crc16(Crc.CCITT_POLY, header);
                 bw.writeBe16(crc);

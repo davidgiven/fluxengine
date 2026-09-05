@@ -46,24 +46,6 @@ public class ApplicationFrame extends JFrame
     private final SummaryPanel summaryPanel;
 
     private final ImagerViewModel model;
-
-    enum Workflow
-    {
-        DISK_READING("read a disk"), DISK_WRITING("write a disk");
-
-        private final String displayName;
-
-        Workflow(String displayName)
-        {
-            this.displayName = displayName;
-        }
-
-        public String getDisplayName()
-        {
-            return displayName;
-        }
-    }
-
     private final Var<Workflow> currentWorkflow = Var.of(Workflow.DISK_READING);
 
     ApplicationFrame(ImagerViewModel model)
@@ -190,5 +172,22 @@ public class ApplicationFrame extends JFrame
                                     .setOnClick(model::onSaveDiskFlux)
                                     .build()));
         };
+    }
+
+    enum Workflow
+    {
+        DISK_READING("read a disk"), DISK_WRITING("write a disk");
+
+        private final String displayName;
+
+        Workflow(String displayName)
+        {
+            this.displayName = displayName;
+        }
+
+        public String getDisplayName()
+        {
+            return displayName;
+        }
     }
 }

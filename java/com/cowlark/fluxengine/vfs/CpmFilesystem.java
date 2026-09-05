@@ -10,7 +10,7 @@ import com.cowlark.fluxengine.core.ByteReader;
 import com.cowlark.fluxengine.core.ByteWriter;
 import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.data.CylinderHead;
-import com.cowlark.fluxengine.data.LogicalLocation;
+import com.cowlark.fluxengine.data.CylinderHeadSector;
 import com.cowlark.fluxengine.data.LogicalTrackLayout;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -87,17 +87,17 @@ public class CpmFilesystem extends Filesystem
         int side = start.getSide();
         int sectorId = start.getSector();
 
-        LogicalLocation loc = new LogicalLocation(track, side, sectorId);
+        CylinderHeadSector loc = new CylinderHeadSector(track, side, sectorId);
         Long off = blockDevice.diskLayout.sectorOffsetByLogicalSectorLocation.get(loc);
         if (off == null)
         {
             long min = Long.MAX_VALUE;
             Long found = null;
-            for (Map.Entry<LogicalLocation, Long> e :
+            for (Map.Entry<CylinderHeadSector, Long> e :
                     blockDevice.diskLayout.sectorOffsetByLogicalSectorLocation.entrySet())
             {
-                LogicalLocation ll = e.getKey();
-                if (ll.logicalCylinder() == track && ll.logicalHead() == side)
+                CylinderHeadSector ll = e.getKey();
+                if (ll.cylinder() == track && ll.head() == side)
                 {
                     long v = e.getValue();
                     if (v < min)

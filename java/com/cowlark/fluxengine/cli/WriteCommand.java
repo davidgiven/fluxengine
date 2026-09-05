@@ -9,7 +9,6 @@ import com.cowlark.fluxengine.core.flags.FlagGroup;
 import com.cowlark.fluxengine.core.flags.StringFlag;
 import com.cowlark.fluxengine.core.flags.ValueFlag;
 import com.cowlark.fluxengine.data.Disk;
-import com.cowlark.fluxengine.data.Image;
 import com.google.common.collect.ImmutableList;
 
 /**

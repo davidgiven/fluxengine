@@ -44,83 +44,6 @@ import java.io.IOException;
  */
 public class AnalyseDriveResponse implements Command
 {
-    private interface StepVisitor
-    {
-        void step(double c, double v);
-    }
-
-    private final FlagGroup flags = new FlagGroup();
-    private final StringFlag destFlux = StringFlag
-            .builder()
-            .setGroup(flags)
-            .setName("--dest")
-            .setName("-d")
-            .setHelpText("'drive:' flux destination to analyse")
-            .build();
-    private final StringFlag destTracks = StringFlag
-            .builder()
-            .setGroup(flags)
-            .setName("--tracks")
-            .setName("-t")
-            .setHelpText("tracks to write to")
-            .setDefaultValue("c0h0")
-            .build();
-    private final DoubleFlag minInterval = DoubleFlag
-            .builder()
-            .setGroup(flags)
-            .setName("--min-interval-us")
-            .setHelpText("Minimum pulse interval")
-            .setDefaultValue(2.0)
-            .build();
-    private final DoubleFlag maxInterval = DoubleFlag
-            .builder()
-            .setGroup(flags)
-            .setName("--max-interval-us")
-            .setHelpText("Maximum pulse interval")
-            .setDefaultValue(10.0)
-            .build();
-    private final DoubleFlag intervalStep = DoubleFlag
-            .builder()
-            .setGroup(flags)
-            .setName("--interval-step-us")
-            .setHelpText("Interval step, approximately")
-            .setDefaultValue(0.2)
-            .build();
-    private final StringFlag writeCsv = StringFlag
-            .builder()
-            .setGroup(flags)
-            .setName("--write-csv")
-            .setHelpText("Write detailed CSV data")
-            .build();
-    private final StringFlag writeImg = StringFlag
-            .builder()
-            .setGroup(flags)
-            .setName("--write-img")
-            .setHelpText("Draw a graph of the response data")
-            .setDefaultValue("analysis.png")
-            .build();
-    private final IntFlag imgWidth = IntFlag
-            .builder()
-            .setGroup(flags)
-            .setName("--width")
-            .setHelpText("Width of output graph")
-            .setDefaultValue(800)
-            .build();
-    private final IntFlag imgHeight = IntFlag
-            .builder()
-            .setGroup(flags)
-            .setName("--height")
-            .setHelpText("Height of output graph")
-            .setDefaultValue(600)
-            .build();
-    private final IntFlag buckets = IntFlag
-            .builder()
-            .setGroup(flags)
-            .setName("--buckets")
-            .setHelpText("Number of heatmap buckets")
-            .setDefaultValue(250)
-            .build();
-
     /* This is the Turbo colourmap.
      * https://ai.googleblog.com/2019/08/turbo-improved-rainbow-colormap-for.html
      */
@@ -380,12 +303,77 @@ public class AnalyseDriveResponse implements Command
             {129, 6, 2},
             {126, 5, 2},
             {122, 4, 3},};
-
-    @Override
-    public String getHelp()
-    {
-        return "Measures the drive's ability to read and write pulses.";
-    }
+    private final FlagGroup flags = new FlagGroup();
+    private final StringFlag destFlux = StringFlag
+            .builder()
+            .setGroup(flags)
+            .setName("--dest")
+            .setName("-d")
+            .setHelpText("'drive:' flux destination to analyse")
+            .build();
+    private final StringFlag destTracks = StringFlag
+            .builder()
+            .setGroup(flags)
+            .setName("--tracks")
+            .setName("-t")
+            .setHelpText("tracks to write to")
+            .setDefaultValue("c0h0")
+            .build();
+    private final DoubleFlag minInterval = DoubleFlag
+            .builder()
+            .setGroup(flags)
+            .setName("--min-interval-us")
+            .setHelpText("Minimum pulse interval")
+            .setDefaultValue(2.0)
+            .build();
+    private final DoubleFlag maxInterval = DoubleFlag
+            .builder()
+            .setGroup(flags)
+            .setName("--max-interval-us")
+            .setHelpText("Maximum pulse interval")
+            .setDefaultValue(10.0)
+            .build();
+    private final DoubleFlag intervalStep = DoubleFlag
+            .builder()
+            .setGroup(flags)
+            .setName("--interval-step-us")
+            .setHelpText("Interval step, approximately")
+            .setDefaultValue(0.2)
+            .build();
+    private final StringFlag writeCsv = StringFlag
+            .builder()
+            .setGroup(flags)
+            .setName("--write-csv")
+            .setHelpText("Write detailed CSV data")
+            .build();
+    private final StringFlag writeImg = StringFlag
+            .builder()
+            .setGroup(flags)
+            .setName("--write-img")
+            .setHelpText("Draw a graph of the response data")
+            .setDefaultValue("analysis.png")
+            .build();
+    private final IntFlag imgWidth = IntFlag
+            .builder()
+            .setGroup(flags)
+            .setName("--width")
+            .setHelpText("Width of output graph")
+            .setDefaultValue(800)
+            .build();
+    private final IntFlag imgHeight = IntFlag
+            .builder()
+            .setGroup(flags)
+            .setName("--height")
+            .setHelpText("Height of output graph")
+            .setDefaultValue(600)
+            .build();
+    private final IntFlag buckets = IntFlag
+            .builder()
+            .setGroup(flags)
+            .setName("--buckets")
+            .setHelpText("Number of heatmap buckets")
+            .setDefaultValue(250)
+            .build();
 
     private static Color palette(double value)
     {
@@ -498,6 +486,12 @@ public class AnalyseDriveResponse implements Command
     {
         FontMetrics metrics = painter.getFontMetrics();
         painter.drawString(text, (float) (x - metrics.stringWidth(text)), (float) y);
+    }
+
+    @Override
+    public String getHelp()
+    {
+        return "Measures the drive's ability to read and write pulses.";
     }
 
     private void measure(
@@ -814,5 +808,10 @@ public class AnalyseDriveResponse implements Command
                     drawGraph(frequencies);
             });
         }
+    }
+
+    private interface StepVisitor
+    {
+        void step(double c, double v);
     }
 }

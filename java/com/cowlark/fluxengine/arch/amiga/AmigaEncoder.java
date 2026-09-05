@@ -94,9 +94,9 @@ public class AmigaEncoder extends Encoder
 
         Bytes header = Bytes.of(
                 0xff, /* Amiga 1.0 format byte */
-                (sector.location.logicalCylinder() << 1) | sector.location.logicalHead(),
-                sector.location.logicalSector(),
-                Amiga.AMIGA_SECTORS_PER_TRACK - sector.location.logicalSector());
+                (sector.logicalLocation.cylinder() << 1) | sector.logicalLocation.head(),
+                sector.logicalLocation.sector(),
+                Amiga.AMIGA_SECTORS_PER_TRACK - sector.logicalLocation.sector());
         writeInterleavedBytes(bits, cursor, header, checksum);
         Bytes recoveryInfo = new Bytes(16);
         if (sector.data.size() == 528)

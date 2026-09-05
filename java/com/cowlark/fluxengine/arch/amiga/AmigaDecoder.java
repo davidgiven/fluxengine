@@ -2,8 +2,8 @@ package com.cowlark.fluxengine.arch.amiga;
 
 import com.cowlark.fluxengine.core.Bits;
 import com.cowlark.fluxengine.core.Bytes;
+import com.cowlark.fluxengine.data.CylinderHeadSector;
 import com.cowlark.fluxengine.data.FluxPattern;
-import com.cowlark.fluxengine.data.LogicalLocation;
 import com.cowlark.fluxengine.data.Sector;
 import com.cowlark.fluxengine.decoders.Decoder;
 import com.cowlark.fluxengine.decoders.DecoderProto;
@@ -55,7 +55,8 @@ public class AmigaDecoder extends Decoder
         int logicalCylinder = (header.getByte(1) & 0xff) >> 1;
         int logicalHead = header.getByte(1) & 1;
         int logicalSector = header.getByte(2) & 0xff;
-        sector.location = new LogicalLocation(logicalCylinder, logicalHead, logicalSector);
+        sector.logicalLocation =
+                new CylinderHeadSector(logicalCylinder, logicalHead, logicalSector);
 
         int wantedheaderchecksum = Amiga.amigaDeinterleave(bytes, index, 4).iterator().readBe32();
         int gotheaderchecksum = Amiga.amigaChecksum(rawbytes.slice(0, 40));

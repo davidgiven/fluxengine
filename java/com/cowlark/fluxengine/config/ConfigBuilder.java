@@ -443,15 +443,19 @@ public class ConfigBuilder
 
             int eq = line.indexOf('=');
             if (eq == -1)
-                throw new ConfigException(
-                        String.format("parse error at line %d: '%s': missing '='", i + 1, line));
+                throw new ConfigException(String.format(
+                        "parse error at line %d: '%s': missing '='",
+                        i + 1,
+                        line));
 
             String key = line.substring(0, eq).trim();
             String value = line.substring(eq + 1).trim();
 
             if (key.isEmpty())
-                throw new ConfigException(
-                        String.format("parse error at line %d: '%s': empty key", i + 1, line));
+                throw new ConfigException(String.format(
+                        "parse error at line %d: '%s': empty key",
+                        i + 1,
+                        line));
 
             try
             {
@@ -461,7 +465,12 @@ public class ConfigBuilder
                 if (e.getMessage() != null && e.getMessage().startsWith("parse error at line"))
                     throw e;
                 throw new ConfigException(
-                        String.format("parse error at line %d: '%s': %s", i + 1, line, e.getMessage()), e);
+                        String.format(
+                                "parse error at line %d: '%s': %s",
+                                i + 1,
+                                line,
+                                e.getMessage()),
+                        e);
             }
         }
         return this;

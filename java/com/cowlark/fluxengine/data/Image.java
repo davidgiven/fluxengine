@@ -14,7 +14,7 @@ import java.util.stream.Stream;
  */
 public class Image implements Iterable<Sector>
 {
-    private final Map<LogicalLocation, Sector> sectors = new LinkedHashMap<>();
+    private final Map<CylinderHeadSector, Sector> sectors = new LinkedHashMap<>();
     private Geometry geometry = new Geometry();
 
     public Image()
@@ -24,7 +24,7 @@ public class Image implements Iterable<Sector>
     public Image(Collection<Sector> sectors)
     {
         for (Sector sector : sectors)
-            this.sectors.put(sector.location, sector);
+            this.sectors.put(sector.logicalLocation, sector);
         calculateSize();
     }
 
@@ -32,17 +32,17 @@ public class Image implements Iterable<Sector>
     {
         geometry = new Geometry();
         int maxSector = 0;
-        for (Map.Entry<LogicalLocation, Sector> entry : sectors.entrySet())
+        for (Map.Entry<CylinderHeadSector, Sector> entry : sectors.entrySet())
         {
             Sector sector = entry.getValue();
             if (sector != null)
             {
                 geometry.numCylinders =
-                        Math.max(geometry.numCylinders, sector.location.logicalCylinder() + 1);
-                geometry.numHeads = Math.max(geometry.numHeads, sector.location.logicalHead() + 1);
+                        Math.max(geometry.numCylinders, sector.logicalLocation.cylinder() + 1);
+                geometry.numHeads = Math.max(geometry.numHeads, sector.logicalLocation.head() + 1);
                 geometry.firstSector =
-                        Math.min(geometry.firstSector, sector.location.logicalSector());
-                maxSector = Math.max(maxSector, sector.location.logicalSector());
+                        Math.min(geometry.firstSector, sector.logicalLocation.sector());
+                maxSector = Math.max(maxSector, sector.logicalLocation.sector());
                 geometry.sectorSize = Math.max(geometry.sectorSize, sector.data.size());
                 geometry.totalBytes += geometry.sectorSize;
             }
@@ -61,27 +61,27 @@ public class Image implements Iterable<Sector>
         return sectors.isEmpty();
     }
 
-    public boolean contains(LogicalLocation location)
+    public boolean contains(CylinderHeadSector location)
     {
         return sectors.containsKey(location);
     }
 
     public boolean contains(int cylinder, int head, int sector)
     {
-        return contains(new LogicalLocation(cylinder, head, sector));
+        return contains(new CylinderHeadSector(cylinder, head, sector));
     }
 
-    public Sector get(LogicalLocation location)
+    public Sector get(CylinderHeadSector location)
     {
         return sectors.get(location);
     }
 
     public Sector get(int cylinder, int head, int sector)
     {
-        return get(new LogicalLocation(cylinder, head, sector));
+        return get(new CylinderHeadSector(cylinder, head, sector));
     }
 
-    public Sector put(LogicalLocation location)
+    public Sector put(CylinderHeadSector location)
     {
         Sector sector = new Sector(location);
         sectors.put(location, sector);
@@ -90,22 +90,22 @@ public class Image implements Iterable<Sector>
 
     public Sector put(int cylinder, int head, int sector)
     {
-        return put(new LogicalLocation(cylinder, head, sector));
+        return put(new CylinderHeadSector(cylinder, head, sector));
     }
 
-    public void erase(LogicalLocation location)
+    public void erase(CylinderHeadSector location)
     {
         sectors.remove(location);
     }
 
     public void erase(int cylinder, int head, int sector)
     {
-        erase(new LogicalLocation(cylinder, head, sector));
+        erase(new CylinderHeadSector(cylinder, head, sector));
     }
 
     public void addMissingSectors(DiskLayout layout, boolean populated)
     {
-        for (LogicalLocation location : layout.logicalSectorLocationsInFilesystemOrder)
+        for (CylinderHeadSector location : layout.logicalSectorLocationsInFilesystemOrder)
         {
             if (!sectors.containsKey(location))
             {
@@ -130,12 +130,12 @@ public class Image implements Iterable<Sector>
         for (Sector sector : this)
         {
             LogicalTrackLayout ltl =
-                    diskLayout.layoutByLogicalLocation.get(sector.location.trackLocation());
+                    diskLayout.layoutByLogicalLocation.get(sector.logicalLocation.trackLocation());
             Sector newSector = tempImage.put(
-                    sector.location.logicalCylinder(),
-                    sector.location.logicalHead(),
-                    sector.location.logicalSector());
-            newSector.location = sector.location;
+                    sector.logicalLocation.cylinder(),
+                    sector.logicalLocation.head(),
+                    sector.logicalLocation.sector());
+            newSector.logicalLocation = sector.logicalLocation;
             newSector.status = sector.status;
             newSector.position = sector.position;
             newSector.clockNs = sector.clockNs;
@@ -149,7 +149,7 @@ public class Image implements Iterable<Sector>
         }
 
         for (Sector sector : tempImage)
-            sectors.put(sector.location, sector);
+            sectors.put(sector.logicalLocation, sector);
     }
 
     public Geometry getGeometry()
@@ -173,7 +173,7 @@ public class Image implements Iterable<Sector>
         return sectors.values().stream();
     }
 
-    public ImmutableSortedSet<LogicalLocation> getLogicalLocations()
+    public ImmutableSortedSet<CylinderHeadSector> getLogicalLocations()
     {
         return ImmutableSortedSet.copyOf(sectors.keySet());
     }

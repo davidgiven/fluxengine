@@ -8,9 +8,9 @@ import static com.cowlark.fluxengine.arch.macintosh.Macintosh.MAC_SECTOR_RECORD;
 import com.cowlark.fluxengine.core.ByteReader;
 import com.cowlark.fluxengine.core.ByteWriter;
 import com.cowlark.fluxengine.core.Bytes;
+import com.cowlark.fluxengine.data.CylinderHeadSector;
 import com.cowlark.fluxengine.data.FluxMatchers;
 import com.cowlark.fluxengine.data.FluxPattern;
-import com.cowlark.fluxengine.data.LogicalLocation;
 import com.cowlark.fluxengine.data.Sector;
 import com.cowlark.fluxengine.decoders.Decoder;
 import com.cowlark.fluxengine.decoders.DecoderProto;
@@ -295,7 +295,8 @@ public class MacintoshDecoder extends Decoder
         int logicalCylinder = ltl.logicalCylinder;
         int logicalHead = decodeSide(encodedSide);
         int logicalSector = encodedSector;
-        sector.location = new LogicalLocation(logicalCylinder, logicalHead, logicalSector);
+        sector.logicalLocation =
+                new CylinderHeadSector(logicalCylinder, logicalHead, logicalSector);
         int gotsum = (encodedTrack ^ encodedSector ^ encodedSide ^ formatByte) & 0x3f;
         if (wantedsum == gotsum)
             sector.status = Sector.Status.DATA_MISSING;

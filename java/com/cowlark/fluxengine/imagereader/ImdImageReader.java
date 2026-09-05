@@ -5,6 +5,7 @@ import com.cowlark.fluxengine.core.ByteReader;
 import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.core.FluxEngineException;
 import com.cowlark.fluxengine.core.Logger;
+import com.cowlark.fluxengine.data.CylinderHeadSector;
 import com.cowlark.fluxengine.data.Geometry;
 import com.cowlark.fluxengine.data.Image;
 import com.cowlark.fluxengine.data.Sector;
@@ -318,31 +319,31 @@ public class ImdImageReader extends ImageReader
 
                 if (blnOptionalCylinderMap)
                 {
-                    sector.location = new com.cowlark.fluxengine.data.LogicalLocation(
+                    sector.logicalLocation = new CylinderHeadSector(
                             optionalsectorMap.get(s),
-                            sector.location.logicalHead(),
-                            sector.location.logicalSector());
+                            sector.logicalLocation.head(),
+                            sector.logicalLocation.sector());
                     blnOptionalCylinderMap = false;
                 } else
-                    sector.location = new com.cowlark.fluxengine.data.LogicalLocation(
+                    sector.logicalLocation = new CylinderHeadSector(
                             track,
-                            sector.location.logicalHead(),
-                            sector.location.logicalSector());
+                            sector.logicalLocation.head(),
+                            sector.logicalLocation.sector());
 
                 if (blnOptionalHeadMap)
                 {
-                    sector.location =
-                            new com.cowlark.fluxengine.data.LogicalLocation(
-                                    sector.location.logicalCylinder(),
+                    sector.logicalLocation =
+                            new CylinderHeadSector(
+                                    sector.logicalLocation.cylinder(),
                                     optionalheadMap.get(s),
-                                    sector.location.logicalSector());
+                                    sector.logicalLocation.sector());
                     blnOptionalHeadMap = false;
                 } else
-                    sector.location =
-                            new com.cowlark.fluxengine.data.LogicalLocation(
-                                    sector.location.logicalCylinder(),
+                    sector.logicalLocation =
+                            new CylinderHeadSector(
+                                    sector.logicalLocation.cylinder(),
                                     head,
-                                    sector.location.logicalSector());
+                                    sector.logicalLocation.sector());
             }
         }
 

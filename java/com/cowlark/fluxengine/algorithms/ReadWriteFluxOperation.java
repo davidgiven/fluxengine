@@ -7,12 +7,12 @@ import com.cowlark.fluxengine.core.Logger;
 import com.cowlark.fluxengine.core.SupplierOfAutocloseable;
 import com.cowlark.fluxengine.core.Utils;
 import com.cowlark.fluxengine.data.CylinderHead;
+import com.cowlark.fluxengine.data.CylinderHeadSector;
 import com.cowlark.fluxengine.data.Disk;
 import com.cowlark.fluxengine.data.DiskLayout;
 import com.cowlark.fluxengine.data.Fluxmap;
 import com.cowlark.fluxengine.data.Image;
 import com.cowlark.fluxengine.data.Locations;
-import com.cowlark.fluxengine.data.LogicalLocation;
 import com.cowlark.fluxengine.data.LogicalTrackLayout;
 import com.cowlark.fluxengine.data.PhysicalTrackLayout;
 import com.cowlark.fluxengine.data.Sector;
@@ -68,8 +68,10 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
 
         for (int sectorId : ltl.diskSectorOrder)
         {
-            Sector sector =
-                    new Sector(new LogicalLocation(ltl.logicalCylinder, ltl.logicalHead, sectorId));
+            Sector sector = new Sector(new CylinderHeadSector(
+                    ltl.logicalCylinder,
+                    ltl.logicalHead,
+                    sectorId));
 
             sector.status = Sector.Status.MISSING;
             sector.physicalLocation = new CylinderHead(ltl.physicalCylinder, ltl.physicalHead);
@@ -92,12 +94,12 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
      * good and bad version of the same sector, the bad version is dropped). */
     static List<Sector> collectSectors(List<Sector> trackSectors, boolean collapseConflicts)
     {
-        Map<LogicalLocation, List<Sector>> sectors = new LinkedHashMap<>();
+        Map<CylinderHeadSector, List<Sector>> sectors = new LinkedHashMap<>();
         for (Sector sector : trackSectors)
-            sectors.computeIfAbsent(sector.location, k -> new ArrayList<>()).add(sector);
+            sectors.computeIfAbsent(sector.logicalLocation, k -> new ArrayList<>()).add(sector);
 
         List<Sector> sectorSet = new ArrayList<>();
-        for (Map.Entry<LogicalLocation, List<Sector>> entry : sectors.entrySet())
+        for (Map.Entry<CylinderHeadSector, List<Sector>> entry : sectors.entrySet())
         {
             List<Sector> bucket = entry.getValue();
             Sector newSector = bucket.get(0);
@@ -517,18 +519,18 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
                 {
                     List<Sector> sectors = collectSectors(trackSectors, false);
                     sectors.sort(Comparator
-                            .comparing((Sector s) -> s.location.logicalCylinder())
-                            .thenComparing((Sector s) -> s.location.logicalHead())
-                            .thenComparing((Sector s) -> s.location.logicalSector()));
+                            .comparing((Sector s) -> s.logicalLocation.cylinder())
+                            .thenComparing((Sector s) -> s.logicalLocation.head())
+                            .thenComparing((Sector s) -> s.logicalLocation.sector()));
 
                     System.out.println("\nDecoded sectors follow:\n");
                     for (Sector sector : sectors)
                     {
                         System.out.printf(
                                 "%d.%02d.%02d: I+%.2fus with %.2fus clock: " + "status %s%n",
-                                sector.location.logicalCylinder(),
-                                sector.location.logicalHead(),
-                                sector.location.logicalSector(),
+                                sector.logicalLocation.cylinder(),
+                                sector.logicalLocation.head(),
+                                sector.logicalLocation.sector(),
                                 sector.headerStartTimeNs / 1000.0,
                                 sector.clockNs / 1000.0,
                                 Sector.statusToString(sector.status));
@@ -821,16 +823,16 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
                     Image wanted = new Image();
                     for (Sector sector : getEncoder().collectSectors(ltl, disk.image))
                         wanted.put(
-                                sector.location.logicalCylinder(),
-                                sector.location.logicalHead(),
-                                sector.location.logicalSector()).data = sector.data;
+                                sector.logicalLocation.cylinder(),
+                                sector.logicalLocation.head(),
+                                sector.logicalLocation.sector()).data = sector.data;
 
                     for (Sector sector : rgr.combinedSectors)
                     {
                         Sector s = wanted.get(
-                                sector.location.logicalCylinder(),
-                                sector.location.logicalHead(),
-                                sector.location.logicalSector());
+                                sector.logicalLocation.cylinder(),
+                                sector.logicalLocation.head(),
+                                sector.logicalLocation.sector());
                         if (s == null)
                         {
                             Logger.logf("spurious sector on verify");
@@ -842,9 +844,9 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
                             return false;
                         }
                         wanted.erase(
-                                sector.location.logicalCylinder(),
-                                sector.location.logicalHead(),
-                                sector.location.logicalSector());
+                                sector.logicalLocation.cylinder(),
+                                sector.logicalLocation.head(),
+                                sector.logicalLocation.sector());
                     }
                     if (!wanted.empty())
                     {

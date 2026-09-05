@@ -169,8 +169,8 @@ public class Commodore64Encoder extends Encoder
                 writeBits(bits, cursor, C64.C64_HEADER_DATA_SYNC, 1 * 8); /* sync */
 
             // 2. Write Header info 10 GCR bytes
-            int encodedTrack = sector.location.logicalCylinder() + 1;
-            int encodedSector = sector.location.logicalSector();
+            int encodedTrack = sector.logicalLocation.cylinder() + 1;
+            int encodedSector = sector.logicalLocation.sector();
             int headerChecksum = (encodedTrack ^ encodedSector ^ formatByte1 ^ formatByte2);
             writeBits(bits, cursor, encodeData(C64.C64_HEADER_BLOCK_ID));
             writeBits(bits, cursor, encodeData(headerChecksum));

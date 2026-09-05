@@ -17,6 +17,21 @@ public class MkDoc
     {
     }
 
+    public static void main(String[] args) throws IOException
+    {
+        File dir = new File(args[0]);
+
+        for (String name : Formats.all())
+        {
+            ConfigProto config = Formats.get(name);
+            File outputFile = new File(dir, String.format("disk-%s.md", name));
+            try (PrintWriter writer = new PrintWriter(new FileOutputStream(outputFile)))
+            {
+                new DocumentationWriter(config, name, writer).write();
+            }
+        }
+    }
+
     private record DocumentationWriter(ConfigProto config, String name, PrintWriter writer)
     {
         private void addExample(
@@ -125,21 +140,6 @@ public class MkDoc
                     writer.printf("%s%n", documentation.get(i));
             } else
                 writer.print("(This format has no documentation. Please file a bug.)\n");
-        }
-    }
-
-    public static void main(String[] args) throws IOException
-    {
-        File dir = new File(args[0]);
-
-        for (String name : Formats.all())
-        {
-            ConfigProto config = Formats.get(name);
-            File outputFile = new File(dir, String.format("disk-%s.md", name));
-            try (PrintWriter writer = new PrintWriter(new FileOutputStream(outputFile)))
-            {
-                new DocumentationWriter(config, name, writer).write();
-            }
         }
     }
 }

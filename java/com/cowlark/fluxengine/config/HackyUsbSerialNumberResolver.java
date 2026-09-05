@@ -75,57 +75,21 @@ public final class HackyUsbSerialNumberResolver
         return System.getProperty("os.name", "").toLowerCase(Locale.ROOT).contains("win");
     }
 
+    /**
+     * True if the value looks like a genuine device-reported serial rather
+     * than a Windows-generated placeholder (e.g. "6&2c3d1a4&0&0002").
+     */
+    public static boolean looksLikeGenuineSerial(String serial)
+    {
+        return serial != null && !serial.contains("&");
+    }
+
     /* Windows fallback using internal APIs. */
     private static final class Windows
     {
         private static final int DIGCF_PRESENT = 0x00000002;
         private static final int DIGCF_ALLCLASSES = 0x00000004;
         private static final int CR_SUCCESS = 0;
-
-        public static class SP_DEVINFO_DATA extends Structure
-        {
-            public int cbSize;
-            public GUID.ByValue classGuid;
-            public int devInst;
-            public Pointer reserved;
-
-            public SP_DEVINFO_DATA()
-            {
-                cbSize = size();
-            }
-
-            @Override
-            protected List<String> getFieldOrder()
-            {
-                return Arrays.asList("cbSize", "classGuid", "devInst", "reserved");
-            }
-        }
-
-        private interface SetupApi extends StdCallLibrary
-        {
-            SetupApi INSTANCE =
-                    Native.load("setupapi", SetupApi.class, W32APIOptions.UNICODE_OPTIONS);
-
-            Pointer SetupDiGetClassDevsW(
-                    GUID classGuid,
-                    String enumerator,
-                    Pointer hwndParent,
-                    int flags);
-
-            boolean SetupDiEnumDeviceInfo(
-                    Pointer deviceInfoSet,
-                    int memberIndex,
-                    SP_DEVINFO_DATA deviceInfoData);
-
-            boolean SetupDiGetDeviceInstanceIdW(
-                    Pointer deviceInfoSet,
-                    SP_DEVINFO_DATA deviceInfoData,
-                    char[] deviceInstanceId,
-                    int deviceInstanceIdSize,
-                    com.sun.jna.platform.win32.WinDef.DWORDByReference requiredSize);
-
-            boolean SetupDiDestroyDeviceInfoList(Pointer deviceInfoSet);
-        }
 
         static String getSerialNumberForUsbId(int vendorId, int productId)
         {
@@ -184,14 +148,50 @@ public final class HackyUsbSerialNumberResolver
                     required);
             return ok ? Native.toString(buffer) : null;
         }
-    }
 
-    /**
-     * True if the value looks like a genuine device-reported serial rather
-     * than a Windows-generated placeholder (e.g. "6&2c3d1a4&0&0002").
-     */
-    public static boolean looksLikeGenuineSerial(String serial)
-    {
-        return serial != null && !serial.contains("&");
+        private interface SetupApi extends StdCallLibrary
+        {
+            SetupApi INSTANCE =
+                    Native.load("setupapi", SetupApi.class, W32APIOptions.UNICODE_OPTIONS);
+
+            Pointer SetupDiGetClassDevsW(
+                    GUID classGuid,
+                    String enumerator,
+                    Pointer hwndParent,
+                    int flags);
+
+            boolean SetupDiEnumDeviceInfo(
+                    Pointer deviceInfoSet,
+                    int memberIndex,
+                    SP_DEVINFO_DATA deviceInfoData);
+
+            boolean SetupDiGetDeviceInstanceIdW(
+                    Pointer deviceInfoSet,
+                    SP_DEVINFO_DATA deviceInfoData,
+                    char[] deviceInstanceId,
+                    int deviceInstanceIdSize,
+                    com.sun.jna.platform.win32.WinDef.DWORDByReference requiredSize);
+
+            boolean SetupDiDestroyDeviceInfoList(Pointer deviceInfoSet);
+        }
+
+        public static class SP_DEVINFO_DATA extends Structure
+        {
+            public int cbSize;
+            public GUID.ByValue classGuid;
+            public int devInst;
+            public Pointer reserved;
+
+            public SP_DEVINFO_DATA()
+            {
+                cbSize = size();
+            }
+
+            @Override
+            protected List<String> getFieldOrder()
+            {
+                return Arrays.asList("cbSize", "classGuid", "devInst", "reserved");
+            }
+        }
     }
 }

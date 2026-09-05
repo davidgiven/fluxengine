@@ -51,8 +51,8 @@ public class EncoderTest
         ImmutableList<Sector> sectors = encoder.collectSectors(ltl, image);
 
         assertThat(sectors).hasSize(2);
-        assertThat(sectors.get(0).location.logicalSector()).isEqualTo(0);
-        assertThat(sectors.get(1).location.logicalSector()).isEqualTo(1);
+        assertThat(sectors.get(0).logicalLocation.sector()).isEqualTo(0);
+        assertThat(sectors.get(1).logicalLocation.sector()).isEqualTo(1);
     }
 
     @Test

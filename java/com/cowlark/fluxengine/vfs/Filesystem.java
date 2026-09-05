@@ -21,6 +21,16 @@ public abstract class Filesystem implements AutoCloseable
         this.capabilities = capabilities;
     }
 
+    public static void doWithFilesystem(ConfigProto config, FilesystemCaller callback)
+    {
+        FilesystemOperation op = new FilesystemOperation(callback);
+        op.setConfig(config);
+        op.create().blockingSubscribe(
+                Logger::log, e -> {
+                    logger.atError().setCause(e).log("filesystem thread failed");
+                });
+    }
+
     @Override
     public void close() throws Exception
     {
@@ -188,15 +198,5 @@ public abstract class Filesystem implements AutoCloseable
     public record Dirent(VfsPath path, String filename, int length, String mode, FileType fileType,
                          ImmutableMap<String, String> attributes)
     {
-    }
-
-    public static void doWithFilesystem(ConfigProto config, FilesystemCaller callback)
-    {
-        FilesystemOperation op = new FilesystemOperation(callback);
-        op.setConfig(config);
-        op.create().blockingSubscribe(
-                Logger::log, e -> {
-                    logger.atError().setCause(e).log("filesystem thread failed");
-                });
     }
 }

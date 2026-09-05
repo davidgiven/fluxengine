@@ -1,8 +1,8 @@
 package com.cowlark.fluxengine.gui;
 
+import com.cowlark.fluxengine.data.CylinderHeadSector;
 import com.cowlark.fluxengine.data.Disk;
 import com.cowlark.fluxengine.data.DiskLayout;
-import com.cowlark.fluxengine.data.LogicalLocation;
 import com.cowlark.fluxengine.data.Sector;
 import org.exbin.auxiliary.binary_data.BinaryData;
 import java.io.IOException;
@@ -40,11 +40,11 @@ class ImageBinaryData implements BinaryData
     {
         if (diskLayout == null)
             return 0;
-        Map.Entry<Long, LogicalLocation> entry =
+        Map.Entry<Long, CylinderHeadSector> entry =
                 diskLayout.logicalSectorLocationBySectorOffset.floorEntry(address);
         Long sectorAddress = entry.getKey();
         long sectorOffset = address - sectorAddress;
-        LogicalLocation logicalLocation = entry.getValue();
+        CylinderHeadSector logicalLocation = entry.getValue();
         long sectorSize = diskLayout.blockSizeByLogicalSectorLocation.get(logicalLocation);
         if (sectorOffset >= sectorSize)
             return 0;

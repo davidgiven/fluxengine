@@ -10,7 +10,7 @@ import com.cowlark.fluxengine.core.ByteReader;
 import com.cowlark.fluxengine.core.ByteWriter;
 import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.data.CylinderHead;
-import com.cowlark.fluxengine.data.LogicalLocation;
+import com.cowlark.fluxengine.data.CylinderHeadSector;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import java.io.IOException;
@@ -96,7 +96,7 @@ public class RolandFilesystem extends Filesystem
 
     private int getOffsetOfSector(int track, int side, int sector) throws IOException
     {
-        LogicalLocation loc = new LogicalLocation(track, side, sector);
+        CylinderHeadSector loc = new CylinderHeadSector(track, side, sector);
         Long offset = blockDevice.diskLayout.sectorOffsetByLogicalSectorLocation.get(loc);
         if (offset == null)
             throw new FileSystemException("sector not found: " + loc);

@@ -86,8 +86,8 @@ public class AgatEncoder extends Encoder
             writeFillerRawBytes(config.getPreSectorGapBytes(), 0xaaaa);
             writeRawBits(Agat.SECTOR_ID, 64);
             writeByte(0x5a);
-            writeByte((sector.location.logicalCylinder() << 1) | sector.location.logicalHead());
-            writeByte(sector.location.logicalSector());
+            writeByte((sector.logicalLocation.cylinder() << 1) | sector.logicalLocation.head());
+            writeByte(sector.logicalLocation.sector());
             writeByte(0x5a);
 
             /* Data */

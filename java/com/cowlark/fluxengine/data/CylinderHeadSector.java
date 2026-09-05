@@ -16,4 +16,15 @@ public record CylinderHeadSector(int cylinder, int head, int sector) implements
             result = Integer.compare(sector, other.sector);
         return result;
     }
+
+    public CylinderHead trackLocation()
+    {
+        return new CylinderHead(cylinder, head);
+    }
+
+    @Override
+    public String toString()
+    {
+        return String.format("c%dh%ds%d", cylinder, head, sector);
+    }
 }

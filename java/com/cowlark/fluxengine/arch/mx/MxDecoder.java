@@ -3,8 +3,8 @@ package com.cowlark.fluxengine.arch.mx;
 import com.cowlark.fluxengine.core.Bits;
 import com.cowlark.fluxengine.core.ByteReader;
 import com.cowlark.fluxengine.core.Bytes;
+import com.cowlark.fluxengine.data.CylinderHeadSector;
 import com.cowlark.fluxengine.data.FluxPattern;
-import com.cowlark.fluxengine.data.LogicalLocation;
 import com.cowlark.fluxengine.data.Sector;
 import com.cowlark.fluxengine.decoders.Decoder;
 import com.cowlark.fluxengine.decoders.DecoderProto;
@@ -79,7 +79,8 @@ public class MxDecoder extends Decoder
         int logicalCylinder = ltl.logicalCylinder;
         int logicalHead = ltl.logicalHead;
         int logicalSector = currentSector;
-        sector.location = new LogicalLocation(logicalCylinder, logicalHead, logicalSector);
+        sector.logicalLocation =
+                new CylinderHeadSector(logicalCylinder, logicalHead, logicalSector);
         sector.data = bytes.slice(0, Mx.SECTOR_SIZE).swab();
         sector.status =
                 (gotChecksum == wantChecksum) ? Sector.Status.OK : Sector.Status.BAD_CHECKSUM;

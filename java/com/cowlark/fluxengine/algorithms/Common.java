@@ -14,8 +14,7 @@ class Common
      * error), ported from lib/core/utils.cc. */
     private static volatile boolean emergencyStop = false;
 
-    static void testForEmergencyStop()
-            throws EmergencyStopException
+    static void testForEmergencyStop() throws EmergencyStopException
     {
         if (emergencyStop)
             throw new EmergencyStopException();

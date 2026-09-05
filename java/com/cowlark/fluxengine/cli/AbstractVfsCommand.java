@@ -2,7 +2,6 @@ package com.cowlark.fluxengine.cli;
 
 import com.cowlark.fluxengine.config.ConfigBuilder;
 import com.cowlark.fluxengine.core.Logger;
-import com.cowlark.fluxengine.core.flags.ActionFlag;
 import com.cowlark.fluxengine.core.flags.BoolFlag;
 import com.cowlark.fluxengine.core.flags.FlagGroup;
 import com.cowlark.fluxengine.core.flags.StringFlag;

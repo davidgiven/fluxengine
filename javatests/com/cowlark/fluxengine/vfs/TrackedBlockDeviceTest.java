@@ -6,9 +6,9 @@ import com.cowlark.fluxengine.config.ConfigBuilder;
 import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.data.CylinderHead;
+import com.cowlark.fluxengine.data.CylinderHeadSector;
 import com.cowlark.fluxengine.data.DiskLayout;
 import com.cowlark.fluxengine.data.Image;
-import com.cowlark.fluxengine.data.LogicalLocation;
 import com.cowlark.fluxengine.testing.TestHelpers;
 import org.junit.Rule;
 import org.junit.Test;
@@ -218,7 +218,7 @@ public class TrackedBlockDeviceTest
         Image image = new Image();
         for (int i = 0; i < 72; i++)
         {
-            LogicalLocation loc = diskLayout.logicalSectorLocationsInFilesystemOrder.get(i);
+            CylinderHeadSector loc = diskLayout.logicalSectorLocationsInFilesystemOrder.get(i);
             image.put(loc).data = dataBlock(i * 50);
         }
 

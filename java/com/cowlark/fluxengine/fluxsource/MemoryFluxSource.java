@@ -42,9 +42,9 @@ public class MemoryFluxSource extends FluxSource
     @Override
     public FluxSourceIterator readFlux(FluxReadParameters parameters)
     {
-        Collection<Track> tracks =
-                flux.tracksByPhysicalLocation.asMap().get(
-                        new CylinderHead(parameters.cylinder(), parameters.head()));
+        Collection<Track> tracks = flux.tracksByPhysicalLocation
+                .asMap()
+                .get(new CylinderHead(parameters.cylinder(), parameters.head()));
         if ((tracks != null) && !tracks.isEmpty())
             return new MemoryFluxSourceIterator(tracks);
 

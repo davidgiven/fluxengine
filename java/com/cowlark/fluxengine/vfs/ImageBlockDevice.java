@@ -1,8 +1,8 @@
 package com.cowlark.fluxengine.vfs;
 
 import com.cowlark.fluxengine.core.Bytes;
+import com.cowlark.fluxengine.data.CylinderHeadSector;
 import com.cowlark.fluxengine.data.Image;
-import com.cowlark.fluxengine.data.LogicalLocation;
 import com.cowlark.fluxengine.data.Sector;
 import java.io.IOException;
 import java.nio.file.FileSystemException;
@@ -23,7 +23,7 @@ public class ImageBlockDevice extends BlockDevice
     @Override
     public Bytes getBlock(int blockNumber) throws IOException
     {
-        LogicalLocation ll = getLocationOfBlock(blockNumber);
+        CylinderHeadSector ll = getLocationOfBlock(blockNumber);
         Sector sector = newImage.get(ll);
         if (sector != null)
             return sector.data;
@@ -36,7 +36,7 @@ public class ImageBlockDevice extends BlockDevice
     @Override
     public void putBlock(int blockNumber, Bytes block) throws FileSystemException
     {
-        LogicalLocation ll = getLocationOfBlock(blockNumber);
+        CylinderHeadSector ll = getLocationOfBlock(blockNumber);
         newImage.put(ll).data = block;
     }
 
@@ -44,7 +44,7 @@ public class ImageBlockDevice extends BlockDevice
     public void commit()
     {
         for (Sector sector : newImage)
-            oldImage.put(sector.location).copyFrom(sector);
+            oldImage.put(sector.logicalLocation).copyFrom(sector);
         newImage = new Image();
         try
         {

@@ -3,8 +3,8 @@ package com.cowlark.fluxengine.arch.micropolis;
 import com.cowlark.fluxengine.core.ByteReader;
 import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.core.FluxEngineException;
+import com.cowlark.fluxengine.data.CylinderHeadSector;
 import com.cowlark.fluxengine.data.FluxPattern;
-import com.cowlark.fluxengine.data.LogicalLocation;
 import com.cowlark.fluxengine.data.Sector;
 import com.cowlark.fluxengine.decoders.Decoder;
 import com.cowlark.fluxengine.decoders.DecoderProto;
@@ -213,7 +213,8 @@ public class MicropolisDecoder extends Decoder
         int logicalCylinder = br.read8();
         int logicalHead = ltl.logicalHead;
         int logicalSector = br.read8();
-        sector.location = new LogicalLocation(logicalCylinder, logicalHead, logicalSector);
+        sector.logicalLocation =
+                new CylinderHeadSector(logicalCylinder, logicalHead, logicalSector);
         if (logicalSector > 15)
             return;
         if (logicalCylinder > 76)

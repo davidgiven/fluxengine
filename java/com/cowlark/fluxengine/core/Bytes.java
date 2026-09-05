@@ -48,14 +48,6 @@ public final class Bytes implements List<Byte>
         this(bytesFromByteBuffer(buffer));
     }
 
-    private static byte[] bytesFromByteBuffer(ByteBuffer buffer)
-    {
-        ByteBuffer dup = buffer.duplicate();
-        byte[] bytes = new byte[dup.remaining()];
-        dup.get(bytes);
-        return bytes;
-    }
-
     public Bytes(String data)
     {
         this(data.getBytes(StandardCharsets.UTF_8));
@@ -67,6 +59,14 @@ public final class Bytes implements List<Byte>
         this.low = low;
         this.high = high;
         storage.refcount++;
+    }
+
+    private static byte[] bytesFromByteBuffer(ByteBuffer buffer)
+    {
+        ByteBuffer dup = buffer.duplicate();
+        byte[] bytes = new byte[dup.remaining()];
+        dup.get(bytes);
+        return bytes;
     }
 
     public static Bytes of(int... values)

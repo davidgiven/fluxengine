@@ -157,10 +157,10 @@ public class Apple2Encoder extends Encoder
             //
             // In standard formatting, the first logical sector apparently gets
             // extra padding.
-            writeFf40(bits, cursor, sector.location.logicalSector() == 0 ? 32 : 8);
+            writeFf40(bits, cursor, sector.logicalLocation.sector() == 0 ? 32 : 8);
 
-            int track = sector.location.logicalCylinder();
-            if (sector.location.logicalHead() == 1)
+            int track = sector.logicalLocation.cylinder();
+            if (sector.logicalLocation.head() == 1)
                 track += config.getSideOneTrackOffset();
 
             // Write address field: APPLE2_SECTOR_RECORD + sector identifier +
@@ -168,8 +168,8 @@ public class Apple2Encoder extends Encoder
             writeBits(bits, cursor, Apple2.APPLE2_SECTOR_RECORD, 24);
             writeGcr44(bits, cursor, volumeId);
             writeGcr44(bits, cursor, track);
-            writeGcr44(bits, cursor, sector.location.logicalSector());
-            writeGcr44(bits, cursor, volumeId ^ track ^ sector.location.logicalSector());
+            writeGcr44(bits, cursor, sector.logicalLocation.sector());
+            writeGcr44(bits, cursor, volumeId ^ track ^ sector.logicalLocation.sector());
             writeBits(bits, cursor, 0xDEAAEB, 24);
 
             // Write data syncing leader: FF40 + APPLE2_DATA_RECORD + sector

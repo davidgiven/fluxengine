@@ -109,7 +109,7 @@ public class NorthstarEncoder extends Encoder
         for (int i = 0; i < gapFillSize; i++)
             fw.write8(GAP2_FILL_BYTE);
 
-        if (sector.location.logicalSector() != 9)
+        if (sector.logicalLocation.sector() != 9)
         {
             if (fullSector.size() != fullSectorSize)
                 throw new FluxEngineException(String.format(

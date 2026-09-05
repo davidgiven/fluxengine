@@ -5,9 +5,9 @@ import com.cowlark.fluxengine.core.Bits;
 import com.cowlark.fluxengine.core.ByteReader;
 import com.cowlark.fluxengine.core.ByteWriter;
 import com.cowlark.fluxengine.core.Bytes;
+import com.cowlark.fluxengine.data.CylinderHeadSector;
 import com.cowlark.fluxengine.data.FluxMatchers;
 import com.cowlark.fluxengine.data.FluxPattern;
-import com.cowlark.fluxengine.data.LogicalLocation;
 import com.cowlark.fluxengine.data.Sector;
 import com.cowlark.fluxengine.decoders.Decoder;
 import com.cowlark.fluxengine.decoders.DecoderProto;
@@ -307,7 +307,7 @@ public class BrotherDecoder extends Decoder
         if (logicalCylinder > 79)
             return;
 
-        sector.location = new LogicalLocation(logicalCylinder, 0, logicalSector);
+        sector.logicalLocation = new CylinderHeadSector(logicalCylinder, 0, logicalSector);
         sector.status = Sector.Status.DATA_MISSING;
     }
 

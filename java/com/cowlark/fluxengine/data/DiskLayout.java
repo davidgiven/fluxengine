@@ -45,13 +45,13 @@ public class DiskLayout
     public final ImmutableList<CylinderHead> logicalLocationsInFilesystemOrder;
     public final ImmutableList<CylinderHead> physicalLocations;
     /* Ordered lists of sector locations, plus the reverse mapping. */
-    public final ImmutableList<LogicalLocation> logicalSectorLocationsInFilesystemOrder;
-    public final ImmutableSortedMap<LogicalLocation, Long> blockIdByLogicalSectorLocation;
-    public final ImmutableSortedMap<LogicalLocation, Long> blockSizeByLogicalSectorLocation;
+    public final ImmutableList<CylinderHeadSector> logicalSectorLocationsInFilesystemOrder;
+    public final ImmutableSortedMap<CylinderHeadSector, Long> blockIdByLogicalSectorLocation;
+    public final ImmutableSortedMap<CylinderHeadSector, Long> blockSizeByLogicalSectorLocation;
     public final ImmutableList<CylinderHeadSector> physicalSectorLocationsInFilesystemOrder;
     /* Mapping from logical location to sector offset and back again. */
-    public final ImmutableSortedMap<Long, LogicalLocation> logicalSectorLocationBySectorOffset;
-    public final ImmutableSortedMap<LogicalLocation, Long> sectorOffsetByLogicalSectorLocation;
+    public final ImmutableSortedMap<Long, CylinderHeadSector> logicalSectorLocationBySectorOffset;
+    public final ImmutableSortedMap<CylinderHeadSector, Long> sectorOffsetByLogicalSectorLocation;
 
     public DiskLayout(ConfigProto config)
     {
@@ -171,11 +171,11 @@ public class DiskLayout
         long sectorOffset = 0;
         long blockId = 0;
         List<CylinderHead> logicalLocationsFilesystemLocal = new ArrayList<>();
-        List<LogicalLocation> logicalSectorLocationsLocal = new ArrayList<>();
-        Map<Long, LogicalLocation> logicalSectorOffsetLocal = new LinkedHashMap<>();
-        Map<LogicalLocation, Long> sectorOffsetByLocationLocal = new LinkedHashMap<>();
-        Map<LogicalLocation, Long> blockIdByLocationLocal = new LinkedHashMap<>();
-        Map<LogicalLocation, Long> blockSizeByLocationLocal = new LinkedHashMap<>();
+        List<CylinderHeadSector> logicalSectorLocationsLocal = new ArrayList<>();
+        Map<Long, CylinderHeadSector> logicalSectorOffsetLocal = new LinkedHashMap<>();
+        Map<CylinderHeadSector, Long> sectorOffsetByLocationLocal = new LinkedHashMap<>();
+        Map<CylinderHeadSector, Long> blockIdByLocationLocal = new LinkedHashMap<>();
+        Map<CylinderHeadSector, Long> blockSizeByLocationLocal = new LinkedHashMap<>();
 
         for (CylinderHead ch : getTrackOrdering(
                 config.getLayout().getFilesystemTrackOrder(),
@@ -187,8 +187,8 @@ public class DiskLayout
 
             for (int lid : ltl.filesystemSectorOrder)
             {
-                LogicalLocation logicalLocation =
-                        new LogicalLocation(ch.cylinder(), ch.head(), lid);
+                CylinderHeadSector logicalLocation =
+                        new CylinderHeadSector(ch.cylinder(), ch.head(), lid);
                 logicalSectorOffsetLocal.put(sectorOffset, logicalLocation);
                 sectorOffsetByLocationLocal.put(logicalLocation, sectorOffset);
                 logicalSectorLocationsLocal.add(logicalLocation);

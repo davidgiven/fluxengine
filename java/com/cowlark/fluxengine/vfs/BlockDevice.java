@@ -4,9 +4,9 @@ import com.cowlark.fluxengine.core.ByteReader;
 import com.cowlark.fluxengine.core.ByteWriter;
 import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.data.CylinderHead;
+import com.cowlark.fluxengine.data.CylinderHeadSector;
 import com.cowlark.fluxengine.data.DiskLayout;
 import com.cowlark.fluxengine.data.Image;
-import com.cowlark.fluxengine.data.LogicalLocation;
 import com.cowlark.fluxengine.data.Sector;
 import java.io.IOException;
 import java.nio.file.FileSystemException;
@@ -34,8 +34,8 @@ public abstract class BlockDevice implements AutoCloseable
     protected static void copySectors(Image source, Image destination, CylinderHead lch)
     {
         for (Sector sector : source)
-            if (sector.location.trackLocation().equals(lch))
-                destination.put(sector.location).data = sector.data;
+            if (sector.logicalLocation.trackLocation().equals(lch))
+                destination.put(sector.logicalLocation).data = sector.data;
     }
 
     public int getBlockSize()
@@ -63,7 +63,7 @@ public abstract class BlockDevice implements AutoCloseable
     {
     }
 
-    protected LogicalLocation getLocationOfBlock(int blockNumber) throws FileSystemException
+    protected CylinderHeadSector getLocationOfBlock(int blockNumber) throws FileSystemException
     {
         try
         {

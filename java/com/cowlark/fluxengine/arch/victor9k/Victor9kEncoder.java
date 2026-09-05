@@ -145,8 +145,8 @@ public class Victor9kEncoder extends Encoder
         writeOneBits(bits, cursor, trackdata.getPreHeaderSyncBits());
         writeBits(bits, cursor, Victor9k.VICTOR9K_SECTOR_RECORD, 10);
 
-        int encodedTrack = sector.location.logicalCylinder() | (sector.location.logicalHead() << 7);
-        int encodedSector = sector.location.logicalSector();
+        int encodedTrack = sector.logicalLocation.cylinder() | (sector.logicalLocation.head() << 7);
+        int encodedSector = sector.logicalLocation.sector();
         writeBytes(
                 bits,
                 cursor,

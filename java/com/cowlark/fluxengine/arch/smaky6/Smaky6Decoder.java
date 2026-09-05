@@ -3,9 +3,9 @@ package com.cowlark.fluxengine.arch.smaky6;
 import com.cowlark.fluxengine.core.Bits;
 import com.cowlark.fluxengine.core.ByteReader;
 import com.cowlark.fluxengine.core.Bytes;
+import com.cowlark.fluxengine.data.CylinderHeadSector;
 import com.cowlark.fluxengine.data.FluxPattern;
 import com.cowlark.fluxengine.data.FluxPosition;
-import com.cowlark.fluxengine.data.LogicalLocation;
 import com.cowlark.fluxengine.data.Sector;
 import com.cowlark.fluxengine.decoders.Decoder;
 import com.cowlark.fluxengine.decoders.DecoderProto;
@@ -137,7 +137,8 @@ public class Smaky6Decoder extends Decoder
         int logicalCylinder = ltl.physicalCylinder;
         int logicalHead = ltl.logicalHead;
         int logicalSector = sectorId;
-        sector.location = new LogicalLocation(logicalCylinder, logicalHead, logicalSector);
+        sector.logicalLocation =
+                new CylinderHeadSector(logicalCylinder, logicalHead, logicalSector);
 
         sector.data = data;
         sector.status =

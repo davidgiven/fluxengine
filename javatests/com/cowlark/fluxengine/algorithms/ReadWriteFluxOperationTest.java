@@ -8,8 +8,8 @@ import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.core.FluxEngineException;
 import com.cowlark.fluxengine.data.CylinderHead;
+import com.cowlark.fluxengine.data.CylinderHeadSector;
 import com.cowlark.fluxengine.data.DiskLayout;
-import com.cowlark.fluxengine.data.LogicalLocation;
 import com.cowlark.fluxengine.data.LogicalTrackLayout;
 import com.cowlark.fluxengine.data.Sector;
 import com.cowlark.fluxengine.data.Track;
@@ -49,7 +49,7 @@ public class ReadWriteFluxOperationTest
 
     private static Sector makeSector(int sectorId, Sector.Status status)
     {
-        Sector sector = new Sector(new LogicalLocation(0, 0, sectorId));
+        Sector sector = new Sector(new CylinderHeadSector(0, 0, sectorId));
         sector.status = status;
         return sector;
     }
@@ -65,6 +65,43 @@ public class ReadWriteFluxOperationTest
                 .set("layout.layoutdata[0].physical.start_sector", "0")
                 .set("layout.layoutdata[0].physical.count", "8")
                 .build();
+    }
+
+    private static ConfigProto makeConfigWithLayout(int tracks, int sides, String tracksOverride)
+    {
+        ConfigBuilder builder = new ConfigBuilder()
+                .set("usb.serial", "test-serial")
+                .set("drive.rotational_period_ms", "200")
+                .set("layout.tracks", String.valueOf(tracks))
+                .set("layout.sides", String.valueOf(sides))
+                .set("layout.layoutdata[0].sector_size", "256")
+                .set("layout.layoutdata[0].physical.start_sector", "0")
+                .set("layout.layoutdata[0].physical.count", "4");
+        if (tracksOverride != null)
+            builder.set("tracks", tracksOverride);
+        return builder.build();
+    }
+
+    private static ConfigProto makeConfigWithGroupSize(
+            int tracks,
+            int sides,
+            String formatType,
+            String driveType,
+            String tracksOverride)
+    {
+        ConfigBuilder builder = new ConfigBuilder()
+                .set("usb.serial", "test-serial")
+                .set("drive.rotational_period_ms", "200")
+                .set("drive.drive_type", driveType)
+                .set("layout.tracks", String.valueOf(tracks))
+                .set("layout.sides", String.valueOf(sides))
+                .set("layout.format_type", formatType)
+                .set("layout.layoutdata[0].sector_size", "256")
+                .set("layout.layoutdata[0].physical.start_sector", "0")
+                .set("layout.layoutdata[0].physical.count", "4");
+        if (tracksOverride != null)
+            builder.set("tracks", tracksOverride);
+        return builder.build();
     }
 
     @Test
@@ -147,11 +184,11 @@ public class ReadWriteFluxOperationTest
         assertThat(cr.sectors).hasSize(3);
 
         Sector s0 =
-                cr.sectors.stream().filter(s -> s.location.logicalSector() == 0).findFirst().get();
+                cr.sectors.stream().filter(s -> s.logicalLocation.sector() == 0).findFirst().get();
         Sector s1 =
-                cr.sectors.stream().filter(s -> s.location.logicalSector() == 1).findFirst().get();
+                cr.sectors.stream().filter(s -> s.logicalLocation.sector() == 1).findFirst().get();
         Sector s2 =
-                cr.sectors.stream().filter(s -> s.location.logicalSector() == 2).findFirst().get();
+                cr.sectors.stream().filter(s -> s.logicalLocation.sector() == 2).findFirst().get();
         assertThat(s0.status).isEqualTo(Sector.Status.OK);
         assertThat(s1.status).isEqualTo(Sector.Status.MISSING);
         assertThat(s2.status).isEqualTo(Sector.Status.MISSING);
@@ -211,6 +248,8 @@ public class ReadWriteFluxOperationTest
         assertThat(diskLayout.layoutByLogicalLocation.size()).isEqualTo(1);
     }
 
+    /* ---------- computeLogicalLocations ---------- */
+
     @Test
     public void getDiskLayoutIsMemoized()
     {
@@ -229,41 +268,6 @@ public class ReadWriteFluxOperationTest
         operation.init();
 
         operation.dispose();
-    }
-
-    /* ---------- computeLogicalLocations ---------- */
-
-    private static ConfigProto makeConfigWithLayout(int tracks, int sides, String tracksOverride)
-    {
-        ConfigBuilder builder = new ConfigBuilder()
-                .set("usb.serial", "test-serial")
-                .set("drive.rotational_period_ms", "200")
-                .set("layout.tracks", String.valueOf(tracks))
-                .set("layout.sides", String.valueOf(sides))
-                .set("layout.layoutdata[0].sector_size", "256")
-                .set("layout.layoutdata[0].physical.start_sector", "0")
-                .set("layout.layoutdata[0].physical.count", "4");
-        if (tracksOverride != null)
-            builder.set("tracks", tracksOverride);
-        return builder.build();
-    }
-
-    private static ConfigProto makeConfigWithGroupSize(
-            int tracks, int sides, String formatType, String driveType, String tracksOverride)
-    {
-        ConfigBuilder builder = new ConfigBuilder()
-                .set("usb.serial", "test-serial")
-                .set("drive.rotational_period_ms", "200")
-                .set("drive.drive_type", driveType)
-                .set("layout.tracks", String.valueOf(tracks))
-                .set("layout.sides", String.valueOf(sides))
-                .set("layout.format_type", formatType)
-                .set("layout.layoutdata[0].sector_size", "256")
-                .set("layout.layoutdata[0].physical.start_sector", "0")
-                .set("layout.layoutdata[0].physical.count", "4");
-        if (tracksOverride != null)
-            builder.set("tracks", tracksOverride);
-        return builder.build();
     }
 
     @Test
@@ -318,9 +322,9 @@ public class ReadWriteFluxOperationTest
         op.setConfig(config);
         op.init();
 
-        assertThat(op.computeLogicalLocations()).containsExactly(
-                new CylinderHead(0, 0),
-                new CylinderHead(1, 1)).inOrder();
+        assertThat(op.computeLogicalLocations())
+                .containsExactly(new CylinderHead(0, 0), new CylinderHead(1, 1))
+                .inOrder();
     }
 
     @Test
@@ -332,10 +336,12 @@ public class ReadWriteFluxOperationTest
         op.init();
 
         /* Expands to c0,1,2 cross h0 ; h1 filtered by step 2 -> only h0 */
-        assertThat(op.computeLogicalLocations()).containsExactly(
-                new CylinderHead(0, 0),
-                new CylinderHead(1, 0),
-                new CylinderHead(2, 0)).inOrder();
+        assertThat(op.computeLogicalLocations())
+                .containsExactly(
+                        new CylinderHead(0, 0),
+                        new CylinderHead(1, 0),
+                        new CylinderHead(2, 0))
+                .inOrder();
     }
 
     @Test
@@ -400,8 +406,8 @@ public class ReadWriteFluxOperationTest
     @Test
     public void computePhysicalLocationsExpandsGroupSizeTwoSingleLogical()
     {
-        ConfigProto config = makeConfigWithGroupSize(
-                2, 1, "FORMATTYPE_40TRACK", "DRIVETYPE_80TRACK", null);
+        ConfigProto config =
+                makeConfigWithGroupSize(2, 1, "FORMATTYPE_40TRACK", "DRIVETYPE_80TRACK", null);
         TestOperation op = new TestOperation();
         op.setConfig(config);
         op.init();
@@ -421,8 +427,8 @@ public class ReadWriteFluxOperationTest
     @Test
     public void computePhysicalLocationsExpandsGroupSizeTwoWithOverride()
     {
-        ConfigProto config = makeConfigWithGroupSize(
-                2, 1, "FORMATTYPE_40TRACK", "DRIVETYPE_80TRACK", "c1h0");
+        ConfigProto config =
+                makeConfigWithGroupSize(2, 1, "FORMATTYPE_40TRACK", "DRIVETYPE_80TRACK", "c1h0");
         TestOperation op = new TestOperation();
         op.setConfig(config);
         op.init();
@@ -430,23 +436,28 @@ public class ReadWriteFluxOperationTest
         assertThat(op.getDiskLayout().groupSize).isEqualTo(2);
 
         /* Logical c1 maps to physical 2 and 3 (head 0). */
-        assertThat(op.computePhysicalLocations()).containsExactly(
-                new CylinderHead(2, 0),
-                new CylinderHead(3, 0)).inOrder();
+        assertThat(op.computePhysicalLocations())
+                .containsExactly(new CylinderHead(2, 0), new CylinderHead(3, 0))
+                .inOrder();
     }
 
     @Test
     public void computePhysicalLocationsGroupSizeTwoMultipleLogicalWithTwoSides()
     {
         ConfigProto config = makeConfigWithGroupSize(
-                2, 2, "FORMATTYPE_40TRACK", "DRIVETYPE_80TRACK", "c0-1h0-1");
+                2,
+                2,
+                "FORMATTYPE_40TRACK",
+                "DRIVETYPE_80TRACK",
+                "c0-1h0-1");
         TestOperation op = new TestOperation();
         op.setConfig(config);
         op.init();
 
         assertThat(op.getDiskLayout().groupSize).isEqualTo(2);
 
-        /* Order follows logicalLocations sorted order: (0,0) -> 0,1 ; (0,1) -> 0,1 on head1 etc? Actually physicalHead = logicalHead remapped.
+        /* Order follows logicalLocations sorted order: (0,0) -> 0,1 ; (0,1) -> 0,1 on head1 etc?
+         Actually physicalHead = logicalHead remapped.
            With swapSides false and headBias 0, physicalHead == logicalHead.
            So (0,0)-> p0h0,p1h0 ; (0,1)-> p0h1,p1h1 ; (1,0)-> p2h0,p3h0 ; (1,1)-> p2h1,p3h1
         */
@@ -465,7 +476,11 @@ public class ReadWriteFluxOperationTest
     public void computePhysicalLocationsFilteredSubsetGroupSizeTwo()
     {
         ConfigProto config = makeConfigWithGroupSize(
-                3, 1, "FORMATTYPE_40TRACK", "DRIVETYPE_80TRACK", "c0h0 c2h0");
+                3,
+                1,
+                "FORMATTYPE_40TRACK",
+                "DRIVETYPE_80TRACK",
+                "c0h0 c2h0");
         TestOperation op = new TestOperation();
         op.setConfig(config);
         op.init();
@@ -485,7 +500,11 @@ public class ReadWriteFluxOperationTest
     {
         /* Input logical order unsorted but parser sorts; physical should follow sorted. */
         ConfigProto config = makeConfigWithGroupSize(
-                2, 1, "FORMATTYPE_40TRACK", "DRIVETYPE_80TRACK", "c1h0 c0h0");
+                2,
+                1,
+                "FORMATTYPE_40TRACK",
+                "DRIVETYPE_80TRACK",
+                "c1h0 c0h0");
         TestOperation op = new TestOperation();
         op.setConfig(config);
         op.init();
@@ -519,8 +538,8 @@ public class ReadWriteFluxOperationTest
         op.setConfig(config);
         op.init();
 
-        FluxEngineException ex = assertThrows(
-                FluxEngineException.class, () -> op.computePhysicalLocations());
+        FluxEngineException ex =
+                assertThrows(FluxEngineException.class, () -> op.computePhysicalLocations());
         assertThat(ex.getMessage()).contains("isn't part of the format");
     }
 

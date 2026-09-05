@@ -131,8 +131,8 @@ public class ByteReaderTest
     @Test
     public void readString()
     {
-        ByteReader reader = new ByteReader(
-                Bytes.of('H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd'));
+        ByteReader reader =
+                new ByteReader(Bytes.of('H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd'));
 
         assertThat(reader.readString(5)).isEqualTo("Hello");
         assertThat(reader.pos()).isEqualTo(5);

@@ -5,9 +5,9 @@ import com.cowlark.fluxengine.core.Bits;
 import com.cowlark.fluxengine.core.ByteReader;
 import com.cowlark.fluxengine.core.ByteWriter;
 import com.cowlark.fluxengine.core.Bytes;
+import com.cowlark.fluxengine.data.CylinderHeadSector;
 import com.cowlark.fluxengine.data.FluxMatchers;
 import com.cowlark.fluxengine.data.FluxPattern;
-import com.cowlark.fluxengine.data.LogicalLocation;
 import com.cowlark.fluxengine.data.Sector;
 import com.cowlark.fluxengine.decoders.Decoder;
 import com.cowlark.fluxengine.decoders.DecoderProto;
@@ -115,7 +115,8 @@ public class DurangoF85Decoder extends Decoder
         int logicalSector = bytes.getByte(2) & 0xff;
         int logicalHead = 0;
         int logicalCylinder = bytes.getByte(0) & 0xff;
-        sector.location = new LogicalLocation(logicalCylinder, logicalHead, logicalSector);
+        sector.logicalLocation =
+                new CylinderHeadSector(logicalCylinder, logicalHead, logicalSector);
 
         int wantChecksum = bytes.iterator().seek(4).readBe16();
         int gotChecksum = Crc.crc16(Crc.CCITT_POLY, 0xef21, bytes.slice(0, 4));

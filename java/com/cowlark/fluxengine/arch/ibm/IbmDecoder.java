@@ -4,9 +4,9 @@ import com.cowlark.fluxengine.core.Bits;
 import com.cowlark.fluxengine.core.ByteReader;
 import com.cowlark.fluxengine.core.ByteWriter;
 import com.cowlark.fluxengine.core.Bytes;
+import com.cowlark.fluxengine.data.CylinderHeadSector;
 import com.cowlark.fluxengine.data.FluxMatchers;
 import com.cowlark.fluxengine.data.FluxPattern;
-import com.cowlark.fluxengine.data.LogicalLocation;
 import com.cowlark.fluxengine.data.Sector;
 import com.cowlark.fluxengine.decoders.Decoder;
 import com.cowlark.fluxengine.decoders.DecoderProto;
@@ -160,7 +160,8 @@ public class IbmDecoder extends Decoder
         int logicalHead = br.read8();
         int logicalSector = br.read8();
         currentSectorSize = 1 << (br.read8() + 7);
-        sector.location = new LogicalLocation(logicalCylinder, logicalHead, logicalSector);
+        sector.logicalLocation =
+                new CylinderHeadSector(logicalCylinder, logicalHead, logicalSector);
 
         int gotCrc = Crc.crc16(Crc.CCITT_POLY, bytes.slice(0, br.pos()));
         int wantCrc = br.readBe16();
@@ -168,22 +169,22 @@ public class IbmDecoder extends Decoder
             sector.status = Sector.Status.DATA_MISSING;
 
         if (trackdata.getIgnoreSideByte())
-            sector.location = new LogicalLocation(
-                    sector.location.logicalCylinder(),
+            sector.logicalLocation = new CylinderHeadSector(
+                    sector.logicalLocation.cylinder(),
                     ltl.logicalHead,
-                    sector.location.logicalSector());
-        sector.location = new LogicalLocation(
-                sector.location.logicalCylinder(),
-                sector.location.logicalHead() ^ (trackdata.getInvertSideByte() ? 1 : 0),
-                sector.location.logicalSector());
+                    sector.logicalLocation.sector());
+        sector.logicalLocation = new CylinderHeadSector(
+                sector.logicalLocation.cylinder(),
+                sector.logicalLocation.head() ^ (trackdata.getInvertSideByte() ? 1 : 0),
+                sector.logicalLocation.sector());
         if (trackdata.getIgnoreTrackByte())
-            sector.location = new LogicalLocation(
+            sector.logicalLocation = new CylinderHeadSector(
                     ltl.logicalCylinder,
-                    sector.location.logicalHead(),
-                    sector.location.logicalSector());
+                    sector.logicalLocation.head(),
+                    sector.logicalLocation.sector());
 
         for (int s : trackdata.getIgnoreSectorList())
-            if (sector.location.logicalSector() == s)
+            if (sector.logicalLocation.sector() == s)
             {
                 sector.status = Sector.Status.MISSING;
                 break;
@@ -224,9 +225,9 @@ public class IbmDecoder extends Decoder
             System.err.printf(
                     "Warning: configured sector size for t%d.h%d.s%d is %d bytes but that seen on" +
                             " disk is %d bytes%n",
-                    sector.location.logicalCylinder(),
-                    sector.location.logicalHead(),
-                    sector.location.logicalSector(),
+                    sector.logicalLocation.cylinder(),
+                    sector.logicalLocation.head(),
+                    sector.logicalLocation.sector(),
                     ltl.sectorSize,
                     currentSectorSize);
     }

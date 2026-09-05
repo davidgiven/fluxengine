@@ -5,9 +5,9 @@ package(default_visibility = ["//visibility:public"])
 java_library(
     name = "gui",
     srcs = glob(["*.java"]),
-    resources = ["//extras:pngs"],
-    resource_strip_prefix = "extras",
     plugins = ["//java/com/cowlark/fluxengine/wiring:lombok_plugin"],
+    resource_strip_prefix = "extras",
+    resources = ["//extras:pngs"],
     runtime_deps = [
         "@maven//:org_slf4j_slf4j_simple",
     ],

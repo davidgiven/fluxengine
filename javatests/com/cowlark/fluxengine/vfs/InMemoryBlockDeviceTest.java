@@ -5,6 +5,7 @@ import static com.google.common.truth.Truth.assertThat;
 import com.cowlark.fluxengine.config.ConfigBuilder;
 import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.core.Bytes;
+import com.cowlark.fluxengine.data.CylinderHeadSector;
 import com.cowlark.fluxengine.data.DiskLayout;
 import com.cowlark.fluxengine.data.Image;
 import com.cowlark.fluxengine.testing.TestHelpers;
@@ -111,8 +112,7 @@ public class InMemoryBlockDeviceTest
         Image image = new Image();
         for (int i = 0; i < count; i++)
         {
-            com.cowlark.fluxengine.data.LogicalLocation loc =
-                    diskLayout.logicalSectorLocationsInFilesystemOrder.get(i);
+            CylinderHeadSector loc = diskLayout.logicalSectorLocationsInFilesystemOrder.get(i);
             com.cowlark.fluxengine.data.Sector sector = image.put(loc);
             sector.data = sequentialBlock(i * 50);
         }

@@ -1,9 +1,9 @@
 package com.cowlark.fluxengine.arch.agat;
 
 import com.cowlark.fluxengine.core.Bytes;
+import com.cowlark.fluxengine.data.CylinderHeadSector;
 import com.cowlark.fluxengine.data.FluxMatchers;
 import com.cowlark.fluxengine.data.FluxPattern;
-import com.cowlark.fluxengine.data.LogicalLocation;
 import com.cowlark.fluxengine.data.Sector;
 import com.cowlark.fluxengine.decoders.Decoder;
 import com.cowlark.fluxengine.decoders.DecoderProto;
@@ -70,7 +70,8 @@ public class AgatDecoder extends Decoder
         int logicalCylinder = (bytes.getByte(1) & 0xff) >> 1;
         int logicalSector = bytes.getByte(2) & 0xff;
         int logicalHead = bytes.getByte(1) & 1;
-        sector.location = new LogicalLocation(logicalCylinder, logicalHead, logicalSector);
+        sector.logicalLocation =
+                new CylinderHeadSector(logicalCylinder, logicalHead, logicalSector);
         sector.status = Sector.Status.DATA_MISSING;
     }
 

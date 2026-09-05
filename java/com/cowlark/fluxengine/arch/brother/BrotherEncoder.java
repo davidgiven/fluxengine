@@ -238,8 +238,8 @@ public class BrotherEncoder extends Encoder
             writeSectorHeader(
                     bits,
                     cursor,
-                    sectorData.location.logicalCylinder(),
-                    sectorData.location.logicalSector());
+                    sectorData.logicalLocation.cylinder(),
+                    sectorData.logicalLocation.sector());
             bits.fillBitmapTo(cursor, dataCursor, new boolean[]{true, false});
             writeSectorData(bits, cursor, sectorData.data);
 

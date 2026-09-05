@@ -6,17 +6,16 @@ import com.cowlark.fluxengine.config.ConfigBuilder;
 import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.data.Image;
-import com.cowlark.fluxengine.data.Sector;
 import com.cowlark.fluxengine.imagewriter.ImageWriter;
 import com.cowlark.fluxengine.testing.TestHelpers;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 @RunWith(JUnit4.class)
 public class ImageBlockDeviceTest
@@ -49,7 +48,8 @@ public class ImageBlockDeviceTest
 
     private FilesystemOperation createOperation()
     {
-        FilesystemOperation fso = new FilesystemOperation(fs -> {});
+        FilesystemOperation fso = new FilesystemOperation(fs -> {
+        });
         fso.setConfig(configProto);
         fso.init();
         return fso;

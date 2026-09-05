@@ -4,9 +4,9 @@ import com.cowlark.fluxengine.core.BitWriter;
 import com.cowlark.fluxengine.core.Bits;
 import com.cowlark.fluxengine.core.ByteWriter;
 import com.cowlark.fluxengine.core.Bytes;
+import com.cowlark.fluxengine.data.CylinderHeadSector;
 import com.cowlark.fluxengine.data.FluxMatchers;
 import com.cowlark.fluxengine.data.FluxPattern;
-import com.cowlark.fluxengine.data.LogicalLocation;
 import com.cowlark.fluxengine.data.Sector;
 import com.cowlark.fluxengine.decoders.Decoder;
 import com.cowlark.fluxengine.decoders.DecoderProto;
@@ -112,7 +112,8 @@ public class Commodore64Decoder extends Decoder
         int logicalSector = bytes.getByte(1) & 0xff;
         int logicalHead = 0;
         int logicalCylinder = (bytes.getByte(2) & 0xff) - 1;
-        sector.location = new LogicalLocation(logicalCylinder, logicalHead, logicalSector);
+        sector.logicalLocation =
+                new CylinderHeadSector(logicalCylinder, logicalHead, logicalSector);
         if (checksum == Crc.xorBytes(bytes.slice(1, 4)))
             sector.status = Sector.Status.DATA_MISSING; /* unintuitive but correct */
     }

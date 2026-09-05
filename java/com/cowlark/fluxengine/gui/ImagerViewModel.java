@@ -94,6 +94,11 @@ public class ImagerViewModel
         refreshUsbDevices();
     }
 
+    private static void showFatalError(ErrorLogMessage m)
+    {
+        UI.message(String.format("Error: %s", m.message())).showAsError();
+    }
+
     private Var<String> makeStringPreference(String preferenceName, String defaultValue)
     {
         /* Viewable.cast reinterprets the property itself as a Viewable, so the
@@ -109,7 +114,6 @@ public class ImagerViewModel
                         it.currentValue().orElseThrowUnchecked()));
         return value;
     }
-
 
     private Var<Integer> makeIntegerPreference(String preferenceName, int defaultValue)
     {
@@ -402,10 +406,5 @@ public class ImagerViewModel
             }
         }
         logQueue.add(message);
-    }
-
-    private static void showFatalError(ErrorLogMessage m)
-    {
-        UI.message(String.format("Error: %s", m.message())).showAsError();
     }
 }

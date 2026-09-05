@@ -51,9 +51,9 @@ public record TrackReadLogMessage(List<Track> tracks, List<Sector> sectors) impl
         for (Sector sector : rawSectors)
             r.add(String.format(
                     "%d.%d.%d%s",
-                    sector.location.logicalCylinder(),
-                    sector.location.logicalHead(),
-                    sector.location.logicalSector(),
+                    sector.logicalLocation.cylinder(),
+                    sector.logicalLocation.head(),
+                    sector.logicalLocation.sector(),
                     Sector.statusToChar(sector.status)));
 
         int size = 0;

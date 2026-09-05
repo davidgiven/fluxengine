@@ -1,8 +1,8 @@
 package com.cowlark.fluxengine.external;
 
-import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.core.ByteReader;
 import com.cowlark.fluxengine.core.ByteWriter;
+import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.core.FluxEngineException;
 import java.util.Map;
 import java.util.TreeMap;
@@ -18,13 +18,6 @@ public class Ldbs
     public static final int FILE_TYPE = 0x44534b02;
     public static final int BLOCK_MAGIC = 0x4c444201;
     public static final int TRACK_BLOCK = 0x44495201;
-
-    private static final class Block
-    {
-        int type;
-        Bytes data = new Bytes();
-    }
-
     private final TreeMap<Integer, Block> blocks = new TreeMap<>();
     private int top = 20;
 
@@ -65,8 +58,9 @@ public class Ldbs
         {
             br.seek(address);
             if (br.readBe32() != BLOCK_MAGIC)
-                throw new FluxEngineException(
-                        String.format("invalid block at address 0x%x", address));
+                throw new FluxEngineException(String.format(
+                        "invalid block at address 0x%x",
+                        address));
 
             int blockAddress = address;
             Block block = new Block();
@@ -111,5 +105,11 @@ public class Ldbs
         bw.writeLe32(trackDirectory);
 
         return data;
+    }
+
+    private static final class Block
+    {
+        int type;
+        Bytes data = new Bytes();
     }
 }

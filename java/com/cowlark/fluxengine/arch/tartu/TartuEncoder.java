@@ -63,10 +63,10 @@ public class TartuEncoder extends Encoder
         {
             Bytes bytes = new Bytes(0);
             ByteWriter bw = bytes.writer();
-            bw.write8((sectorData.location.logicalCylinder() << 1) |
-                    sectorData.location.logicalHead());
+            bw.write8((sectorData.logicalLocation.cylinder() << 1) |
+                    sectorData.logicalLocation.head());
             bw.write8(1);
-            bw.write8(sectorData.location.logicalSector());
+            bw.write8(sectorData.logicalLocation.sector());
             bw.write8(~Crc.sumBytes(bytes.slice(0, 3)));
             writeBytes(bytes);
         }

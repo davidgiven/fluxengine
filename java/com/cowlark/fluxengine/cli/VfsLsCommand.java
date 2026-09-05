@@ -24,12 +24,6 @@ public class VfsLsCommand extends AbstractVfsCommand
             .setDefaultValue("/")
             .build();
 
-    @Override
-    public String getHelp()
-    {
-        return "Show files on disk (or image).";
-    }
-
     private static char fileTypeChar(Filesystem.FileType fileType)
     {
         switch (fileType)
@@ -43,6 +37,12 @@ public class VfsLsCommand extends AbstractVfsCommand
             default:
                 return '?';
         }
+    }
+
+    @Override
+    public String getHelp()
+    {
+        return "Show files on disk (or image).";
     }
 
     @Override

@@ -233,8 +233,8 @@ public class ImdImageWriter extends ImageWriter
                     {
                         sectorSkew = sectorSkew + (char) ((i + sectorIdBase) + '0');
                         if (s.physicalLocation != null &&
-                                ((s.physicalLocation.cylinder() != s.location.logicalCylinder()) ||
-                                        (s.physicalLocation.head() != s.location.logicalHead())))
+                                ((s.physicalLocation.cylinder() != s.logicalLocation.cylinder()) ||
+                                        (s.physicalLocation.head() != s.logicalLocation.head())))
                             blnOptionalHeadMap = true;
                     }
                 }
@@ -262,7 +262,7 @@ public class ImdImageWriter extends ImageWriter
                     for (int i = 0; i < numSectorsInTrack; i++)
                     {
                         Sector s = image.get(track, head, i + 1);
-                        bw.write8(s.location.logicalCylinder());
+                        bw.write8(s.logicalLocation.cylinder());
                     }
                 }
 
@@ -272,7 +272,7 @@ public class ImdImageWriter extends ImageWriter
                     for (int i = 0; i < numSectorsInTrack; i++)
                     {
                         Sector s = image.get(track, head, i + 1);
-                        bw.write8(s.location.logicalHead());
+                        bw.write8(s.logicalLocation.head());
                     }
                 }
                 /* Now read data and write to file */

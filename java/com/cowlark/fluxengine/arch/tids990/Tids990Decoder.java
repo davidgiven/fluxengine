@@ -3,9 +3,9 @@ package com.cowlark.fluxengine.arch.tids990;
 import com.cowlark.fluxengine.core.Bits;
 import com.cowlark.fluxengine.core.ByteReader;
 import com.cowlark.fluxengine.core.Bytes;
+import com.cowlark.fluxengine.data.CylinderHeadSector;
 import com.cowlark.fluxengine.data.FluxMatchers;
 import com.cowlark.fluxengine.data.FluxPattern;
-import com.cowlark.fluxengine.data.LogicalLocation;
 import com.cowlark.fluxengine.data.Sector;
 import com.cowlark.fluxengine.decoders.Decoder;
 import com.cowlark.fluxengine.decoders.DecoderProto;
@@ -80,7 +80,8 @@ public class Tids990Decoder extends Decoder
         int logicalSector = br.read8();
         br.readBe16(); /* sector size */
         int wantChecksum = br.readBe16();
-        sector.location = new LogicalLocation(logicalCylinder, logicalHead, logicalSector);
+        sector.logicalLocation =
+                new CylinderHeadSector(logicalCylinder, logicalHead, logicalSector);
 
         if (wantChecksum == gotChecksum)
             sector.status = Sector.Status.DATA_MISSING;

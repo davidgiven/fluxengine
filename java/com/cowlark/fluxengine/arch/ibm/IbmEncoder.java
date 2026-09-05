@@ -192,10 +192,10 @@ public class IbmEncoder extends Encoder
                         bw.write8(MFM_RECORD_SEPARATOR_BYTE);
                 }
                 bw.write8(idamUnencoded);
-                bw.write8(sectorData.location.logicalCylinder());
-                bw.write8(sectorData.location.logicalHead() ^
+                bw.write8(sectorData.logicalLocation.cylinder());
+                bw.write8(sectorData.logicalLocation.head() ^
                         (trackdata.getInvertSideByte() ? 1 : 0));
-                bw.write8(sectorData.location.logicalSector());
+                bw.write8(sectorData.logicalLocation.sector());
                 bw.write8(sectorSize);
                 int crc = Crc.crc16(Crc.CCITT_POLY, header);
                 bw.writeBe16(crc);
