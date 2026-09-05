@@ -172,7 +172,7 @@ jobs:
               --action_env=INCLUDE `
               --action_env=LIB `
               --action_env=LIBPATH
-          ren bazel-bin\java\com\cowlark\fluxengine\fluxengine_1.0.0.msi fluxengine-1.0.0.${{ runner.arch }}.msi
+          move bazel-bin\java\com\cowlark\fluxengine\fluxengine_1.0.0.msi fluxengine-1.0.0.${{ runner.arch }}.msi
 
       - name: date
         run: |
