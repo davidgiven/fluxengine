@@ -11,7 +11,9 @@ on:
 
 jobs:
   build-linux:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        runs-on: [ ubuntu-26.04, ubuntu-26.04-arm ]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -130,6 +132,9 @@ jobs:
 
 
   build-windows:
+    strategy:
+      matrix:
+        runs-on: [ windows-latest, windows-11-arm ]
     runs-on: windows-latest
 
     steps:
