@@ -20,5 +20,6 @@ manifest.mf
 /upgrade-flux-file
 /compile_commands.json
 /doc/disk-_global_options.md
-
+opencode.json
+fluxengine.iml
 /nbproject/private/
