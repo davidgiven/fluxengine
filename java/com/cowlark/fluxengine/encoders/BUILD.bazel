@@ -1,0 +1,29 @@
+load("@com_google_protobuf//bazel:java_proto_library.bzl", "java_proto_library")
+load("@rules_java//java:defs.bzl", "java_library")
+load("@rules_proto//proto:defs.bzl", "proto_library")
+
+package(default_visibility = ["//visibility:public"])
+
+proto_library(
+    name = "encoders_proto",
+    srcs = ["encoders.proto"],
+    strip_import_prefix = "/java/",
+    deps = ["//java/com/cowlark/fluxengine/arch:arch_proto"],
+)
+
+java_proto_library(
+    name = "encoders_java_proto",
+    deps = [":encoders_proto"],
+)
+
+java_library(
+    name = "encoders",
+    srcs = glob(["*.java"]),
+    deps = [
+        ":encoders_java_proto",
+        "//java/com/cowlark/fluxengine/config:config_java_proto",
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/data",
+        "@maven//:com_google_guava_guava",
+    ],
+)

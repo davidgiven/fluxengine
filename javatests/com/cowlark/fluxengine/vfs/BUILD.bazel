@@ -1,0 +1,426 @@
+load("@rules_java//java:defs.bzl", "java_library", "java_test")
+
+package(default_visibility = ["//visibility:public"])
+
+java_library(
+    name = "testlib",
+    srcs = [
+        "GenericFilesystemTest.java",
+        "GenericTreeFilesystemTest.java",
+    ],
+    deps = [
+        "//java/com/cowlark/fluxengine/config",
+        "//java/com/cowlark/fluxengine/config:common_java_proto",
+        "//java/com/cowlark/fluxengine/config:config_java_proto",
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/data",
+        "//java/com/cowlark/fluxengine/imagewriter",
+        "//java/com/cowlark/fluxengine/imagewriter:imagewriter_java_proto",
+        "//java/com/cowlark/fluxengine/vfs",
+        "//javatests/com/cowlark/fluxengine/testing",
+        "@maven//:com_google_guava_guava",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "InMemoryBlockDeviceTest",
+    srcs = ["InMemoryBlockDeviceTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/config",
+        "//java/com/cowlark/fluxengine/config:config_java_proto",
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/data",
+        "//java/com/cowlark/fluxengine/vfs",
+        "//javatests/com/cowlark/fluxengine/testing",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "VfsPathTest",
+    srcs = ["VfsPathTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/vfs",
+        "@maven//:com_google_guava_guava",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "TrackedBlockDeviceTest",
+    srcs = ["TrackedBlockDeviceTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/config",
+        "//java/com/cowlark/fluxengine/config:config_java_proto",
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/data",
+        "//java/com/cowlark/fluxengine/vfs",
+        "//javatests/com/cowlark/fluxengine/testing",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "FatFilesystemTest",
+    srcs = ["FatFilesystemTest.java"],
+    deps = [
+        ":testlib",
+        "//java/com/cowlark/fluxengine/config",
+        "//java/com/cowlark/fluxengine/config:common_java_proto",
+        "//java/com/cowlark/fluxengine/config:config_java_proto",
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/data",
+        "//java/com/cowlark/fluxengine/imagewriter",
+        "//java/com/cowlark/fluxengine/imagewriter:imagewriter_java_proto",
+        "//java/com/cowlark/fluxengine/vfs",
+        "//javatests/com/cowlark/fluxengine/testing",
+        "@maven//:com_google_guava_guava",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "AmigaFilesystemTest",
+    srcs = ["AmigaFilesystemTest.java"],
+    deps = [
+        ":testlib",
+        "//java/com/cowlark/fluxengine/config",
+        "//java/com/cowlark/fluxengine/config:common_java_proto",
+        "//java/com/cowlark/fluxengine/config:config_java_proto",
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/data",
+        "//java/com/cowlark/fluxengine/imagewriter",
+        "//java/com/cowlark/fluxengine/imagewriter:imagewriter_java_proto",
+        "//java/com/cowlark/fluxengine/vfs",
+        "//javatests/com/cowlark/fluxengine/testing",
+        "@maven//:com_google_guava_guava",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "MacHfsFilesystemTest",
+    srcs = ["MacHfsFilesystemTest.java"],
+    deps = [
+        ":testlib",
+        "//java/com/cowlark/fluxengine/config",
+        "//java/com/cowlark/fluxengine/config:common_java_proto",
+        "//java/com/cowlark/fluxengine/config:config_java_proto",
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/data",
+        "//java/com/cowlark/fluxengine/imagewriter",
+        "//java/com/cowlark/fluxengine/imagewriter:imagewriter_java_proto",
+        "//java/com/cowlark/fluxengine/vfs",
+        "//javatests/com/cowlark/fluxengine/testing",
+        "//third_party/java/org/mars/hfsutils",
+        "@maven//:com_google_guava_guava",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "AcornDfsFilesystemTest",
+    srcs = ["AcornDfsFilesystemTest.java"],
+    deps = [
+        ":testlib",
+        "//java/com/cowlark/fluxengine/config",
+        "//java/com/cowlark/fluxengine/config:common_java_proto",
+        "//java/com/cowlark/fluxengine/config:config_java_proto",
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/data",
+        "//java/com/cowlark/fluxengine/imagewriter",
+        "//java/com/cowlark/fluxengine/imagewriter:imagewriter_java_proto",
+        "//java/com/cowlark/fluxengine/vfs",
+        "//javatests/com/cowlark/fluxengine/testing",
+        "@maven//:com_google_guava_guava",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "AppleDosFilesystemTest",
+    srcs = ["AppleDosFilesystemTest.java"],
+    deps = [
+        ":testlib",
+        "//java/com/cowlark/fluxengine/config",
+        "//java/com/cowlark/fluxengine/config:common_java_proto",
+        "//java/com/cowlark/fluxengine/config:config_java_proto",
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/data",
+        "//java/com/cowlark/fluxengine/imagewriter",
+        "//java/com/cowlark/fluxengine/imagewriter:imagewriter_java_proto",
+        "//java/com/cowlark/fluxengine/vfs",
+        "//javatests/com/cowlark/fluxengine/testing",
+        "@maven//:com_google_guava_guava",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "Brother120FilesystemTest",
+    srcs = ["Brother120FilesystemTest.java"],
+    deps = [
+        ":testlib",
+        "//java/com/cowlark/fluxengine/config",
+        "//java/com/cowlark/fluxengine/config:common_java_proto",
+        "//java/com/cowlark/fluxengine/config:config_java_proto",
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/data",
+        "//java/com/cowlark/fluxengine/imagewriter",
+        "//java/com/cowlark/fluxengine/imagewriter:imagewriter_java_proto",
+        "//java/com/cowlark/fluxengine/vfs",
+        "//javatests/com/cowlark/fluxengine/testing",
+        "@maven//:com_google_guava_guava",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "CbmFilesystemTest",
+    srcs = ["CbmFilesystemTest.java"],
+    deps = [
+        ":testlib",
+        "//java/com/cowlark/fluxengine/config",
+        "//java/com/cowlark/fluxengine/config:common_java_proto",
+        "//java/com/cowlark/fluxengine/config:config_java_proto",
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/data",
+        "//java/com/cowlark/fluxengine/imagewriter",
+        "//java/com/cowlark/fluxengine/imagewriter:imagewriter_java_proto",
+        "//java/com/cowlark/fluxengine/vfs",
+        "//javatests/com/cowlark/fluxengine/testing",
+        "@maven//:com_google_guava_guava",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "CpmFilesystemTest",
+    srcs = ["CpmFilesystemTest.java"],
+    deps = [
+        ":testlib",
+        "//java/com/cowlark/fluxengine/config",
+        "//java/com/cowlark/fluxengine/config:common_java_proto",
+        "//java/com/cowlark/fluxengine/config:config_java_proto",
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/data",
+        "//java/com/cowlark/fluxengine/imagewriter",
+        "//java/com/cowlark/fluxengine/imagewriter:imagewriter_java_proto",
+        "//java/com/cowlark/fluxengine/vfs",
+        "//javatests/com/cowlark/fluxengine/testing",
+        "@maven//:com_google_guava_guava",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "LifFilesystemTest",
+    srcs = ["LifFilesystemTest.java"],
+    deps = [
+        ":testlib",
+        "//java/com/cowlark/fluxengine/config",
+        "//java/com/cowlark/fluxengine/config:common_java_proto",
+        "//java/com/cowlark/fluxengine/config:config_java_proto",
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/data",
+        "//java/com/cowlark/fluxengine/imagewriter",
+        "//java/com/cowlark/fluxengine/imagewriter:imagewriter_java_proto",
+        "//java/com/cowlark/fluxengine/vfs",
+        "//javatests/com/cowlark/fluxengine/testing",
+        "@maven//:com_google_guava_guava",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "MicrodosFilesystemTest",
+    srcs = ["MicrodosFilesystemTest.java"],
+    deps = [
+        ":testlib",
+        "//java/com/cowlark/fluxengine/config",
+        "//java/com/cowlark/fluxengine/config:common_java_proto",
+        "//java/com/cowlark/fluxengine/config:config_java_proto",
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/data",
+        "//java/com/cowlark/fluxengine/imagewriter",
+        "//java/com/cowlark/fluxengine/imagewriter:imagewriter_java_proto",
+        "//java/com/cowlark/fluxengine/vfs",
+        "//javatests/com/cowlark/fluxengine/testing",
+        "@maven//:com_google_guava_guava",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "PhileFilesystemTest",
+    srcs = ["PhileFilesystemTest.java"],
+    deps = [
+        ":testlib",
+        "//java/com/cowlark/fluxengine/config",
+        "//java/com/cowlark/fluxengine/config:common_java_proto",
+        "//java/com/cowlark/fluxengine/config:config_java_proto",
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/data",
+        "//java/com/cowlark/fluxengine/imagewriter",
+        "//java/com/cowlark/fluxengine/imagewriter:imagewriter_java_proto",
+        "//java/com/cowlark/fluxengine/vfs",
+        "//javatests/com/cowlark/fluxengine/testing",
+        "@maven//:com_google_guava_guava",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "ProdosFilesystemTest",
+    srcs = ["ProdosFilesystemTest.java"],
+    deps = [
+        ":testlib",
+        "//java/com/cowlark/fluxengine/config",
+        "//java/com/cowlark/fluxengine/config:common_java_proto",
+        "//java/com/cowlark/fluxengine/config:config_java_proto",
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/data",
+        "//java/com/cowlark/fluxengine/imagewriter",
+        "//java/com/cowlark/fluxengine/imagewriter:imagewriter_java_proto",
+        "//java/com/cowlark/fluxengine/vfs",
+        "//javatests/com/cowlark/fluxengine/testing",
+        "@maven//:com_google_guava_guava",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "RolandFilesystemTest",
+    srcs = ["RolandFilesystemTest.java"],
+    deps = [
+        ":testlib",
+        "//java/com/cowlark/fluxengine/config",
+        "//java/com/cowlark/fluxengine/config:common_java_proto",
+        "//java/com/cowlark/fluxengine/config:config_java_proto",
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/data",
+        "//java/com/cowlark/fluxengine/imagewriter",
+        "//java/com/cowlark/fluxengine/imagewriter:imagewriter_java_proto",
+        "//java/com/cowlark/fluxengine/vfs",
+        "//javatests/com/cowlark/fluxengine/testing",
+        "@maven//:com_google_guava_guava",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "Smaky6FilesystemTest",
+    srcs = ["Smaky6FilesystemTest.java"],
+    deps = [
+        ":testlib",
+        "//java/com/cowlark/fluxengine/config",
+        "//java/com/cowlark/fluxengine/config:common_java_proto",
+        "//java/com/cowlark/fluxengine/config:config_java_proto",
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/data",
+        "//java/com/cowlark/fluxengine/imagewriter",
+        "//java/com/cowlark/fluxengine/imagewriter:imagewriter_java_proto",
+        "//java/com/cowlark/fluxengine/vfs",
+        "//javatests/com/cowlark/fluxengine/testing",
+        "@maven//:com_google_guava_guava",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "ZDosFilesystemTest",
+    srcs = ["ZDosFilesystemTest.java"],
+    deps = [
+        ":testlib",
+        "//java/com/cowlark/fluxengine/config",
+        "//java/com/cowlark/fluxengine/config:common_java_proto",
+        "//java/com/cowlark/fluxengine/config:config_java_proto",
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/data",
+        "//java/com/cowlark/fluxengine/imagewriter",
+        "//java/com/cowlark/fluxengine/imagewriter:imagewriter_java_proto",
+        "//java/com/cowlark/fluxengine/vfs",
+        "//javatests/com/cowlark/fluxengine/testing",
+        "@maven//:com_google_guava_guava",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "AppleSingleTest",
+    srcs = ["AppleSingleTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/vfs",
+        "@maven//:com_google_guava_guava",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "FilesystemTest",
+    srcs = ["FilesystemTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/config",
+        "//java/com/cowlark/fluxengine/config:config_java_proto",
+        "//java/com/cowlark/fluxengine/vfs",
+        "//javatests/com/cowlark/fluxengine/testing",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "ImageBlockDeviceTest",
+    srcs = ["ImageBlockDeviceTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/config",
+        "//java/com/cowlark/fluxengine/config:config_java_proto",
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/data",
+        "//java/com/cowlark/fluxengine/imagereader",
+        "//java/com/cowlark/fluxengine/imagereader:imagereader_java_proto",
+        "//java/com/cowlark/fluxengine/imagewriter",
+        "//java/com/cowlark/fluxengine/imagewriter:imagewriter_java_proto",
+        "//java/com/cowlark/fluxengine/vfs",
+        "//javatests/com/cowlark/fluxengine/testing",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "FluxBlockDeviceTest",
+    srcs = ["FluxBlockDeviceTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/config",
+        "//java/com/cowlark/fluxengine/config:config_java_proto",
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/data",
+        "//java/com/cowlark/fluxengine/vfs",
+        "//javatests/com/cowlark/fluxengine/testing",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)

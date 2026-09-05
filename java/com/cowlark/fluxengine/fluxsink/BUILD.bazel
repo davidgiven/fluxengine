@@ -1,0 +1,36 @@
+load("@com_google_protobuf//bazel:java_proto_library.bzl", "java_proto_library")
+load("@rules_java//java:defs.bzl", "java_library")
+load("@rules_proto//proto:defs.bzl", "proto_library")
+
+package(default_visibility = ["//visibility:public"])
+
+proto_library(
+    name = "fluxsink_proto",
+    srcs = ["fluxsink.proto"],
+    strip_import_prefix = "/java/",
+    deps = ["//java/com/cowlark/fluxengine/config:common_proto"],
+)
+
+java_proto_library(
+    name = "fluxsink_java_proto",
+    deps = [":fluxsink_proto"],
+)
+
+java_library(
+    name = "fluxsink",
+    srcs = glob(["*.java"]),
+    deps = [
+        ":fluxsink_java_proto",
+        "//java/com/cowlark/fluxengine/config:common_java_proto",
+        "//java/com/cowlark/fluxengine/config:config_java_proto",
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/data",
+        "//java/com/cowlark/fluxengine/decoders:decoders_java_proto",
+        "//java/com/cowlark/fluxengine/external",
+        "//java/com/cowlark/fluxengine/external:fl2_java_proto",
+        "//java/com/cowlark/fluxengine/usb",
+        "//java/com/cowlark/fluxengine/wiring",
+        "@com_google_protobuf//java/core",
+        "@maven//:org_apache_commons_commons_lang3",
+    ],
+)

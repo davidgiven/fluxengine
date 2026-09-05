@@ -4,11 +4,11 @@ FluxEngine
 (If you're reading this on GitHub, the formatting's a bit messed up. [Try the
 version on cowlark.com instead.](http://cowlark.com/fluxengine/))
 
-**Breaking news!** As of 2025-11-19, there's a new FluxEngine GUI, based on
-the excellent [ImHex](https://imhex.werwolv.net/), which is substantially better (i.e. mostly works) than the old one!
+**Breaking news!** As of 2026-09-05, the entire client has been rewritten in Java, with a new GUI. It _actually_ works
+this time!
 
 <div style="text-align: center">
-<a href="doc/screenshot.png"><img src="doc/screenshot.png" style="width:60%" alt="screenshot of the GUI in action"></a>
+<a href="doc/screenshot.jpg"><img src="doc/screenshot.jpg" style="width:60%" alt="screenshot of the GUI in action"></a>
 </div>
 
 What?

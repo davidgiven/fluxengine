@@ -1,0 +1,23 @@
+load("@rules_java//java:defs.bzl", "java_test")
+
+package(default_visibility = ["//visibility:public"])
+
+java_test(
+    name = "FatFsTest",
+    srcs = ["FatFsTest.java", "FatFormat.java", "RamDisk.java"],
+    deps = [
+        "//third_party/java/org/elm_chan/ff",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "MkfsTest",
+    srcs = ["MkfsTest.java", "RamDisk.java"],
+    deps = [
+        "//third_party/java/org/elm_chan/ff",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)

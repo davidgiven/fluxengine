@@ -1,0 +1,99 @@
+load("@com_google_protobuf//bazel:java_proto_library.bzl", "java_proto_library")
+load("@rules_java//java:defs.bzl", "java_library")
+load("@rules_proto//proto:defs.bzl", "proto_library")
+
+package(default_visibility = ["//visibility:public"])
+
+proto_library(
+    name = "common_proto",
+    srcs = ["common.proto"],
+    strip_import_prefix = "/java/",
+    deps = ["@com_google_protobuf//:descriptor_proto"],
+)
+
+java_proto_library(
+    name = "common_java_proto",
+    deps = [":common_proto"],
+)
+
+proto_library(
+    name = "layout_proto",
+    srcs = ["layout.proto"],
+    strip_import_prefix = "/java/",
+    deps = [
+        ":common_proto",
+        "//java/com/cowlark/fluxengine/external:fl2_proto",
+    ],
+)
+
+java_proto_library(
+    name = "layout_java_proto",
+    deps = [":layout_proto"],
+)
+
+proto_library(
+    name = "drive_proto",
+    srcs = ["drive.proto"],
+    strip_import_prefix = "/java/",
+    deps = [
+        ":common_proto",
+        "//java/com/cowlark/fluxengine/external:fl2_proto",
+    ],
+)
+
+java_proto_library(
+    name = "drive_java_proto",
+    deps = [":drive_proto"],
+)
+
+proto_library(
+    name = "config_proto",
+    srcs = ["config.proto"],
+    strip_import_prefix = "/java/",
+    deps = [
+        ":common_proto",
+        ":drive_proto",
+        ":layout_proto",
+        "//java/com/cowlark/fluxengine/decoders:decoders_proto",
+        "//java/com/cowlark/fluxengine/encoders:encoders_proto",
+        "//java/com/cowlark/fluxengine/fluxsink:fluxsink_proto",
+        "//java/com/cowlark/fluxengine/fluxsource:fluxsource_proto",
+        "//java/com/cowlark/fluxengine/imagereader:imagereader_proto",
+        "//java/com/cowlark/fluxengine/imagewriter:imagewriter_proto",
+        "//java/com/cowlark/fluxengine/usb:usb_proto",
+        "//java/com/cowlark/fluxengine/vfs:vfs_proto",
+    ],
+)
+
+java_proto_library(
+    name = "config_java_proto",
+    deps = [":config_proto"],
+)
+
+java_library(
+    name = "config",
+    srcs = glob(["*.java"]),
+    plugins = ["//java/com/cowlark/fluxengine/wiring:lombok_plugin"],
+    runtime_deps = [
+        "@maven//:org_slf4j_slf4j_simple",
+    ],
+    deps = [
+        ":common_java_proto",
+        ":config_java_proto",
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/core/flags",
+        "//java/com/cowlark/fluxengine/data",
+        "//java/com/cowlark/fluxengine/fluxsink:fluxsink_java_proto",
+        "//java/com/cowlark/fluxengine/fluxsource:fluxsource_java_proto",
+        "//java/com/cowlark/fluxengine/imagewriter:imagewriter_java_proto",
+        "@com_google_protobuf//java/core",
+        "@maven//:com_fazecast_jSerialComm",
+        "@maven//:com_google_guava_guava",
+        "@maven//:com_jayway_jsonpath_json_path",
+        "@maven//:javax_usb_usb_api",
+        "@maven//:net_java_dev_jna_jna",
+        "@maven//:net_java_dev_jna_jna_platform",
+        "@maven//:org_projectlombok_lombok",
+        "@maven//:org_usb4java_usb4java_javax",
+    ],
+)

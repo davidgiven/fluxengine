@@ -1,0 +1,62 @@
+load("@com_google_protobuf//bazel:java_proto_library.bzl", "java_proto_library")
+load("@rules_java//java:defs.bzl", "java_library")
+load("@rules_proto//proto:defs.bzl", "proto_library")
+
+package(default_visibility = ["//visibility:public"])
+
+proto_library(
+    name = "arch_proto",
+    srcs = glob(["*/*.proto"]),
+    strip_import_prefix = "/java/",
+    deps = ["//java/com/cowlark/fluxengine/config:common_proto"],
+)
+
+java_proto_library(
+    name = "arch_java_proto",
+    deps = [":arch_proto"],
+)
+
+java_library(
+    name = "arch",
+    srcs = glob([
+        "*.java",
+        "*/*.java",
+    ]),
+    deps = [
+        ":arch_java_proto",
+        "//java/com/cowlark/fluxengine/config:config_java_proto",
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/data",
+        "//java/com/cowlark/fluxengine/decoders",
+        "//java/com/cowlark/fluxengine/decoders:decoders_java_proto",
+        "//java/com/cowlark/fluxengine/encoders",
+        "//java/com/cowlark/fluxengine/encoders:encoders_java_proto",
+        "//java/com/cowlark/fluxengine/external",
+    ],
+)
+
+FORMATS = [f[:-7] for f in glob(["*.textpb"])]
+
+[
+    genrule(
+        name = "%s_bin" % f,
+        srcs = ["%s.textpb" % f],
+        outs = ["formats/%s.bin" % f],
+        tools = ["//java/com/cowlark/fluxengine/buildtools:protoencode"],
+        cmd = "$(location //java/com/cowlark/fluxengine/buildtools:protoencode) " +
+              "$(location %s.textpb) $(location formats/%s.bin)" % (f, f),
+    )
+    for f in FORMATS
+]
+
+genrule(
+    name = "names",
+    srcs = ["%s.textpb" % f for f in FORMATS],
+    outs = ["formats/names.txt"],
+    cmd = "printf '%%s\\n' %s > $(location formats/names.txt)" % " ".join(FORMATS),
+)
+
+filegroup(
+    name = "formats_files",
+    srcs = ["formats/%s.bin" % f for f in FORMATS] + ["formats/names.txt"],
+)

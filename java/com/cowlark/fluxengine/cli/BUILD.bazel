@@ -1,0 +1,34 @@
+load("@rules_java//java:defs.bzl", "java_library")
+
+package(default_visibility = ["//visibility:public"])
+
+java_library(
+    name = "cli",
+    srcs = glob(["*.java"]),
+    deps = [
+        "//java/com/cowlark/fluxengine/algorithms",
+        "//java/com/cowlark/fluxengine/arch",
+        "//java/com/cowlark/fluxengine/config",
+        "//java/com/cowlark/fluxengine/config:common_java_proto",
+        "//java/com/cowlark/fluxengine/config:config_java_proto",
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/core/flags",
+        "//java/com/cowlark/fluxengine/data",
+        "//java/com/cowlark/fluxengine/decoders",
+        "//java/com/cowlark/fluxengine/decoders:decoders_java_proto",
+        "//java/com/cowlark/fluxengine/encoders",
+        "//java/com/cowlark/fluxengine/external",
+        "//java/com/cowlark/fluxengine/external:fl2_java_proto",
+        "//java/com/cowlark/fluxengine/fluxsink",
+        "//java/com/cowlark/fluxengine/fluxsource",
+        "//java/com/cowlark/fluxengine/gui",
+        "//java/com/cowlark/fluxengine/imagereader",
+        "//java/com/cowlark/fluxengine/imagewriter",
+        "//java/com/cowlark/fluxengine/usb",
+        "//java/com/cowlark/fluxengine/vfs",
+        "//java/com/cowlark/fluxengine/wiring",
+        "@maven//:com_google_guava_guava",
+        "@maven//:org_apache_commons_commons_csv",
+        "@maven//:org_apache_commons_commons_lang3",
+    ],
+)

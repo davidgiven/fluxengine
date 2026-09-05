@@ -1,0 +1,17 @@
+common --java_language_version=21
+common --java_runtime_version=remotejdk_21
+
+# Tools built in the exec configuration also need Java 21 (for records etc.).
+common --tool_java_language_version=21
+common --tool_java_runtime_version=remotejdk_21
+
+# Lombok generates builder classes that are part of the public API; the
+# annotation-processor output doesn't reach the interface jar used by header
+# compilation (and Turbine can't run Lombok), so disable header compilation.
+build --java_header_compilation=false
+
+# Dev machine toolchain workarounds: the system gcc is wrapped by ccache and
+# the system linker (lld) lives in /opt/bin, outside Bazel's default action PATH.
+build --repo_env=CC=/usr/bin/gcc
+build --repo_env=CXX=/usr/bin/g++
+build --host_linkopt=-B/opt/bin

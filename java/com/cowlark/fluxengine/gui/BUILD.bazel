@@ -1,0 +1,37 @@
+load("@rules_java//java:defs.bzl", "java_binary", "java_library")
+
+package(default_visibility = ["//visibility:public"])
+
+java_library(
+    name = "gui",
+    srcs = glob(["*.java"]),
+    plugins = ["//java/com/cowlark/fluxengine/wiring:lombok_plugin"],
+    resource_strip_prefix = "extras",
+    resources = ["//extras:pngs"],
+    runtime_deps = [
+        "@maven//:org_slf4j_slf4j_simple",
+    ],
+    deps = [
+        "//java/com/cowlark/fluxengine/algorithms",
+        "//java/com/cowlark/fluxengine/config",
+        "//java/com/cowlark/fluxengine/config:config_java_proto",
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/data",
+        "//java/com/cowlark/fluxengine/fluxsource",
+        "//java/com/cowlark/fluxengine/imagewriter",
+        "//java/com/cowlark/fluxengine/usb",
+        "@maven//:com_formdev_flatlaf",
+        "@maven//:com_google_guava_guava",
+        "@maven//:io_github_globaltcad_sprouts",
+        "@maven//:io_github_globaltcad_swing_tree",
+        "@maven//:io_reactivex_rxjava3_rxjava",
+        "@maven//:org_apache_commons_commons_lang3",
+        "@maven//:org_exbin_auxiliary_binary_data",
+        "@maven//:org_exbin_auxiliary_binary_data_array",
+        "@maven//:org_exbin_bined_bined_core",
+        "@maven//:org_exbin_bined_bined_swing",
+        "@maven//:org_jspecify_jspecify",
+        "@maven//:org_projectlombok_lombok",
+        "@maven//:org_slf4j_slf4j_api",
+    ],
+)

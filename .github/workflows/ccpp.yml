@@ -1,118 +1,105 @@
 name: C/C++ CI
 
-on: [push]
+on: [ push ]
 
-concurrency: 
+concurrency:
   group: environment-${{ github.head_ref }}
   cancel-in-progress: true
 
 jobs:
-  build-docker:
+  build-linux:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        variant:
-        - debian12
-        - debian13
-        - fedora42
-        - fedora43
-        - fedora43.nooptionaldeps
     steps:
-    - uses: actions/checkout@v4
-      with:
-        repository: 'davidgiven/fluxengine'
-        path: 'fluxengine'
-    - uses: actions/checkout@v4
-      with:
-        repository: 'davidgiven/fluxengine-testdata'
-        path: 'fluxengine-testdata'
-    - name: make
-      run: |
-        cd fluxengine && docker build -t ${{ matrix.variant }} -f tests/docker/Dockerfile.${{ matrix.variant }} .
+      - uses: actions/checkout@v4
+        with:
+          repository: 'davidgiven/fluxengine'
+          path: 'fluxengine'
+      - uses: actions/checkout@v4
+        with:
+          repository: 'davidgiven/fluxengine-testdata'
+          path: 'fluxengine-testdata'
+      - name: Setup Bazel
+        uses: bazel-contrib/setup-bazel@0.19.0
+      - name: Build with Bazel
+        run: |
+          cd fluxengine
+          bazel test //... //:fluxengine_deb //:fluxengine_rpm //:fluxengine_app_image --test_output=errors
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ github.event.repository.name }}.${{ github.sha }}.linux
+          path: |
+            fluxengine/bazel-bin/java/com/cowlark/fluxengine/*.deb
+            fluxengine/bazel-bin/java/com/cowlark/fluxengine/*.rpm
+            fluxengine/bazel-bin/java/com/cowlark/fluxengine/*.tar.xz
 
   build-macos-current:
     strategy:
       matrix:
-        runs-on: [macos-15, macos-15-intel]
+        runs-on: [ macos-15, macos-15-intel ]
     runs-on: ${{ matrix.runs-on }}
     steps:
-    - uses: actions/checkout@v4
-      with:
-        repository: 'davidgiven/fluxengine'
-        path: 'fluxengine'
-    - uses: actions/checkout@v4
-      with:
-        repository: 'davidgiven/fluxengine-testdata'
-        path: 'fluxengine-testdata'
-    - name: brew
-      run: |
-        brew install sqlite pkg-config libusb protobuf wxwidgets fmt make coreutils dylibbundler libjpeg libmagic nlohmann-json cli11 boost glfw3 md4c ninja python freetype2 mbedtls@3 lunasvg
-        brew link mbedtls@3
-        brew upgrade
-    - name: make
-      run: |
-        g++ -v
-        gmake -C fluxengine
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: ${{ github.event.repository.name }}.${{ github.sha }}.fluxengine.${{ runner.arch }}.pkg
-        path: |
-          fluxengine/FluxEngine.pkg
-          fluxengine/FluxEngine.app.zip
+      - uses: actions/checkout@v4
+        with:
+          repository: 'davidgiven/fluxengine'
+          path: 'fluxengine'
+      - uses: actions/checkout@v4
+        with:
+          repository: 'davidgiven/fluxengine-testdata'
+          path: 'fluxengine-testdata'
+      - name: Setup Bazel
+        uses: bazel-contrib/setup-bazel@0.19.0
+      - name: Build with Bazel
+        run: |
+          cd fluxengine
+          bazel test //... //:fluxengine_dmg --test_output=errors
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ github.event.repository.name }}.${{ github.sha }}.osx.${{ runner.arch }}
+          path: |
+            fluxengine/bazel-bin/java/com/cowlark/fluxengine/*.dmg
 
   build-windows:
     runs-on: windows-latest
-    defaults:
-      run:
-        shell: msys2 {0}
 
     steps:
-    - uses: msys2/setup-msys2@v2
-      with:
-        msystem: mingw64
-        update: true
-        install: |
-          python diffutils ninja make zip git
-        pacboy: |
-          protobuf:p pkgconf:p curl-winssl:p file:p glfw:p mbedtls:p
-          sqlite:p freetype:p boost:p gcc:p binutils:p nsis:p abseil-cpp:p
+      - uses: actions/checkout@v4
+        with:
+          repository: 'davidgiven/fluxengine'
+          path: 'fluxengine'
 
-    - name: debug
-      run: |
-        pacboy -Q --info protobuf:p
-        cat /mingw64/lib/pkgconfig/protobuf.pc
-        /mingw64/bin/pkg-config.exe protobuf --cflags
-        /mingw64/bin/pkg-config.exe protobuf --cflags --static
+      - uses: actions/checkout@v4
+        with:
+          repository: 'davidgiven/fluxengine-testdata'
+          path: 'fluxengine-testdata'
 
-    - uses: actions/checkout@v4
-      with:
-        repository: 'davidgiven/fluxengine'
-        path: 'fluxengine'
+      - name: Setup software
+        run: |
+          winget install ImageMagick.ImageMagick --accept-source-agreements --accept-package-agreements
 
-    - uses: actions/checkout@v4
-      with:
-        repository: 'davidgiven/fluxengine-testdata'
-        path: 'fluxengine-testdata'
+      - name: Setup Bazel
+        uses: bazel-contrib/setup-bazel@0.19.0
 
-    - name: run
-      run: |
-        g++ -v
-        make -C fluxengine BUILDTYPE=windows AB_SANDBOX=no
+      - name: Set up MSVC Developer Environment
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
 
-    - name: nsis
-      run: |
-        cd fluxengine
-        strip fluxengine.exe -o fluxengine-stripped.exe
-        strip fluxengine-gui.exe -o fluxengine-gui-stripped.exe
-        makensis -v2 -nocd -dOUTFILE=fluxengine-installer.exe extras/windows-installer.nsi
+      - name: Build with Bazel
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $PSNativeCommandUseErrorActionPreference = $true
+          cd fluxengine
+          bazel test //... //:fluxengine_msi --test_output=errors `
+              --action_env=PATH `
+              --action_env=INCLUDE `
+              --action_env=LIB `
+              --action_env=LIBPATH
 
-    - name: zip
-      run: |
-        cd fluxengine && zip -9 fluxengine-windows.zip fluxengine.exe fluxengine-gui.exe upgrade-flux-file.exe brother120tool.exe brother240tool.exe FluxEngine.cydsn/CortexM3/ARM_GCC_541/Release/FluxEngine.hex fluxengine-installer.exe
-
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: ${{ github.event.repository.name }}.${{ github.sha }}.windows.zip
-        path: fluxengine/fluxengine-windows.zip
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ github.event.repository.name }}.${{ github.sha }}.windows
+          path: fluxengine/bazel-bin/java/com/cowlark/fluxengine/*.msi

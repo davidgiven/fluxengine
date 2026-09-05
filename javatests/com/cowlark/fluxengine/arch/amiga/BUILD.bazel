@@ -1,0 +1,30 @@
+load("@rules_java//java:defs.bzl", "java_test")
+
+package(default_visibility = ["//visibility:public"])
+
+java_test(
+    name = "AmigaTest",
+    srcs = ["AmigaTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/arch",
+        "//java/com/cowlark/fluxengine/core",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "AmigaEncoderTest",
+    srcs = ["AmigaEncoderTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/arch",
+        "//java/com/cowlark/fluxengine/config",
+        "//java/com/cowlark/fluxengine/config:config_java_proto",
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/data",
+        "//javatests/com/cowlark/fluxengine/testing",
+        "@maven//:com_google_guava_guava",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)

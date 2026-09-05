@@ -1,0 +1,13 @@
+load("@rules_java//java:defs.bzl", "java_test")
+
+package(default_visibility = ["//visibility:public"])
+
+java_test(
+    name = "HfsutilsTest",
+    srcs = ["HfsutilsTest.java"],
+    deps = [
+        "//third_party/java/org/mars/hfsutils",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)

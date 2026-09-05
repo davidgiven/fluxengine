@@ -1,0 +1,22 @@
+load("@rules_java//java:defs.bzl", "java_library")
+
+package(default_visibility = ["//visibility:public"])
+
+java_library(
+    name = "data",
+    srcs = glob(["*.java"]),
+    plugins = ["//java/com/cowlark/fluxengine/wiring:lombok_plugin"],
+    resource_strip_prefix = "java/com/cowlark/fluxengine/arch",
+    resources = ["//java/com/cowlark/fluxengine/arch:formats_files"],
+    deps = [
+        "//java/com/cowlark/fluxengine/config:config_java_proto",
+        "//java/com/cowlark/fluxengine/config:layout_java_proto",
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/decoders:decoders_java_proto",
+        "//java/com/cowlark/fluxengine/external:fl2_java_proto",
+        "//java/com/cowlark/fluxengine/wiring",
+        "@com_google_protobuf//java/core",
+        "@maven//:com_google_guava_guava",
+        "@maven//:org_projectlombok_lombok",
+    ],
+)

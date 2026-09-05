@@ -1,0 +1,14 @@
+syntax = "proto2";
+
+option java_package = "com.cowlark.fluxengine.macintosh";
+option java_multiple_files = true;
+
+import "com/cowlark/fluxengine/config/common.proto";
+
+message MacintoshDecoderProto {}
+
+message MacintoshEncoderProto {
+  optional double post_index_gap_us = 1 [default = 0.0,
+    (help) = "post-index gap before first sector header (microseconds)."];
+}
+

@@ -1,0 +1,47 @@
+load("//scripts:corpus.bzl", "define_corpus_tests")
+
+package(default_visibility = ["//visibility:public"])
+
+# Root aliases for running/building the application
+alias(
+    name = "fluxengine",
+    actual = "//java/com/cowlark/fluxengine",
+)
+
+alias(
+    name = "fluxengine_deb",
+    actual = "//java/com/cowlark/fluxengine:fluxengine_deb",
+    tags = ["manual"],
+)
+
+alias(
+    name = "fluxengine_rpm",
+    actual = "//java/com/cowlark/fluxengine:fluxengine_rpm",
+    tags = ["manual"],
+)
+
+alias(
+    name = "fluxengine_app_image",
+    actual = "//java/com/cowlark/fluxengine:fluxengine_app_image",
+    tags = ["manual"],
+)
+
+alias(
+    name = "fluxengine_msi",
+    actual = "//java/com/cowlark/fluxengine:fluxengine_msi",
+    tags = ["manual"],
+)
+
+alias(
+    name = "fluxengine_dmg",
+    actual = "//java/com/cowlark/fluxengine:fluxengine_dmg",
+    tags = ["manual"],
+)
+
+# Encode/decode round-trip tests, ported from the corpus tests in build.py.
+CORPUS_TESTS = define_corpus_tests()
+
+test_suite(
+    name = "corpus",
+    tests = CORPUS_TESTS,
+)

@@ -1,0 +1,34 @@
+package(default_visibility = ["//visibility:public"])
+
+# The PNG images used by the GUI.
+filegroup(
+    name = "pngs",
+    srcs = glob(["*.png"]),
+)
+
+# Windows .ico converted from icon.png using png2ico, ported from the
+# fluxengine_ico rule in extras/build.py. Only buildable where png2ico is
+# installed (i.e. Windows), hence the manual tag.
+genrule(
+    name = "fluxengine_ico",
+    srcs = ["icon.png"],
+    outs = ["fluxengine.ico"],
+    cmd = "magick $< -define icon:auto-resize=256,128,64,48,32,16 $@",
+    tags = ["manual"],
+)
+
+# macOS .icns converted from icon.png using sips and iconutil, ported from
+# the fluxengine_icns rule in extras/build.py: render a 64x64 image as the
+# 32x32@2x variant of an iconset, then convert the iconset. Only buildable
+# on macOS, hence the manual tag.
+genrule(
+    name = "fluxengine_icns",
+    srcs = ["icon.png"],
+    outs = ["fluxengine.icns"],
+    cmd = """
+        mkdir -p fluxengine.iconset && \
+        sips -z 64 64 $(location icon.png) --out fluxengine.iconset/icon_32x32@2x.png > /dev/null && \
+        iconutil -c icns -o $@ fluxengine.iconset
+    """,
+    tags = ["manual"],
+)

@@ -1,0 +1,89 @@
+load("@rules_java//java:defs.bzl", "java_binary")
+load("//scripts:jpackage.bzl", "jpackage", "jpackage_app_image")
+
+package(default_visibility = ["//visibility:public"])
+
+java_binary(
+    name = "fluxengine",
+    jvm_flags = ["--enable-native-access=ALL-UNNAMED"],
+    main_class = "com.cowlark.fluxengine.cli.Main",
+    runtime_deps = [
+        "//java/com/cowlark/fluxengine/cli",
+        "@maven//:org_slf4j_slf4j_simple",
+    ],
+)
+
+jpackage(
+    name = "fluxengine_deb",
+    package_name = "fluxengine",
+    app_version = "1.0.0",
+    extra_launchers = [":fluxengine-gui.properties"],
+    jar = ":fluxengine_deploy.jar",
+    launcher_icon = "//extras:icon.png",
+    main_class = "com.cowlark.fluxengine.cli.Main",
+    package_type = "deb",
+    tags = ["manual"],
+)
+
+jpackage(
+    name = "fluxengine_rpm",
+    package_name = "fluxengine",
+    app_version = "1.0.0",
+    extra_launchers = [":fluxengine-gui.properties"],
+    jar = ":fluxengine_deploy.jar",
+    launcher_icon = "//extras:icon.png",
+    main_class = "com.cowlark.fluxengine.cli.Main",
+    package_type = "rpm",
+    tags = ["manual"],
+)
+
+# MSI and DMG installers can only be built on their native platforms
+# (jpackage can't cross-compile), so select() picks the package type per
+# platform; on other platforms it's "unsupported", which produces an empty
+# target so `bazel build //java/...` still works everywhere.
+jpackage(
+    name = "fluxengine_msi",
+    package_name = "fluxengine",
+    app_version = "1.0.0",
+    extra_launchers = [":fluxengine-gui.properties"],
+    jar = ":fluxengine_deploy.jar",
+    launcher_icon = select({
+        "@platforms//os:windows": "//extras:fluxengine_ico",
+        "//conditions:default": "//extras:icon.png",
+    }),
+    main_class = "com.cowlark.fluxengine.cli.Main",
+    package_type = select({
+        "@platforms//os:windows": "msi",
+        "//conditions:default": "unsupported",
+    }),
+    tags = ["manual"],
+)
+
+jpackage(
+    name = "fluxengine_dmg",
+    package_name = "fluxengine",
+    app_version = "1.0.0",
+    extra_launchers = [":fluxengine-gui.properties"],
+    jar = ":fluxengine_deploy.jar",
+    launcher_icon = select({
+        "@platforms//os:osx": "//extras:fluxengine_icns",
+        "//conditions:default": "//extras:icon.png",
+    }),
+    main_class = "com.cowlark.fluxengine.cli.Main",
+    package_type = select({
+        "@platforms//os:osx": "dmg",
+        "//conditions:default": "unsupported",
+    }),
+    tags = ["manual"],
+)
+
+jpackage_app_image(
+    name = "fluxengine_app_image",
+    package_name = "fluxengine",
+    app_version = "1.0.0",
+    extra_launchers = [":fluxengine-gui.properties"],
+    jar = ":fluxengine_deploy.jar",
+    launcher_icon = "//extras:icon.png",
+    main_class = "com.cowlark.fluxengine.cli.Main",
+    tags = ["manual"],
+)

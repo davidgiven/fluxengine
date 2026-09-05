@@ -1,5 +1,15 @@
+bazel-fluxengine
+bazel-testlogs
+bazel-out
+bazel-bin
 .obj
 .project
+.idea/
+.ijwb/
+nbproject/
+build.xml
+.classpath
+manifest.mf
 /.ninja*
 /brother120tool
 /brother120tool-*
@@ -10,4 +20,6 @@
 /upgrade-flux-file
 /compile_commands.json
 /doc/disk-_global_options.md
-
+opencode.json
+fluxengine.iml
+/nbproject/private/

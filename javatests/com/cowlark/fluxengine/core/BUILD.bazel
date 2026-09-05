@@ -1,0 +1,98 @@
+load("@rules_java//java:defs.bzl", "java_test")
+
+package(default_visibility = ["//visibility:public"])
+
+java_test(
+    name = "BytesTest",
+    srcs = ["BytesTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/core",
+        "@maven//:com_google_guava_guava",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "ByteReaderTest",
+    srcs = ["ByteReaderTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/core",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "ByteWriterTest",
+    srcs = ["ByteWriterTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/core",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "BitWriterTest",
+    srcs = ["BitWriterTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/core",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "BitReaderTest",
+    srcs = ["BitReaderTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/core",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "LoggerTest",
+    srcs = ["LoggerTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/algorithms",
+        "//java/com/cowlark/fluxengine/core",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "LogRendererTest",
+    srcs = ["LogRendererTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/algorithms",
+        "//java/com/cowlark/fluxengine/config",
+        "//java/com/cowlark/fluxengine/config:config_java_proto",
+        "//java/com/cowlark/fluxengine/core",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "BitsTest",
+    srcs = ["BitsTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/core",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "SupplierOfAutocloseableTest",
+    srcs = ["SupplierOfAutocloseableTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/core",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)

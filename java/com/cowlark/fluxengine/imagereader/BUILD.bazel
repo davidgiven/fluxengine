@@ -1,0 +1,36 @@
+load("@com_google_protobuf//bazel:java_proto_library.bzl", "java_proto_library")
+load("@rules_java//java:defs.bzl", "java_library")
+load("@rules_proto//proto:defs.bzl", "proto_library")
+
+package(default_visibility = ["//visibility:public"])
+
+proto_library(
+    name = "imagereader_proto",
+    srcs = ["imagereader.proto"],
+    strip_import_prefix = "/java/",
+    deps = ["//java/com/cowlark/fluxengine/config:common_proto"],
+)
+
+java_proto_library(
+    name = "imagereader_java_proto",
+    deps = [":imagereader_proto"],
+)
+
+java_library(
+    name = "imagereader",
+    srcs = glob(["*.java"]),
+    deps = [
+        ":imagereader_java_proto",
+        "//java/com/cowlark/fluxengine/arch:arch_java_proto",
+        "//java/com/cowlark/fluxengine/config:config_java_proto",
+        "//java/com/cowlark/fluxengine/config:drive_java_proto",
+        "//java/com/cowlark/fluxengine/config:layout_java_proto",
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/data",
+        "//java/com/cowlark/fluxengine/decoders:decoders_java_proto",
+        "//java/com/cowlark/fluxengine/encoders:encoders_java_proto",
+        "//java/com/cowlark/fluxengine/external",
+        "//java/com/cowlark/fluxengine/external:fl2_java_proto",
+        "@maven//:com_google_guava_guava",
+    ],
+)

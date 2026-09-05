@@ -1,0 +1,40 @@
+load("@com_google_protobuf//bazel:java_proto_library.bzl", "java_proto_library")
+load("@rules_java//java:defs.bzl", "java_library")
+load("@rules_proto//proto:defs.bzl", "proto_library")
+
+package(default_visibility = ["//visibility:public"])
+
+proto_library(
+    name = "usb_proto",
+    srcs = ["usb.proto"],
+    strip_import_prefix = "/java/",
+    deps = ["//java/com/cowlark/fluxengine/config:common_proto"],
+)
+
+java_proto_library(
+    name = "usb_java_proto",
+    deps = [":usb_proto"],
+)
+
+java_library(
+    name = "usb",
+    srcs = glob(["*.java"]),
+    plugins = ["//java/com/cowlark/fluxengine/wiring:lombok_plugin"],
+    resources = ["//java:javax.usb.properties"],
+    deps = [
+        ":usb_java_proto",
+        "//java/com/cowlark/fluxengine/config",
+        "//java/com/cowlark/fluxengine/config:config_java_proto",
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/data",
+        "//java/com/cowlark/fluxengine/decoders:decoders_java_proto",
+        "//java/com/cowlark/fluxengine/external",
+        "//java/com/cowlark/fluxengine/wiring",
+        "@maven//:com_fazecast_jSerialComm",
+        "@maven//:com_google_guava_guava",
+        "@maven//:javax_usb_usb_api",
+        "@maven//:org_projectlombok_lombok",
+        "@maven//:org_slf4j_slf4j_api",
+        "@maven//:org_usb4java_usb4java_javax",
+    ],
+)

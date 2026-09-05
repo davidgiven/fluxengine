@@ -1,0 +1,35 @@
+load("@com_google_protobuf//bazel:java_proto_library.bzl", "java_proto_library")
+load("@rules_java//java:defs.bzl", "java_library")
+load("@rules_proto//proto:defs.bzl", "proto_library")
+
+package(default_visibility = ["//visibility:public"])
+
+proto_library(
+    name = "imagewriter_proto",
+    srcs = ["imagewriter.proto"],
+    strip_import_prefix = "/java/",
+    deps = [
+        "//java/com/cowlark/fluxengine/config:common_proto",
+        "//java/com/cowlark/fluxengine/imagereader:imagereader_proto",
+    ],
+)
+
+java_proto_library(
+    name = "imagewriter_java_proto",
+    deps = [":imagewriter_proto"],
+)
+
+java_library(
+    name = "imagewriter",
+    srcs = glob(["*.java"]),
+    deps = [
+        ":imagewriter_java_proto",
+        "//java/com/cowlark/fluxengine/config:common_java_proto",
+        "//java/com/cowlark/fluxengine/config:config_java_proto",
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/data",
+        "//java/com/cowlark/fluxengine/external",
+        "//java/com/cowlark/fluxengine/imagereader:imagereader_java_proto",
+        "@maven//:org_apache_commons_commons_csv",
+    ],
+)

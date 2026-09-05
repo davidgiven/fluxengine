@@ -1,0 +1,27 @@
+load("@com_google_protobuf//bazel:java_proto_library.bzl", "java_proto_library")
+load("@rules_java//java:defs.bzl", "java_library")
+load("@rules_proto//proto:defs.bzl", "proto_library")
+
+package(default_visibility = ["//visibility:public"])
+
+proto_library(
+    name = "fl2_proto",
+    srcs = ["fl2.proto"],
+    strip_import_prefix = "/java/",
+    deps = ["@com_google_protobuf//:descriptor_proto"],
+)
+
+java_proto_library(
+    name = "fl2_java_proto",
+    deps = [":fl2_proto"],
+)
+
+java_library(
+    name = "external",
+    srcs = glob(["*.java"]),
+    deps = [
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/data",
+        "//java/com/cowlark/fluxengine/wiring",
+    ],
+)

@@ -1,5 +1,0 @@
-syntax = "proto2";
-
-message RolandD20DecoderProto {}
-
-

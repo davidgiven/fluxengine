@@ -1,0 +1,77 @@
+load("@rules_java//java:defs.bzl", "java_test")
+
+package(default_visibility = ["//visibility:public"])
+
+java_test(
+    name = "FmMfmTest",
+    srcs = ["FmMfmTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/external",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "LdbsTest",
+    srcs = ["LdbsTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/external",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "CrcTest",
+    srcs = ["CrcTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/external",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "GreaseweazleUtilsTest",
+    srcs = ["GreaseweazleUtilsTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/external",
+        "//java/com/cowlark/fluxengine/wiring",
+        "//javatests/com/cowlark/fluxengine/testing",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "KryofluxTest",
+    srcs = ["KryofluxTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/data",
+        "//java/com/cowlark/fluxengine/external",
+        "//javatests/com/cowlark/fluxengine/testing",
+        "@com_google_protobuf//java/core",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "FlxTest",
+    srcs = ["FlxTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/data",
+        "//java/com/cowlark/fluxengine/external",
+        "//javatests/com/cowlark/fluxengine/testing",
+        "@com_google_protobuf//java/core",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
