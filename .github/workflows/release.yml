@@ -136,7 +136,7 @@ jobs:
   build-windows:
     strategy:
       matrix:
-        runs-on: [ windows-latest, windows-11-arm ]
+        runs-on: [ windows-latest ]
     runs-on: ${{ matrix.runs-on }}
 
     steps:
