@@ -13,6 +13,7 @@ import static com.cowlark.fluxengine.config.FluxSourceSinkType.FLUXTYPE_NOP;
 import static com.cowlark.fluxengine.config.FluxSourceSinkType.FLUXTYPE_SCP;
 import static com.cowlark.fluxengine.config.FluxSourceSinkType.FLUXTYPE_TEST_PATTERN;
 import static com.cowlark.fluxengine.config.FluxSourceSinkType.FLUXTYPE_VCD;
+import static com.cowlark.fluxengine.config.ImageFormats.Mode.MODE_RO;
 import static com.cowlark.fluxengine.config.ImageReaderWriterType.IMAGETYPE_D64;
 import static com.cowlark.fluxengine.config.ImageReaderWriterType.IMAGETYPE_D88;
 import static com.cowlark.fluxengine.config.ImageReaderWriterType.IMAGETYPE_DIM;
@@ -25,6 +26,7 @@ import static com.cowlark.fluxengine.config.ImageReaderWriterType.IMAGETYPE_NFD;
 import static com.cowlark.fluxengine.config.ImageReaderWriterType.IMAGETYPE_NSI;
 import static com.cowlark.fluxengine.config.ImageReaderWriterType.IMAGETYPE_TD0;
 
+import com.cowlark.fluxengine.config.ImageFormats.ImageFormat;
 import com.cowlark.fluxengine.core.Logger;
 import com.cowlark.fluxengine.core.flags.FlagGroup;
 import com.cowlark.fluxengine.core.flags.Flags;
@@ -52,42 +54,6 @@ public class ConfigBuilder
 
     public ConfigBuilder()
     {
-    }
-
-    private static ImageReaderWriterType imageType(String filename)
-    {
-        if (filename.endsWith(".adf") || filename.endsWith(".d81") || filename.endsWith(".dsk") ||
-                filename.endsWith(".img") || filename.endsWith(".st") ||
-                filename.endsWith(".vgi") || filename.endsWith(".xdf"))
-            return IMAGETYPE_IMG;
-        else if (filename.endsWith(".d64"))
-            return IMAGETYPE_D64;
-        else if (filename.endsWith(".d88"))
-            return IMAGETYPE_D88;
-        else if (filename.endsWith(".dim"))
-            return IMAGETYPE_DIM;
-        else if (filename.endsWith(".diskcopy"))
-            return IMAGETYPE_DISKCOPY;
-        else if (filename.endsWith(".fdi"))
-            return IMAGETYPE_FDI;
-        else if (filename.endsWith(".imd"))
-            return IMAGETYPE_IMD;
-        else if (filename.endsWith(".jv3"))
-            return IMAGETYPE_JV3;
-        else if (filename.endsWith(".nfd"))
-            return IMAGETYPE_NFD;
-        else if (filename.endsWith(".nsi"))
-            return IMAGETYPE_NSI;
-        else if (filename.endsWith(".td0"))
-            return IMAGETYPE_TD0;
-        else
-            return null;
-    }
-
-    private static boolean isReadOnlyImage(String filename)
-    {
-        return filename.endsWith(".dim") || filename.endsWith(".fdi") ||
-                filename.endsWith(".jv3") || filename.endsWith(".nfd") || filename.endsWith(".td0");
     }
 
     /* Quotes a string if it contains spaces or quote characters, ported from
@@ -258,21 +224,33 @@ public class ConfigBuilder
             throw new ConfigException("unrecognised flux filename '" + filename + "'");
     }
 
+    private ImageFormat findImageFormat(String filename)
+    {
+        for (ImageFormat format : ImageFormats.imageFormats)
+        {
+            if (filename.endsWith(format.extension()))
+                return format;
+        }
+        return null;
+    }
+
     public ConfigBuilder withImageWriter(String filename)
     {
-        ImageReaderWriterType type = imageType(filename);
-        if (type == null || isReadOnlyImage(filename))
+        ImageFormat format = findImageFormat(filename);
+        if (format == null)
             throw new ConfigException("unrecognised image filename '" + filename + "'");
-        proto.getImageWriterBuilder().setType(type).setFilename(filename);
+        if (format.mode() == MODE_RO)
+            throw new ConfigException("image filename '" + filename + "' can only be read");
+        proto.getImageWriterBuilder().setType(format.type()).setFilename(filename);
         return this;
     }
 
     public ConfigBuilder withImageReader(String filename)
     {
-        ImageReaderWriterType type = imageType(filename);
-        if (type == null)
+        ImageFormat format = findImageFormat(filename);
+        if (format == null)
             throw new ConfigException("unrecognised image filename '" + filename + "'");
-        proto.getImageReaderBuilder().setType(type).setFilename(filename);
+        proto.getImageReaderBuilder().setType(format.type()).setFilename(filename);
         return this;
     }
 
