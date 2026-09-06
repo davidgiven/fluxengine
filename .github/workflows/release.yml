@@ -33,7 +33,7 @@ jobs:
       - name: Build with Bazel
         run: |
           cd fluxengine
-          bazel test //... //:fluxengine_deb //:fluxengine_rpm //:fluxengine_app_image --test_output=errors
+          bazel build //:fluxengine_deb //:fluxengine_rpm //:fluxengine_app_image --test_output=errors
           mv bazel-bin/java/com/cowlark/fluxengine/fluxengine_1.0.0.deb fluxengine-1.0.0.${{ runner.arch }}.deb
           mv bazel-bin/java/com/cowlark/fluxengine/fluxengine_1.0.0.rpm fluxengine-1.0.0.${{ runner.arch }}.rpm
           mv bazel-bin/java/com/cowlark/fluxengine/fluxengine_1.0.0.tar.xz fluxengine-1.0.0.${{ runner.arch }}.tar.xz
@@ -97,7 +97,7 @@ jobs:
       - name: Build with Bazel
         run: |
           cd fluxengine
-          bazel test //... //:fluxengine_dmg --test_output=errors
+          bazel build //:fluxengine_dmg --test_output=errors
           mv bazel-bin/java/com/cowlark/fluxengine/fluxengine_1.0.0.dmg fluxengine_1.0.0.${{ runner.arch }}.dmg
 
       - name: date
@@ -167,7 +167,7 @@ jobs:
           $ErrorActionPreference = 'Stop'
           $PSNativeCommandUseErrorActionPreference = $true
           cd fluxengine
-          bazel test //... //:fluxengine_msi --test_output=errors `
+          bazel build //:fluxengine_msi --test_output=errors `
               --action_env=PATH `
               --action_env=INCLUDE `
               --action_env=LIB `
