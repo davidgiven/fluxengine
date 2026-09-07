@@ -1,0 +1,75 @@
+shortname: "Ai Electronics ABC 24"
+comment: 'CP/M; 158kB 35-track DSDD'
+read_support_status: UNICORN
+
+documentation:
+<<<
+Ai Electronics was a Japanese computer company that produced minicomputers during the 1960s and 1970s. In 1979 they
+started production of the ABC, the Ai Business Computer, a decently specced CP/M machine with 64kB RAM, a Z80, twin
+floppy drives, GBIP ports, and a maths coprocessor.
+
+The floppy disks it uses are relatively normal 35-track IBM scheme disks, with cylinder 0 reserved as the boot track.
+>>>
+
+documentation:
+<<<
+## References
+
+  - [DoPECC's page on the ABC 24](https://dopecc.net/computers/ai/)
+>>>
+
+image_reader {
+  filename: "abc.img"
+  type: IMAGETYPE_IMG
+}
+
+image_writer {
+  filename: "abc.img"
+  type: IMAGETYPE_IMG
+}
+
+flux_source {
+  type: FLUXTYPE_DRIVE
+}
+
+encoder {
+  ibm {
+    trackdata {
+      target_rotational_period_ms: 167
+      target_clock_period_us: 3.333
+    }
+  }
+}
+
+decoder {
+  ibm {
+  }
+}
+
+layout {
+  layoutdata {
+    sector_size: 512
+    physical {
+      start_sector: 1
+      count: 9
+    }
+  }
+  tracks: 35
+  sides: 2
+  format_type: FORMATTYPE_40TRACK
+}
+
+filesystem {
+	type: CPMFS
+	cpmfs {
+		filesystem_start {
+			track: 1
+			side: 0
+			sector: 1
+		}
+		block_size: 2048
+		dir_entries: 64
+	}
+}
+
+
