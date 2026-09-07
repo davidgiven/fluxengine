@@ -22,7 +22,6 @@ java_library(
     plugins = ["//java/com/cowlark/fluxengine/wiring:lombok_plugin"],
     deps = [
         ":fluxsource_java_proto",
-        "//java/com/cowlark/fluxengine/config",
         "//java/com/cowlark/fluxengine/config:common_java_proto",
         "//java/com/cowlark/fluxengine/config:config_java_proto",
         "//java/com/cowlark/fluxengine/core",

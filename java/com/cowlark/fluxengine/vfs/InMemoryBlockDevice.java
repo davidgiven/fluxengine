@@ -3,6 +3,8 @@ package com.cowlark.fluxengine.vfs;
 import com.cowlark.fluxengine.data.CylinderHead;
 import com.cowlark.fluxengine.data.DiskLayout;
 import com.cowlark.fluxengine.data.Image;
+import com.google.common.collect.ImmutableCollection;
+import java.util.Collection;
 
 public class InMemoryBlockDevice extends TrackedBlockDevice
 {
@@ -16,14 +18,16 @@ public class InMemoryBlockDevice extends TrackedBlockDevice
     }
 
     @Override
-    protected void populateTrack(Image destination, CylinderHead lch)
+    protected void populateTracks(Image destination, ImmutableCollection<CylinderHead> lchs)
     {
-        copySectors(image, destination, lch);
+        for (CylinderHead lch : lchs)
+            copySectors(image, destination, lch);
     }
 
     @Override
-    protected void commitTrack(Image source, CylinderHead lch)
+    protected void commitTracks(Image source, ImmutableCollection<CylinderHead> lchs)
     {
-        copySectors(source, image, lch);
+        for (CylinderHead lch : lchs)
+            copySectors(source, image, lch);
     }
 }

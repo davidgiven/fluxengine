@@ -5,8 +5,12 @@ import com.cowlark.fluxengine.data.CylinderHead;
 import com.cowlark.fluxengine.data.CylinderHeadSector;
 import com.cowlark.fluxengine.data.DiskLayout;
 import com.cowlark.fluxengine.data.Image;
+import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import java.io.IOException;
 import java.nio.file.FileSystemException;
+import java.util.Collection;
 
 public abstract class TrackedBlockDevice extends BlockDevice
 {
@@ -29,7 +33,7 @@ public abstract class TrackedBlockDevice extends BlockDevice
             return changedData.get(ll).data;
         if (originalData.contains(ll))
             return originalData.get(ll).data;
-        populateTrack(originalData, ll.trackLocation());
+        populateTracks(originalData, ImmutableList.of(ll.trackLocation()));
         return originalData.get(ll).data;
     }
 
@@ -40,17 +44,23 @@ public abstract class TrackedBlockDevice extends BlockDevice
         changedData.put(ll).data = block;
     }
 
-    protected abstract void commitTrack(Image source, CylinderHead lch);
+    protected abstract void commitTracks(Image source, ImmutableCollection<CylinderHead> lch);
 
-    protected abstract void populateTrack(Image destination, CylinderHead lch);
+    protected abstract void populateTracks(
+            Image destination,
+            ImmutableCollection<CylinderHead> lch);
 
     @Override
     public void commit()
     {
-        changedData.getLogicalLocations().stream().map(ll -> ll.trackLocation()).forEach(lch -> {
-            commitTrack(changedData, lch);
+        ImmutableSet.Builder<CylinderHead> changedTracks = ImmutableSet.builder();
+        for (CylinderHeadSector ll : changedData.getLogicalLocations())
+        {
+            CylinderHead lch = ll.trackLocation();
             copySectors(changedData, originalData, lch);
-        });
+            changedTracks.add(lch);
+        }
+        commitTracks(changedData, changedTracks.build());
         changedData = new Image();
     }
 

@@ -1,12 +1,13 @@
 package com.cowlark.fluxengine.fluxsource;
 
+import static com.cowlark.fluxengine.external.DriveType.DRIVETYPE_40TRACK;
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
 
-import com.cowlark.fluxengine.config.ConfigBuilder;
 import com.cowlark.fluxengine.config.ConfigProto;
+import com.cowlark.fluxengine.config.DriveProto;
 import com.cowlark.fluxengine.core.ByteWriter;
 import com.cowlark.fluxengine.core.Bytes;
-import com.cowlark.fluxengine.external.DriveType;
 import com.cowlark.fluxengine.external.Scp;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -82,11 +83,16 @@ public class ScpFluxSourceTest
         assertThat(iterator.next().rawBytes().toByteArray()).isEqualTo(expected.toByteArray());
         assertThat(iterator.hasNext()).isFalse();
 
-        ConfigBuilder configBuilder = new ConfigBuilder().set("usb.serial", "test-serial");
-        source.adjustConfig(configBuilder);
-        ConfigProto config = configBuilder.build();
-        assertThat(config.getDrive().getTracks()).isEqualTo("c0h0");
-        assertThat(config.getDrive().getDriveType()).isEqualTo(DriveType.DRIVETYPE_40TRACK);
+        assertThat(source.getExtraConfig())
+                .comparingExpectedFieldsOnly()
+                .isEqualTo(ConfigProto
+                        .newBuilder()
+                        .setDrive(DriveProto
+                                .newBuilder()
+                                .setTracks("c0h0")
+                                .setDriveType(DRIVETYPE_40TRACK)
+                                .build())
+                        .build());
     }
 
     @Test

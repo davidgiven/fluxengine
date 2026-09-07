@@ -18,8 +18,8 @@ import com.cowlark.fluxengine.algorithms.EndWriteOperationLogMessage;
 import com.cowlark.fluxengine.algorithms.ReadWriteFluxOperation;
 import com.cowlark.fluxengine.config.ConfigBuilder;
 import com.cowlark.fluxengine.config.ConfigProto;
-import com.cowlark.fluxengine.config.UsbFinder;
-import com.cowlark.fluxengine.config.UsbFinder.CandidateDevice;
+import com.cowlark.fluxengine.usb.UsbFinder;
+import com.cowlark.fluxengine.usb.UsbFinder.CandidateDevice;
 import com.cowlark.fluxengine.core.FluxEngineException;
 import com.cowlark.fluxengine.core.LogMessage;
 import com.cowlark.fluxengine.core.LogMessage.ErrorLogMessage;
@@ -158,9 +158,7 @@ public class ImagerViewModel
     void refreshUsbDevices()
     {
         usbDevices.set(Association
-                .between(
-                        String.class,
-                        com.cowlark.fluxengine.config.UsbFinder.CandidateDevice.class)
+                .between(String.class, UsbFinder.CandidateDevice.class)
                 .put(DEVICE_FLUXFILE, new CandidateDevice())
                 .put(DEVICE_SERIALPORT, new CandidateDevice())
                 .putAll(UsbFinder

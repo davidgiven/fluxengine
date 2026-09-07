@@ -1,9 +1,10 @@
 package com.cowlark.fluxengine.fluxsource;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
 
-import com.cowlark.fluxengine.config.ConfigBuilder;
 import com.cowlark.fluxengine.config.ConfigProto;
+import com.cowlark.fluxengine.config.DriveProto;
 import com.cowlark.fluxengine.external.FluxFileProto;
 import com.cowlark.fluxengine.external.FluxFileVersion;
 import com.cowlark.fluxengine.external.TrackFluxProto;
@@ -60,11 +61,16 @@ public class Fl2FluxSourceTest
                 .setHead(0)
                 .build())).isInstanceOf(EmptyFluxSourceIterator.class);
 
-        ConfigBuilder configBuilder = new ConfigBuilder().set("usb.serial", "test-serial");
-        source.adjustConfig(configBuilder);
-        ConfigProto config = configBuilder.build();
-        assertThat(config.getDrive().getTracks()).isEqualTo("c0h0");
-        assertThat(config.getDrive().getRotationalPeriodMs()).isEqualTo(200.0);
+        assertThat(source.getExtraConfig())
+                .comparingExpectedFieldsOnly()
+                .isEqualTo(ConfigProto
+                        .newBuilder()
+                        .setDrive(DriveProto
+                                .newBuilder()
+                                .setTracks("c0h0")
+                                .setRotationalPeriodMs(200.0)
+                                .build())
+                        .build());
     }
 
     @Test

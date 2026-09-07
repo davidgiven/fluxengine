@@ -3,6 +3,7 @@ package com.cowlark.fluxengine.data;
 import com.cowlark.fluxengine.core.FluxEngineException;
 import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -38,7 +39,7 @@ public class Locations
     {
         StringBuilder sb = new StringBuilder();
         boolean first = true;
-        for (CylinderHead ch : chs)
+        for (CylinderHead ch : chs.stream().sorted().collect(ImmutableList.toImmutableList()))
         {
             if (!first)
                 sb.append(' ');

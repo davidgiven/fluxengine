@@ -64,26 +64,15 @@ public interface Command
             .put("gui", GuiCommand::new)
             .build();
 
-    /* Consume arguments until we reach a real command, instantiate it, and
-     * run it with the tail of the argv array. */
     static boolean dispatch(
             Map<String, Supplier<? extends Command>> commands,
-            ImmutableList<String> args)
+            ImmutableList<String> args) throws Exception
     {
-        for (int index = 0; index < args.size(); index++)
+        Supplier<? extends Command> supplier = commands.get(args.getFirst());
+        if (supplier != null)
         {
-            Supplier<? extends Command> supplier = commands.get(args.get(index));
-            if (supplier != null)
-            {
-                try
-                {
-                    supplier.get().run(ImmutableList.copyOf(args.subList(index + 1, args.size())));
-                } catch (Exception e)
-                {
-                    throw new RuntimeException(e);
-                }
-                return true;
-            }
+            supplier.get().run(ImmutableList.copyOf(args.subList(1, args.size())));
+            return true;
         }
 
         return false;
