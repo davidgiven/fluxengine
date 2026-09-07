@@ -7,8 +7,10 @@ import com.cowlark.fluxengine.data.Image;
 import com.cowlark.fluxengine.data.LogicalTrackLayout;
 import com.cowlark.fluxengine.data.Sector;
 import com.cowlark.fluxengine.data.Track;
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
+import java.util.Collection;
 
 public class FluxBlockDevice extends TrackedBlockDevice
 {
@@ -21,44 +23,50 @@ public class FluxBlockDevice extends TrackedBlockDevice
     }
 
     @Override
-    protected void commitTrack(Image source, CylinderHead lch)
+    protected void commitTracks(Image source, ImmutableCollection<CylinderHead> lchs)
     {
-        LogicalTrackLayout ltl = diskLayout.layoutByLogicalLocation.get(lch);
         Image merged = new Image();
-        for (int sectorId : ltl.diskSectorOrder)
+        for (CylinderHead lch : lchs)
         {
-            CylinderHeadSector loc =
-                    new CylinderHeadSector(ltl.logicalCylinder, ltl.logicalHead, sectorId);
-            Sector sector = null;
-            if (source.contains(loc))
-                sector = source.get(loc);
-            else if (originalData.contains(loc))
-                sector = originalData.get(loc);
-
-            if (sector != null)
-                merged.put(loc).copyFrom(sector);
-            else
+            LogicalTrackLayout ltl = diskLayout.layoutByLogicalLocation.get(lch);
+            for (int sectorId : ltl.diskSectorOrder)
             {
-                Sector newSector = merged.put(loc);
-                newSector.data = new com.cowlark.fluxengine.core.Bytes(ltl.sectorSize);
-                newSector.status = Sector.Status.OK;
+                CylinderHeadSector loc =
+                        new CylinderHeadSector(ltl.logicalCylinder, ltl.logicalHead, sectorId);
+                Sector sector = null;
+                if (source.contains(loc))
+                    sector = source.get(loc);
+                else if (originalData.contains(loc))
+                    sector = originalData.get(loc);
+
+                if (sector != null)
+                    merged.put(loc).copyFrom(sector);
+                else
+                {
+                    Sector newSector = merged.put(loc);
+                    newSector.data = new com.cowlark.fluxengine.core.Bytes(ltl.sectorSize);
+                    newSector.status = Sector.Status.OK;
+                }
             }
         }
 
         Disk disk = new Disk();
         disk.image = merged;
-        fso.writeDisk(disk, ImmutableList.of(lch));
+        fso.writeDisk(disk, lchs);
     }
 
     @Override
-    protected void populateTrack(Image destination, CylinderHead lch)
+    protected void populateTracks(Image destination, ImmutableCollection<CylinderHead> lchs)
     {
-        LogicalTrackLayout ltl = diskLayout.layoutByLogicalLocation.get(lch);
-        ArrayList<Track> trackFluxes = new ArrayList<>();
-        ArrayList<Sector> trackSectors = new ArrayList<>();
-        fso.readAndDecodeTrack(ltl, trackFluxes, trackSectors);
+        for (CylinderHead lch : lchs)
+        {
+            LogicalTrackLayout ltl = diskLayout.layoutByLogicalLocation.get(lch);
+            ArrayList<Track> trackFluxes = new ArrayList<>();
+            ArrayList<Sector> trackSectors = new ArrayList<>();
+            fso.readAndDecodeTrack(ltl, trackFluxes, trackSectors);
 
-        for (Sector sector : trackSectors)
-            destination.put(sector.logicalLocation).copyFrom(sector);
+            for (Sector sector : trackSectors)
+                destination.put(sector.logicalLocation).copyFrom(sector);
+        }
     }
 }

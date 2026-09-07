@@ -10,6 +10,7 @@ import com.cowlark.fluxengine.data.CylinderHeadSector;
 import com.cowlark.fluxengine.data.DiskLayout;
 import com.cowlark.fluxengine.data.Image;
 import com.cowlark.fluxengine.testing.TestHelpers;
+import com.google.common.collect.ImmutableCollection;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
@@ -102,7 +103,7 @@ public class TrackedBlockDeviceTest
     /* ---- Parameterised commitTrack test ---- */
 
     @Test
-    public void populateTrackMapsBlockToCorrectTrack() throws IOException
+    public void populateTrackMapsBlockToCorrectTracks() throws IOException
     {
         DiskLayout diskLayout = getDiskLayout();
         Image image = new Image();
@@ -135,7 +136,7 @@ public class TrackedBlockDeviceTest
         device.putBlock(1, dataBlock(20));
         device.commit();
 
-        assertThat(device.commitTrackCalls).hasSize(2);
+        assertThat(device.commitTrackCalls).hasSize(1);
         assertThat(image.get(0, 0, 1).data.toByteArray()).isEqualTo(dataBlock(10).toByteArray());
         assertThat(image.get(0, 0, 2).data.toByteArray()).isEqualTo(dataBlock(20).toByteArray());
     }
@@ -159,7 +160,7 @@ public class TrackedBlockDeviceTest
     }
 
     @Test
-    public void populateTrackMultipleTracks() throws IOException
+    public void populateTracksMultipleTracks() throws IOException
     {
         DiskLayout diskLayout = getDiskLayout();
         Image image = new Image();
@@ -175,7 +176,7 @@ public class TrackedBlockDeviceTest
     }
 
     @Test
-    public void populateTrackDeduplicatesAcrossBlocks() throws IOException
+    public void populateTracksDeduplicatesAcrossBlocks() throws IOException
     {
         DiskLayout diskLayout = getDiskLayout();
         Image image = new Image();
@@ -245,17 +246,19 @@ public class TrackedBlockDeviceTest
         }
 
         @Override
-        protected void commitTrack(Image source, CylinderHead lch)
+        protected void commitTracks(Image source, ImmutableCollection<CylinderHead> lchs)
         {
-            commitTrackCalls.add(lch);
-            copySectors(source, image, lch);
+            commitTrackCalls.addAll(lchs);
+            for (CylinderHead lch : lchs)
+                copySectors(source, image, lch);
         }
 
         @Override
-        protected void populateTrack(Image destination, CylinderHead lch)
+        protected void populateTracks(Image destination, ImmutableCollection<CylinderHead> lchs)
         {
-            populateTrackCalls.add(lch);
-            copySectors(image, destination, lch);
+            populateTrackCalls.addAll(lchs);
+            for (CylinderHead lch : lchs)
+                copySectors(image, destination, lch);
         }
     }
 }
