@@ -1,9 +1,8 @@
 package com.cowlark.fluxengine.usb;
 
 import com.cowlark.fluxengine.config.ConfigProto;
-import com.cowlark.fluxengine.config.UsbFinder;
-import com.cowlark.fluxengine.config.UsbFinder.CandidateDevice;
 import com.cowlark.fluxengine.core.Logger;
+import com.cowlark.fluxengine.usb.UsbFinder.CandidateDevice;
 import lombok.SneakyThrows;
 import org.slf4j.LoggerFactory;
 import java.util.function.Consumer;

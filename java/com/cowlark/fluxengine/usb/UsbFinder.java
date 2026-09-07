@@ -1,5 +1,7 @@
-package com.cowlark.fluxengine.config;
+package com.cowlark.fluxengine.usb;
 
+import com.cowlark.fluxengine.config.ConfigException;
+import com.cowlark.fluxengine.config.ConfigProtoOrBuilder;
 import com.fazecast.jSerialComm.SerialPort;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;

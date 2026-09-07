@@ -1,6 +1,5 @@
 package com.cowlark.fluxengine.fluxsource;
 
-import com.cowlark.fluxengine.config.ConfigBuilder;
 import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.data.Fluxmap;
 import com.cowlark.fluxengine.wiring.FluxEngine;
@@ -26,9 +25,9 @@ public class TestPatternFluxSource extends TrivialFluxSource
     }
 
     @Override
-    public void adjustConfig(ConfigBuilder configBuilder)
+    public ConfigProto getExtraConfig()
     {
-        configBuilder.mergeConfig(extraConfig);
+        return extraConfig;
     }
 
     @Override

@@ -1,4 +1,4 @@
-package com.cowlark.fluxengine.config;
+package com.cowlark.fluxengine.usb;
 
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;

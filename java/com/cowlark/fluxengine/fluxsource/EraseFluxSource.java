@@ -1,6 +1,5 @@
 package com.cowlark.fluxengine.fluxsource;
 
-import com.cowlark.fluxengine.config.ConfigBuilder;
 import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.data.Fluxmap;
 
@@ -20,9 +19,9 @@ public class EraseFluxSource extends TrivialFluxSource
     }
 
     @Override
-    public void adjustConfig(ConfigBuilder configBuilder)
+    public ConfigProto getExtraConfig()
     {
-        configBuilder.mergeConfig(extraConfig);
+        return extraConfig;
     }
 
     @Override

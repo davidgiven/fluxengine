@@ -1,8 +1,10 @@
 package com.cowlark.fluxengine.fluxsource;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
 
-import com.cowlark.fluxengine.config.ConfigBuilder;
+import com.cowlark.fluxengine.config.ConfigProto;
+import com.cowlark.fluxengine.config.DriveProto;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -10,8 +12,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.stream.Collectors;
 
 @RunWith(JUnit4.class)
 public class KryofluxFluxSourceTest
@@ -37,10 +37,11 @@ public class KryofluxFluxSourceTest
                 .rawBytes()
                 .toByteArray()).isEqualTo(new byte[]{(byte) 0x8f});
 
-        ConfigBuilder configBuilder = new ConfigBuilder().set("usb.serial", "test-serial");
-        source.adjustConfig(configBuilder);
-        String tracks = configBuilder.build().getDrive().getTracks();
-        String sorted = Arrays.stream(tracks.split(" ")).sorted().collect(Collectors.joining(" "));
-        assertThat(sorted).isEqualTo("c80h0 c81h1");
+        assertThat(source.getExtraConfig())
+                .comparingExpectedFieldsOnly()
+                .isEqualTo(ConfigProto
+                        .newBuilder()
+                        .setDrive(DriveProto.newBuilder().setTracks("c80h0 c81h1").build())
+                        .build());
     }
 }

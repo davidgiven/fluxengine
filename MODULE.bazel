@@ -37,6 +37,7 @@ maven.install(
         "org.indunet:fastproto:4.1.0",
         "net.java.dev.jna:jna:5.19.1",
         "net.java.dev.jna:jna-platform:5.19.1",
+        "com.google.truth.extensions:truth-proto-extension:1.4.5",
     ],
     repositories = [
         "https://repo1.maven.org/maven2",

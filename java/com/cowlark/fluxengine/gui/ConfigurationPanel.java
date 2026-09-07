@@ -21,7 +21,7 @@ import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.config.OptionApplicabilityHint;
 import com.cowlark.fluxengine.config.OptionGroupProto;
 import com.cowlark.fluxengine.config.OptionProto;
-import com.cowlark.fluxengine.config.UsbFinder;
+import com.cowlark.fluxengine.usb.UsbFinder;
 import com.cowlark.fluxengine.data.Formats;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;

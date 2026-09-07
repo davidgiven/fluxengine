@@ -1,6 +1,5 @@
 package com.cowlark.fluxengine.fluxsource;
 
-import com.cowlark.fluxengine.config.ConfigBuilder;
 import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.core.FluxEngineException;
 import com.cowlark.fluxengine.usb.UsbFactory;
@@ -37,9 +36,10 @@ public abstract class FluxSource implements AutoCloseable
     {
     }
 
-    /* Adjusts the current configuration based on the contents of this flux source. */
-    public void adjustConfig(ConfigBuilder configBuilder)
+    /* Returns any adjustments required by the current config. */
+    public ConfigProto getExtraConfig()
     {
+        return null;
     }
 
     /* Read flux from a given cylinder and head. */

@@ -1,6 +1,5 @@
 package com.cowlark.fluxengine.fluxsource;
 
-import com.cowlark.fluxengine.config.ConfigBuilder;
 import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.core.ByteReader;
 import com.cowlark.fluxengine.core.Bytes;
@@ -108,9 +107,9 @@ public class A2RFluxSource extends FluxSource
     }
 
     @Override
-    public void adjustConfig(ConfigBuilder configBuilder)
+    public ConfigProto getExtraConfig()
     {
-        configBuilder.mergeConfig(extraConfig);
+        return extraConfig;
     }
 
     @Override

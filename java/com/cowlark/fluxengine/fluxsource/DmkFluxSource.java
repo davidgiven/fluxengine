@@ -1,6 +1,5 @@
 package com.cowlark.fluxengine.fluxsource;
 
-import com.cowlark.fluxengine.config.ConfigBuilder;
 import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.data.CylinderHead;
 import com.cowlark.fluxengine.data.Locations;
@@ -45,9 +44,9 @@ public class DmkFluxSource extends FluxSource
     }
 
     @Override
-    public void adjustConfig(ConfigBuilder configBuilder)
+    public ConfigProto getExtraConfig()
     {
-        configBuilder.mergeConfig(extraConfig);
+        return extraConfig;
     }
 
     @Override
