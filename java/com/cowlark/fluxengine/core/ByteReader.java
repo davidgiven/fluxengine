@@ -67,6 +67,12 @@ public final class ByteReader implements Iterator<Byte>
         return slice;
     }
 
+    public Bytes readPadded(int len)
+    {
+        int remaining = Math.min(len, remaining());
+        return read(remaining).slice(0, len);
+    }
+
     public void readInto(byte[] buffer, int length)
     {
         if (length > buffer.length)
