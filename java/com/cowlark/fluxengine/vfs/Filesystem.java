@@ -9,6 +9,7 @@ import com.google.common.collect.ImmutableSet;
 import lombok.Builder;
 import org.slf4j.LoggerFactory;
 import java.io.IOException;
+import java.nio.file.FileSystemException;
 
 public abstract class Filesystem implements AutoCloseable
 {
@@ -198,5 +199,22 @@ public abstract class Filesystem implements AutoCloseable
     public record Dirent(VfsPath path, String filename, int length, String mode, FileType fileType,
                          ImmutableMap<String, String> attributes)
     {
+    }
+
+    protected class FluxEngineFileSystemException extends FileSystemException
+    {
+        private final Exception cause;
+
+        public FluxEngineFileSystemException(String file, Exception cause)
+        {
+            super(file);
+            this.cause = cause;
+        }
+
+        @Override
+        public Exception getCause()
+        {
+            return cause;
+        }
     }
 }
