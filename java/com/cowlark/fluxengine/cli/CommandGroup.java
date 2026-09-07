@@ -27,7 +27,7 @@ public class CommandGroup implements Command
     }
 
     @Override
-    public void run(ImmutableList<String> args)
+    public void run(ImmutableList<String> args) throws Exception
     {
         if (args.getFirst().startsWith("-"))
             throw new FluxEngineException("CLI verbs must come before all options, sorry!");
