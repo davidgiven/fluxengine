@@ -114,7 +114,7 @@ choices because they can store multiple types of file system.
 
 | Profile | Format | Read? | Write? | Filesystem? |
 |:--------|:-------|:-----:|:------:|:------------|
-| [`abc`](doc/disk-abc.md) | Ai Electronics ABC-24 CP/M: Ai Electronics ABC-24 CP/M physical disk format: 35 tracks, 2 sides, 9 x 512-byte sectors, IBM-scheme MFM, 40-track (48 TPI) media. |  |  |  |
+| [`abc`](doc/disk-abc.md) | Ai Electronics ABC 24: CP/M; 158kB 35-track DSDD | 🦄 |  | CPMFS  |
 | [`acornadfs`](doc/disk-acornadfs.md) | Acorn ADFS: BBC Micro, Archimedes | 🦖 |  |  |
 | [`acorndfs`](doc/disk-acorndfs.md) | Acorn DFS: Acorn Atom, BBC Micro series | 🦄 |  | ACORNDFS  |
 | [`aeslanier`](doc/disk-aeslanier.md) | AES Lanier "No Problem": 616kB 5.25" 77-track SSDD hard sectored | 🦖 |  |  |
