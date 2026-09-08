@@ -1,35 +1,70 @@
 package com.cowlark.fluxengine.vfs;
 
+import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_CREATE;
+import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_DELETE;
 import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_GETDIRENT;
 import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_GETFILE;
 import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_GETFSDATA;
 import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_LIST;
+import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_PUTFILE;
 import static com.cowlark.fluxengine.vfs.Filesystem.FileType.IS_FILE;
+import static com.google.common.collect.ImmutableList.toImmutableList;
+import static com.google.common.collect.ImmutableListMultimap.toImmutableListMultimap;
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
+import static java.util.Arrays.stream;
+import static org.apache.commons.lang3.StringUtils.stripEnd;
+import static org.apache.commons.lang3.StringUtils.substring;
 
 import com.cowlark.fluxengine.core.ByteReader;
 import com.cowlark.fluxengine.core.ByteWriter;
 import com.cowlark.fluxengine.core.Bytes;
-import com.cowlark.fluxengine.data.CylinderHead;
 import com.cowlark.fluxengine.data.CylinderHeadSector;
+import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.io.Files;
+import org.apache.commons.lang3.ArrayUtils;
+import org.indunet.fastproto.FastProto;
+import org.indunet.fastproto.annotation.DecodingFormula;
+import org.indunet.fastproto.annotation.EncodingFormula;
+import org.indunet.fastproto.annotation.Expect;
+import org.indunet.fastproto.annotation.StringType;
+import org.indunet.fastproto.annotation.StructArrayType;
+import org.indunet.fastproto.annotation.UInt8ArrayType;
+import org.indunet.fastproto.annotation.UInt8Type;
+import org.indunet.fastproto.exception.DecodingException;
+import org.indunet.fastproto.exception.EncodingException;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystemException;
 import java.nio.file.InvalidPathException;
 import java.nio.file.NoSuchFileException;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.Comparator;
+import java.util.function.Function;
 
 public class RolandFilesystem extends Filesystem
 {
-    private static final ImmutableSet<Capability> CAPABILITIES =
-            ImmutableSet.of(OP_GETFSDATA, OP_LIST, OP_GETFILE, OP_GETDIRENT);
+    public final static int NUM_DIRECTORY_ENTRIES = 79;
+    public final static int SECTOR_SIZE = 256;
+    public final static int BLOCK_SIZE = 12 * SECTOR_SIZE; /* one track */
+    public final static int BLOCK_SECTORS = BLOCK_SIZE / SECTOR_SIZE;
+    public final static int DIRECTORY_TRACK = 39;
+    public final static int DIRECTORY_SECTOR = DIRECTORY_TRACK * BLOCK_SECTORS;
+    public final static int EXTENT_BLOCKS = 16;
+
+    private static final ImmutableSet<Capability> CAPABILITIES = ImmutableSet.of(
+            OP_GETFSDATA,
+            OP_CREATE,
+            OP_LIST,
+            OP_DELETE,
+            OP_GETFILE,
+            OP_PUTFILE,
+            OP_GETDIRENT);
 
     private final RolandFsProto config;
     private final BlockDevice blockDevice;
+    private Geometry geometry = null;
 
     public RolandFilesystem(RolandFsProto config, BlockDevice blockDevice)
     {
@@ -38,128 +73,120 @@ public class RolandFilesystem extends Filesystem
         this.blockDevice = blockDevice;
     }
 
-    private static String unmangleFilename(String mangled)
+    private static String getFilename(VfsPath path)
     {
-        String extension = mangled.substring(10);
-        int end = extension.length();
-        while (end > 0 && extension.charAt(end - 1) == '_')
-            end--;
-        extension = extension.substring(0, end);
-
-        String root = mangled.substring(0, 10);
-        end = root.length();
-        while (end > 0 && root.charAt(end - 1) == '_')
-            end--;
-        root = root.substring(0, end);
-
-        if (!extension.isEmpty())
-            return root + "." + extension;
-        return root;
+        if (path.segments().size() != 1)
+            throw new InvalidPathException(path.toString(), "Bad path");
+        return path.segments().getFirst();
     }
 
-    private int getBlockSize()
+    private static boolean isFile(RolandDirent de)
     {
-        if (config != null)
-            return config.getBlockSize();
-        return 3072;
+        return (de.flag == 0) && !de.filename.isEmpty();
     }
 
-    private int getDirectoryTrack()
+    private static ImmutableList<RolandDirent> findFileFor(
+            RolandDirectory directory,
+            String filename)
     {
-        if (config != null)
-            return config.getDirectoryTrack();
-        return 39;
+        return stream(directory.dirents)
+                .filter(dirent -> isFile(dirent) && dirent.filename.equals(filename))
+                .collect(toImmutableList());
     }
 
-    private int getDirectoryEntries()
+    private static ImmutableList<RolandDirent> findExistingFileFor(
+            RolandDirectory directory,
+            String filename) throws NoSuchFileException
     {
-        if (config != null)
-            return config.getDirectoryEntries();
-        return 79;
+        ImmutableList<RolandDirent> des = findFileFor(directory, filename);
+        if (des.isEmpty())
+            throw new NoSuchFileException(filename);
+        return des;
     }
 
-    private int getLogicalSectorSize()
+    private static int allocateBlock(RolandDirectory dir) throws FileSystemException
     {
-        // corresponds to getLogicalSectorSize(0,0) in C++
-        CylinderHead ch = new CylinderHead(0, 0);
-        var ltl = blockDevice.diskLayout.layoutByLogicalLocation.get(ch);
-        if (ltl != null)
-            return ltl.sectorSize;
-        // fallback to blockDevice block size if layout not found
-        return blockDevice.getBlockSize();
+        int firstFreeBlock = ArrayUtils.indexOf(dir.allocationBitmap, 0);
+        if (firstFreeBlock == -1)
+            throw new FileSystemException("no room");
+        dir.allocationBitmap[firstFreeBlock] = 0xff;
+        return firstFreeBlock;
     }
 
-    private int getLogicalSectorCount()
+    private static RolandDirent allocateDirent(RolandDirectory dir, String filename, int extent)
+            throws FileSystemException
     {
-        return blockDevice.getBlockCount();
+        RolandDirent firstFreeDirent = stream(dir.dirents)
+                .filter(de -> !isFile(de))
+                .findFirst()
+                .orElseThrow(() -> new FileSystemException("catalogue full"));
+        firstFreeDirent.flag = 0;
+        firstFreeDirent.extent = extent;
+        firstFreeDirent.filename = filename;
+        firstFreeDirent.blocks = new int[EXTENT_BLOCKS];
+        return firstFreeDirent;
     }
 
-    private int getOffsetOfSector(int track, int side, int sector) throws IOException
-    {
-        CylinderHeadSector loc = new CylinderHeadSector(track, side, sector);
-        Long offset = blockDevice.diskLayout.sectorOffsetByLogicalSectorLocation.get(loc);
-        if (offset == null)
-            throw new FileSystemException("sector not found: " + loc);
-        return offset.intValue();
-    }
-
-    private Geometry computeGeometry() throws IOException
+    private Geometry computeGeometry()
     {
         Geometry g = new Geometry();
-        g.blockSize = getBlockSize();
-        g.directoryTrack = getDirectoryTrack();
-        g.directoryEntries = getDirectoryEntries();
-        g.sectorSize = getLogicalSectorSize();
-        if (g.sectorSize == 0)
-            g.sectorSize = 256;
-        g.blockSectors = g.blockSize / g.sectorSize;
-        if (g.blockSectors <= 0)
-            g.blockSectors = 1;
-        int totalSectors = getLogicalSectorCount();
-        g.filesystemBlocks = totalSectors / g.blockSectors;
-        try
-        {
-            g.directoryByteOffset = getOffsetOfSector(g.directoryTrack, 0, 0);
-        } catch (IOException e)
-        {
-            // fallback to linear calculation if layout lookup fails
-            g.directoryByteOffset = g.directoryTrack * g.blockSectors * g.sectorSize;
-        }
-        g.directorySector = g.directoryByteOffset / g.sectorSize;
-        g.midBlock = (totalSectors - g.directorySector) / g.blockSectors;
+        int totalSectors = blockDevice.getBlockCount();
+        g.filesystemBlocks = totalSectors / BLOCK_SECTORS;
+        g.directoryByteOffset = DIRECTORY_TRACK * BLOCK_SECTORS * SECTOR_SIZE;
+        g.midBlock = (totalSectors - DIRECTORY_SECTOR) / BLOCK_SECTORS;
         return g;
     }
 
-    private int blockToLogicalSectorNumber(int block, Geometry g)
+    private int blockToLogicalSectorNumber(int block)
     {
         int track;
-        if (block < g.midBlock)
-            track = g.directoryTrack + block;
+        if (block < geometry.midBlock)
+            track = DIRECTORY_TRACK + block;
         else
-            track = g.directoryTrack - (1 + block - g.midBlock);
-        return track * g.blockSectors;
+            track = DIRECTORY_TRACK - (1 + block - geometry.midBlock);
+        return track * BLOCK_SECTORS;
     }
 
-    private Bytes getRolandBlock(int number, Geometry g) throws IOException
+    private Bytes getRolandBlock(int number) throws IOException
     {
-        int lba = blockToLogicalSectorNumber(number, g);
-        return blockDevice.getBlocks(lba, g.blockSectors);
+        int lba = blockToLogicalSectorNumber(number);
+        return blockDevice.getBlocks(lba, BLOCK_SECTORS);
+    }
+
+    private void putRolandBlock(int number, Bytes data) throws IOException
+    {
+        int lba = blockToLogicalSectorNumber(number);
+        blockDevice.putBlocks(lba, data);
     }
 
     @Override
-    public void check()
+    public void create(boolean quick, String volumeName) throws IOException
     {
+        geometry = computeGeometry();
+        RolandDirectory dir = new RolandDirectory();
+        dir.numBlocks = geometry.filesystemBlocks;
+        dir.allocationBitmap = new int[geometry.filesystemBlocks];
+        dir.allocationBitmap[0] = 0xff;
+        dir.dirents = new RolandDirent[NUM_DIRECTORY_ENTRIES];
+        for (int i = 0; i < NUM_DIRECTORY_ENTRIES; i++)
+        {
+            RolandDirent de = new RolandDirent();
+            de.flag = 0xe5;
+            dir.dirents[i] = de;
+        }
+        unmount(dir);
     }
 
     @Override
     public ImmutableMap<String, String> getFilesystemMetadata() throws IOException
     {
-        RolandDirectory dir = new RolandDirectory();
+        RolandDirectory dir = mount();
+        BlockUsage blockUsage = countBlocks(dir);
         ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
         builder.put(Attributes.VOLUME_NAME, "");
-        builder.put(Attributes.TOTAL_BLOCKS, Integer.toString(dir.totalBlocks));
-        builder.put(Attributes.USED_BLOCKS, Integer.toString(dir.usedBlocks));
-        builder.put(Attributes.BLOCK_SIZE, Integer.toString(dir.geometry.blockSize));
+        builder.put(Attributes.TOTAL_BLOCKS, Integer.toString(blockUsage.totalBlocks));
+        builder.put(Attributes.USED_BLOCKS, Integer.toString(blockUsage.usedBlocks));
+        builder.put(Attributes.BLOCK_SIZE, Integer.toString(BLOCK_SIZE));
         return builder.build();
     }
 
@@ -169,48 +196,108 @@ public class RolandFilesystem extends Filesystem
         if (!path.isRoot())
             throw new NoSuchFileException(path.toString());
 
-        RolandDirectory dir = new RolandDirectory();
-        ImmutableMap.Builder<String, Dirent> builder = ImmutableMap.builder();
-        for (RolandEntry de : dir.dirents)
-            builder.put(de.filename, de.dirent);
-        return builder.build();
+        RolandDirectory dir = mount();
+        return stream(dir.dirents)
+                .filter(RolandFilesystem::isFile)
+                .collect(toImmutableListMultimap(de -> de.filename, de -> de))
+                .asMap()
+                .values()
+                .stream()
+                .map(des -> getDirentFor((ImmutableCollection<RolandDirent>) des))
+                .collect(toImmutableMap(Dirent::filename, de -> de));
     }
 
     @Override
     public Dirent getDirent(VfsPath path) throws IOException
     {
-        if (path.segments().size() != 1)
-            throw new InvalidPathException(path.toString(), "Bad path");
+        var filename = getFilename(path);
 
-        RolandDirectory dir = new RolandDirectory();
-        String wanted = path.segments().get(0);
-        return dir.findFile(wanted).dirent;
+        RolandDirectory dir = mount();
+        return getDirentFor(findExistingFileFor(dir, filename));
     }
 
     @Override
     public Bytes getFile(VfsPath path) throws IOException
     {
-        if (path.segments().size() != 1)
-            throw new InvalidPathException(path.toString(), "Bad path");
+        String filename = getFilename(path);
 
-        RolandDirectory dir = new RolandDirectory();
-        String wanted = path.segments().get(0);
-        RolandEntry de = dir.findFile(wanted);
+        RolandDirectory dir = mount();
+        ImmutableList<RolandDirent> des = findExistingFileFor(dir, filename);
 
         Bytes data = new Bytes();
         ByteWriter bw = new ByteWriter(data);
-        for (int blockNum : de.blocks)
+        for (RolandDirent de : des)
         {
-            Bytes blockData = getRolandBlock(blockNum, dir.geometry);
-            bw.write(blockData);
+            for (int i = 0; i < de.blocks.length; i++)
+            {
+                int blockNumber = de.blocks[i];
+                if (blockNumber != 0)
+                {
+                    Bytes blockData = getRolandBlock(blockNumber);
+                    bw.seek((de.extent * 16 + i) * BLOCK_SIZE);
+                    bw.write(blockData);
+                }
+            }
         }
-        // truncate to actual file length (blocks * blockSize, but for safety)
-        // In C++ they return full concatenated blocks; we keep same without extra truncate.
-        // However task says truncate, so ensure we don't exceed expected length.
-        int expectedLength = de.blocks.size() * dir.geometry.blockSize;
-        if (data.size() > expectedLength)
-            data.resize(expectedLength);
         return data;
+    }
+
+    @Override
+    public void putFile(VfsPath path, Bytes bytes) throws IOException
+    {
+        String filename = getFilename(path);
+
+        RolandDirectory dir = mount();
+        try
+        {
+            deleteDes(dir, findExistingFileFor(dir, filename));
+        } catch (NoSuchFileException e)
+        {
+        }
+
+        int oldExtent = -1;
+        RolandDirent de = null;
+        ByteReader br = new ByteReader(bytes);
+        do
+        {
+            int blockCount = br.pos() / BLOCK_SIZE;
+            int newExtent = blockCount / EXTENT_BLOCKS;
+            if (newExtent != oldExtent)
+            {
+                de = allocateDirent(dir, filename, newExtent);
+                oldExtent = newExtent;
+            }
+
+            int blockIndexInExtent = blockCount % EXTENT_BLOCKS;
+            Bytes data = br.readPadded(BLOCK_SIZE);
+            int blockNumber = allocateBlock(dir);
+            de.blocks[blockIndexInExtent] = blockNumber;
+            putRolandBlock(blockNumber, data);
+        } while (!br.eof());
+
+        unmount(dir);
+    }
+
+    @Override
+    public void deleteFile(VfsPath path) throws IOException
+    {
+        String filename = getFilename(path);
+
+        RolandDirectory dir = mount();
+        deleteDes(dir, findExistingFileFor(dir, filename));
+        unmount(dir);
+    }
+
+    private void deleteDes(RolandDirectory dir, ImmutableCollection<RolandDirent> des)
+    {
+        for (RolandDirent de : des)
+        {
+            de.flag = 0xe5;
+            for (int block : de.blocks)
+                if (block != 0)
+                    dir.allocationBitmap[block] = 0;
+            de.blocks = new int[EXTENT_BLOCKS];
+        }
     }
 
     @Override
@@ -237,142 +324,129 @@ public class RolandFilesystem extends Filesystem
         blockDevice.revert();
     }
 
+    private Dirent getDirentFor(ImmutableCollection<RolandDirent> de)
+    {
+        RolandDirent lastDe = de.stream().max(Comparator.comparing(d -> d.extent)).get();
+        int lastBlockCount = ArrayUtils.indexOf(lastDe.blocks, 0);
+        if (lastBlockCount == -1)
+            lastBlockCount = EXTENT_BLOCKS;
+
+        int length = (lastDe.extent * EXTENT_BLOCKS + lastBlockCount) * BLOCK_SIZE;
+        ImmutableMap.Builder<String, String> attrs = ImmutableMap.builder();
+        attrs.put(Attributes.FILENAME, lastDe.filename);
+        attrs.put(Attributes.LENGTH, Integer.toString(length));
+        attrs.put(Attributes.FILE_TYPE, "file");
+
+        return Dirent
+                .builder()
+                .setPath(VfsPath.of("/").resolve(lastDe.filename))
+                .setFilename(lastDe.filename)
+                .setLength(length)
+                .setMode("")
+                .setFileType(IS_FILE)
+                .setAttributes(attrs.build())
+                .build();
+    }
+
+    private BlockUsage countBlocks(RolandDirectory directory)
+    {
+        int totalBlocks = 0;
+        int usedBlocks = 0;
+        for (int i = 0; i < geometry.filesystemBlocks; i++)
+        {
+            totalBlocks++;
+            if (directory.allocationBitmap[i] != 0)
+                usedBlocks++;
+        }
+        return new BlockUsage(totalBlocks, usedBlocks);
+    }
+
+    private RolandDirectory mount() throws IOException
+    {
+        geometry = computeGeometry();
+        Bytes directory = getRolandBlock(0);
+
+        try
+        {
+            return FastProto.decode(directory.toByteArray(), RolandDirectory.class);
+        } catch (DecodingException e)
+        {
+            throw new FluxEngineFileSystemException("Invalid filesystem", e);
+        }
+    }
+
+    private void unmount(RolandDirectory dir) throws IOException
+    {
+        try
+        {
+            Bytes bytes = new Bytes(FastProto.encode(dir));
+            putRolandBlock(0, bytes);
+        } catch (EncodingException e)
+        {
+            throw new FluxEngineFileSystemException("Invalid filesystem", e);
+        }
+    }
+
     private static class Geometry
     {
-        int blockSize;
-        int directoryTrack;
-        int directoryEntries;
-        int sectorSize;
-        int blockSectors;
         int filesystemBlocks;
         int midBlock;
         int directoryByteOffset;
-        int directorySector;
     }
 
-    private static class RolandEntry
+    public static class RolandDirent
     {
-        String filename;
-        List<Integer> blocks = new ArrayList<>();
-        Dirent dirent;
+        @UInt8Type(offset = 0) public int flag;
 
-        RolandEntry(String filename)
+        @EncodingFormula(FilenameEncoder.class) @DecodingFormula(FilenameDecoder.class)
+        @StringType(offset = 1, length = 13) public String filename;
+
+        @UInt8Type(offset = 15) public int extent;
+        @UInt8ArrayType(offset = 16, length = 16) public int[] blocks;
+
+        public static class FilenameDecoder implements Function<String, String>
         {
-            this.filename = filename;
+            @Override
+            public String apply(String s)
+            {
+                String base = stripEnd(substring(s, 0, 10), "_ \0");
+                String ext = stripEnd(substring(s, 10), "_ \0");
+                if (base.isEmpty())
+                    return "";
+                if (ext.isEmpty())
+                    return base;
+                return base + "." + ext;
+            }
+        }
+
+        public static class FilenameEncoder implements Function<String, String>
+        {
+            @Override
+            public String apply(String s)
+            {
+                String base = Files.getNameWithoutExtension(s);
+                String ext = Files.getFileExtension(s);
+
+                return Strings.padEnd(base, 10, '_') + Strings.padEnd(ext, 3, '_');
+            }
         }
     }
 
-    private class RolandDirectory
+    public static class RolandDirectory
     {
-        Geometry geometry;
-        List<RolandEntry> dirents = new ArrayList<>();
-        Map<String, RolandEntry> map = new LinkedHashMap<>();
-        int usedBlocks;
-        int totalBlocks;
+        @Expect(offset = 1,
+                bytes = {'R', 'O', 'L', 'A', 'N', 'D', '-', 'G', 'C', 'R', 'D', 'O', 'S'})
+        public transient int _magic;
 
-        RolandDirectory() throws IOException
-        {
-            geometry = computeGeometry();
-            Bytes directory = getRolandBlock(0, geometry);
-            if (directory.size() < 32)
-                throw new FileSystemException("Invalid filesystem");
+        @UInt8Type(offset = 14) public int numBlocks;
 
-            ByteReader hdrReader = new ByteReader(directory);
-            hdrReader.seek(1);
-            if (hdrReader.remaining() < 13)
-                throw new FileSystemException("Invalid filesystem");
-            Bytes hdrBytes = hdrReader.read(13);
-            String hdr = new String(hdrBytes.toByteArray(), StandardCharsets.ISO_8859_1);
-            if (!"ROLAND-GCRDOS".equals(hdr))
-                throw new FileSystemException("Invalid filesystem");
+        @StructArrayType(offset = 32, length = NUM_DIRECTORY_ENTRIES, element = RolandDirent.class)
+        public RolandDirent[] dirents;
 
-            ByteReader br = new ByteReader(directory);
-            br.seek(32);
+        @UInt8ArrayType(offset = 0xa00, lengthRef = "$numBlocks") public int[] allocationBitmap;
+    }
 
-            for (int i = 0; i < geometry.directoryEntries; i++)
-            {
-                if (br.remaining() < 32)
-                    break;
-                Bytes direntBytes = br.read(32);
-                if ((direntBytes.getByte(0) & 0xff) != 0)
-                    continue;
-
-                int extent = direntBytes.getByte(15) & 0xff;
-                Bytes mangledBytes = direntBytes.slice(1, 13);
-                String mangled =
-                        new String(mangledBytes.toByteArray(), StandardCharsets.ISO_8859_1);
-                String filename = unmangleFilename(mangled);
-                if (filename.isEmpty())
-                    continue;
-
-                RolandEntry de = map.get(filename);
-                if (de == null)
-                {
-                    de = new RolandEntry(filename);
-                    map.put(filename, de);
-                    dirents.add(de);
-                }
-
-                for (int j = 0; j < 16; j++)
-                {
-                    int blockNumber = direntBytes.getByte(16 + j) & 0xff;
-                    if (blockNumber == 0)
-                        break;
-                    int offset = extent * 16 + j;
-                    while (de.blocks.size() <= offset)
-                        de.blocks.add(0);
-                    de.blocks.set(offset, blockNumber);
-                }
-            }
-
-            // Trim trailing zeros that may have been left as placeholders?
-            // In C++ blocks size is offset+1; no gaps, so we keep as is.
-            // But ensure we remove trailing zeros if any
-            for (RolandEntry de : dirents)
-            {
-                // Remove trailing zero padding if any (should not happen)
-                while (!de.blocks.isEmpty() && de.blocks.get(de.blocks.size() - 1) == 0)
-                    de.blocks.remove(de.blocks.size() - 1);
-
-                int length = de.blocks.size() * geometry.blockSize;
-                ImmutableMap.Builder<String, String> attrs = ImmutableMap.builder();
-                attrs.put(Attributes.FILENAME, de.filename);
-                attrs.put(Attributes.LENGTH, Integer.toString(length));
-                attrs.put(Attributes.FILE_TYPE, "file");
-                attrs.put(Attributes.MODE, "");
-
-                de.dirent = Dirent
-                        .builder()
-                        .setPath(VfsPath.of("/").resolve(de.filename))
-                        .setFilename(de.filename)
-                        .setLength(length)
-                        .setMode("")
-                        .setFileType(IS_FILE)
-                        .setAttributes(attrs.build())
-                        .build();
-            }
-
-            // allocation bitmap at 0xa00
-            br.seek(0xa00);
-            int used = 0;
-            for (int i = 0; i < geometry.filesystemBlocks; i++)
-            {
-                if (br.eof())
-                    break;
-                int v = br.read8() & 0xff;
-                if (v != 0)
-                    used++;
-            }
-            usedBlocks = used;
-            totalBlocks = geometry.filesystemBlocks;
-        }
-
-        RolandEntry findFile(String wanted) throws IOException
-        {
-            RolandEntry de = map.get(wanted);
-            if (de == null)
-                throw new NoSuchFileException(wanted);
-            return de;
-        }
+    record BlockUsage(int totalBlocks, int usedBlocks)
+    {
     }
 }

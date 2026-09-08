@@ -92,8 +92,9 @@ public abstract class BlockDevice implements AutoCloseable
 
         while (!br.eof())
         {
-            Bytes block = br.read(getBlockSize());
-            putBlock(blockNumber++, block);
+            Bytes block = br.readPadded(getBlockSize());
+            putBlock(blockNumber, block);
+            blockNumber++;
         }
     }
 

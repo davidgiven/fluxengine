@@ -1,6 +1,7 @@
 package com.cowlark.fluxengine.cli;
 
 import com.cowlark.fluxengine.config.ConfigBuilder;
+import com.cowlark.fluxengine.core.LogMessage;
 import com.cowlark.fluxengine.core.Logger;
 import com.cowlark.fluxengine.core.flags.BoolFlag;
 import com.cowlark.fluxengine.core.flags.FlagGroup;
@@ -48,8 +49,12 @@ public abstract class AbstractVfsCommand implements Command
 
         if (!loggingFlag.get())
         {
-            Logger.setLogger(Consumers.nop());
+            Logger.setLogger(AbstractVfsCommand::log);
             System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "ERROR");
         }
+    }
+
+    private static void log(LogMessage message)
+    {
     }
 }

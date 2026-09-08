@@ -1,7 +1,10 @@
 package com.cowlark.fluxengine.vfs;
 
+import static com.cowlark.fluxengine.vfs.RolandFilesystem.BLOCK_SIZE;
+
 import com.cowlark.fluxengine.config.ConfigBuilder;
 import com.cowlark.fluxengine.config.ConfigProto;
+import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.data.DiskLayout;
 import com.cowlark.fluxengine.data.Image;
 import com.cowlark.fluxengine.testing.TestHelpers;
@@ -30,6 +33,12 @@ public class RolandFilesystemTest extends GenericFilesystemTest
         diskLayout = new DiskLayout(configProto);
         image = new Image();
         createTestFilesystem();
+    }
+
+    @Override
+    protected Bytes getTestFileData(String contents)
+    {
+        return super.getTestFileData(contents).slice(0, BLOCK_SIZE);
     }
 
     @Override

@@ -126,6 +126,7 @@ public class ByteReaderTest
         assertThrows(IndexOutOfBoundsException.class, () -> reader.seek(2).readBe16());
         assertThrows(IndexOutOfBoundsException.class, () -> reader.seek(0).readBe32());
         assertThrows(IndexOutOfBoundsException.class, () -> reader.seek(0).read(4));
+        assertThat(reader.seek(0).readPadded(4)).isEqualTo(Bytes.of(1, 2, 3, 0));
     }
 
     @Test

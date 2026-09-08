@@ -109,10 +109,6 @@ message RolandFsProto
 {
   optional uint32 directory_track = 1
   [(help) = "position of the directory", default = 39];
-  optional uint32 block_size = 2
-  [(help) = "filesystem block size", default = 3072];
-  optional uint32 directory_entries = 3
-  [(help) = "number of directory entries", default = 79];
 }
 
 // NEXT_TAG: 18
