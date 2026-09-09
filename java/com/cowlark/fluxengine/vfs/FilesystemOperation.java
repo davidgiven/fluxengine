@@ -54,6 +54,7 @@ public class FilesystemOperation extends ReadWriteFluxOperation
         } catch (Exception e)
         {
             filesystem.discardChanges();
+            throw e;
         }
     }
 

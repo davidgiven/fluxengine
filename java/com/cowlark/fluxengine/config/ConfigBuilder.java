@@ -182,7 +182,11 @@ public class ConfigBuilder
         {
             ConfigProto extraConfig = fluxSource.getExtraConfig();
             if (extraConfig != null)
-                proto.mergeFrom(extraConfig);
+            {
+                /* This merge is backwards so that options set on the command line take precedence
+                 * over what's in the image. */
+                proto = extraConfig.toBuilder().mergeFrom(proto.build());
+            }
         } catch (FluxEngineException e)
         {
             /* File not found --- ignore. */
@@ -268,7 +272,11 @@ public class ConfigBuilder
         {
             ConfigProto extraConfig = reader.getExtraConfig();
             if (extraConfig != null)
-                proto.mergeFrom(extraConfig);
+            {
+                /* This merge is backwards so that options set on the command line take precedence
+                 * over what's in the image. */
+                proto = extraConfig.toBuilder().mergeFrom(proto.build());
+            }
         }
         return this;
     }
