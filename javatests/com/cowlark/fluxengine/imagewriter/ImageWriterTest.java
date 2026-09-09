@@ -137,7 +137,7 @@ public class ImageWriterTest
     }
 
     @Test
-    public void d64EmptyImageWritesNothing() throws Exception
+    public void d64IsEmptyImageWritesNothing() throws Exception
     {
         Image image = new Image();
 

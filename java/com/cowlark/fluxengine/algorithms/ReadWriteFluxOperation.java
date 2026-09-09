@@ -206,6 +206,11 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
         diskRotationalPeriodNs = configProto.getDrive().getRotationalPeriodMs() * 1e6;
         if (diskRotationalPeriodNs == 0)
         {
+            if (!getFluxSource().isHardware() && !getFluxSinkFactory().isHardware())
+                throw new FluxEngineException(
+                        "Don't know the rotational speed of the disk; you'll need to set it " +
+                                "manually with --drive.rotational_period_ms=xxx");
+
             usbFactorySupplier.get().perform(device -> {
                 Logger.log(new BeginOperationLogMessage("Measuring drive rotational speed"));
                 Logger.log(new BeginSpeedOperationLogMessage());
@@ -848,7 +853,7 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
                                 sector.logicalLocation.head(),
                                 sector.logicalLocation.sector());
                     }
-                    if (!wanted.empty())
+                    if (!wanted.isEmpty())
                     {
                         Logger.logf("missing sector on verify");
                         return false;

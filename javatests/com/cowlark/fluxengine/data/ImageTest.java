@@ -18,11 +18,11 @@ public class ImageTest
     }
 
     @Test
-    public void emptyImageHasNoSectors()
+    public void isEmptyImageHasNoSectors()
     {
         Image image = new Image();
 
-        assertThat(image.empty()).isTrue();
+        assertThat(image.isEmpty()).isTrue();
         assertThat(image.iterator().hasNext()).isFalse();
     }
 

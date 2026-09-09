@@ -2,7 +2,6 @@ package com.cowlark.fluxengine.data;
 
 import com.cowlark.fluxengine.core.Bytes;
 import com.google.common.collect.ImmutableSortedSet;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -21,7 +20,7 @@ public class Image implements Iterable<Sector>
     {
     }
 
-    public Image(Collection<Sector> sectors)
+    public Image(Iterable<Sector> sectors)
     {
         for (Sector sector : sectors)
             this.sectors.put(sector.logicalLocation, sector);
@@ -56,7 +55,7 @@ public class Image implements Iterable<Sector>
         geometry = new Geometry();
     }
 
-    public boolean empty()
+    public boolean isEmpty()
     {
         return sectors.isEmpty();
     }
