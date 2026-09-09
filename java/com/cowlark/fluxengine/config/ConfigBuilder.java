@@ -1,29 +1,16 @@
 package com.cowlark.fluxengine.config;
 
-import static com.cowlark.fluxengine.config.FluxSourceSinkType.FLUXTYPE_A2R;
-import static com.cowlark.fluxengine.config.FluxSourceSinkType.FLUXTYPE_AU;
-import static com.cowlark.fluxengine.config.FluxSourceSinkType.FLUXTYPE_CWF;
-import static com.cowlark.fluxengine.config.FluxSourceSinkType.FLUXTYPE_DMK;
 import static com.cowlark.fluxengine.config.FluxSourceSinkType.FLUXTYPE_DRIVE;
-import static com.cowlark.fluxengine.config.FluxSourceSinkType.FLUXTYPE_ERASE;
-import static com.cowlark.fluxengine.config.FluxSourceSinkType.FLUXTYPE_FLUX;
-import static com.cowlark.fluxengine.config.FluxSourceSinkType.FLUXTYPE_FLX;
-import static com.cowlark.fluxengine.config.FluxSourceSinkType.FLUXTYPE_KRYOFLUX;
-import static com.cowlark.fluxengine.config.FluxSourceSinkType.FLUXTYPE_NOP;
-import static com.cowlark.fluxengine.config.FluxSourceSinkType.FLUXTYPE_SCP;
-import static com.cowlark.fluxengine.config.FluxSourceSinkType.FLUXTYPE_TEST_PATTERN;
-import static com.cowlark.fluxengine.config.FluxSourceSinkType.FLUXTYPE_VCD;
 import static com.cowlark.fluxengine.config.ImageFormats.Mode.MODE_RO;
 
+import com.cowlark.fluxengine.config.FluxFormats.FluxFormat;
 import com.cowlark.fluxengine.config.ImageFormats.ImageFormat;
 import com.cowlark.fluxengine.core.FluxEngineException;
 import com.cowlark.fluxengine.core.Logger;
 import com.cowlark.fluxengine.core.flags.FlagGroup;
 import com.cowlark.fluxengine.core.flags.Flags;
 import com.cowlark.fluxengine.data.Formats;
-import com.cowlark.fluxengine.fluxsink.FluxSinkProto;
 import com.cowlark.fluxengine.fluxsource.FluxSource;
-import com.cowlark.fluxengine.fluxsource.FluxSourceProto;
 import com.cowlark.fluxengine.imagereader.ImageReader;
 import com.cowlark.fluxengine.usb.UsbFinder;
 import com.google.common.collect.ImmutableList;
@@ -34,6 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Matcher;
 
 /**
  * The assembled configuration, built from the unmatched command-line
@@ -125,59 +113,32 @@ public class ConfigBuilder
         return this;
     }
 
+    private static FluxFormat findFluxFormat(String filename)
+    {
+        for (FluxFormat format : FluxFormats.formats)
+        {
+            if (format.matcher().matcher(filename).matches())
+                return format;
+        }
+        throw new ConfigException("unrecognised flux filename '" + filename + "'");
+    }
+
+
     @SneakyThrows
     public ConfigBuilder withFluxSource(String filename)
     {
-        FluxSourceProto.Builder fluxSourceProto = proto.getFluxSourceBuilder();
-        if (filename.endsWith(".flux"))
-        {
-            fluxSourceProto.setType(FLUXTYPE_FLUX);
-            fluxSourceProto.getFl2Builder().setFilename(filename);
-        } else if (filename.endsWith(".scp"))
-        {
-            fluxSourceProto.setType(FLUXTYPE_SCP);
-            fluxSourceProto.getScpBuilder().setFilename(filename);
-        } else if (filename.endsWith(".a2r"))
-        {
-            fluxSourceProto.setType(FLUXTYPE_A2R);
-            fluxSourceProto.getA2RBuilder().setFilename(filename);
-        } else if (filename.endsWith(".cwf"))
-        {
-            fluxSourceProto.setType(FLUXTYPE_CWF);
-            fluxSourceProto.getCwfBuilder().setFilename(filename);
-        } else if (filename.startsWith("dmk:"))
-        {
-            fluxSourceProto.setType(FLUXTYPE_DMK);
-            fluxSourceProto.getDmkBuilder().setDirectory(filename.substring(4));
-        } else if (filename.equals("erase:"))
-        {
-            fluxSourceProto.setType(FLUXTYPE_ERASE);
-        } else if (filename.startsWith("kryoflux:"))
-        {
-            fluxSourceProto.setType(FLUXTYPE_KRYOFLUX);
-            fluxSourceProto.getKryofluxBuilder().setDirectory(filename.substring(9));
-        } else if (filename.startsWith("testpattern:"))
-        {
-            fluxSourceProto.setType(FLUXTYPE_TEST_PATTERN);
-        } else if (filename.startsWith("drive:"))
-        {
-            fluxSourceProto.setType(FLUXTYPE_DRIVE);
-            proto.getDriveBuilder().setDrive(Integer.parseInt(filename.substring(6)));
-        } else if (filename.startsWith("flx:"))
-        {
-            fluxSourceProto.setType(FLUXTYPE_FLX);
-            fluxSourceProto.getFlxBuilder().setDirectory(filename.substring(4));
-        } else if (filename.startsWith("nop:"))
-            fluxSourceProto.setType(FLUXTYPE_NOP);
-        else
-            throw new ConfigException("unrecognised flux filename '" + filename + "'");
+        FluxFormat format = findFluxFormat(filename);
+
+        Matcher matcher = format.matcher().matcher(filename);
+        matcher.matches();
+        format.sourceBuilder().accept(matcher.group(1), proto);
 
         /* If the FluxSource has any extra config to contribute, add it here. */
 
         try (FluxSource fluxSource = FluxSource.create(
                 ConfigProto
                         .newBuilder()
-                        .setFluxSource(fluxSourceProto)
+                        .setFluxSource(proto.getFluxSource())
                         .build(), () -> null))
         {
             ConfigProto extraConfig = fluxSource.getExtraConfig();
@@ -196,47 +157,29 @@ public class ConfigBuilder
 
     public ConfigBuilder withCopyFluxTo(String filename)
     {
-        setFluxSink(proto.getDecoderBuilder().getCopyFluxToBuilder(), filename);
+        ConfigProto.Builder builder = ConfigProto.newBuilder();
+
+        FluxFormat format = findFluxFormat(filename);
+
+        Matcher matcher = format.matcher().matcher(filename);
+        matcher.matches();
+
+        format.sinkBuilder().accept(matcher.group(1), builder);
+        if (builder.getFluxSink().getType() == FLUXTYPE_DRIVE)
+            throw new ConfigException("you can't copy flux to a hardware device");
+
+        proto.getDecoderBuilder().setCopyFluxTo(builder.getFluxSink());
         return this;
     }
 
     public ConfigBuilder withFluxSink(String filename)
     {
-        setFluxSink(proto.getFluxSinkBuilder(), filename);
-        return this;
-    }
+        FluxFormat format = findFluxFormat(filename);
 
-    private void setFluxSink(FluxSinkProto.Builder fluxSink, String filename)
-    {
-        if (filename.endsWith(".flux"))
-        {
-            fluxSink.setType(FLUXTYPE_FLUX);
-            fluxSink.getFl2Builder().setFilename(filename);
-        } else if (filename.endsWith(".scp"))
-        {
-            fluxSink.setType(FLUXTYPE_SCP);
-            fluxSink.getScpBuilder().setFilename(filename);
-        } else if (filename.endsWith(".a2r"))
-        {
-            fluxSink.setType(FLUXTYPE_A2R);
-            fluxSink.getA2RBuilder().setFilename(filename);
-        } else if (filename.startsWith("drive:"))
-        {
-            fluxSink.setType(FLUXTYPE_DRIVE);
-            proto.getDriveBuilder().setDrive(Integer.parseInt(filename.substring(6)));
-        } else if (filename.startsWith("vcd:"))
-        {
-            fluxSink.setType(FLUXTYPE_VCD);
-            fluxSink.getVcdBuilder().setDirectory(filename.substring(4));
-        } else if (filename.startsWith("au:"))
-        {
-            fluxSink.setType(FLUXTYPE_AU);
-            fluxSink.getAuBuilder().setDirectory(filename.substring(3));
-        } else if (filename.startsWith("nop:"))
-        {
-            fluxSink.setType(FLUXTYPE_NOP);
-        } else
-            throw new ConfigException("unrecognised flux filename '" + filename + "'");
+        Matcher matcher = format.matcher().matcher(filename);
+        matcher.matches();
+        format.sinkBuilder().accept(matcher.group(1), proto);
+        return this;
     }
 
     private ImageFormat findImageFormat(String filename)
