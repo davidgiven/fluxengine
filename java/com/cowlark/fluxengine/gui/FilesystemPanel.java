@@ -9,7 +9,12 @@ import sprouts.Tuple;
 import sprouts.Val;
 import swingtree.UI;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import java.awt.BorderLayout;
+import org.jdesktop.swingx.JXTreeTable;
+import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
+import org.jdesktop.swingx.treetable.DefaultTreeTableModel;
+
 
 public class FilesystemPanel extends JPanel
 {
@@ -36,23 +41,29 @@ public class FilesystemPanel extends JPanel
         this.model = model;
         setLayout(new BorderLayout());
 
-        //        Font font = new Font(Font.MONOSPACED, Font.PLAIN, UIScale.scale(14));
+        DefaultMutableTreeTableNode root = new DefaultMutableTreeTableNode("Root");
 
-        Val<FsNode> fileSystem =
-                Val.of(new Dir("id", "name", Tuple.of(new Doc("doc", "doc", "doc"))));
+        DefaultMutableTreeTableNode docs = new DefaultMutableTreeTableNode("Documents");
+        docs.add(new DefaultMutableTreeTableNode("Invoice.docx"));
+        docs.add(new DefaultMutableTreeTableNode("Report.pdf"));
 
-        of(this).withLayout("fill, insets 5").add(
-                "grow, push", scrollPane().add(UI.tree(
-                                fileSystem, conf -> conf.nodesOf(
-                                                Dir.class,
-                                                it -> it
-                                                        .children(Dir::entries, Dir::withEntries)
-                                                        .text(Dir::name, Dir::withName))
-                                        //                                                        .icon(d -> Icons.FOLDER)
-                                        .nodesOf(Doc.class, it -> it.text(Doc::name)))
-                        //.withSelection(selectedPath)                           //
-                        // Var<Tuple<String>>: a PATH of ids, two-way
-                        .withRootVisible(false).withInitialExpansionDepth(2)));
+        DefaultMutableTreeTableNode pics = new DefaultMutableTreeTableNode("Pictures");
+        pics.add(new DefaultMutableTreeTableNode("Holiday.png"));
 
+        root.add(docs);
+        root.add(pics);
+
+        FilesystemTreeTableModel tableModel = new FilesystemTreeTableModel(root);
+
+        JXTreeTable treeTable = new JXTreeTable(tableModel);
+        treeTable.setRootVisible(true);
+        treeTable.setShowGrid(true, true);
+        treeTable.setLeafIcon(null);   // let FlatLaf's own icons show through
+        treeTable.setOpenIcon(null);
+        treeTable.setClosedIcon(null);
+
+        treeTable.putClientProperty("FlatLaf.style", "showHorizontalLines: true");
+
+        of(this).withLayout("fill, insets 5").add("grow, push", scrollPane().add(of(treeTable)));
     }
 }
