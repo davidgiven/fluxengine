@@ -64,6 +64,6 @@ public class ImageBlockDevice extends BlockDevice
     @Override
     public boolean needsCommit()
     {
-        return !newImage.empty();
+        return !newImage.isEmpty();
     }
 }

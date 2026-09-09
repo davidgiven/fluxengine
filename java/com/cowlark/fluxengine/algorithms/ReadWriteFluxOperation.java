@@ -848,7 +848,7 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
                                 sector.logicalLocation.head(),
                                 sector.logicalLocation.sector());
                     }
-                    if (!wanted.empty())
+                    if (!wanted.isEmpty())
                     {
                         Logger.logf("missing sector on verify");
                         return false;

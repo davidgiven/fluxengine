@@ -8,9 +8,7 @@ import com.cowlark.fluxengine.data.LogicalTrackLayout;
 import com.cowlark.fluxengine.data.Sector;
 import com.cowlark.fluxengine.data.Track;
 import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
-import java.util.Collection;
 
 public class FluxBlockDevice extends TrackedBlockDevice
 {
@@ -25,7 +23,8 @@ public class FluxBlockDevice extends TrackedBlockDevice
     @Override
     protected void commitTracks(Image source, ImmutableCollection<CylinderHead> lchs)
     {
-        Image merged = new Image();
+        Image merged = new Image(originalData);
+
         for (CylinderHead lch : lchs)
         {
             LogicalTrackLayout ltl = diskLayout.layoutByLogicalLocation.get(lch);
@@ -52,7 +51,10 @@ public class FluxBlockDevice extends TrackedBlockDevice
 
         Disk disk = new Disk();
         disk.image = merged;
-        fso.writeDisk(disk, lchs);
+        if (fso.getFluxSinkFactory().isHardware())
+            fso.writeDisk(disk);
+        else
+            fso.writeDisk(disk, lchs);
     }
 
     @Override

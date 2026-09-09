@@ -10,7 +10,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import java.io.IOException;
 import java.nio.file.FileSystemException;
-import java.util.Collection;
 
 public abstract class TrackedBlockDevice extends BlockDevice
 {
@@ -53,6 +52,9 @@ public abstract class TrackedBlockDevice extends BlockDevice
     @Override
     public void commit()
     {
+        if (changedData.isEmpty())
+            return;
+
         ImmutableSet.Builder<CylinderHead> changedTracks = ImmutableSet.builder();
         for (CylinderHeadSector ll : changedData.getLogicalLocations())
         {
@@ -73,6 +75,6 @@ public abstract class TrackedBlockDevice extends BlockDevice
     @Override
     public boolean needsCommit()
     {
-        return !changedData.empty();
+        return !changedData.isEmpty();
     }
 }
