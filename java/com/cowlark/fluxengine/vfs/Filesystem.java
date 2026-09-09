@@ -24,7 +24,15 @@ public abstract class Filesystem implements AutoCloseable
 
     public static void doWithFilesystem(ConfigProto config, FilesystemCaller callback)
     {
-        FilesystemOperation op = new FilesystemOperation(callback);
+        FilesystemOperation op = new FilesystemOperation()
+        {
+            @Override
+            public void run(Filesystem filesystem) throws IOException
+            {
+                callback.accept(filesystem);
+            }
+        };
+
         op.setConfig(config);
         op.create().blockingSubscribe(
                 Logger::log, e -> {
