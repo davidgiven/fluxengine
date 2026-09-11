@@ -174,12 +174,25 @@ public class ApplicationFrame extends JFrame
                                     .setLabel("Save flux to file")
                                     .setOnClick(model::onSaveDiskFlux)
                                     .build()));
+
+            case IMAGE_PROCESSING -> panel("center, nogrid, ins 0")
+                    .add(button("Load disk image")
+                            .isEnabledIf(notBusy)
+                            .onClick(model::onLoadDiskImage))
+                    .add(label(" → "))
+                    .add(label("use the Files tab above"))
+                    .add(label(" → "))
+                    .add(button("Save disk image")
+                            .isEnabledIf(notBusy)
+                            .onClick(model::onSaveDiskImage));
         };
     }
 
     enum Workflow
     {
-        DISK_READING("read a disk"), DISK_WRITING("write a disk");
+        DISK_READING("read a disk"),
+        DISK_WRITING("write a disk"),
+        IMAGE_PROCESSING("access a disk image");
 
         private final String displayName;
 
