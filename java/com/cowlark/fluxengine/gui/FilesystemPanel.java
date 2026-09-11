@@ -1,6 +1,7 @@
 package com.cowlark.fluxengine.gui;
 
 import static swingtree.UIFactoryMethods.button;
+import static swingtree.UIFactoryMethods.html;
 import static swingtree.UIFactoryMethods.label;
 import static swingtree.UIFactoryMethods.panel;
 import static swingtree.UIFactoryMethods.scrollPane;
@@ -26,23 +27,11 @@ public class FilesystemPanel extends JPanel
         this.treeTableModel = model.getFilesystemTreeTableModel();
 
         Val<Boolean> allowedWhenMounted = treeTableModel.getIsMounted().view();
+        Val<Boolean> notMounted = allowedWhenMounted.viewAs(Boolean.class, m -> !m);
         Val<Boolean> allowedWhenNotMounted = Viewable.of(
                 model.getBusy(),
                 treeTableModel.getIsMounted(),
                 (busy, mounted) -> !mounted && !busy);
-
-        //        DefaultMutableTreeTableNode root = new DefaultMutableTreeTableNode("Root");
-        //
-        //        DefaultMutableTreeTableNode docs = new DefaultMutableTreeTableNode("Documents");
-        //        docs.add(new DefaultMutableTreeTableNode("Invoice.docx"));
-        //        docs.add(new DefaultMutableTreeTableNode("Report.pdf"));
-        //
-        //        DefaultMutableTreeTableNode pics = new DefaultMutableTreeTableNode("Pictures");
-        //        pics.add(new DefaultMutableTreeTableNode("Holiday.png"));
-        //
-        //        root.add(docs);
-        //        root.add(pics);
-
 
         JXTreeTable treeTable = new JXTreeTable(model.getFilesystemTreeTableModel());
         treeTable.addTreeExpansionListener(model.getFilesystemTreeTableModel());
@@ -58,16 +47,19 @@ public class FilesystemPanel extends JPanel
         Var<Integer> bytesTotal = model.getFilesystemTreeTableModel().getBytesTotal();
         Var<Integer> bytesUsed = model.getFilesystemTreeTableModel().getBytesUsed();
 
-        UI.of(this).withLayout("fill, wrap 1, insets 5")
-                //                .add(
-                //                        "growx",
-                //                        panel("insets 2, gap 4")
-                //                                .add(button("Up").isEnabledIf(allowedWhenMounted))
-                //                                .add(button("New Folder").isEnabledIf
-                //                                (allowedWhenMounted))
-                //                                .add(button("Delete"))
-                //                                .isEnabledIf(allowedWhenMounted))
-                .add("grow, push", scrollPane().add(UI.of(treeTable))).add(
+
+        UI
+                .of(this)
+                .withLayout("fill, wrap 1, insets 5, hidemode 3")
+                .add("grow, push",
+                        scrollPane().add(UI.of(treeTable)).isVisibleIf(allowedWhenMounted))
+                .add(
+                        "grow, push, align center, w 100%!", html("""
+                                <html><center><b>Filesystem not mounted</b>
+                                <br>Load some data and press 'Mount' to see files!</center></html>""")
+                                .withHorizontalAlignment(UI.HorizontalAlignment.CENTER)
+                                .isVisibleIf(notMounted))
+                .add(
                         "growx", panel("insets 2")
                                 .add("align left",
                                         button("Mount")
@@ -87,15 +79,13 @@ public class FilesystemPanel extends JPanel
                                                 .onClick(delegate -> treeTableModel.unmount()))
                                 .add("push", separator())
                                 .add(
-                                        "align right",
-                                        label(bytesUsed.viewAs(
+                                        "align right", label(bytesUsed.viewAs(
                                                 String.class,
                                                 FileUtils::byteCountToDisplaySize)).isVisibleIf(
                                                 allowedWhenMounted))
                                 .add("align right", label("/").isVisibleIf(allowedWhenMounted))
                                 .add(
-                                        "align right",
-                                        label(bytesTotal.viewAs(
+                                        "align right", label(bytesTotal.viewAs(
                                                 String.class,
                                                 FileUtils::byteCountToDisplaySize)).isVisibleIf(
                                                 allowedWhenMounted))
