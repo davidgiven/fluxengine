@@ -3,6 +3,7 @@ package com.cowlark.fluxengine.gui;
 import static com.cowlark.fluxengine.vfs.Filesystem.FileType.IS_DIR;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 
+import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.core.EmergencyStopException;
 import com.cowlark.fluxengine.data.Image;
 import com.cowlark.fluxengine.vfs.Attributes;
@@ -15,10 +16,12 @@ import lombok.Getter;
 import lombok.Setter;
 import org.jdesktop.swingx.treetable.AbstractMutableTreeTableNode;
 import org.jdesktop.swingx.treetable.DefaultTreeTableModel;
+import sprouts.Tuple;
 import sprouts.Var;
 import javax.swing.SwingUtilities;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeExpansionListener;
+import javax.swing.tree.TreePath;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -157,6 +160,37 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel implements T
         queue.add(fs -> {
             throw new EmergencyStopException();
         });
+    }
+
+    public void getFile(Tuple<TreePath> paths)
+    {
+        if (paths.size() == 1)
+        {
+            queue.add(fs -> {
+                switch (paths.get(0).getLastPathComponent())
+                {
+                    case DirNode node ->
+                    {
+                    }
+
+                    case FileNode node ->
+                    {
+                        Bytes data = fs.getFile(node.getDirent().path());
+                        SwingUtilities.invokeLater(() -> {
+                            UiUtils.promptAndSave(
+                                    null,
+                                    "Save file",
+                                    node.getDirent().filename(),
+                                    data);
+                        });
+                    }
+
+                    default ->
+                    {
+                    }
+                }
+            });
+        }
     }
 
     @Override

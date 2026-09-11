@@ -109,8 +109,7 @@ public class ApplicationFrame extends JFrame
                         .add("growx, h 100pt!", of(summaryPanel))
                         .add("growx", controlPanel)));
 
-        UI
-                .of(this)
+        of(this)
                 .withOnCloseOperation(UI.OnWindowClose.DISPOSE)
                 .onClose(it -> System.exit(0))
                 .peek(frame -> {
