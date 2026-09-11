@@ -205,8 +205,13 @@ public abstract class Filesystem implements AutoCloseable
 
     @Builder(setterPrefix = "set")
     public record Dirent(VfsPath path, String filename, int length, String mode, FileType fileType,
-                         ImmutableMap<String, String> attributes)
+                         ImmutableMap<String, String> attributes) implements Comparable<Dirent>
     {
+        @Override
+        public int compareTo(Dirent other)
+        {
+            return this.filename.compareTo(other.filename);
+        }
     }
 
     protected class FluxEngineFileSystemException extends FileSystemException

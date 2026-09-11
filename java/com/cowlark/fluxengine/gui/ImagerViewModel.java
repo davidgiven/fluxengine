@@ -18,6 +18,7 @@ import com.cowlark.fluxengine.algorithms.EndWriteOperationLogMessage;
 import com.cowlark.fluxengine.algorithms.ReadWriteFluxOperation;
 import com.cowlark.fluxengine.config.ConfigBuilder;
 import com.cowlark.fluxengine.config.ConfigProto;
+import com.cowlark.fluxengine.core.EmergencyStopException;
 import com.cowlark.fluxengine.core.FluxEngineException;
 import com.cowlark.fluxengine.core.LogMessage;
 import com.cowlark.fluxengine.core.LogMessage.ErrorLogMessage;
@@ -304,7 +305,10 @@ public class ImagerViewModel
                 });
     }
 
-    void startFilesystemOperation(BlockingQueue<FilesystemCaller> queue, Image image)
+    void startFilesystemOperation(
+            BlockingQueue<FilesystemCaller> queue,
+            Image image,
+            Runnable onExit)
     {
         performOperation(
                 this::makeConfigBuilder, new FilesystemOperation()
@@ -314,13 +318,10 @@ public class ImagerViewModel
                     {
                         try
                         {
-                            for (; ; )
-                            {
-                                FilesystemCaller cb = queue.take();
-                                if (cb == null)
-                                    break;
-                                cb.accept(filesystem);
-                            }
+                            while (true)
+                                queue.take().accept(filesystem);
+                        } catch (EmergencyStopException e)
+                        {
                         } catch (InterruptedException e)
                         {
                             throw new RuntimeException(e);
@@ -331,6 +332,13 @@ public class ImagerViewModel
                     protected BlockDevice createBlockDevice()
                     {
                         return new InMemoryBlockDevice(getDiskLayout(), image);
+                    }
+
+                    @Override
+                    public void dispose()
+                    {
+                        super.dispose();
+                        onExit.run();
                     }
                 });
     }

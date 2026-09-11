@@ -6,12 +6,13 @@ import static swingtree.UIFactoryMethods.panel;
 import static swingtree.UIFactoryMethods.scrollPane;
 import static swingtree.UIFactoryMethods.separator;
 
+import org.apache.commons.io.FileUtils;
 import org.jdesktop.swingx.JXTreeTable;
 import sprouts.Val;
+import sprouts.Var;
 import sprouts.Viewable;
 import swingtree.UI;
 import javax.swing.JPanel;
-import javax.swing.JProgressBar;
 
 
 public class FilesystemPanel extends JPanel
@@ -44,13 +45,18 @@ public class FilesystemPanel extends JPanel
 
 
         JXTreeTable treeTable = new JXTreeTable(model.getFilesystemTreeTableModel());
+        treeTable.addTreeExpansionListener(model.getFilesystemTreeTableModel());
         treeTable.setRootVisible(true);
         treeTable.setShowGrid(true, true);
         treeTable.setLeafIcon(null);
         treeTable.setOpenIcon(null);
         treeTable.setClosedIcon(null);
+        treeTable.expandRow(0);
 
         treeTable.putClientProperty("FlatLaf.style", "showHorizontalLines: true");
+
+        Var<Integer> bytesTotal = model.getFilesystemTreeTableModel().getBytesTotal();
+        Var<Integer> bytesUsed = model.getFilesystemTreeTableModel().getBytesUsed();
 
         UI.of(this).withLayout("fill, wrap 1, insets 5")
                 //                .add(
@@ -80,10 +86,31 @@ public class FilesystemPanel extends JPanel
                                                 .isEnabledIf(allowedWhenMounted)
                                                 .onClick(delegate -> treeTableModel.unmount()))
                                 .add("push", separator())
-                                .add("align right", label("123kB"))
-                                .add("align right", label("/"))
-                                .add("align right", label("456kB"))
-                                .add("align right", UI.of(new JProgressBar())));
+                                .add(
+                                        "align right",
+                                        label(bytesUsed.viewAs(
+                                                String.class,
+                                                FileUtils::byteCountToDisplaySize)).isVisibleIf(
+                                                allowedWhenMounted))
+                                .add("align right", label("/").isVisibleIf(allowedWhenMounted))
+                                .add(
+                                        "align right",
+                                        label(bytesTotal.viewAs(
+                                                String.class,
+                                                FileUtils::byteCountToDisplaySize)).isVisibleIf(
+                                                allowedWhenMounted))
+                                .add(
+                                        "align right", UI
+                                                .progressBar(
+                                                        UI.Axis.HORIZONTAL, 0, 100, Viewable.of(
+                                                                bytesUsed,
+                                                                bytesTotal,
+                                                                (used, total) -> (total == 0) ?
+                                                                        0 :
+                                                                        (100 * used / total)))
+                                                .isVisibleIf(allowedWhenMounted)
+
+                                ));
     }
 
 }
