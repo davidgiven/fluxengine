@@ -2,6 +2,7 @@ package com.cowlark.fluxengine.gui;
 
 import static com.cowlark.fluxengine.gui.UiUtils.createSplitButton;
 import static com.cowlark.fluxengine.gui.UiUtils.sizePts;
+import static swingtree.UI.Axis.HORIZONTAL;
 import static swingtree.UIFactoryMethods.button;
 import static swingtree.UIFactoryMethods.comboBox;
 import static swingtree.UIFactoryMethods.label;
@@ -44,6 +45,7 @@ public class ApplicationFrame extends JFrame
     private final ImagePanel imagePanel;
     private final LogPanel logPanel;
     private final SummaryPanel summaryPanel;
+    private final FilesystemPanel filesystemPanel;
 
     private final ImagerViewModel model;
     private final Var<Workflow> currentWorkflow = Var.of(Workflow.DISK_READING);
@@ -56,6 +58,7 @@ public class ApplicationFrame extends JFrame
         imagePanel = new ImagePanel(model);
         visualiserPanel = new VisualiserPanel(model);
         configurationPanel = new ConfigurationPanel(model);
+        filesystemPanel = new FilesystemPanel(model);
 
         URL iconUrl = ApplicationFrame.class.getResource("/icon.png");
         if (iconUrl != null)
@@ -66,15 +69,15 @@ public class ApplicationFrame extends JFrame
                 tabbedPane().add(tab("Configuration").add(scrollPane().add(of(configurationPanel))));
 
         UIForSplitPane<JSplitPane> topPane =
-                splitPane(UI.Align.HORIZONTAL)
+                splitPane(HORIZONTAL)
                         .peek(pane -> pane.setResizeWeight(1.0))
                         .add(
-                                TOP,
-                                tabbedPane()
+                                TOP, tabbedPane()
                                         .add(tab("Image").add(of(imagePanel).withPrefSize(sizePts(
                                                 500,
                                                 300))))
-                                        .add(tab("Log").add(of(logPanel))))
+                                        .add(tab("Log").add(of(logPanel)))
+                                        .add(tab("Files").add(of(filesystemPanel))))
                         .add(BOTTOM, tabbedPane().add(tab("Visualiser").add(of(visualiserPanel))));
 
         UIForPanel<JPanel> controlPanel =
@@ -106,8 +109,7 @@ public class ApplicationFrame extends JFrame
                         .add("growx, h 100pt!", of(summaryPanel))
                         .add("growx", controlPanel)));
 
-        UI
-                .of(this)
+        of(this)
                 .withOnCloseOperation(UI.OnWindowClose.DISPOSE)
                 .onClose(it -> System.exit(0))
                 .peek(frame -> {
@@ -115,7 +117,7 @@ public class ApplicationFrame extends JFrame
                 })
                 .add(panel("fill, wrap 2").add("growy", leftPane).add(
                         "grow, push",
-                        splitPane(UI.Align.VERTICAL)
+                        splitPane(UI.Axis.VERTICAL)
                                 .peek(pane -> pane.setResizeWeight(1.0))
                                 .add(TOP, topPane)
                                 .add(BOTTOM, bottomPane)));
@@ -171,12 +173,25 @@ public class ApplicationFrame extends JFrame
                                     .setLabel("Save flux to file")
                                     .setOnClick(model::onSaveDiskFlux)
                                     .build()));
+
+            case IMAGE_PROCESSING -> panel("center, nogrid, ins 0")
+                    .add(button("Load disk image")
+                            .isEnabledIf(notBusy)
+                            .onClick(model::onLoadDiskImage))
+                    .add(label(" → "))
+                    .add(label("use the Files tab above"))
+                    .add(label(" → "))
+                    .add(button("Save disk image")
+                            .isEnabledIf(notBusy)
+                            .onClick(model::onSaveDiskImage));
         };
     }
 
     enum Workflow
     {
-        DISK_READING("read a disk"), DISK_WRITING("write a disk");
+        DISK_READING("read a disk"),
+        DISK_WRITING("write a disk"),
+        IMAGE_PROCESSING("access a disk image");
 
         private final String displayName;
 

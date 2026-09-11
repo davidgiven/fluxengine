@@ -34,6 +34,7 @@ import org.indunet.fastproto.annotation.StringType;
 import org.indunet.fastproto.annotation.StructArrayType;
 import org.indunet.fastproto.annotation.UInt8ArrayType;
 import org.indunet.fastproto.annotation.UInt8Type;
+import org.indunet.fastproto.exception.CodecException;
 import org.indunet.fastproto.exception.DecodingException;
 import org.indunet.fastproto.exception.EncodingException;
 import java.io.IOException;
@@ -369,7 +370,7 @@ public class RolandFilesystem extends Filesystem
         try
         {
             return FastProto.decode(directory.toByteArray(), RolandDirectory.class);
-        } catch (DecodingException e)
+        } catch (CodecException e)
         {
             throw new FluxEngineFileSystemException("Invalid filesystem", e);
         }

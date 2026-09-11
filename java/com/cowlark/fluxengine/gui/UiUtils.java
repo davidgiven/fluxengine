@@ -6,6 +6,8 @@ import static swingtree.UIFactoryMethods.menuItem;
 import static swingtree.UIFactoryMethods.popupMenu;
 import static swingtree.UIFactoryMethods.splitButton;
 
+import com.cowlark.fluxengine.core.Bytes;
+import com.cowlark.fluxengine.core.FluxEngineException;
 import io.reactivex.rxjava3.core.Scheduler;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import lombok.Builder;
@@ -20,9 +22,13 @@ import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
@@ -30,8 +36,10 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -170,6 +178,48 @@ public class UiUtils
                         }
                     return new ImageIcon(out);
                 });
+    }
+
+    /**
+     * Prompts the user for a save location, then writes {@code data} to it.
+     */
+    public static void promptAndSave(
+            Component parent,
+            String dialogTitle,
+            String defaultFileName,
+            Bytes data)
+    {
+        JFileChooser chooser = new JFileChooser();
+        chooser.setDialogTitle(dialogTitle);
+        chooser.setSelectedFile(new File(defaultFileName));
+
+        int result = chooser.showSaveDialog(parent);
+        if (result != JFileChooser.APPROVE_OPTION)
+            return;
+
+        File file = chooser.getSelectedFile();
+        if (file.exists())
+        {
+            int overwrite = JOptionPane.showConfirmDialog(
+                    parent,
+                    file.getName() + " already exists. Overwrite it?",
+                    "Confirm Overwrite",
+                    JOptionPane.YES_NO_OPTION);
+            if (overwrite != JOptionPane.YES_OPTION)
+                return;
+        }
+
+        try
+        {
+            data.writeToFile(file.toPath());
+        } catch (FluxEngineException e)
+        {
+            JOptionPane.showMessageDialog(
+                    parent,
+                    "Could not save file: " + e.getMessage(),
+                    "Save Failed",
+                    JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     @Builder(setterPrefix = "set")

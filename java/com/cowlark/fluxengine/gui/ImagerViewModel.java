@@ -18,8 +18,7 @@ import com.cowlark.fluxengine.algorithms.EndWriteOperationLogMessage;
 import com.cowlark.fluxengine.algorithms.ReadWriteFluxOperation;
 import com.cowlark.fluxengine.config.ConfigBuilder;
 import com.cowlark.fluxengine.config.ConfigProto;
-import com.cowlark.fluxengine.usb.UsbFinder;
-import com.cowlark.fluxengine.usb.UsbFinder.CandidateDevice;
+import com.cowlark.fluxengine.core.EmergencyStopException;
 import com.cowlark.fluxengine.core.FluxEngineException;
 import com.cowlark.fluxengine.core.LogMessage;
 import com.cowlark.fluxengine.core.LogMessage.ErrorLogMessage;
@@ -30,6 +29,13 @@ import com.cowlark.fluxengine.fluxsource.FluxSource;
 import com.cowlark.fluxengine.fluxsource.MemoryFluxSource;
 import com.cowlark.fluxengine.gui.DriveActivity.ActivityType;
 import com.cowlark.fluxengine.imagewriter.ImageWriter;
+import com.cowlark.fluxengine.usb.UsbFinder;
+import com.cowlark.fluxengine.usb.UsbFinder.CandidateDevice;
+import com.cowlark.fluxengine.vfs.BlockDevice;
+import com.cowlark.fluxengine.vfs.Filesystem;
+import com.cowlark.fluxengine.vfs.FilesystemOperation;
+import com.cowlark.fluxengine.vfs.FilesystemOperation.FilesystemCaller;
+import com.cowlark.fluxengine.vfs.InMemoryBlockDevice;
 import io.reactivex.rxjava3.disposables.Disposable;
 import lombok.Getter;
 import org.apache.commons.lang3.function.Consumers;
@@ -46,6 +52,8 @@ import swingtree.UI;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import java.awt.event.ActionEvent;
+import java.io.IOException;
+import java.util.concurrent.BlockingQueue;
 import java.util.function.Supplier;
 
 public class ImagerViewModel
@@ -67,18 +75,20 @@ public class ImagerViewModel
     @Getter private Var<String> advancedSettings;
     @Getter private Var<Integer> selectedDrive;
 
-    @Getter private Var<Image> diskImage = Var.of(new Image());
     @Getter private Vars<LogMessage> logQueue = Vars.of(LogMessage.class);
-    @Getter private Var<Disposable> currentOperation = Var.ofNull(Disposable.class);
+    @Getter private Var<Disposable> currentDisposable = Var.ofNull(Disposable.class);
     @Getter private Var<Disk> disk = Var.of(new Disk());
     @Getter private Var<DriveActivity> driveActivity =
             Var.of(new DriveActivity(ActivityType.IDLE, 0, 0));
 
     @Getter private Val<Boolean> busy =
-            currentOperation.viewAs(Boolean.class, op -> op != null && !op.isDisposed());
+            currentDisposable.viewAs(Boolean.class, op -> op != null && !op.isDisposed());
 
     @Getter private Var<Association<String, CandidateDevice>> usbDevices =
             Var.of(Association.between(String.class, CandidateDevice.class));
+
+    @Getter(lazy = true) private final FilesystemTreeTableModel filesystemTreeTableModel =
+            new FilesystemTreeTableModel(this);
 
     ImagerViewModel(PreferencesReaderWriter preferencesReaderWriter)
     {
@@ -295,9 +305,47 @@ public class ImagerViewModel
                 });
     }
 
+    void startFilesystemOperation(
+            BlockingQueue<FilesystemCaller> queue,
+            Image image,
+            Runnable onExit)
+    {
+        performOperation(
+                this::makeConfigBuilder, new FilesystemOperation()
+                {
+                    @Override
+                    public void run(Filesystem filesystem) throws IOException
+                    {
+                        try
+                        {
+                            while (true)
+                                queue.take().accept(filesystem);
+                        } catch (EmergencyStopException e)
+                        {
+                        } catch (InterruptedException e)
+                        {
+                            throw new RuntimeException(e);
+                        }
+                    }
+
+                    @Override
+                    protected BlockDevice createBlockDevice()
+                    {
+                        return new InMemoryBlockDevice(getDiskLayout(), image);
+                    }
+
+                    @Override
+                    public void dispose()
+                    {
+                        super.dispose();
+                        onExit.run();
+                    }
+                });
+    }
+
     void onEmergencyStop(ComponentDelegate<JButton, ActionEvent> delegate)
     {
-        Disposable operation = getCurrentOperation().get();
+        Disposable operation = getCurrentDisposable().get();
         if ((operation == null) || operation.isDisposed())
             return;
 
@@ -306,7 +354,7 @@ public class ImagerViewModel
 
         /* Only clear the property once the dispose has actually happened;
          * dispose() blocks until the worker thread has exited. */
-        getCurrentOperation().set(From.VIEW_MODEL, null);
+        getCurrentDisposable().set(From.VIEW_MODEL, null);
         getDriveActivity().set(new DriveActivity(ActivityType.IDLE, 0, 0));
     }
 
@@ -324,13 +372,13 @@ public class ImagerViewModel
             return;
         }
 
-        currentOperation.set(operation.setConfig(config).create().observeOn(UiUtils.EDT).subscribe(
+        currentDisposable.set(operation.setConfig(config).create().observeOn(UiUtils.EDT).subscribe(
                 this::handleLogMessage, e -> {
-                    currentOperation.set(From.VIEW_MODEL, null);
+                    currentDisposable.set(From.VIEW_MODEL, null);
                     ErrorLogMessage m = new ErrorLogMessage(e.getMessage());
                     logQueue.add(m);
                     showFatalError(m);
-                }, () -> currentOperation.set(From.VIEW_MODEL, null)));
+                }, () -> currentDisposable.set(From.VIEW_MODEL, null)));
     }
 
     private ConfigBuilder makeConfigBuilderWithFormat()

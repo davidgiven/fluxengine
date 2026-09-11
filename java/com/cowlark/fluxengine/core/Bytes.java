@@ -5,6 +5,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -135,17 +137,19 @@ public final class Bytes implements List<Byte>
         return result;
     }
 
-    /* Writes the contents to a file, ported from lib/core/bytes.h
-     * Bytes::writeToFile(). */
     public void writeToFile(String filename)
+    {
+        writeToFile(Path.of(filename));
+    }
+
+    public void writeToFile(Path path)
     {
         try
         {
-            java.nio.file.Files.write(java.nio.file.Path.of(filename), toByteArray());
+            Files.write(path, toByteArray());
         } catch (IOException e)
         {
-            throw new FluxEngineException(
-                    "cannot write to file " + filename + ": " + e.getMessage());
+            throw new FluxEngineException("cannot write to file " + path + ": " + e.getMessage());
         }
     }
 
