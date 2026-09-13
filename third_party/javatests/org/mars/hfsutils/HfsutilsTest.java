@@ -187,4 +187,53 @@ public class HfsutilsTest
             i++;
         return i;
     }
+
+    @Test
+    public void deleteNestedFileRecursively() throws Exception
+    {
+        MemOs os = makeOs800k();
+        Hfs.hfsFormat(os, null, 0, HfsConstants.HFS_MODE_RDWR, "VOL", 0, null);
+
+        HfsVol vol = Hfs.hfsMount(os, null, 0, HfsConstants.HFS_MODE_RDWR);
+        assertThat(vol).isNotNull();
+
+        Hfs.hfsMkdir(vol, ":dir1");
+        Hfs.hfsMkdir(vol, ":dir1:dir2");
+        Hfs.hfsMkdir(vol, ":dir1:dir2:dir3");
+
+        HfsFileHandle file = Hfs.hfsCreate(vol, ":dir1:dir2:dir3:data", "TEXT", "TEST");
+        assertThat(file).isNotNull();
+        byte[] data = "hello".getBytes(StandardCharsets.US_ASCII);
+        Hfs.hfsWrite(file, data, data.length);
+        Hfs.hfsClose(file);
+
+        // Deleting a file inside a nested directory previously failed with
+        // "can't find parent directory" / "read unallocated b*-tree node"
+        // due to translation errors in HfsNode.compact, HfsBTree.deletex/insertx/bt_insert
+        Hfs.hfsDelete(vol, ":dir1:dir2:dir3:data");
+
+        Hfs.hfsRmdir(vol, ":dir1:dir2:dir3");
+        Hfs.hfsRmdir(vol, ":dir1:dir2");
+        Hfs.hfsRmdir(vol, ":dir1");
+
+        // Verify root is empty after recursive delete (simulates Filesystem.deleteFileRecursively(:dir1))
+        HfsDir dir = Hfs.hfsOpendir(vol, ":");
+        HfsDirEnt ent = new HfsDirEnt();
+        int count = 0;
+        while (true)
+        {
+            try
+            {
+                Hfs.hfsReaddir(dir, ent);
+                count++;
+            } catch (HfsException e)
+            {
+                break;
+            }
+        }
+        Hfs.hfsClosedir(dir);
+        assertThat(count).isEqualTo(0);
+
+        Hfs.hfsUmount(vol);
+    }
 }
