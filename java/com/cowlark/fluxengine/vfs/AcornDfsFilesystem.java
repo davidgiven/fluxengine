@@ -85,6 +85,9 @@ public class AcornDfsFilesystem extends Filesystem
     @Override
     public Dirent getDirent(VfsPath path) throws IOException
     {
+        if (path.isRoot())
+            return ROOT_DIRENT;
+
         AcornDfsDirectory dir = new AcornDfsDirectory();
         return dir.findFile(path).dirent;
     }

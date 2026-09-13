@@ -8,12 +8,29 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import lombok.Builder;
 import org.slf4j.LoggerFactory;
+import javax.swing.tree.TreePath;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.FileSystemException;
+import java.nio.file.Path;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 public abstract class Filesystem implements AutoCloseable
 {
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(Filesystem.class);
+
+    protected static Dirent ROOT_DIRENT = Dirent
+            .builder()
+            .setFilename("")
+            .setPath(VfsPath.of("/"))
+            .setFileType(FileType.IS_DIR)
+            .setAttributes(ImmutableMap
+                    .<String, String>builder()
+                    .put(Attributes.FILENAME, "")
+                    .put(Attributes.FILE_TYPE, "dir")
+                    .build())
+            .build();
 
     private final ImmutableSet<Capability> capabilities;
 
@@ -101,6 +118,50 @@ public abstract class Filesystem implements AutoCloseable
     {
         throw new UnsupportedOperationException();
     }
+
+    /**
+     * Read a file/directory recursively into a zipfile.
+     */
+    public Bytes getFiles(Filesystem fs, Iterable<VfsPath> paths)
+            throws IOException
+    {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (ZipOutputStream zos = new ZipOutputStream(baos))
+        {
+            for (VfsPath path : paths)
+                recursivelyAddToZipfile(fs, zos, Path.of(""), path);
+        }
+        return new Bytes(baos.toByteArray());
+    }
+
+    private static void recursivelyAddToZipfile(
+            Filesystem fs,
+            ZipOutputStream zos,
+            Path zpath,
+            VfsPath path) throws IOException
+    {
+        Filesystem.Dirent dirent = fs.getDirent(path);
+        switch (dirent.fileType())
+        {
+            case IS_FILE ->
+            {
+                ZipEntry entry = new ZipEntry(zpath.resolve(dirent.filename()).toString());
+                zos.putNextEntry(entry);
+                zos.write(fs.getFile(dirent.path()).toByteArray());
+                zos.closeEntry();
+            }
+
+            case IS_DIR ->
+            {
+                Path childZpath = zpath.resolve(dirent.filename());
+                for (Filesystem.Dirent childDirent : fs.list(dirent.path()).values())
+                {
+                    recursivelyAddToZipfile(fs, zos, childZpath, childDirent.path());
+                }
+            }
+        }
+    }
+
 
     /**
      * Write a file.

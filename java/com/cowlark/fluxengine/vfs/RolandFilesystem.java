@@ -211,7 +211,10 @@ public class RolandFilesystem extends Filesystem
     @Override
     public Dirent getDirent(VfsPath path) throws IOException
     {
-        var filename = getFilename(path);
+        if (path.isRoot())
+            return ROOT_DIRENT;
+
+        String filename = getFilename(path);
 
         RolandDirectory dir = mount();
         return getDirentFor(findExistingFileFor(dir, filename));

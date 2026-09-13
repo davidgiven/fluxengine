@@ -262,6 +262,9 @@ public class AmigaFilesystem extends Filesystem
     @Override
     public Dirent getDirent(VfsPath path) throws IOException
     {
+        if (path.isRoot())
+            return ROOT_DIRENT;
+
         mount();
         Entry e = findEntry(path);
         VfsPath parent = path.getParent();

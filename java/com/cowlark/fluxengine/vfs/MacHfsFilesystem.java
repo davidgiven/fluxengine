@@ -246,6 +246,9 @@ public class MacHfsFilesystem extends Filesystem
     @Override
     public Dirent getDirent(VfsPath path) throws IOException
     {
+        if (path.isRoot())
+            return ROOT_DIRENT;
+
         mount();
 
         try

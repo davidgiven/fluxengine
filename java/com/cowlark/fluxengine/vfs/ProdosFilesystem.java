@@ -173,11 +173,10 @@ public class ProdosFilesystem extends Filesystem
     @Override
     public Dirent getDirent(VfsPath path) throws IOException
     {
-        mount();
         if (path.isRoot())
-        {
-            throw new NoSuchFileException(path.toString());
-        }
+            return ROOT_DIRENT;
+
+        mount();
         VfsPath parent = path.getParent();
         if (parent == null)
         {

@@ -143,6 +143,15 @@ public abstract class GenericFilesystemTest
     }
 
     @Test
+    public void getDirent_emptyPath() throws IOException
+    {
+        assume(Capability.OP_CREATE, Capability.OP_GETDIRENT);
+        impl.create(true, "LABEL");
+        Dirent de = impl.getDirent(VfsPath.of("/"));
+        assertThat(de.fileType()).isEqualTo(IS_DIR);
+    }
+
+    @Test
     public void flushActuallyFlushes() throws IOException
     {
         assume(

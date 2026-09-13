@@ -74,6 +74,9 @@ public class Smaky6Filesystem extends Filesystem
     @Override
     public Dirent getDirent(VfsPath path) throws IOException
     {
+        if (path.isRoot())
+            return ROOT_DIRENT;
+
         return resolveDirent(path).dirent;
     }
 

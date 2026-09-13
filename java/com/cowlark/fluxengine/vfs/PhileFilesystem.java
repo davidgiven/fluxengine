@@ -118,6 +118,8 @@ public class PhileFilesystem extends Filesystem
     @Override
     public Dirent getDirent(VfsPath path) throws IOException
     {
+        if (path.isRoot())
+            return ROOT_DIRENT;
         if (path.segments().size() != 1)
             throw new InvalidPathException(path.toString(), "Bad path");
 

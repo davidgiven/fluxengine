@@ -275,6 +275,9 @@ public class FatFilesystem extends Filesystem
     @Override
     public Dirent getDirent(VfsPath path) throws IOException
     {
+        if (path.isRoot())
+            return ROOT_DIRENT;
+
         mount();
         String p = toFatPath(path);
         FilInfo filinfo = new FilInfo();

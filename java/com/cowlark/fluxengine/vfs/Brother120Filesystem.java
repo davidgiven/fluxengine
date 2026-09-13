@@ -81,6 +81,9 @@ public class Brother120Filesystem extends Filesystem
     @Override
     public Dirent getDirent(VfsPath path) throws IOException
     {
+        if (path.isRoot())
+            return ROOT_DIRENT;
+
         BrotherDirectory dir = new BrotherDirectory();
         return dir.findFile(path).dirent;
     }
