@@ -115,9 +115,11 @@ public class FilesystemPanel extends JPanel
                                                 OP_PUTFILE)))
                                 .add(
                                         "align left",
-                                        button("Rename").isEnabledIf(ifCapability(
-                                                canDoSingleFileOperation,
-                                                OP_MOVE)))
+                                        button("Rename")
+                                                .isEnabledIf(ifCapability(
+                                                        canDoSingleFileOperation,
+                                                        OP_MOVE))
+                                                .onClick(this::renameFile))
                                 .add(
                                         "align left",
                                         button("Delete")
@@ -295,6 +297,24 @@ public class FilesystemPanel extends JPanel
         treeTableModel.queueFilesystemOperation(fs -> {
             fs.createDirectory(childVfsPath);
             treeTableModel.addNode(parent, childVfsPath);
+        });
+    }
+
+    private void renameFile(
+            ComponentDelegate<JButton, ActionEvent> delegate)
+    {
+        TreePath path = Iterables.getOnlyElement(filesSelected.get());
+        DirNode parent = (DirNode) path.getParentPath().getLastPathComponent();
+        FileNode child = (FileNode) path.getLastPathComponent();
+
+        String newChild = JOptionPane.showInputDialog(this, "Enter new leaf filename:");
+        VfsPath newVfsPath = parent.getDirent().path().resolve(newChild);
+        treeTableModel.queueFilesystemOperation(fs -> {
+            fs.moveFile(child.getDirent().path(), newVfsPath);
+            SwingUtilities.invokeLater(() -> {
+                treeTableModel.addNode(parent, newVfsPath);
+                treeTableModel.removeNodeFromParent(child);
+            });
         });
     }
 
