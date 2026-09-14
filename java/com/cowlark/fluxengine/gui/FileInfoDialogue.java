@@ -12,7 +12,6 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import java.awt.Component;
 import java.awt.Window;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -35,8 +34,7 @@ public class FileInfoDialogue extends JDialog
         UI
                 .of((JPanel) getContentPane())
                 .withLayout("fill, wrap 1, insets 12, gap 8")
-                .add(
-                        "grow, push, wmin 0",
+                .add("grow, push, wmin 0",
                         scrollPane()
                                 .withPrefSize(420, 260)
                                 .add(UI.table(tableData).withPrefSize(400, 200)))
@@ -55,18 +53,6 @@ public class FileInfoDialogue extends JDialog
         return tableData;
     }
 
-    private static TableData createTableData(String col1, String col2, List<String[]> rows)
-    {
-        TableData tableData = TableData.of(UI.CellOrder.ROW_MAJOR, col1, col2);
-        for (String[] row : rows)
-        {
-            String first = row.length > 0 ? row[0] : "";
-            String second = row.length > 1 ? row[1] : "";
-            tableData = tableData.addRow(first, second);
-        }
-        return tableData;
-    }
-
     /**
      * Shows a modal dialog with a two-column table.
      *
@@ -78,41 +64,6 @@ public class FileInfoDialogue extends JDialog
     {
         Window window = parent != null ? SwingUtilities.getWindowAncestor(parent) : null;
         FileInfoDialogue dialog = new FileInfoDialogue(window, title, data);
-        dialog.setVisible(true);
-    }
-
-    /**
-     * Shows a modal dialog with a two-column table.
-     *
-     * @param parent      owner component for positioning (may be null)
-     * @param title       dialog title
-     * @param column1Name header for first column
-     * @param column2Name header for second column
-     * @param rows        table rows, each as two strings
-     */
-    public static void show(
-            Component parent,
-            String title,
-            String column1Name,
-            String column2Name,
-            List<String[]> rows)
-    {
-        Window window = parent != null ? SwingUtilities.getWindowAncestor(parent) : null;
-        Var<TableData> tableData = Var.of(createTableData(column1Name, column2Name, rows));
-
-        JDialog dialog = new JDialog(window, title, ModalityType.APPLICATION_MODAL);
-        UI
-                .of((JPanel) dialog.getContentPane())
-                .withLayout("fill, wrap 1, insets 12, gap 8")
-                .add(
-                        "grow, push, wmin 0",
-                        scrollPane()
-                                .withPrefSize(420, 260)
-                                .add(UI.table(tableData).withPrefSize(400, 200)))
-                .add("align right", button("Close").onClick(it -> dialog.dispose()));
-        dialog.pack();
-        dialog.setLocationRelativeTo(window);
-        dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         dialog.setVisible(true);
     }
 }

@@ -8,6 +8,7 @@ import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_MOVE;
 import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_PUTFILE;
 import static com.cowlark.fluxengine.vfs.Filesystem.FileType.IS_FILE;
 import static com.google.common.collect.ImmutableList.toImmutableList;
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static com.google.common.collect.Streams.stream;
 import static swingtree.UIFactoryMethods.button;
 import static swingtree.UIFactoryMethods.html;
@@ -18,6 +19,7 @@ import static swingtree.UIFactoryMethods.separator;
 
 import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.gui.FilesystemTreeTableModel.FileNode;
+import com.cowlark.fluxengine.vfs.FileAttributes;
 import com.cowlark.fluxengine.vfs.Filesystem;
 import com.cowlark.fluxengine.vfs.Filesystem.Capability;
 import com.cowlark.fluxengine.vfs.Filesystem.Dirent;
@@ -257,10 +259,18 @@ public class FilesystemPanel extends JPanel
         treeTableModel.queueFilesystemOperation(fs -> {
             FileNode file = (FileNode) path.getLastPathComponent();
             Dirent de = file.getDirent();
-            SwingUtilities.invokeLater(() -> {
-                FileInfoDialogue.show(this, "File info: " + de.path().toString(), de.attributes());
-            });
+            SwingUtilities.invokeLater(() -> FileInfoDialogue.show(
+                    this,
+                    "File info: " + de.path().toString(),
+                    de
+                            .attributes()
+                            .entrySet()
+                            .stream()
+                            .collect(toImmutableMap(
+                                    e -> FileAttributes.getHumanName(e.getKey()),
+                                    e -> e.getValue()))));
         });
+
     }
 
     private static Bytes recursivelyAddPathsToZipfile(Filesystem fs, Iterable<TreePath> paths)

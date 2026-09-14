@@ -5,7 +5,8 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
 
 import com.cowlark.fluxengine.core.EmergencyStopException;
 import com.cowlark.fluxengine.data.Image;
-import com.cowlark.fluxengine.vfs.Attributes;
+import com.cowlark.fluxengine.vfs.FileAttributes;
+import com.cowlark.fluxengine.vfs.FilesystemAttributes;
 import com.cowlark.fluxengine.vfs.Filesystem.Capability;
 import com.cowlark.fluxengine.vfs.Filesystem.Dirent;
 import com.cowlark.fluxengine.vfs.FilesystemOperation.FilesystemCaller;
@@ -33,8 +34,8 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel implements T
             .setFileType(IS_DIR)
             .setAttributes(ImmutableMap
                     .<String, String>builder()
-                    .put(Attributes.FILENAME, "/")
-                    .put(Attributes.FILE_TYPE, "dir")
+                    .put(FileAttributes.FILENAME.name(), "/")
+                    .put(FileAttributes.FILE_TYPE.name(), "dir")
                     .build())
             .build();
 
@@ -147,9 +148,9 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel implements T
             ImmutableMap<String, String> attrs = fs.getFilesystemMetadata();
             try
             {
-                int blockSize = Integer.parseInt(attrs.get(Attributes.BLOCK_SIZE));
-                int totalBlocks = Integer.parseInt(attrs.get(Attributes.TOTAL_BLOCKS));
-                int usedBlocks = Integer.parseInt(attrs.get(Attributes.USED_BLOCKS));
+                int blockSize = Integer.parseInt(attrs.get(FilesystemAttributes.BLOCK_SIZE.name()));
+                int totalBlocks = Integer.parseInt(attrs.get(FilesystemAttributes.TOTAL_BLOCKS.name()));
+                int usedBlocks = Integer.parseInt(attrs.get(FilesystemAttributes.USED_BLOCKS.name()));
                 bytesTotal.set(totalBlocks * blockSize);
                 bytesUsed.set(usedBlocks * blockSize);
             } catch (NumberFormatException e)
