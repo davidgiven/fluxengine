@@ -1,5 +1,15 @@
 package com.cowlark.fluxengine.gui;
 
+import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_CREATEDIR;
+import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_DELETE;
+import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_GETDIRENT;
+import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_GETFILE;
+import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_MOVE;
+import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_PUTFILE;
+import static com.cowlark.fluxengine.vfs.Filesystem.FileType.IS_FILE;
+import static com.google.common.collect.ImmutableList.toImmutableList;
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
+import static com.google.common.collect.Streams.stream;
 import static swingtree.UIFactoryMethods.button;
 import static swingtree.UIFactoryMethods.html;
 import static swingtree.UIFactoryMethods.label;
@@ -7,6 +17,12 @@ import static swingtree.UIFactoryMethods.panel;
 import static swingtree.UIFactoryMethods.scrollPane;
 import static swingtree.UIFactoryMethods.separator;
 
+import com.cowlark.fluxengine.core.Bytes;
+import com.cowlark.fluxengine.gui.FilesystemTreeTableModel.FileNode;
+import com.cowlark.fluxengine.vfs.Filesystem;
+import com.cowlark.fluxengine.vfs.Filesystem.Capability;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import org.apache.commons.io.FileUtils;
 import org.jdesktop.swingx.JXTreeTable;
 import org.slf4j.LoggerFactory;
@@ -14,10 +30,15 @@ import sprouts.Tuple;
 import sprouts.Val;
 import sprouts.Var;
 import sprouts.Viewable;
+import swingtree.ComponentDelegate;
 import swingtree.UI;
+import javax.swing.JButton;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
+import java.awt.event.ActionEvent;
+import java.io.IOException;
 
 public class FilesystemPanel extends JPanel
 {
@@ -27,6 +48,7 @@ public class FilesystemPanel extends JPanel
     private final JXTreeTable treeTable;
     private final FilesystemTreeTableModel treeTableModel;
     private final TreeSelectionModel treeSelectionModel;
+    private final Var<Tuple<TreePath>> filesSelected;
 
     public FilesystemPanel(ImagerViewModel model)
     {
@@ -49,7 +71,7 @@ public class FilesystemPanel extends JPanel
         treeTable.setClosedIcon(null);
         treeTable.putClientProperty("FlatLaf.style", "showHorizontalLines: true");
 
-        Var<Tuple<TreePath>> filesSelected = Var.of(Tuple.of(TreePath.class));
+        filesSelected = Var.of(Tuple.of(TreePath.class));
         treeSelectionModel = treeTable.getTreeSelectionModel();
         treeSelectionModel.setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
         treeSelectionModel.addTreeSelectionListener(e -> {
@@ -74,43 +96,73 @@ public class FilesystemPanel extends JPanel
                 .withLayout("fill, wrap 1, insets 5, hidemode 3")
                 .add(
                         "growx", panel("insets 2")
-                                .add("align left",
+                                .add(
+                                        "align left",
                                         button("Get")
-                                                .isEnabledIf(canDoMultiFileOperation)
-                                                .onClick(d -> treeTableModel.getFile(filesSelected.get())))
-                                .add("align left",
-                                        button("Put").isEnabledIf(canDoSingleFileOperation))
-                                .add("align left",
-                                        button("Rename").isEnabledIf(canDoSingleFileOperation))
-                                .add("align left",
-                                        button("Delete").isEnabledIf(canDoMultiFileOperation))
-                                .add("align left",
-                                        button("Info").isEnabledIf(canDoSingleFileOperation))
-                                .add("align left",
-                                        button("View").isEnabledIf(canDoSingleFileOperation)))
-                .add("grow, push",
+                                                .isEnabledIf(ifCapability(
+                                                        canDoMultiFileOperation,
+                                                        OP_GETFILE))
+                                                .onClick(this::getFile))
+                                .add(
+                                        "align left",
+                                        button("Put").isEnabledIf(ifCapability(
+                                                canDoSingleFileOperation,
+                                                OP_PUTFILE)))
+                                .add(
+                                        "align left",
+                                        button("Rename").isEnabledIf(ifCapability(
+                                                canDoSingleFileOperation,
+                                                OP_MOVE)))
+                                .add(
+                                        "align left",
+                                        button("Delete")
+                                                .isEnabledIf(ifCapability(
+                                                        canDoMultiFileOperation,
+                                                        OP_DELETE))
+                                                .onClick(this::deleteFiles))
+                                .add(
+                                        "align left",
+                                        button("Create dir").isEnabledIf(ifCapability(
+                                                canDoMultiFileOperation,
+                                                OP_CREATEDIR)))
+                                .add(
+                                        "align left",
+                                        button("Info").isEnabledIf(ifCapability(
+                                                canDoSingleFileOperation,
+                                                OP_GETDIRENT)))
+                                .add(
+                                        "align left",
+                                        button("View").isEnabledIf(ifCapability(
+                                                canDoSingleFileOperation,
+                                                OP_GETFILE))))
+                .add(
+                        "grow, push",
                         scrollPane().add(UI.of(treeTable)).isVisibleIf(allowedWhenMounted))
                 .add(
-                        "grow, push, align center, w 100%!", html("""
+                        "grow, push, align " + "center, w 100%!", html("""
                                 <html><center><b>Filesystem not mounted</b>
                                 <br>Load some data and press 'Mount' to see files!</center></html>""")
                                 .withHorizontalAlignment(UI.HorizontalAlignment.CENTER)
                                 .isVisibleIf(notMounted))
                 .add(
                         "growx", panel("insets 2")
-                                .add("align left",
+                                .add(
+                                        "align left",
                                         button("Mount")
                                                 .isEnabledIf(allowedWhenNotMounted)
                                                 .onClick(delegate -> treeTableModel.mount()))
-                                .add("align left",
+                                .add(
+                                        "align left",
                                         button("Discard")
                                                 .isEnabledIf(allowedWhenMounted)
                                                 .onClick(delegate -> treeTableModel.discard()))
-                                .add("align left",
+                                .add(
+                                        "align left",
                                         button("Commit")
                                                 .isEnabledIf(allowedWhenMounted)
                                                 .onClick(delegate -> treeTableModel.commit()))
-                                .add("align left",
+                                .add(
+                                        "align left",
                                         button("Unmount")
                                                 .isEnabledIf(allowedWhenMounted)
                                                 .onClick(delegate -> treeTableModel.unmount()))
@@ -138,6 +190,73 @@ public class FilesystemPanel extends JPanel
                                                 .isVisibleIf(allowedWhenMounted)
 
                                 ));
+    }
+
+    private Val<Boolean> ifCapability(Val<Boolean> base, Capability cap)
+    {
+        return Viewable.of(
+                base,
+                treeTableModel.getCapabilities(),
+                (b, caps) -> b && caps.contains(cap));
+    }
+
+    private void getFile(
+            ComponentDelegate<JButton, ActionEvent> delegate)
+    {
+        Tuple<TreePath> paths = filesSelected.get();
+        if (paths.size() == 1)
+        {
+            FileNode node = (FileNode) Iterables.getOnlyElement(paths).getLastPathComponent();
+            if (node.getDirent().fileType() == IS_FILE)
+            {
+                UiUtils.promptAndSave(
+                        this, "Save file", node.getDirent().filename(), saver -> {
+                            treeTableModel.queueFilesystemOperation(fs -> {
+                                Bytes bytes = fs.getFile(node.getDirent().path());
+                                saver.accept(bytes);
+                            });
+                        });
+                return;
+            }
+        }
+
+        UiUtils.promptAndSave(
+                this, "Save multiple files", "files.zip", saver -> {
+                    treeTableModel.queueFilesystemOperation(fs -> {
+                        saver.accept(recursivelyAddPathsToZipfile(fs, paths));
+                    });
+                });
+    }
+
+    private void deleteFiles(
+            ComponentDelegate<JButton, ActionEvent> delegate)
+    {
+        Tuple<TreePath> paths = filesSelected.get();
+
+        treeTableModel.queueFilesystemOperation(fs -> {
+            try
+            {
+                for (TreePath path : paths)
+                {
+                    FileNode file = (FileNode) path.getLastPathComponent();
+                    fs.deleteFileRecursively(file.getDirent().path());
+                    treeTableModel.removeNodeFromParent(file);
+                }
+            } finally
+            {
+                treeTableModel.mutated();
+            }
+        });
+    }
+
+    private static Bytes recursivelyAddPathsToZipfile(Filesystem fs, Iterable<TreePath> paths)
+            throws IOException
+    {
+        return fs.getFiles(
+                fs,
+                stream(paths)
+                        .map(path -> ((FileNode) path.getLastPathComponent()).getDirent().path())
+                        .collect(toImmutableList()));
     }
 
     /**

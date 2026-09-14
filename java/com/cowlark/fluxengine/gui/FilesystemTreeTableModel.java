@@ -3,10 +3,10 @@ package com.cowlark.fluxengine.gui;
 import static com.cowlark.fluxengine.vfs.Filesystem.FileType.IS_DIR;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 
-import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.core.EmergencyStopException;
 import com.cowlark.fluxengine.data.Image;
 import com.cowlark.fluxengine.vfs.Attributes;
+import com.cowlark.fluxengine.vfs.Filesystem.Capability;
 import com.cowlark.fluxengine.vfs.Filesystem.Dirent;
 import com.cowlark.fluxengine.vfs.FilesystemOperation.FilesystemCaller;
 import com.cowlark.fluxengine.vfs.VfsPath;
@@ -16,12 +16,11 @@ import lombok.Getter;
 import lombok.Setter;
 import org.jdesktop.swingx.treetable.AbstractMutableTreeTableNode;
 import org.jdesktop.swingx.treetable.DefaultTreeTableModel;
-import sprouts.Tuple;
+import sprouts.ValueSet;
 import sprouts.Var;
 import javax.swing.SwingUtilities;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeExpansionListener;
-import javax.swing.tree.TreePath;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -45,6 +44,8 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel implements T
     @Getter private final Var<Boolean> isMounted = Var.of(false);
     @Getter private final Var<Integer> bytesTotal = Var.of(0);
     @Getter private final Var<Integer> bytesUsed = Var.of(0);
+    @Getter private final Var<ValueSet<Capability>> capabilities =
+            Var.of(ValueSet.of(Capability.class));
 
     private class PlaceholderNode extends AbstractMutableTreeTableNode
     {
@@ -62,7 +63,7 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel implements T
         }
     }
 
-    private class FileNode extends AbstractMutableTreeTableNode
+    class FileNode extends AbstractMutableTreeTableNode
     {
         @Getter private final Dirent dirent;
 
@@ -89,7 +90,7 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel implements T
         }
     }
 
-    private class DirNode extends FileNode
+    class DirNode extends FileNode
     {
         @Getter @Setter private boolean expanded = false;
 
@@ -124,8 +125,20 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel implements T
         setRoot(root);
         insertNodeInto(new PlaceholderNode(), root, 0);
 
-        updateFreeSpace();
         isMounted.set(true);
+        mutated();
+    }
+
+    /* Must be called from filesystem thread */
+    public void mutated()
+    {
+        updateFreeSpace();
+        queue.add(fs -> capabilities.set(ValueSet.of(Capability.class, fs.getCapabilities())));
+    }
+
+    public void queueFilesystemOperation(FilesystemCaller caller)
+    {
+        queue.add(caller);
     }
 
     private void updateFreeSpace()
@@ -160,37 +173,6 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel implements T
         queue.add(fs -> {
             throw new EmergencyStopException();
         });
-    }
-
-    public void getFile(Tuple<TreePath> paths)
-    {
-        if (paths.size() == 1)
-        {
-            queue.add(fs -> {
-                switch (paths.get(0).getLastPathComponent())
-                {
-                    case DirNode node ->
-                    {
-                    }
-
-                    case FileNode node ->
-                    {
-                        Bytes data = fs.getFile(node.getDirent().path());
-                        SwingUtilities.invokeLater(() -> {
-                            UiUtils.promptAndSave(
-                                    null,
-                                    "Save file",
-                                    node.getDirent().filename(),
-                                    data);
-                        });
-                    }
-
-                    default ->
-                    {
-                    }
-                }
-            });
-        }
     }
 
     @Override

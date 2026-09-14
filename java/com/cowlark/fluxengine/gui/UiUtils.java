@@ -26,7 +26,6 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -39,7 +38,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -183,11 +181,11 @@ public class UiUtils
     /**
      * Prompts the user for a save location, then writes {@code data} to it.
      */
-    public static void promptAndSave(
+    static void promptAndSave(
             Component parent,
             String dialogTitle,
             String defaultFileName,
-            Bytes data)
+            Consumer<Consumer<Bytes>> dataSupplier)
     {
         JFileChooser chooser = new JFileChooser();
         chooser.setDialogTitle(dialogTitle);
@@ -209,17 +207,23 @@ public class UiUtils
                 return;
         }
 
-        try
-        {
-            data.writeToFile(file.toPath());
-        } catch (FluxEngineException e)
-        {
-            JOptionPane.showMessageDialog(
-                    parent,
-                    "Could not save file: " + e.getMessage(),
-                    "Save Failed",
-                    JOptionPane.ERROR_MESSAGE);
-        }
+        Consumer<Bytes> saver = data -> {
+            SwingUtilities.invokeLater(() -> {
+                try
+                {
+                    data.writeToFile(file.toPath());
+                } catch (FluxEngineException e)
+                {
+                    JOptionPane.showMessageDialog(
+                            parent,
+                            "Could not save file: " + e.getMessage(),
+                            "Save Failed",
+                            JOptionPane.ERROR_MESSAGE);
+                }
+            });
+        };
+
+        dataSupplier.accept(saver);
     }
 
     @Builder(setterPrefix = "set")

@@ -302,4 +302,29 @@ public abstract class GenericTreeFilesystemTest extends GenericFilesystemTest
         assertThat(impl.getFile(VfsPath.of("/file.txt"))).isEqualTo(data);
         assertThat(impl.getDirent(VfsPath.of("/dir")).fileType()).isEqualTo(IS_DIR);
     }
+
+    @Test
+    public void deleteRecursively() throws IOException
+    {
+        assumeTree(
+                Capability.OP_CREATE,
+                Capability.OP_CREATEDIR,
+                Capability.OP_PUTFILE,
+                Capability.OP_DELETE,
+                Capability.OP_LIST,
+                Capability.OP_GETDIRENT);
+        impl.create(true, "LABEL");
+        impl.createDirectory(VfsPath.of("/dir1"));
+        impl.createDirectory(VfsPath.of("/dir1/dir2"));
+        impl.createDirectory(VfsPath.of("/dir1/dir2/dir3"));
+        impl.putFile(VfsPath.of("/dir1/dir2/dir3/data"), getTestFileData());
+
+        impl.deleteFileRecursively(VfsPath.of("/dir1"));
+
+        assertThat(impl.list(VfsPath.of("/"))).isEmpty();
+        assertThrows(NoSuchFileException.class, () -> impl.getDirent(VfsPath.of("/dir1")));
+        assertThrows(NoSuchFileException.class, () -> impl.getDirent(VfsPath.of("/dir1/dir2")));
+        assertThrows(
+                NoSuchFileException.class, () -> impl.getDirent(VfsPath.of("/dir1/dir2/dir3/data")));
+    }
 }

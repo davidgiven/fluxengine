@@ -122,8 +122,7 @@ public abstract class Filesystem implements AutoCloseable
     /**
      * Read a file/directory recursively into a zipfile.
      */
-    public Bytes getFiles(Filesystem fs, Iterable<VfsPath> paths)
-            throws IOException
+    public Bytes getFiles(Filesystem fs, Iterable<VfsPath> paths) throws IOException
     {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (ZipOutputStream zos = new ZipOutputStream(baos))
@@ -196,11 +195,30 @@ public abstract class Filesystem implements AutoCloseable
     }
 
     /**
-     * Deletes a file or non-empty directory.
+     * Deletes a file or empty directory.
      */
     public void deleteFile(VfsPath path) throws IOException
     {
         throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Deletes a file or directory and all contents.
+     */
+    public void deleteFileRecursively(VfsPath path) throws IOException
+    {
+        Filesystem.Dirent dirent = getDirent(path);
+        switch (dirent.fileType())
+        {
+            case IS_FILE -> deleteFile(path);
+
+            case IS_DIR ->
+            {
+                for (Filesystem.Dirent childDirent : list(dirent.path()).values())
+                    deleteFileRecursively(childDirent.path());
+                deleteFile(path);
+            }
+        }
     }
 
     /**
