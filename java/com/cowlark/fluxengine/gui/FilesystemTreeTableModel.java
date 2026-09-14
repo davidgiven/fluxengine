@@ -22,6 +22,7 @@ import sprouts.Var;
 import javax.swing.SwingUtilities;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeExpansionListener;
+import javax.swing.tree.TreePath;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -149,8 +150,10 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel implements T
             try
             {
                 int blockSize = Integer.parseInt(attrs.get(FilesystemAttributes.BLOCK_SIZE.name()));
-                int totalBlocks = Integer.parseInt(attrs.get(FilesystemAttributes.TOTAL_BLOCKS.name()));
-                int usedBlocks = Integer.parseInt(attrs.get(FilesystemAttributes.USED_BLOCKS.name()));
+                int totalBlocks =
+                        Integer.parseInt(attrs.get(FilesystemAttributes.TOTAL_BLOCKS.name()));
+                int usedBlocks =
+                        Integer.parseInt(attrs.get(FilesystemAttributes.USED_BLOCKS.name()));
                 bytesTotal.set(totalBlocks * blockSize);
                 bytesUsed.set(usedBlocks * blockSize);
             } catch (NumberFormatException e)
@@ -214,11 +217,28 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel implements T
                 dir.setExpanded(true);
 
                 for (Dirent file : files)
-                {
-                    FileNode node = new FileNode(file);
-                    insertNodeInto(node, dir, dir.getChildCount());
-                }
+                    addNode(dir, file.path());
+
                 removeNodeFromParent((PlaceholderNode) dir.getChildAt(0));
+            });
+        });
+    }
+
+    public void addNode(DirNode dir, VfsPath child)
+    {
+        queue.add(fs -> {
+            Dirent de = fs.getDirent(child);
+            SwingUtilities.invokeLater(() -> {
+                FileNode newNode = switch (de.fileType())
+                {
+                    case IS_DIR -> new DirNode(de);
+                    case IS_FILE -> new FileNode(de);
+                };
+
+                insertNodeInto(newNode, dir, dir.getChildCount());
+                if (newNode instanceof DirNode)
+                    insertNodeInto(new PlaceholderNode(), newNode, 0);
+                mutated();
             });
         });
     }

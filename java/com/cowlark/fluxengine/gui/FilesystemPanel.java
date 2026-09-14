@@ -18,14 +18,17 @@ import static swingtree.UIFactoryMethods.scrollPane;
 import static swingtree.UIFactoryMethods.separator;
 
 import com.cowlark.fluxengine.core.Bytes;
+import com.cowlark.fluxengine.gui.FilesystemTreeTableModel.DirNode;
 import com.cowlark.fluxengine.gui.FilesystemTreeTableModel.FileNode;
 import com.cowlark.fluxengine.vfs.FileAttributes;
 import com.cowlark.fluxengine.vfs.Filesystem;
 import com.cowlark.fluxengine.vfs.Filesystem.Capability;
 import com.cowlark.fluxengine.vfs.Filesystem.Dirent;
+import com.cowlark.fluxengine.vfs.VfsPath;
 import com.google.common.collect.Iterables;
 import org.apache.commons.io.FileUtils;
 import org.jdesktop.swingx.JXTreeTable;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sprouts.Tuple;
 import sprouts.Val;
@@ -34,6 +37,7 @@ import sprouts.Viewable;
 import swingtree.ComponentDelegate;
 import swingtree.UI;
 import javax.swing.JButton;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.tree.TreePath;
@@ -43,7 +47,7 @@ import java.io.IOException;
 
 public class FilesystemPanel extends JPanel
 {
-    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(FilesystemPanel.class);
+    private static final Logger logger = LoggerFactory.getLogger(FilesystemPanel.class);
 
     private final ImagerViewModel model;
     private final JXTreeTable treeTable;
@@ -122,10 +126,11 @@ public class FilesystemPanel extends JPanel
                                                         OP_DELETE))
                                                 .onClick(this::deleteFiles))
                                 .add(
-                                        "align left",
-                                        button("Create dir").isEnabledIf(ifCapability(
-                                                canDoMultiFileOperation,
-                                                OP_CREATEDIR)))
+                                        "align left", button("Create dir")
+                                                .isEnabledIf(ifCapability(
+                                                        canDoMultiFileOperation,
+                                                        OP_CREATEDIR))
+                                                .onClick(this::createDirectory))
                                 .add(
                                         "align left", button("Info")
                                                 .isEnabledIf(ifCapability(
@@ -271,6 +276,26 @@ public class FilesystemPanel extends JPanel
                                     e -> e.getValue()))));
         });
 
+    }
+
+    private void createDirectory(
+            ComponentDelegate<JButton, ActionEvent> delegate)
+    {
+        TreePath parentPath = Iterables.getOnlyElement(filesSelected.get());
+        DirNode parent = switch (parentPath.getLastPathComponent())
+        {
+            case DirNode dir -> dir;
+            case FileNode file -> (DirNode) parentPath.getParentPath().getLastPathComponent();
+            default -> throw new IllegalStateException(
+                    "Unexpected value: " + parentPath.getLastPathComponent());
+        };
+
+        String childName = JOptionPane.showInputDialog(this, "Enter new directory name:");
+        VfsPath childVfsPath = parent.getDirent().path().resolve(childName);
+        treeTableModel.queueFilesystemOperation(fs -> {
+            fs.createDirectory(childVfsPath);
+            treeTableModel.addNode(parent, childVfsPath);
+        });
     }
 
     private static Bytes recursivelyAddPathsToZipfile(Filesystem fs, Iterable<TreePath> paths)
