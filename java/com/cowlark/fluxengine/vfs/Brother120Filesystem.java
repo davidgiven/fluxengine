@@ -41,10 +41,12 @@ public class Brother120Filesystem extends Filesystem
     {
         BrotherDirectory dir = new BrotherDirectory();
         ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
-        builder.put(Attributes.VOLUME_NAME, "");
-        builder.put(Attributes.TOTAL_BLOCKS, Integer.toString(blockDevice.getBlockCount()));
-        builder.put(Attributes.USED_BLOCKS, Integer.toString(dir.usedSectors));
-        builder.put(Attributes.BLOCK_SIZE, "256");
+        builder.put(FilesystemAttributes.VOLUME_NAME.name(), "");
+        builder.put(
+                FilesystemAttributes.TOTAL_BLOCKS.name(),
+                Integer.toString(blockDevice.getBlockCount()));
+        builder.put(FilesystemAttributes.USED_BLOCKS.name(), Integer.toString(dir.usedSectors));
+        builder.put(FilesystemAttributes.BLOCK_SIZE.name(), "256");
         return builder.build();
     }
 
@@ -155,10 +157,10 @@ public class Brother120Filesystem extends Filesystem
             length = sectorLength * 256;
 
             ImmutableMap.Builder<String, String> attrs = ImmutableMap.builder();
-            attrs.put(Attributes.FILENAME, filename);
-            attrs.put(Attributes.LENGTH, Integer.toString(length));
-            attrs.put(Attributes.FILE_TYPE, "file");
-            attrs.put(Attributes.MODE, "");
+            attrs.put(FileAttributes.FILENAME.name(), filename);
+            attrs.put(FileAttributes.LENGTH.name(), Integer.toString(length));
+            attrs.put(FileAttributes.FILE_TYPE.name(), "file");
+            attrs.put(FileAttributes.MODE.name(), "");
             attrs.put("brother120.start_sector", Integer.toString(startSector));
             attrs.put("brother120.type", Integer.toString(brotherType));
 

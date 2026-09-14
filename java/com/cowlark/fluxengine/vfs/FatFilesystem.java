@@ -75,19 +75,19 @@ public class FatFilesystem extends Filesystem
         DirentBuilder direntBuilder =
                 Dirent.builder().setFilename(fi.fname).setPath(dir.resolve(fi.fname)).setMode("");
 
-        attrsBuilder.put(Attributes.FILENAME, fi.fname);
+        attrsBuilder.put(FileAttributes.FILENAME.name(), fi.fname);
 
         if ((fi.fattrib & AM_DIR) != AM_DIR)
         {
             long length = fi.fsize;
             direntBuilder.setFileType(IS_FILE).setLength((int) length);
             attrsBuilder
-                    .put(Attributes.LENGTH, Long.toString(length))
-                    .put(Attributes.FILE_TYPE, "file");
+                    .put(FileAttributes.LENGTH.name(), Long.toString(length))
+                    .put(FileAttributes.FILE_TYPE.name(), "file");
         } else
         {
             direntBuilder.setFileType(IS_DIR);
-            attrsBuilder.put(Attributes.FILE_TYPE, "dir");
+            attrsBuilder.put(FileAttributes.FILE_TYPE.name(), "dir");
         }
 
         return direntBuilder.setAttributes(attrsBuilder.build()).build();
@@ -172,14 +172,14 @@ public class FatFilesystem extends Filesystem
         String[] stringBox = new String[1];
         long[] longBox = new long[1];
         checkResult(fatFilesystem.getLabel("", stringBox, longBox));
-        builder.put(Attributes.VOLUME_NAME, stringBox[0]);
+        builder.put(FilesystemAttributes.VOLUME_NAME.name(), stringBox[0]);
 
         checkResult(fatFilesystem.getfree("", longBox));
         long total = (fatFilesystem.n_fatent - 2) + (fatFilesystem.database / fatFilesystem.csize);
-        builder.put(Attributes.TOTAL_BLOCKS, Long.toString(total));
-        builder.put(Attributes.USED_BLOCKS, Long.toString(total - longBox[0]));
+        builder.put(FilesystemAttributes.TOTAL_BLOCKS.name(), Long.toString(total));
+        builder.put(FilesystemAttributes.USED_BLOCKS.name(), Long.toString(total - longBox[0]));
         builder.put(
-                Attributes.BLOCK_SIZE,
+                FilesystemAttributes.BLOCK_SIZE.name(),
                 Long.toString(fatFilesystem.csize * blockDevice.getBlockSize()));
 
         return builder.build();
@@ -190,10 +190,10 @@ public class FatFilesystem extends Filesystem
     {
         mount();
 
-        if (!metadata.keySet().equals(ImmutableSet.of(Attributes.VOLUME_NAME)))
+        if (!metadata.keySet().equals(ImmutableSet.of(FilesystemAttributes.VOLUME_NAME.name())))
             throw new IllegalArgumentException("can't set this metadata key");
 
-        checkResult(fatFilesystem.setLabel(metadata.get(Attributes.VOLUME_NAME)));
+        checkResult(fatFilesystem.setLabel(metadata.get(FilesystemAttributes.VOLUME_NAME.name())));
     }
 
     @Override

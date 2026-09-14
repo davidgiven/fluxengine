@@ -8,7 +8,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import lombok.Builder;
 import org.slf4j.LoggerFactory;
-import javax.swing.tree.TreePath;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.FileSystemException;
@@ -27,8 +26,8 @@ public abstract class Filesystem implements AutoCloseable
             .setFileType(FileType.IS_DIR)
             .setAttributes(ImmutableMap
                     .<String, String>builder()
-                    .put(Attributes.FILENAME, "")
-                    .put(Attributes.FILE_TYPE, "dir")
+                    .put(FileAttributes.FILENAME.name(), "")
+                    .put(FileAttributes.FILE_TYPE.name(), "dir")
                     .build())
             .build();
 
@@ -55,6 +54,34 @@ public abstract class Filesystem implements AutoCloseable
                 Logger::log, e -> {
                     logger.atError().setCause(e).log("filesystem thread failed");
                 });
+    }
+
+    private static void recursivelyAddToZipfile(
+            Filesystem fs,
+            ZipOutputStream zos,
+            Path zpath,
+            VfsPath path) throws IOException
+    {
+        Filesystem.Dirent dirent = fs.getDirent(path);
+        switch (dirent.fileType())
+        {
+            case IS_FILE ->
+            {
+                ZipEntry entry = new ZipEntry(zpath.resolve(dirent.filename()).toString());
+                zos.putNextEntry(entry);
+                zos.write(fs.getFile(dirent.path()).toByteArray());
+                zos.closeEntry();
+            }
+
+            case IS_DIR ->
+            {
+                Path childZpath = zpath.resolve(dirent.filename());
+                for (Filesystem.Dirent childDirent : fs.list(dirent.path()).values())
+                {
+                    recursivelyAddToZipfile(fs, zos, childZpath, childDirent.path());
+                }
+            }
+        }
     }
 
     @Override
@@ -132,35 +159,6 @@ public abstract class Filesystem implements AutoCloseable
         }
         return new Bytes(baos.toByteArray());
     }
-
-    private static void recursivelyAddToZipfile(
-            Filesystem fs,
-            ZipOutputStream zos,
-            Path zpath,
-            VfsPath path) throws IOException
-    {
-        Filesystem.Dirent dirent = fs.getDirent(path);
-        switch (dirent.fileType())
-        {
-            case IS_FILE ->
-            {
-                ZipEntry entry = new ZipEntry(zpath.resolve(dirent.filename()).toString());
-                zos.putNextEntry(entry);
-                zos.write(fs.getFile(dirent.path()).toByteArray());
-                zos.closeEntry();
-            }
-
-            case IS_DIR ->
-            {
-                Path childZpath = zpath.resolve(dirent.filename());
-                for (Filesystem.Dirent childDirent : fs.list(dirent.path()).values())
-                {
-                    recursivelyAddToZipfile(fs, zos, childZpath, childDirent.path());
-                }
-            }
-        }
-    }
-
 
     /**
      * Write a file.

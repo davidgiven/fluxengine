@@ -86,10 +86,12 @@ public class CbmFilesystem extends Filesystem
     {
         Directory dir = new Directory();
         ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
-        builder.put(Attributes.VOLUME_NAME, dir.volumeName);
-        builder.put(Attributes.USED_BLOCKS, Integer.toString(dir.usedBlocks));
-        builder.put(Attributes.TOTAL_BLOCKS, Integer.toString(blockDevice.getBlockCount()));
-        builder.put(Attributes.BLOCK_SIZE, Integer.toString(blockDevice.getBlockSize()));
+        builder.put(FilesystemAttributes.VOLUME_NAME.name(), dir.volumeName);
+        builder.put(FilesystemAttributes.USED_BLOCKS.name(), Integer.toString(dir.usedBlocks));
+        builder.put(
+                FilesystemAttributes.TOTAL_BLOCKS.name(),
+                Integer.toString(blockDevice.getBlockCount()));
+        builder.put(FilesystemAttributes.BLOCK_SIZE.name(), Integer.toString(blockDevice.getBlockSize()));
         builder.put("cbmfs.dos_type", Integer.toString(dir.dosVersion));
         builder.put("cbmfs.bam_size", Integer.toString(dir.bamSize));
         return builder.build();
@@ -216,10 +218,10 @@ public class CbmFilesystem extends Filesystem
             String mode = "";
 
             ImmutableMap.Builder<String, String> attrs = ImmutableMap.builder();
-            attrs.put(Attributes.FILENAME, filename);
-            attrs.put(Attributes.LENGTH, Integer.toString(length));
-            attrs.put(Attributes.FILE_TYPE, "file");
-            attrs.put(Attributes.MODE, mode);
+            attrs.put(FileAttributes.FILENAME.name(), filename);
+            attrs.put(FileAttributes.LENGTH.name(), Integer.toString(length));
+            attrs.put(FileAttributes.FILE_TYPE.name(), "file");
+            attrs.put(FileAttributes.MODE.name(), mode);
             attrs.put("cbmfs.type", toFileType(cbmType));
             attrs.put("cbmfs.start_track", Integer.toString(startTrack));
             attrs.put("cbmfs.start_sector", Integer.toString(startSector));

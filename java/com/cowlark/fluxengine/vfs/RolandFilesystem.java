@@ -18,7 +18,6 @@ import static org.apache.commons.lang3.StringUtils.substring;
 import com.cowlark.fluxengine.core.ByteReader;
 import com.cowlark.fluxengine.core.ByteWriter;
 import com.cowlark.fluxengine.core.Bytes;
-import com.cowlark.fluxengine.data.CylinderHeadSector;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
@@ -35,7 +34,6 @@ import org.indunet.fastproto.annotation.StructArrayType;
 import org.indunet.fastproto.annotation.UInt8ArrayType;
 import org.indunet.fastproto.annotation.UInt8Type;
 import org.indunet.fastproto.exception.CodecException;
-import org.indunet.fastproto.exception.DecodingException;
 import org.indunet.fastproto.exception.EncodingException;
 import java.io.IOException;
 import java.nio.file.FileSystemException;
@@ -184,10 +182,10 @@ public class RolandFilesystem extends Filesystem
         RolandDirectory dir = mount();
         BlockUsage blockUsage = countBlocks(dir);
         ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
-        builder.put(Attributes.VOLUME_NAME, "");
-        builder.put(Attributes.TOTAL_BLOCKS, Integer.toString(blockUsage.totalBlocks));
-        builder.put(Attributes.USED_BLOCKS, Integer.toString(blockUsage.usedBlocks));
-        builder.put(Attributes.BLOCK_SIZE, Integer.toString(BLOCK_SIZE));
+        builder.put(FilesystemAttributes.VOLUME_NAME.name(), "");
+        builder.put(FilesystemAttributes.TOTAL_BLOCKS.name(), Integer.toString(blockUsage.totalBlocks));
+        builder.put(FilesystemAttributes.USED_BLOCKS.name(), Integer.toString(blockUsage.usedBlocks));
+        builder.put(FilesystemAttributes.BLOCK_SIZE.name(), Integer.toString(BLOCK_SIZE));
         return builder.build();
     }
 
@@ -337,9 +335,9 @@ public class RolandFilesystem extends Filesystem
 
         int length = (lastDe.extent * EXTENT_BLOCKS + lastBlockCount) * BLOCK_SIZE;
         ImmutableMap.Builder<String, String> attrs = ImmutableMap.builder();
-        attrs.put(Attributes.FILENAME, lastDe.filename);
-        attrs.put(Attributes.LENGTH, Integer.toString(length));
-        attrs.put(Attributes.FILE_TYPE, "file");
+        attrs.put(FileAttributes.FILENAME.name(), lastDe.filename);
+        attrs.put(FileAttributes.LENGTH.name(), Integer.toString(length));
+        attrs.put(FileAttributes.FILE_TYPE.name(), "file");
 
         return Dirent
                 .builder()

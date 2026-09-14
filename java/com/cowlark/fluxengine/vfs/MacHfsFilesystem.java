@@ -76,12 +76,14 @@ public class MacHfsFilesystem extends Filesystem
             Hfs.hfsVstat(volume, ent);
             return ImmutableMap
                     .<String, String>builder()
-                    .put(Attributes.VOLUME_NAME, charsToString(ent.name))
-                    .put(Attributes.TOTAL_BLOCKS, Long.toString(ent.totbytes / HFS_BLOCKSZ))
+                    .put(FilesystemAttributes.VOLUME_NAME.name(), charsToString(ent.name))
                     .put(
-                            Attributes.USED_BLOCKS,
+                            FilesystemAttributes.TOTAL_BLOCKS.name(),
+                            Long.toString(ent.totbytes / HFS_BLOCKSZ))
+                    .put(
+                            FilesystemAttributes.USED_BLOCKS.name(),
                             Long.toString((ent.totbytes - ent.freebytes) / HFS_BLOCKSZ))
-                    .put(Attributes.BLOCK_SIZE, "512")
+                    .put(FilesystemAttributes.BLOCK_SIZE.name(), "512")
                     .build();
         } catch (HfsException e)
         {
@@ -407,17 +409,17 @@ public class MacHfsFilesystem extends Filesystem
         boolean isDir = (ent.flags & HFS_ISDIR) != 0;
         ImmutableMap.Builder<String, String> attrs = ImmutableMap.builder();
         Dirent.DirentBuilder b = Dirent.builder().setFilename(name).setPath(path).setMode("");
-        attrs.put(Attributes.FILENAME, name);
+        attrs.put(FileAttributes.FILENAME.name(), name);
         if (isDir)
         {
             b.setFileType(FileType.IS_DIR);
-            attrs.put(Attributes.FILE_TYPE, "dir");
+            attrs.put(FileAttributes.FILE_TYPE.name(), "dir");
         } else
         {
             int appleLen = AppleSingle.OVERHEAD + (int) ent.uFile.dsize + (int) ent.uFile.rsize;
             b.setFileType(FileType.IS_FILE).setLength(appleLen);
-            attrs.put(Attributes.LENGTH, Integer.toString(appleLen));
-            attrs.put(Attributes.FILE_TYPE, "file");
+            attrs.put(FileAttributes.LENGTH.name(), Integer.toString(appleLen));
+            attrs.put(FileAttributes.FILE_TYPE.name(), "file");
         }
         return b.setAttributes(attrs.build()).build();
     }

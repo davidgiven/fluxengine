@@ -43,10 +43,12 @@ public class AcornDfsFilesystem extends Filesystem
     {
         AcornDfsDirectory dir = new AcornDfsDirectory();
         ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
-        builder.put(Attributes.VOLUME_NAME, dir.volumeName);
-        builder.put(Attributes.TOTAL_BLOCKS, Integer.toString(blockDevice.getBlockCount()));
-        builder.put(Attributes.USED_BLOCKS, Integer.toString(dir.usedSectors));
-        builder.put(Attributes.BLOCK_SIZE, "256");
+        builder.put(FilesystemAttributes.VOLUME_NAME.name(), dir.volumeName);
+        builder.put(
+                FilesystemAttributes.TOTAL_BLOCKS.name(),
+                Integer.toString(blockDevice.getBlockCount()));
+        builder.put(FilesystemAttributes.USED_BLOCKS.name(), Integer.toString(dir.usedSectors));
+        builder.put(FilesystemAttributes.BLOCK_SIZE.name(), "256");
         return builder.build();
     }
 
@@ -202,10 +204,10 @@ public class AcornDfsFilesystem extends Filesystem
             String mode = locked ? "L" : "";
 
             ImmutableMap.Builder<String, String> attrs = ImmutableMap.builder();
-            attrs.put(Attributes.FILENAME, filename);
-            attrs.put(Attributes.LENGTH, Integer.toString(length));
-            attrs.put(Attributes.FILE_TYPE, "file");
-            attrs.put(Attributes.MODE, mode);
+            attrs.put(FileAttributes.FILENAME.name(), filename);
+            attrs.put(FileAttributes.LENGTH.name(), Integer.toString(length));
+            attrs.put(FileAttributes.FILE_TYPE.name(), "file");
+            attrs.put(FileAttributes.MODE.name(), mode);
             attrs.put("acorndfs.inode", Integer.toString(inode));
             attrs.put("acorndfs.start_sector", Integer.toString(startSector));
             attrs.put("acorndfs.load_address", String.format("0x%x", loadAddress));

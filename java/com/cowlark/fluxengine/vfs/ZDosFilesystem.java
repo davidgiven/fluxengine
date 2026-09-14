@@ -111,10 +111,10 @@ public class ZDosFilesystem extends Filesystem
     {
         ZDosDirectory dir = new ZDosDirectory();
         ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
-        builder.put(Attributes.VOLUME_NAME, "");
-        builder.put(Attributes.TOTAL_BLOCKS, Integer.toString(dir.totalBlocks));
-        builder.put(Attributes.USED_BLOCKS, Integer.toString(dir.usedBlocks));
-        builder.put(Attributes.BLOCK_SIZE, "128");
+        builder.put(FilesystemAttributes.VOLUME_NAME.name(), "");
+        builder.put(FilesystemAttributes.TOTAL_BLOCKS.name(), Integer.toString(dir.totalBlocks));
+        builder.put(FilesystemAttributes.USED_BLOCKS.name(), Integer.toString(dir.usedBlocks));
+        builder.put(FilesystemAttributes.BLOCK_SIZE.name(), "128");
         return builder.build();
     }
 
@@ -302,10 +302,10 @@ public class ZDosFilesystem extends Filesystem
             mode = sb.toString();
 
             ImmutableMap.Builder<String, String> attrs = ImmutableMap.builder();
-            attrs.put(Attributes.FILENAME, filename);
-            attrs.put(Attributes.LENGTH, Integer.toString(length));
-            attrs.put(Attributes.FILE_TYPE, "file");
-            attrs.put(Attributes.MODE, mode);
+            attrs.put(FileAttributes.FILENAME.name(), filename);
+            attrs.put(FileAttributes.LENGTH.name(), Integer.toString(length));
+            attrs.put(FileAttributes.FILE_TYPE.name(), "file");
+            attrs.put(FileAttributes.MODE.name(), mode);
             attrs.put("zdos.descriptor_record", Integer.toString(descriptorBlock));
             attrs.put("zdos.first_record", Integer.toString(descriptor.firstRecord));
             attrs.put("zdos.record_size", Integer.toString(descriptor.recordSize));

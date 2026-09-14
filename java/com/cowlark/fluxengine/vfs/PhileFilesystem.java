@@ -95,10 +95,10 @@ public class PhileFilesystem extends Filesystem
     {
         PhileDirectory dir = new PhileDirectory();
         ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
-        builder.put(Attributes.VOLUME_NAME, dir.volumeName);
-        builder.put(Attributes.TOTAL_BLOCKS, Integer.toString(dir.totalBlocks));
-        builder.put(Attributes.USED_BLOCKS, Integer.toString(dir.totalBlocks));
-        builder.put(Attributes.BLOCK_SIZE, Integer.toString(phileBlockSize));
+        builder.put(FilesystemAttributes.VOLUME_NAME.name(), dir.volumeName);
+        builder.put(FilesystemAttributes.TOTAL_BLOCKS.name(), Integer.toString(dir.totalBlocks));
+        builder.put(FilesystemAttributes.USED_BLOCKS.name(), Integer.toString(dir.totalBlocks));
+        builder.put(FilesystemAttributes.BLOCK_SIZE.name(), Integer.toString(phileBlockSize));
         return builder.build();
     }
 
@@ -233,11 +233,11 @@ public class PhileFilesystem extends Filesystem
             }
 
             ImmutableMap.Builder<String, String> attrs = ImmutableMap.builder();
-            attrs.put(Attributes.FILENAME, filename);
-            attrs.put(Attributes.LENGTH, Integer.toString(length));
-            attrs.put(Attributes.FILE_TYPE, "file");
-            attrs.put(Attributes.MODE, mode);
-            attrs.put(Attributes.CTIME, ctime);
+            attrs.put(FileAttributes.FILENAME.name(), filename);
+            attrs.put(FileAttributes.LENGTH.name(), Integer.toString(length));
+            attrs.put(FileAttributes.FILE_TYPE.name(), "file");
+            attrs.put(FileAttributes.MODE.name(), mode);
+            attrs.put(FileAttributes.CTIME.name(), ctime);
             attrs.put("phile.spans", Integer.toString(spansCount));
 
             this.dirent = Dirent

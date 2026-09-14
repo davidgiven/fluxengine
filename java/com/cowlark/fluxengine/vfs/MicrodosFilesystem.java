@@ -72,10 +72,10 @@ public class MicrodosFilesystem extends Filesystem
     {
         MicrodosDirectory dir = new MicrodosDirectory();
         ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
-        builder.put(Attributes.VOLUME_NAME, dir.volumeLabel);
-        builder.put(Attributes.TOTAL_BLOCKS, Integer.toString(TOTAL_BLOCKS));
-        builder.put(Attributes.USED_BLOCKS, Integer.toString(dir.usedBlocks));
-        builder.put(Attributes.BLOCK_SIZE, Integer.toString(BLOCK_SIZE));
+        builder.put(FilesystemAttributes.VOLUME_NAME.name(), dir.volumeLabel);
+        builder.put(FilesystemAttributes.TOTAL_BLOCKS.name(), Integer.toString(TOTAL_BLOCKS));
+        builder.put(FilesystemAttributes.USED_BLOCKS.name(), Integer.toString(dir.usedBlocks));
+        builder.put(FilesystemAttributes.BLOCK_SIZE.name(), Integer.toString(BLOCK_SIZE));
         return builder.build();
     }
 
@@ -222,10 +222,10 @@ public class MicrodosFilesystem extends Filesystem
             mode = "";
 
             ImmutableMap.Builder<String, String> attrs = ImmutableMap.builder();
-            attrs.put(Attributes.FILENAME, filename);
-            attrs.put(Attributes.LENGTH, Integer.toString(length));
-            attrs.put(Attributes.FILE_TYPE, "file");
-            attrs.put(Attributes.MODE, mode);
+            attrs.put(FileAttributes.FILENAME.name(), filename);
+            attrs.put(FileAttributes.LENGTH.name(), Integer.toString(length));
+            attrs.put(FileAttributes.FILE_TYPE.name(), "file");
+            attrs.put(FileAttributes.MODE.name(), mode);
             attrs.put("microdos.ssn", Integer.toString(ssn));
             attrs.put("microdos.attr", String.format("0x%x", attr));
             attrs.put("microdos.sdw_count", Integer.toString(sdws.size()));

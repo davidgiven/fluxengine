@@ -128,8 +128,8 @@ public abstract class GenericTreeFilesystemTest extends GenericFilesystemTest
                 .setMode("")
                 .setAttributes(ImmutableMap
                         .<String, String>builder()
-                        .put(Attributes.FILENAME, "dir")
-                        .put(Attributes.FILE_TYPE, "dir")
+                        .put(FileAttributes.FILENAME.name(), "dir")
+                        .put(FileAttributes.FILE_TYPE.name(), "dir")
                         .build())
                 .build());
     }
@@ -325,6 +325,7 @@ public abstract class GenericTreeFilesystemTest extends GenericFilesystemTest
         assertThrows(NoSuchFileException.class, () -> impl.getDirent(VfsPath.of("/dir1")));
         assertThrows(NoSuchFileException.class, () -> impl.getDirent(VfsPath.of("/dir1/dir2")));
         assertThrows(
-                NoSuchFileException.class, () -> impl.getDirent(VfsPath.of("/dir1/dir2/dir3/data")));
+                NoSuchFileException.class,
+                () -> impl.getDirent(VfsPath.of("/dir1/dir2/dir3/data")));
     }
 }

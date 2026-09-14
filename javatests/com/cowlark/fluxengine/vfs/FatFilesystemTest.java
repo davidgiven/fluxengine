@@ -70,10 +70,10 @@ public class FatFilesystemTest extends GenericTreeFilesystemTest
         ImmutableMap<String, String> metadata = impl.getFilesystemMetadata();
         assertThat(metadata).isEqualTo(ImmutableMap
                 .builder()
-                .put(Attributes.VOLUME_NAME, "LABEL")
-                .put(Attributes.TOTAL_BLOCKS, "2880")
-                .put(Attributes.USED_BLOCKS, "42")
-                .put(Attributes.BLOCK_SIZE, "512")
+                .put(FilesystemAttributes.VOLUME_NAME.name(), "LABEL")
+                .put(FilesystemAttributes.TOTAL_BLOCKS.name(), "2880")
+                .put(FilesystemAttributes.USED_BLOCKS.name(), "42")
+                .put(FilesystemAttributes.BLOCK_SIZE.name(), "512")
                 .build());
     }
 
@@ -81,25 +81,29 @@ public class FatFilesystemTest extends GenericTreeFilesystemTest
     public void putFilesystemMetadata() throws IOException
     {
         impl.create(true, "LABEL");
-        impl.putFilesystemMetadata(ImmutableMap.of(Attributes.VOLUME_NAME, "NEWLABEL"));
-        assertThat(impl.getFilesystemMetadata().get(Attributes.VOLUME_NAME)).isEqualTo("NEWLABEL");
+        impl.putFilesystemMetadata(ImmutableMap.of(FilesystemAttributes.VOLUME_NAME.name(), "NEWLABEL"));
+        assertThat(impl.getFilesystemMetadata().get(FilesystemAttributes.VOLUME_NAME.name())).isEqualTo(
+                "NEWLABEL");
     }
 
     @Test
     public void putFilesystemMetadata_replacesLabel() throws IOException
     {
         impl.create(true, "LABEL");
-        impl.putFilesystemMetadata(ImmutableMap.of(Attributes.VOLUME_NAME, "OTHER"));
-        impl.putFilesystemMetadata(ImmutableMap.of(Attributes.VOLUME_NAME, "FINAL"));
-        assertThat(impl.getFilesystemMetadata().get(Attributes.VOLUME_NAME)).isEqualTo("FINAL");
+        impl.putFilesystemMetadata(ImmutableMap.of(FilesystemAttributes.VOLUME_NAME.name(), "OTHER"));
+        impl.putFilesystemMetadata(ImmutableMap.of(FilesystemAttributes.VOLUME_NAME.name(), "FINAL"));
+        assertThat(impl.getFilesystemMetadata().get(FilesystemAttributes.VOLUME_NAME.name())).isEqualTo(
+                "FINAL");
     }
 
     @Test
     public void putFilesystemMetadata_emptyRemovesLabel() throws IOException
     {
         impl.create(true, "LABEL");
-        impl.putFilesystemMetadata(ImmutableMap.of(Attributes.VOLUME_NAME, ""));
-        assertThat(impl.getFilesystemMetadata().get(Attributes.VOLUME_NAME)).isEqualTo("");
+        impl.putFilesystemMetadata(ImmutableMap.of(FilesystemAttributes.VOLUME_NAME.name(), ""));
+        assertThat(impl
+                .getFilesystemMetadata()
+                .get(FilesystemAttributes.VOLUME_NAME.name())).isEqualTo("");
     }
 
     @Test
@@ -111,13 +115,14 @@ public class FatFilesystemTest extends GenericTreeFilesystemTest
                 () -> impl.putFilesystemMetadata(ImmutableMap.of()));
         assertThrows(
                 IllegalArgumentException.class,
-                () -> impl.putFilesystemMetadata(ImmutableMap.of(Attributes.TOTAL_BLOCKS, "123")));
-        assertThrows(
-                IllegalArgumentException.class,
                 () -> impl.putFilesystemMetadata(ImmutableMap.of(
-                        Attributes.VOLUME_NAME,
+                        FilesystemAttributes.TOTAL_BLOCKS.name(),
+                        "123")));
+        assertThrows(
+                IllegalArgumentException.class, () -> impl.putFilesystemMetadata(ImmutableMap.of(
+                        FilesystemAttributes.VOLUME_NAME.name(),
                         "A",
-                        Attributes.TOTAL_BLOCKS,
+                        FilesystemAttributes.TOTAL_BLOCKS.name(),
                         "123")));
         assertThrows(
                 IllegalArgumentException.class,
@@ -128,12 +133,13 @@ public class FatFilesystemTest extends GenericTreeFilesystemTest
     public void putFilesystemMetadata_persistsAfterFlush() throws IOException
     {
         impl.create(true, "LABEL");
-        impl.putFilesystemMetadata(ImmutableMap.of(Attributes.VOLUME_NAME, "PERSIST"));
+        impl.putFilesystemMetadata(ImmutableMap.of(FilesystemAttributes.VOLUME_NAME.name(), "PERSIST"));
         impl.flushChanges();
 
         FatFilesystem impl2 =
                 new FatFilesystem(configProto.getFilesystem().getFatfs(), blockDevice);
-        assertThat(impl2.getFilesystemMetadata().get(Attributes.VOLUME_NAME)).isEqualTo("PERSIST");
+        assertThat(impl2.getFilesystemMetadata().get(FilesystemAttributes.VOLUME_NAME.name())).isEqualTo(
+                "PERSIST");
     }
 
     @Test
@@ -146,7 +152,7 @@ public class FatFilesystemTest extends GenericTreeFilesystemTest
         assertThrows(
                 java.nio.file.InvalidPathException.class,
                 () -> impl.putFilesystemMetadata(ImmutableMap.of(
-                        Attributes.VOLUME_NAME,
+                        FilesystemAttributes.VOLUME_NAME.name(),
                         "BAD*LABEL")));
     }
 

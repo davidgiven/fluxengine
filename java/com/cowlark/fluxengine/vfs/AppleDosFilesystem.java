@@ -91,9 +91,9 @@ public class AppleDosFilesystem extends Filesystem
                         filename = "";
 
                     ImmutableMap.Builder<String, String> attrs = ImmutableMap.builder();
-                    attrs.put(Attributes.FILENAME, filename);
-                    attrs.put(Attributes.LENGTH, Integer.toString(fLength));
-                    attrs.put(Attributes.FILE_TYPE, "file");
+                    attrs.put(FileAttributes.FILENAME.name(), filename);
+                    attrs.put(FileAttributes.LENGTH.name(), Integer.toString(fLength));
+                    attrs.put(FileAttributes.FILE_TYPE.name(), "file");
                     attrs.put("appledos.flags", String.format("0x%x", fFlags));
 
                     Dirent dirent = Dirent
@@ -143,10 +143,10 @@ public class AppleDosFilesystem extends Filesystem
         mount();
         int totalBlocks = (_vtoc.getByte(0x34) & 0xff) * (_vtoc.getByte(0x35) & 0xff);
         ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
-        builder.put(Attributes.VOLUME_NAME, "");
-        builder.put(Attributes.TOTAL_BLOCKS, Integer.toString(totalBlocks));
-        builder.put(Attributes.USED_BLOCKS, "0");
-        builder.put(Attributes.BLOCK_SIZE, "256");
+        builder.put(FilesystemAttributes.VOLUME_NAME.name(), "");
+        builder.put(FilesystemAttributes.TOTAL_BLOCKS.name(), Integer.toString(totalBlocks));
+        builder.put(FilesystemAttributes.USED_BLOCKS.name(), "0");
+        builder.put(FilesystemAttributes.BLOCK_SIZE.name(), "256");
         return builder.build();
     }
 
