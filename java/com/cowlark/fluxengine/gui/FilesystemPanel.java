@@ -8,7 +8,6 @@ import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_MOVE;
 import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_PUTFILE;
 import static com.cowlark.fluxengine.vfs.Filesystem.FileType.IS_FILE;
 import static com.google.common.collect.ImmutableList.toImmutableList;
-import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.collect.Streams.stream;
 import static swingtree.UIFactoryMethods.button;
 import static swingtree.UIFactoryMethods.html;
@@ -21,7 +20,7 @@ import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.gui.FilesystemTreeTableModel.FileNode;
 import com.cowlark.fluxengine.vfs.Filesystem;
 import com.cowlark.fluxengine.vfs.Filesystem.Capability;
-import com.google.common.collect.ImmutableSet;
+import com.cowlark.fluxengine.vfs.Filesystem.Dirent;
 import com.google.common.collect.Iterables;
 import org.apache.commons.io.FileUtils;
 import org.jdesktop.swingx.JXTreeTable;
@@ -126,10 +125,11 @@ public class FilesystemPanel extends JPanel
                                                 canDoMultiFileOperation,
                                                 OP_CREATEDIR)))
                                 .add(
-                                        "align left",
-                                        button("Info").isEnabledIf(ifCapability(
-                                                canDoSingleFileOperation,
-                                                OP_GETDIRENT)))
+                                        "align left", button("Info")
+                                                .isEnabledIf(ifCapability(
+                                                        canDoSingleFileOperation,
+                                                        OP_GETDIRENT))
+                                                .onClick(this::infoFile))
                                 .add(
                                         "align left",
                                         button("View").isEnabledIf(ifCapability(
@@ -246,6 +246,20 @@ public class FilesystemPanel extends JPanel
             {
                 treeTableModel.mutated();
             }
+        });
+    }
+
+    private void infoFile(
+            ComponentDelegate<JButton, ActionEvent> delegate)
+    {
+        TreePath path = Iterables.getOnlyElement(filesSelected.get());
+
+        treeTableModel.queueFilesystemOperation(fs -> {
+            FileNode file = (FileNode) path.getLastPathComponent();
+            Dirent de = file.getDirent();
+            SwingUtilities.invokeLater(() -> {
+                FileInfoDialogue.show(this, "File info: " + de.path().toString(), de.attributes());
+            });
         });
     }
 
