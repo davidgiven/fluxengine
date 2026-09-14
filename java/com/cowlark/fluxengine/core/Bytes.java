@@ -153,6 +153,18 @@ public final class Bytes implements List<Byte>
         }
     }
 
+    public static Bytes readFromFile(Path path)
+    {
+        try
+        {
+            byte[] data = Files.readAllBytes(path);
+            return new Bytes(data);
+        } catch (IOException e)
+        {
+            throw new FluxEngineException("cannot write to file " + path + ": " + e.getMessage());
+        }
+    }
+
     @Override
     public Object[] toArray()
     {

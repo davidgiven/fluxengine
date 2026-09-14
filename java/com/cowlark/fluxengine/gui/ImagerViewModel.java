@@ -316,6 +316,7 @@ public class ImagerViewModel
                     @Override
                     public void run(Filesystem filesystem) throws IOException
                     {
+                        logger.atInfo().log("starting filesystem thread");
                         try
                         {
                             while (true)
@@ -324,7 +325,7 @@ public class ImagerViewModel
                         {
                         } catch (InterruptedException e)
                         {
-                            throw new RuntimeException(e);
+                            Thread.currentThread().interrupt();
                         }
                     }
 
@@ -332,6 +333,16 @@ public class ImagerViewModel
                     protected BlockDevice createBlockDevice()
                     {
                         return new InMemoryBlockDevice(getDiskLayout(), image);
+                    }
+
+                    @Override
+                    protected void onEmergencyStop()
+                    {
+                        // Unblock queue.take() waiting in run().
+                        logger.atInfo().log("terminating filesystem thread");
+                        queue.add(fs -> {
+                            throw new EmergencyStopException();
+                        });
                     }
 
                     @Override

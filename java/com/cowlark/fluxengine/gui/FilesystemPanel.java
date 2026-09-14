@@ -37,12 +37,14 @@ import sprouts.Viewable;
 import swingtree.ComponentDelegate;
 import swingtree.UI;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.event.ActionEvent;
+import java.io.File;
 import java.io.IOException;
 
 public class FilesystemPanel extends JPanel
@@ -110,9 +112,11 @@ public class FilesystemPanel extends JPanel
                                                 .onClick(this::getFile))
                                 .add(
                                         "align left",
-                                        button("Put").isEnabledIf(ifCapability(
-                                                canDoSingleFileOperation,
-                                                OP_PUTFILE)))
+                                        button("Put")
+                                                .isEnabledIf(ifCapability(
+                                                        canDoSingleFileOperation,
+                                                        OP_PUTFILE))
+                                                .onClick(this::putFiles))
                                 .add(
                                         "align left",
                                         button("Rename")
@@ -237,6 +241,31 @@ public class FilesystemPanel extends JPanel
                 });
     }
 
+    private void putFiles(
+            ComponentDelegate<JButton, ActionEvent> delegate)
+    {
+        DirNode parent = getParentNodeOfSelection();
+
+        JFileChooser chooser = new JFileChooser();
+        chooser.setDialogTitle("Open files");
+        chooser.setMultiSelectionEnabled(true);
+
+        int result = chooser.showOpenDialog(this);
+        if (result != JFileChooser.APPROVE_OPTION)
+            return;
+
+        treeTableModel.queueFilesystemOperation(fs -> {
+            for (File file : chooser.getSelectedFiles())
+            {
+                Bytes data = Bytes.readFromFile(file.toPath());
+                String leafName = file.getName();
+                VfsPath vfsName = parent.getDirent().path().resolve(leafName);
+                fs.putFile(vfsName, data);
+                SwingUtilities.invokeLater(() -> treeTableModel.addNode(parent, vfsName));
+            }
+        });
+    }
+
     private void deleteFiles(
             ComponentDelegate<JButton, ActionEvent> delegate)
     {
@@ -283,6 +312,18 @@ public class FilesystemPanel extends JPanel
     private void createDirectory(
             ComponentDelegate<JButton, ActionEvent> delegate)
     {
+        DirNode parent = getParentNodeOfSelection();
+
+        String childName = JOptionPane.showInputDialog(this, "Enter new directory name:");
+        VfsPath childVfsPath = parent.getDirent().path().resolve(childName);
+        treeTableModel.queueFilesystemOperation(fs -> {
+            fs.createDirectory(childVfsPath);
+            treeTableModel.addNode(parent, childVfsPath);
+        });
+    }
+
+    private DirNode getParentNodeOfSelection()
+    {
         TreePath parentPath = Iterables.getOnlyElement(filesSelected.get());
         DirNode parent = switch (parentPath.getLastPathComponent())
         {
@@ -291,13 +332,7 @@ public class FilesystemPanel extends JPanel
             default -> throw new IllegalStateException(
                     "Unexpected value: " + parentPath.getLastPathComponent());
         };
-
-        String childName = JOptionPane.showInputDialog(this, "Enter new directory name:");
-        VfsPath childVfsPath = parent.getDirent().path().resolve(childName);
-        treeTableModel.queueFilesystemOperation(fs -> {
-            fs.createDirectory(childVfsPath);
-            treeTableModel.addNode(parent, childVfsPath);
-        });
+        return parent;
     }
 
     private void renameFile(
