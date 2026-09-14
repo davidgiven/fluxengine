@@ -68,6 +68,7 @@ public class FilesystemPanel extends JPanel
                 model.getBusy(),
                 treeTableModel.getIsMounted(),
                 (busy, mounted) -> !mounted && !busy);
+        Val<Boolean> hasPendingChanges = treeTableModel.getHasPendingChanges();
 
         treeTable = new JXTreeTable(model.getFilesystemTreeTableModel());
         treeTable.addTreeExpansionListener(model.getFilesystemTreeTableModel());
@@ -165,19 +166,22 @@ public class FilesystemPanel extends JPanel
                                                 .isEnabledIf(allowedWhenNotMounted)
                                                 .onClick(delegate -> treeTableModel.mount()))
                                 .add(
-                                        "align left",
-                                        button("Discard")
-                                                .isEnabledIf(allowedWhenMounted)
+                                        "align left", button("Discard")
+                                                .isEnabledIf(and(
+                                                        allowedWhenMounted,
+                                                        hasPendingChanges))
                                                 .onClick(delegate -> treeTableModel.discard()))
                                 .add(
-                                        "align left",
-                                        button("Commit")
-                                                .isEnabledIf(allowedWhenMounted)
+                                        "align left", button("Commit")
+                                                .isEnabledIf(and(
+                                                        allowedWhenMounted,
+                                                        hasPendingChanges))
                                                 .onClick(delegate -> treeTableModel.commit()))
                                 .add(
-                                        "align left",
-                                        button("Unmount")
-                                                .isEnabledIf(allowedWhenMounted)
+                                        "align left", button("Unmount")
+                                                .isEnabledIf(and(
+                                                        allowedWhenMounted,
+                                                        not(hasPendingChanges)))
                                                 .onClick(delegate -> treeTableModel.unmount()))
                                 .add("push", separator())
                                 .add(
@@ -384,4 +388,18 @@ public class FilesystemPanel extends JPanel
         return true;
     }
 
+    private static Val<Boolean> and(Val<Boolean> v1, Val<Boolean> v2)
+    {
+        return Viewable.of(v1, v2, (b1, b2) -> b1 && b2);
+    }
+
+    private static Val<Boolean> or(Val<Boolean> v1, Val<Boolean> v2)
+    {
+        return Viewable.of(v1, v2, (b1, b2) -> b1 || b2);
+    }
+
+    private static Val<Boolean> not(Val<Boolean> v1)
+    {
+        return v1.viewAs(Boolean.class, b -> !b);
+    }
 }

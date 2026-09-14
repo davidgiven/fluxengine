@@ -6,9 +6,9 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
 import com.cowlark.fluxengine.core.EmergencyStopException;
 import com.cowlark.fluxengine.data.Image;
 import com.cowlark.fluxengine.vfs.FileAttributes;
-import com.cowlark.fluxengine.vfs.FilesystemAttributes;
 import com.cowlark.fluxengine.vfs.Filesystem.Capability;
 import com.cowlark.fluxengine.vfs.Filesystem.Dirent;
+import com.cowlark.fluxengine.vfs.FilesystemAttributes;
 import com.cowlark.fluxengine.vfs.FilesystemOperation.FilesystemCaller;
 import com.cowlark.fluxengine.vfs.VfsPath;
 import com.google.common.collect.ImmutableList;
@@ -22,7 +22,6 @@ import sprouts.Var;
 import javax.swing.SwingUtilities;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeExpansionListener;
-import javax.swing.tree.TreePath;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -48,6 +47,7 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel implements T
     @Getter private final Var<Integer> bytesUsed = Var.of(0);
     @Getter private final Var<ValueSet<Capability>> capabilities =
             Var.of(ValueSet.of(Capability.class));
+    @Getter private final Var<Boolean> hasPendingChanges = Var.of(false);
 
     private class PlaceholderNode extends AbstractMutableTreeTableNode
     {
@@ -135,7 +135,10 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel implements T
     public void mutated()
     {
         updateFreeSpace();
-        queue.add(fs -> capabilities.set(ValueSet.of(Capability.class, fs.getCapabilities())));
+        queue.add(fs -> {
+            capabilities.set(ValueSet.of(Capability.class, fs.getCapabilities()));
+            hasPendingChanges.set(fs.needsFlushing());
+        });
     }
 
     public void queueFilesystemOperation(FilesystemCaller caller)
@@ -166,10 +169,12 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel implements T
 
     public void commit()
     {
+        queue.add(fs -> fs.flushChanges());
     }
 
     public void discard()
     {
+        queue.add(fs -> fs.discardChanges());
     }
 
     public void unmount()
