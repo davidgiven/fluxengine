@@ -4,7 +4,6 @@ import com.cowlark.fluxengine.data.CylinderHead;
 import com.cowlark.fluxengine.data.DiskLayout;
 import com.cowlark.fluxengine.data.Image;
 import com.google.common.collect.ImmutableCollection;
-import java.util.Collection;
 
 public class InMemoryBlockDevice extends TrackedBlockDevice
 {

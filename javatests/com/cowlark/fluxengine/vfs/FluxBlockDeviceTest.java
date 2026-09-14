@@ -43,8 +43,13 @@ public class FluxBlockDeviceTest
 
     private FilesystemOperation createOperation()
     {
-        FilesystemOperation fso = new FilesystemOperation(fs -> {
-        });
+        FilesystemOperation fso = new FilesystemOperation()
+        {
+            @Override
+            public void run(Filesystem filesystem) throws java.io.IOException
+            {
+            }
+        };
         fso.setConfig(configProto);
         fso.init();
         return fso;

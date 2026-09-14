@@ -54,10 +54,12 @@ public class Smaky6Filesystem extends Filesystem
             usedBlocks += (de.endSector - de.startSector);
 
         ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
-        builder.put(Attributes.VOLUME_NAME, "");
-        builder.put(Attributes.TOTAL_BLOCKS, Integer.toString(blockDevice.getBlockCount()));
-        builder.put(Attributes.USED_BLOCKS, Integer.toString(usedBlocks));
-        builder.put(Attributes.BLOCK_SIZE, Integer.toString(getLogicalSectorSize()));
+        builder.put(FilesystemAttributes.VOLUME_NAME.name(), "");
+        builder.put(
+                FilesystemAttributes.TOTAL_BLOCKS.name(),
+                Integer.toString(blockDevice.getBlockCount()));
+        builder.put(FilesystemAttributes.USED_BLOCKS.name(), Integer.toString(usedBlocks));
+        builder.put(FilesystemAttributes.BLOCK_SIZE.name(), Integer.toString(getLogicalSectorSize()));
         return builder.build();
     }
 
@@ -74,6 +76,9 @@ public class Smaky6Filesystem extends Filesystem
     @Override
     public Dirent getDirent(VfsPath path) throws IOException
     {
+        if (path.isRoot())
+            return ROOT_DIRENT;
+
         return resolveDirent(path).dirent;
     }
 
@@ -203,10 +208,10 @@ public class Smaky6Filesystem extends Filesystem
                 path = parentPath.resolve(filename);
 
             ImmutableMap.Builder<String, String> attrs = ImmutableMap.builder();
-            attrs.put(Attributes.FILENAME, filename);
-            attrs.put(Attributes.LENGTH, Integer.toString(length));
-            attrs.put(Attributes.FILE_TYPE, "file");
-            attrs.put(Attributes.MODE, "");
+            attrs.put(FileAttributes.FILENAME.name(), filename);
+            attrs.put(FileAttributes.LENGTH.name(), Integer.toString(length));
+            attrs.put(FileAttributes.FILE_TYPE.name(), "file");
+            attrs.put(FileAttributes.MODE.name(), "");
             attrs.put("smaky6.start_sector", Integer.toString(startSector));
             attrs.put("smaky6.end_sector", Integer.toString(endSector));
             attrs.put("smaky6.sectors", Integer.toString(endSector - startSector));

@@ -111,9 +111,9 @@ public abstract class GenericFilesystemTest
                 .setMode("")
                 .setAttributes(ImmutableMap
                         .<String, String>builder()
-                        .put(Attributes.FILENAME, "data")
-                        .put(Attributes.LENGTH, Integer.toString(expected.size()))
-                        .put(Attributes.FILE_TYPE, "file")
+                        .put(FileAttributes.FILENAME.name(), "data")
+                        .put(FileAttributes.LENGTH.name(), Integer.toString(expected.size()))
+                        .put(FileAttributes.FILE_TYPE.name(), "file")
                         .build())
                 .build());
     }
@@ -135,11 +135,20 @@ public abstract class GenericFilesystemTest
                 .setMode("")
                 .setAttributes(ImmutableMap
                         .<String, String>builder()
-                        .put(Attributes.FILENAME, "data")
-                        .put(Attributes.LENGTH, Integer.toString(expected.size()))
-                        .put(Attributes.FILE_TYPE, "file")
+                        .put(FileAttributes.FILENAME.name(), "data")
+                        .put(FileAttributes.LENGTH.name(), Integer.toString(expected.size()))
+                        .put(FileAttributes.FILE_TYPE.name(), "file")
                         .build())
                 .build());
+    }
+
+    @Test
+    public void getDirent_emptyPath() throws IOException
+    {
+        assume(Capability.OP_CREATE, Capability.OP_GETDIRENT);
+        impl.create(true, "LABEL");
+        Dirent de = impl.getDirent(VfsPath.of("/"));
+        assertThat(de.fileType()).isEqualTo(IS_DIR);
     }
 
     @Test

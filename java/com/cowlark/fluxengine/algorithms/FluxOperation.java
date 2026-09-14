@@ -17,6 +17,7 @@ public abstract class FluxOperation<T extends FluxOperation<T>> implements Runna
     /* Serialises all operations across the whole program: only one may run at
      * a time, because the hardware doesn't cope with concurrent access. */
     private static final Object lock = new Object();
+    private static volatile FluxOperation<?> currentOperation = null;
     protected ConfigProto configProto = null;
     private boolean started = false;
     private Thread workerThread;
@@ -30,7 +31,19 @@ public abstract class FluxOperation<T extends FluxOperation<T>> implements Runna
      * its next testForEmergencyStop checkpoint. */
     public static void requestEmergencyStop()
     {
-        Common.setEmergencyStop(true);
+        synchronized (FluxOperation.class)
+        {
+            Common.setEmergencyStop(true);
+            FluxOperation<?> op = currentOperation;
+            if (op != null)
+                op.onEmergencyStop();
+        }
+    }
+
+    /* Called on the current operation when requestEmergencyStop is invoked,
+     * to allow it to unblock or clean up. */
+    protected void onEmergencyStop()
+    {
     }
 
     public ConfigProto getConfig()
@@ -81,9 +94,13 @@ public abstract class FluxOperation<T extends FluxOperation<T>> implements Runna
     {
         synchronized (lock)
         {
-            /* Clear any emergency stop left over from a previous aborted
-             * operation. */
-            Common.setEmergencyStop(false);
+            synchronized (FluxOperation.class)
+            {
+                /* Clear any emergency stop left over from a previous aborted
+                 * operation. */
+                Common.setEmergencyStop(false);
+                currentOperation = this;
+            }
 
             Consumer<? super LogMessage> oldLogger = Logger.getLogger();
             Logger.setLogger(subject::onNext);
@@ -98,6 +115,10 @@ public abstract class FluxOperation<T extends FluxOperation<T>> implements Runna
             } finally
             {
                 Logger.setLogger(oldLogger);
+                synchronized (FluxOperation.class)
+                {
+                    currentOperation = null;
+                }
             }
         }
     }

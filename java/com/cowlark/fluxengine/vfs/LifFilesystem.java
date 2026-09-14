@@ -172,10 +172,10 @@ public class LifFilesystem extends Filesystem
     {
         LifDirectory dir = new LifDirectory();
         ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
-        builder.put(Attributes.VOLUME_NAME, dir.volumeLabel);
-        builder.put(Attributes.TOTAL_BLOCKS, Integer.toString(dir.totalBlocks));
-        builder.put(Attributes.USED_BLOCKS, Integer.toString(dir.usedBlocks));
-        builder.put(Attributes.BLOCK_SIZE, Integer.toString(lifBlockSize));
+        builder.put(FilesystemAttributes.VOLUME_NAME.name(), dir.volumeLabel);
+        builder.put(FilesystemAttributes.TOTAL_BLOCKS.name(), Integer.toString(dir.totalBlocks));
+        builder.put(FilesystemAttributes.USED_BLOCKS.name(), Integer.toString(dir.usedBlocks));
+        builder.put(FilesystemAttributes.BLOCK_SIZE.name(), Integer.toString(lifBlockSize));
         builder.put("lif.directory_block", Integer.toString(dir.directoryBlock));
         builder.put("lif.directory_size", Integer.toString(dir.directorySize));
         return builder.build();
@@ -197,6 +197,8 @@ public class LifFilesystem extends Filesystem
     @Override
     public Dirent getDirent(VfsPath path) throws IOException
     {
+        if (path.isRoot())
+            return ROOT_DIRENT;
         if (path.segments().size() != 1)
             throw new InvalidPathException(path.toString(), "Bad path");
 
@@ -290,10 +292,10 @@ public class LifFilesystem extends Filesystem
                 mode = String.format("0x%04x", type);
 
             ImmutableMap.Builder<String, String> attrs = ImmutableMap.builder();
-            attrs.put(Attributes.FILENAME, filename);
-            attrs.put(Attributes.LENGTH, Integer.toString(length));
-            attrs.put(Attributes.FILE_TYPE, "file");
-            attrs.put(Attributes.MODE, mode);
+            attrs.put(FileAttributes.FILENAME.name(), filename);
+            attrs.put(FileAttributes.LENGTH.name(), Integer.toString(length));
+            attrs.put(FileAttributes.FILE_TYPE.name(), "file");
+            attrs.put(FileAttributes.MODE.name(), mode);
             attrs.put("lif.ctime", ctime);
             attrs.put("lif.volume", Integer.toString(volume & 0x7fff));
             attrs.put("lif.protection", String.format("0x%x", protection));

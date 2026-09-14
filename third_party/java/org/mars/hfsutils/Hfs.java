@@ -80,6 +80,14 @@ public final class Hfs
         return -1;
     }
 
+    private static String cStr(char[] arr)
+    {
+        int len = 0;
+        while (len < arr.length && arr[len] != 0)
+            len++;
+        return new String(arr, 0, len);
+    }
+
     /*
      * NAME:	validvname()
      * DESCRIPTION:	return true if parameter is a valid volume name
@@ -656,12 +664,12 @@ public final class Hfs
             if (HfsVolume.v_getthread(vol, HFS_CNID_ROOTDIR, data, null,
                                       CatDataType.CDR_THD_REC) <= 0 ||
                 HfsVolume.v_catsearch(vol, HFS_CNID_ROOTPAR,
-                                      new String(data.thdCName),
+                                      cStr(data.thdCName),
                                       data, null, null) <= 0)
                 throw new HfsException(hfsErrno, hfsError);
 
             HfsRecord.r_unpackdirent(HFS_CNID_ROOTPAR,
-                                     new String(data.thdCName), data, ent);
+                                     cStr(data.thdCName), data, ent);
 
             dir.vptr = vol.next;
 

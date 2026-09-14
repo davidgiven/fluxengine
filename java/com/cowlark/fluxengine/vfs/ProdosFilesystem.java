@@ -150,10 +150,10 @@ public class ProdosFilesystem extends Filesystem
         br.seek(0x29);
         int totalBlocks = br.readLe16() & 0xffff;
         ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
-        builder.put(Attributes.VOLUME_NAME, volumename);
-        builder.put(Attributes.TOTAL_BLOCKS, Integer.toString(totalBlocks));
-        builder.put(Attributes.USED_BLOCKS, Integer.toString(usedBlocks));
-        builder.put(Attributes.BLOCK_SIZE, "512");
+        builder.put(FilesystemAttributes.VOLUME_NAME.name(), volumename);
+        builder.put(FilesystemAttributes.TOTAL_BLOCKS.name(), Integer.toString(totalBlocks));
+        builder.put(FilesystemAttributes.USED_BLOCKS.name(), Integer.toString(usedBlocks));
+        builder.put(FilesystemAttributes.BLOCK_SIZE.name(), "512");
         return builder.build();
     }
 
@@ -173,11 +173,10 @@ public class ProdosFilesystem extends Filesystem
     @Override
     public Dirent getDirent(VfsPath path) throws IOException
     {
-        mount();
         if (path.isRoot())
-        {
-            throw new NoSuchFileException(path.toString());
-        }
+            return ROOT_DIRENT;
+
+        mount();
         VfsPath parent = path.getParent();
         if (parent == null)
         {
@@ -329,10 +328,10 @@ public class ProdosFilesystem extends Filesystem
             this.fileType = (storageType == STORAGETYPE_SUBDIR) ? IS_DIR : IS_FILE;
 
             ImmutableMap.Builder<String, String> attrs = ImmutableMap.builder();
-            attrs.put(Attributes.FILENAME, filename);
-            attrs.put(Attributes.LENGTH, Integer.toString(length));
-            attrs.put(Attributes.FILE_TYPE, fileType == IS_DIR ? "dir" : "file");
-            attrs.put(Attributes.MODE, "");
+            attrs.put(FileAttributes.FILENAME.name(), filename);
+            attrs.put(FileAttributes.LENGTH.name(), Integer.toString(length));
+            attrs.put(FileAttributes.FILE_TYPE.name(), fileType == IS_DIR ? "dir" : "file");
+            attrs.put(FileAttributes.MODE.name(), "");
             attrs.put("prodos.storage_type", String.format("0x%x", storageType));
             attrs.put("prodos.prodos_type", Integer.toString(prodosType));
             attrs.put("prodos.key_block", Integer.toString(keyBlock));
