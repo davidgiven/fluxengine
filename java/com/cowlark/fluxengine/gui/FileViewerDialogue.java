@@ -60,7 +60,10 @@ public class FileViewerDialogue extends JDialog
                         tabbedPane()
                                 .add(tab("Text").add(scrollPane()
                                         .withPrefSize(600, 400)
-                                        .add(textArea(text).isEditableIf(false))))
+                                        .add(textArea(text).isEditableIf(false).peek(ta -> {
+                                            ta.setLineWrap(true);
+                                            ta.setWrapStyleWord(true);
+                                        }))))
                                 .add(tab("Hex").add(scrollPane()
                                         .withPrefSize(600, 400)
                                         .add(of(codeArea)))))
