@@ -94,6 +94,13 @@ public class FilesystemPanel extends JPanel
                 allowedWhenMounted,
                 filesSelected,
                 (mounted, files) -> isValidSelection(files) && (files.size() == 1) && mounted);
+        Val<Boolean> canDoSingleFileNotDirOperation = Viewable.of(
+                allowedWhenMounted,
+                filesSelected,
+                (mounted, files) -> isValidSelection(files) && (files.size() == 1) && mounted &&
+                        !(Iterables
+                                .getOnlyElement(files)
+                                .getLastPathComponent() instanceof DirNode));
         Val<Boolean> canDoMultiFileOperation = Viewable.of(
                 allowedWhenMounted,
                 filesSelected,
@@ -145,10 +152,11 @@ public class FilesystemPanel extends JPanel
                                                         OP_GETDIRENT))
                                                 .onClick(this::infoFile))
                                 .add(
-                                        "align left",
-                                        button("View").isEnabledIf(ifCapability(
-                                                canDoSingleFileOperation,
-                                                OP_GETFILE))))
+                                        "align left", button("View")
+                                                .isEnabledIf(ifCapability(
+                                                        canDoSingleFileNotDirOperation,
+                                                        OP_GETFILE))
+                                                .onClick(this::viewFile)))
                 .add(
                         "grow, push",
                         scrollPane().add(UI.of(treeTable)).isVisibleIf(allowedWhenMounted))
@@ -243,6 +251,20 @@ public class FilesystemPanel extends JPanel
                         saver.accept(recursivelyAddPathsToZipfile(fs, paths));
                     });
                 });
+    }
+
+    private void viewFile(
+            ComponentDelegate<JButton, ActionEvent> delegate)
+    {
+        TreePath path = Iterables.getOnlyElement(filesSelected.get());
+        FileNode file = (FileNode) path.getLastPathComponent();
+        treeTableModel.queueFilesystemOperation(fs -> {
+            Bytes data = fs.getFile(file.getDirent().path());
+            SwingUtilities.invokeLater(() -> FileViewerDialogue.show(
+                    this,
+                    file.getDirent().path().toString(),
+                    data));
+        });
     }
 
     private void putFiles(

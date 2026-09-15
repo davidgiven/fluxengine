@@ -55,3 +55,13 @@ java_test(
         "@maven//:org_objenesis_objenesis",
     ],
 )
+
+java_test(
+    name = "UiUtilsTest",
+    srcs = ["UiUtilsTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/gui",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)

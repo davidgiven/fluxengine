@@ -226,6 +226,32 @@ public class UiUtils
         dataSupplier.accept(saver);
     }
 
+    public static String buildSanitisedString(byte[] source)
+    {
+        StringBuilder sb = new StringBuilder();
+        boolean lastWasCR = false;
+        for (int i = 0; i < source.length; i++)
+        {
+            int c = source[i] & 0xff;
+            if ((c == '\n') && lastWasCR)
+            {
+                lastWasCR = false;
+                continue;
+            }
+
+            if ((c == '\n') || (c == '\t') || ((c >= 32) && (c <= 126)))
+                sb.append((char) c);
+            else if (c == '\r')
+                sb.append('\n');
+            else
+                sb.append(String.format("\\x%02x", c));
+
+            lastWasCR = (c == '\r');
+        }
+
+        return sb.toString();
+    }
+
     @Builder(setterPrefix = "set")
     record SplitPanelAction(String label, Val<Boolean> isEnabled,
                             Consumer<ComponentDelegate<JButton, ActionEvent>> onClick)
