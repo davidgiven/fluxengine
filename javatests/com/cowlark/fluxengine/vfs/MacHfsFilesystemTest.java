@@ -63,9 +63,9 @@ public class MacHfsFilesystemTest extends GenericTreeFilesystemTest
 
         // Verify volume was created with correct name via metadata
         ImmutableMap<String, String> meta = impl.getFilesystemMetadata();
-        assertThat(meta.get(Attributes.VOLUME_NAME)).isEqualTo("LABEL");
-        assertThat(meta.get(Attributes.BLOCK_SIZE)).isEqualTo("512");
-        int totalBlocks = Integer.parseInt(meta.get(Attributes.TOTAL_BLOCKS));
+        assertThat(meta.get(FilesystemAttributes.VOLUME_NAME.name())).isEqualTo("LABEL");
+        assertThat(meta.get(FilesystemAttributes.BLOCK_SIZE.name())).isEqualTo("512");
+        int totalBlocks = Integer.parseInt(meta.get(FilesystemAttributes.TOTAL_BLOCKS.name()));
         assertThat(totalBlocks).isGreaterThan(0);
     }
 
@@ -74,11 +74,11 @@ public class MacHfsFilesystemTest extends GenericTreeFilesystemTest
     {
         impl.create(true, "LABEL");
         ImmutableMap<String, String> metadata = impl.getFilesystemMetadata();
-        assertThat(metadata.get(Attributes.VOLUME_NAME)).isEqualTo("LABEL");
-        assertThat(metadata.get(Attributes.BLOCK_SIZE)).isEqualTo("512");
-        int totalBlocks = Integer.parseInt(metadata.get(Attributes.TOTAL_BLOCKS));
+        assertThat(metadata.get(FilesystemAttributes.VOLUME_NAME.name())).isEqualTo("LABEL");
+        assertThat(metadata.get(FilesystemAttributes.BLOCK_SIZE.name())).isEqualTo("512");
+        int totalBlocks = Integer.parseInt(metadata.get(FilesystemAttributes.TOTAL_BLOCKS.name()));
         assertThat(totalBlocks).isGreaterThan(0);
-        int usedBlocks = Integer.parseInt(metadata.get(Attributes.USED_BLOCKS));
+        int usedBlocks = Integer.parseInt(metadata.get(FilesystemAttributes.USED_BLOCKS.name()));
         assertThat(usedBlocks).isAtLeast(0);
     }
 

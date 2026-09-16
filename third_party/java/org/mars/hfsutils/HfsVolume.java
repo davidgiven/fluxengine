@@ -39,6 +39,14 @@ public final class HfsVolume
         return -1;
     }
 
+    private static String cStr(char[] arr)
+    {
+        int len = 0;
+        while (len < arr.length && arr[len] != 0)
+            len++;
+        return new String(arr, 0, len);
+    }
+
     /*
      * Compute the key-skip offset for a record in a B*-tree node.
      * Equivalent to C macro HFS_RECKEYSKIP(ptr).
@@ -887,7 +895,7 @@ public final class HfsVolume
                         parid[0] = data.thdParID;
 
                     found = v_catsearch(vol[0], data.thdParID,
-                                        new String(data.thdCName),
+                                        cStr(data.thdCName),
                                         data, fname, np);
                     if (found == -1)
                         return -1;
@@ -947,7 +955,7 @@ public final class HfsVolume
                         parid[0] = data.thdParID;
 
                     found = v_catsearch(vol[0], data.thdParID,
-                                        new String(data.thdCName),
+                                        cStr(data.thdCName),
                                         data, fname, np);
                     if (found == -1)
                         return -1;
@@ -1049,7 +1057,7 @@ public final class HfsVolume
             return 0;
 
         if (v_getthread(vol, parid, data, null, CatDataType.CDR_THD_REC) <= 0 ||
-            v_catsearch(vol, data.thdParID, new String(data.thdCName),
+            v_catsearch(vol, data.thdParID, cStr(data.thdCName),
                         data, null, n) <= 0 ||
             data.cdrType != CatDataType.CDR_DIR_REC)
             return fail(EIO, "can't find parent directory");

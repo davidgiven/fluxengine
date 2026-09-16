@@ -8,12 +8,28 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import lombok.Builder;
 import org.slf4j.LoggerFactory;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.FileSystemException;
+import java.nio.file.Path;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 public abstract class Filesystem implements AutoCloseable
 {
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(Filesystem.class);
+
+    protected static Dirent ROOT_DIRENT = Dirent
+            .builder()
+            .setFilename("")
+            .setPath(VfsPath.of("/"))
+            .setFileType(FileType.IS_DIR)
+            .setAttributes(ImmutableMap
+                    .<String, String>builder()
+                    .put(FileAttributes.FILENAME.name(), "")
+                    .put(FileAttributes.FILE_TYPE.name(), "dir")
+                    .build())
+            .build();
 
     private final ImmutableSet<Capability> capabilities;
 
@@ -24,12 +40,48 @@ public abstract class Filesystem implements AutoCloseable
 
     public static void doWithFilesystem(ConfigProto config, FilesystemCaller callback)
     {
-        FilesystemOperation op = new FilesystemOperation(callback);
+        FilesystemOperation op = new FilesystemOperation()
+        {
+            @Override
+            public void run(Filesystem filesystem) throws IOException
+            {
+                callback.accept(filesystem);
+            }
+        };
+
         op.setConfig(config);
         op.create().blockingSubscribe(
                 Logger::log, e -> {
                     logger.atError().setCause(e).log("filesystem thread failed");
                 });
+    }
+
+    private static void recursivelyAddToZipfile(
+            Filesystem fs,
+            ZipOutputStream zos,
+            Path zpath,
+            VfsPath path) throws IOException
+    {
+        Filesystem.Dirent dirent = fs.getDirent(path);
+        switch (dirent.fileType())
+        {
+            case IS_FILE ->
+            {
+                ZipEntry entry = new ZipEntry(zpath.resolve(dirent.filename()).toString());
+                zos.putNextEntry(entry);
+                zos.write(fs.getFile(dirent.path()).toByteArray());
+                zos.closeEntry();
+            }
+
+            case IS_DIR ->
+            {
+                Path childZpath = zpath.resolve(dirent.filename());
+                for (Filesystem.Dirent childDirent : fs.list(dirent.path()).values())
+                {
+                    recursivelyAddToZipfile(fs, zos, childZpath, childDirent.path());
+                }
+            }
+        }
     }
 
     @Override
@@ -95,6 +147,20 @@ public abstract class Filesystem implements AutoCloseable
     }
 
     /**
+     * Read a file/directory recursively into a zipfile.
+     */
+    public Bytes getFiles(Filesystem fs, Iterable<VfsPath> paths) throws IOException
+    {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (ZipOutputStream zos = new ZipOutputStream(baos))
+        {
+            for (VfsPath path : paths)
+                recursivelyAddToZipfile(fs, zos, Path.of(""), path);
+        }
+        return new Bytes(baos.toByteArray());
+    }
+
+    /**
      * Write a file.
      */
     public void putFile(VfsPath path, Bytes bytes) throws IOException
@@ -127,11 +193,30 @@ public abstract class Filesystem implements AutoCloseable
     }
 
     /**
-     * Deletes a file or non-empty directory.
+     * Deletes a file or empty directory.
      */
     public void deleteFile(VfsPath path) throws IOException
     {
         throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Deletes a file or directory and all contents.
+     */
+    public void deleteFileRecursively(VfsPath path) throws IOException
+    {
+        Filesystem.Dirent dirent = getDirent(path);
+        switch (dirent.fileType())
+        {
+            case IS_FILE -> deleteFile(path);
+
+            case IS_DIR ->
+            {
+                for (Filesystem.Dirent childDirent : list(dirent.path()).values())
+                    deleteFileRecursively(childDirent.path());
+                deleteFile(path);
+            }
+        }
     }
 
     /**
@@ -197,8 +282,29 @@ public abstract class Filesystem implements AutoCloseable
 
     @Builder(setterPrefix = "set")
     public record Dirent(VfsPath path, String filename, int length, String mode, FileType fileType,
-                         ImmutableMap<String, String> attributes)
+                         ImmutableMap<String, String> attributes) implements Comparable<Dirent>
     {
+        @Override
+        public int compareTo(Dirent other)
+        {
+            return this.filename.compareTo(other.filename);
+        }
+
+        @Override
+        public boolean equals(Object obj)
+        {
+            if (obj == this)
+                return true;
+            if (obj instanceof Dirent other)
+                return path.equals(other.path);
+            return false;
+        }
+
+        @Override
+        public int hashCode()
+        {
+            return path.hashCode();
+        }
     }
 
     protected class FluxEngineFileSystemException extends FileSystemException

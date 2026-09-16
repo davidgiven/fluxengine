@@ -68,15 +68,17 @@ public class AmigaFilesystem extends Filesystem
         ImmutableMap.Builder<String, String> attrs = ImmutableMap.builder();
         Dirent.DirentBuilder b =
                 Dirent.builder().setFilename(e.name).setPath(dir.resolve(e.name)).setMode("");
-        attrs.put(Attributes.FILENAME, e.name);
+        attrs.put(FileAttributes.FILENAME.name(), e.name);
         if (e.type == AdfConstants.ST_FILE)
         {
             b.setFileType(IS_FILE).setLength((int) e.size);
-            attrs.put(Attributes.LENGTH, Long.toString(e.size)).put(Attributes.FILE_TYPE, "file");
+            attrs
+                    .put(FileAttributes.LENGTH.name(), Long.toString(e.size))
+                    .put(FileAttributes.FILE_TYPE.name(), "file");
         } else
         {
             b.setFileType(IS_DIR);
-            attrs.put(Attributes.FILE_TYPE, "dir");
+            attrs.put(FileAttributes.FILE_TYPE.name(), "dir");
         }
         return b.setAttributes(attrs.build()).build();
     }
@@ -137,10 +139,10 @@ public class AmigaFilesystem extends Filesystem
             totalBlocks = amigaDevice.size / 512;
         return ImmutableMap
                 .<String, String>builder()
-                .put(Attributes.VOLUME_NAME, volName)
-                .put(Attributes.TOTAL_BLOCKS, Integer.toString(totalBlocks))
-                .put(Attributes.USED_BLOCKS, Integer.toString(totalBlocks - freeBlocks))
-                .put(Attributes.BLOCK_SIZE, Integer.toString(volume.blockSize))
+                .put(FilesystemAttributes.VOLUME_NAME.name(), volName)
+                .put(FilesystemAttributes.TOTAL_BLOCKS.name(), Integer.toString(totalBlocks))
+                .put(FilesystemAttributes.USED_BLOCKS.name(), Integer.toString(totalBlocks - freeBlocks))
+                .put(FilesystemAttributes.BLOCK_SIZE.name(), Integer.toString(volume.blockSize))
                 .build();
     }
 
@@ -149,7 +151,7 @@ public class AmigaFilesystem extends Filesystem
     {
         mount();
 
-        if (!metadata.keySet().equals(ImmutableSet.of(Attributes.VOLUME_NAME)))
+        if (!metadata.keySet().equals(ImmutableSet.of(FilesystemAttributes.VOLUME_NAME.name())))
             throw new IllegalArgumentException("can't set this metadata key");
 
         /* Read the root block, modify the name, write it back.
@@ -157,7 +159,7 @@ public class AmigaFilesystem extends Filesystem
         BRootBlock root = new BRootBlock();
         checkResult(AdfRaw.adfReadRootBlock(volume, volume.rootBlock, root));
 
-        String newName = Strings.nullToEmpty(metadata.get(Attributes.VOLUME_NAME));
+        String newName = Strings.nullToEmpty(metadata.get(FilesystemAttributes.VOLUME_NAME.name()));
         int nlen = Math.min(AdfConstants.MAXNAMELEN, newName.length());
         root.nameLen = (byte) nlen;
         byte[] nameBytes = newName.getBytes();
@@ -262,6 +264,9 @@ public class AmigaFilesystem extends Filesystem
     @Override
     public Dirent getDirent(VfsPath path) throws IOException
     {
+        if (path.isRoot())
+            return ROOT_DIRENT;
+
         mount();
         Entry e = findEntry(path);
         VfsPath parent = path.getParent();

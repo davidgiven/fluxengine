@@ -20,10 +20,10 @@ import java.nio.charset.StandardCharsets;
  */
 public class ImagePanel extends JPanel
 {
-    private final ImagerViewModel model;
+    private final ImageViewModel model;
     private final CodeArea codeArea;
 
-    public ImagePanel(ImagerViewModel model)
+    public ImagePanel(ImageViewModel model)
     {
         this.model = model;
         setLayout(new BorderLayout());

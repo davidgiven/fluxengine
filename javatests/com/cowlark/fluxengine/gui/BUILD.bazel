@@ -55,3 +55,36 @@ java_test(
         "@maven//:org_objenesis_objenesis",
     ],
 )
+
+java_test(
+    name = "UiUtilsTest",
+    srcs = ["UiUtilsTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/gui",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "FilesystemPanelHeadlessTest",
+    srcs = [
+        "FakeFilesystem.java",
+        "FilesystemPanelHeadlessTest.java",
+    ],
+    jvm_flags = ["-Djava.awt.headless=true"],
+    deps = [
+        "//java/com/cowlark/fluxengine/data",
+        "//java/com/cowlark/fluxengine/gui",
+        "//java/com/cowlark/fluxengine/vfs",
+        "@maven//:com_google_guava_guava",
+        "@maven//:com_google_truth_truth",
+        "@maven//:io_github_globaltcad_sprouts",
+        "@maven//:junit_junit",
+        "@maven//:net_bytebuddy_byte_buddy",
+        "@maven//:net_bytebuddy_byte_buddy_agent",
+        "@maven//:org_mockito_mockito_core",
+        "@maven//:org_objenesis_objenesis",
+        "@maven//:org_swinglabs_swingx_swingx_all",
+    ],
+)

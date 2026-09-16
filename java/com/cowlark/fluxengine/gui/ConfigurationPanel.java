@@ -74,9 +74,9 @@ public class ConfigurationPanel extends JPanel
             .map(it -> Pair.of(it, Formats.get(it)))
             .filter(p -> !p.second().getIsExtension())
             .collect(toImmutableMap(Pair::first, Pair::second));
-    private final ImagerViewModel model;
+    private final ImageViewModel model;
 
-    public ConfigurationPanel(ImagerViewModel model)
+    public ConfigurationPanel(ImageViewModel model)
     {
         this.model = model;
 

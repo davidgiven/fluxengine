@@ -6,25 +6,13 @@ import com.cowlark.fluxengine.config.FluxSourceSinkType;
 import lombok.SneakyThrows;
 import java.io.IOException;
 
-public class FilesystemOperation extends ReadWriteFluxOperation
+public abstract class FilesystemOperation extends ReadWriteFluxOperation
 {
-    private final FilesystemCaller callback;
-
-    public FilesystemOperation(FilesystemCaller callback)
-    {
-        this.callback = callback;
-    }
-
     @Override
     @SneakyThrows
     public void run()
     {
-        BlockDevice blockDevice;
-        if ((getConfig().getFluxSource().getType() != FluxSourceSinkType.FLUXTYPE_NOT_SET) ||
-                (getConfig().getFluxSink().getType() != FluxSourceSinkType.FLUXTYPE_NOT_SET))
-            blockDevice = new FluxBlockDevice(this);
-        else
-            blockDevice = new ImageBlockDevice(this);
+        BlockDevice blockDevice = createBlockDevice();
 
         FilesystemProto fsConfig = configProto.getFilesystem();
         Filesystem filesystem = switch (fsConfig.getType())
@@ -49,13 +37,26 @@ public class FilesystemOperation extends ReadWriteFluxOperation
 
         try
         {
-            callback.accept(filesystem);
+            run(filesystem);
             filesystem.flushChanges();
         } catch (Exception e)
         {
             filesystem.discardChanges();
             throw e;
         }
+    }
+
+    public abstract void run(Filesystem filesystem) throws IOException;
+
+    protected BlockDevice createBlockDevice()
+    {
+        BlockDevice blockDevice;
+        if ((getConfig().getFluxSource().getType() != FluxSourceSinkType.FLUXTYPE_NOT_SET) ||
+                (getConfig().getFluxSink().getType() != FluxSourceSinkType.FLUXTYPE_NOT_SET))
+            blockDevice = new FluxBlockDevice(this);
+        else
+            blockDevice = new ImageBlockDevice(this);
+        return blockDevice;
     }
 
     public interface FilesystemCaller

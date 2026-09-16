@@ -233,7 +233,10 @@ public final class HfsNode
                 if (ptrOff == rec)
                     ptrOff += reclen;
                 else
+                {
                     System.arraycopy(np.data, rec, np.data, ptrOff, reclen);
+                    ptrOff += reclen;
+                }
             }
         }
 

@@ -596,7 +596,13 @@ public final class HfsBTree
 
             if (np.rnum == -1)
             {
-                HfsNode.n_index(child, record, null);
+                // Update parent's first index record to reflect child's new first key
+                // (C: n_index(&child, rec, 0) where rec = HFS_NODEREC(*np,0) is parent's index)
+                byte[] tmpIdx = new byte[HFS_MAX_RECLEN];
+                int[] tmpLen = new int[1];
+                HfsNode.n_index(child, tmpIdx, tmpLen);
+                // Overwrite parent's index at rec (fixed 42 bytes for catalog)
+                System.arraycopy(tmpIdx, 0, np.data, rec, tmpLen[0]);
                 if (reclen[0] == 0)
                 {
                     result = bt_putnode(np);
@@ -659,12 +665,12 @@ public final class HfsBTree
         if (reclenArr[0] != 0)
         {
             byte[] oroot = new byte[HFS_MAX_RECLEN];
-            int orootlen;
+            int[] orootLenArr = new int[1];
 
             /* root node was split; create a new root */
 
-            HfsNode.n_index(root, oroot, null);
-            orootlen = reclenArr[0];
+            HfsNode.n_index(root, oroot, orootLenArr);
+            int orootlen = orootLenArr[0];
 
             HfsNode.n_init(root, bt, ndIndxNode, root.nd.ndNHeight + 1);
             if (HfsNode.n_new(root) == -1)
@@ -729,11 +735,14 @@ public final class HfsBTree
             if (deletex(child, key, recCopy, flag) == -1)
                 return -1;
 
+            // Copy back any modifications to the index record (child freed or first key changed)
+            System.arraycopy(recCopy, 0, np.data, rec, recLen);
+
             if (flag[0] != 0)
             {
                 flag[0] = 0;
 
-                if (recKeyLen(np.data, rec) == 0)
+                if ((recCopy[0] & 0xff) == 0)
                 {
                     result = HfsNode.n_delete(np, record, flag);
                     break;
