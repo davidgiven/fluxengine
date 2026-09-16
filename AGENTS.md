@@ -88,6 +88,10 @@ Useful commands:
 - Tests use JUnit 4 (`@RunWith(JUnit4.class)`, `org.junit.Test`).
 - Follow existing patterns in the package you are editing; keep new functionality
   localized to the relevant package.
+- Comments use block style `/* text\n * more text\n * trailing text */` with leading
+  `/*` and trailing `*/` on the same lines as the text. Wrap text to ~100 columns,
+  merge adjacent comments into a single block, use grammatically correct English, and
+  prefer block comments over `//` (convert `//` to block style when touching a file).
 
 ## Process
 

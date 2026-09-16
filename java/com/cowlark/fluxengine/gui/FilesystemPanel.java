@@ -20,12 +20,11 @@ import static swingtree.UIFactoryMethods.separator;
 import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.gui.FilesystemTreeTableModel.DirNode;
 import com.cowlark.fluxengine.gui.FilesystemTreeTableModel.FileNode;
+import com.cowlark.fluxengine.gui.FilesystemTreeTableModel.FsNode;
 import com.cowlark.fluxengine.vfs.FileAttributes;
-import com.cowlark.fluxengine.vfs.Filesystem;
 import com.cowlark.fluxengine.vfs.Filesystem.Capability;
 import com.cowlark.fluxengine.vfs.Filesystem.Dirent;
 import com.cowlark.fluxengine.vfs.VfsPath;
-import com.cowlark.fluxengine.gui.FilesystemTreeTableModel.FsNode;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import org.apache.commons.io.FileUtils;
@@ -49,7 +48,6 @@ import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.event.ActionEvent;
 import java.io.File;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -57,11 +55,17 @@ public class FilesystemPanel extends JPanel
 {
     private static final Logger logger = LoggerFactory.getLogger(FilesystemPanel.class);
 
-    private final ImagerViewModel model;
-    private final JXTreeTable treeTable;
-    private final FilesystemTreeTableModel treeTableModel;
-    private final TreeSelectionModel treeSelectionModel;
-    private final Var<Tuple<TreePath>> filesSelected;
+    final ImagerViewModel model;
+    final JXTreeTable treeTable;
+    final FilesystemTreeTableModel treeTableModel;
+    final TreeSelectionModel treeSelectionModel;
+    final Var<Tuple<TreePath>> filesSelected;
+    final Set<VfsPath> everExpanded = new HashSet<>();
+
+    JXTreeTable getTreeTable()
+    {
+        return treeTable;
+    }
 
     public FilesystemPanel(ImagerViewModel model)
     {
@@ -77,6 +81,7 @@ public class FilesystemPanel extends JPanel
         Val<Boolean> hasPendingChanges = treeTableModel.getHasPendingChanges();
 
         treeTable = new JXTreeTable(model.getFilesystemTreeTableModel());
+        treeTableModel.setExpandedSupplier(this::snapshotExpandedVfsPaths);
         treeTable.addTreeExpansionListener(new TreeExpansionListener()
         {
             @Override
@@ -84,16 +89,27 @@ public class FilesystemPanel extends JPanel
             {
                 Object last = event.getPath().getLastPathComponent();
                 if (last instanceof DirNode dir)
-                    treeTableModel.requestPopulate(dir);
-                else if (last instanceof FsNode fsNode)
                 {
-                    // Non-dir nodes are not expandable; no-op.
+                    everExpanded.add(dir.vfsPath());
+                    treeTableModel.requestPopulate(dir);
+                } else if (last instanceof FsNode fsNode)
+                {
+                    /* Non-dir nodes are not expandable; no-op. */
                 }
             }
 
             @Override
             public void treeCollapsed(TreeExpansionEvent event)
             {
+                Object last = event.getPath().getLastPathComponent();
+                if (last instanceof DirNode dir)
+                {
+                    /* Keep empty dirs that auto-collapsed when isLeaf became true (handle
+                     * disappears). They are still considered expanded for resync purposes so a
+                     * new child becomes visible. */
+                    if (dir.getChildCount() != 0 || !treeTableModel.isLeaf(dir))
+                        everExpanded.remove(dir.vfsPath());
+                }
             }
         });
         treeTable.setRootVisible(true);
@@ -202,7 +218,27 @@ public class FilesystemPanel extends JPanel
                                                 .isEnabledIf(and(
                                                         allowedWhenMounted,
                                                         hasPendingChanges))
-                                                .onClick(delegate -> treeTableModel.discard()))
+                                                .onClick(delegate -> {
+                                                    Set<VfsPath> snap = snapshotExpandedVfsPaths();
+                                                    treeTableModel.discard();
+                                                    treeTableModel.queueFilesystemOperation(fs -> SwingUtilities.invokeLater(
+                                                            () -> {
+                                                                for (VfsPath p : snap)
+                                                                {
+                                                                    DirNode n =
+                                                                            treeTableModel.findNode(
+                                                                                    p);
+                                                                    if (n == null ||
+                                                                            n.getChildCount() == 0)
+                                                                        continue;
+                                                                    TreePath tp =
+                                                                            treeTableModel.buildTreePath(
+                                                                                    n);
+                                                                    if (!treeTable.isExpanded(tp))
+                                                                        treeTable.expandPath(tp);
+                                                                }
+                                                            }));
+                                                }))
                                 .add(
                                         "align left", button("Commit")
                                                 .isEnabledIf(and(
@@ -271,15 +307,14 @@ public class FilesystemPanel extends JPanel
             }
         }
 
-        // Snapshot paths on EDT before crossing to FS thread.
+        /* Snapshot paths on EDT before crossing to FS thread. */
         ImmutableList<VfsPath> snapshot = stream(paths)
                 .map(p -> ((FileNode) p.getLastPathComponent()).getDirent().path())
                 .collect(toImmutableList());
         UiUtils.promptAndSave(
                 this, "Save multiple files", "files.zip", saver -> {
                     treeTableModel.queueFilesystemOperation(fs -> {
-                        Bytes bytes = fs.getFiles(
-                                fs, snapshot);
+                        Bytes bytes = fs.getFiles(fs, snapshot);
                         saver.accept(bytes);
                     });
                 });
@@ -324,10 +359,7 @@ public class FilesystemPanel extends JPanel
                 VfsPath vfsName = parentPath.resolve(leafName);
                 fs.putFile(vfsName, data);
             }
-            SwingUtilities.invokeLater(() -> {
-                treeTableModel.resyncNode(parentPath);
-                treeTableModel.mutated();
-            });
+            resyncAllExpandedAsync();
         });
     }
 
@@ -335,27 +367,14 @@ public class FilesystemPanel extends JPanel
             ComponentDelegate<JButton, ActionEvent> delegate)
     {
         Tuple<TreePath> paths = filesSelected.get();
-        // Snapshot VfsPaths and parent paths on EDT before crossing to FS thread.
-        // Do not capture TreePath/FileNode across threads.
         ImmutableList<VfsPath> vfsPaths = stream(paths)
                 .map(p -> ((FileNode) p.getLastPathComponent()).getDirent().path())
                 .collect(toImmutableList());
-        Set<VfsPath> parentPaths = new HashSet<>();
-        for (TreePath path : paths)
-        {
-            TreePath parentPath = path.getParentPath();
-            if (parentPath != null)
-                parentPaths.add(((FileNode) parentPath.getLastPathComponent()).getDirent().path());
-        }
 
         treeTableModel.queueFilesystemOperation(fs -> {
             for (VfsPath vfsPath : vfsPaths)
                 fs.deleteFileRecursively(vfsPath);
-            SwingUtilities.invokeLater(() -> {
-                for (VfsPath parent : parentPaths)
-                    treeTableModel.resyncNode(parent);
-                treeTableModel.mutated();
-            });
+            resyncAllExpandedAsync();
         });
     }
 
@@ -393,10 +412,7 @@ public class FilesystemPanel extends JPanel
         VfsPath childVfsPath = parentPath.resolve(childName);
         treeTableModel.queueFilesystemOperation(fs -> {
             fs.createDirectory(childVfsPath);
-            SwingUtilities.invokeLater(() -> {
-                treeTableModel.resyncNode(parentPath);
-                treeTableModel.mutated();
-            });
+            resyncAllExpandedAsync();
         });
     }
 
@@ -411,6 +427,78 @@ public class FilesystemPanel extends JPanel
                     "Unexpected value: " + parentPath.getLastPathComponent());
         };
         return parent;
+    }
+
+    Set<VfsPath> snapshotExpandedVfsPaths()
+    {
+        assert SwingUtilities.isEventDispatchThread();
+        Object rootObj = treeTableModel.getRoot();
+        if (!(rootObj instanceof DirNode rootDir))
+            return Set.of();
+        /* Walk the model tree. JXTreeTable.getExpandedDescendants skips leaf nodes, and empty
+         * LOADED dirs become leaf (handle disappears) and are auto-collapsed by JTree
+         * (expandedState cleared). We keep everExpanded for empty dirs that were expanded so a
+         * new child inside an expanded empty dir is still resynced and re-expanded. */
+        Set<VfsPath> result = new HashSet<>();
+        java.util.ArrayDeque<DirNode> stack = new java.util.ArrayDeque<>();
+        stack.push(rootDir);
+        while (!stack.isEmpty())
+        {
+            DirNode cur = stack.pop();
+            TreePath tp = treeTableModel.buildTreePath(cur);
+            boolean expanded = treeTable.isExpanded(tp);
+            if (!expanded && everExpanded.contains(cur.vfsPath()) && cur.isLeaf())
+                expanded = true;
+
+            /* Root is considered expanded even if JTree reports it collapsed after setRoot;
+             * always include it so discard keeps free-space current. */
+            if (expanded || cur == rootDir)
+                result.add(cur.vfsPath());
+
+            /* Only descend into expanded dirs — descendants of a collapsed dir cannot be
+             * visible/expanded. Include children regardless of LOADED state so that NOT_LOADED
+             * expanded placeholders are also captured. */
+            if (expanded || cur == rootDir)
+            {
+                if (cur.getLoadState() == FilesystemTreeTableModel.LoadState.LOADED)
+                {
+                    for (int i = 0; i < cur.getChildCount(); i++)
+                    {
+                        if (cur.getChildAt(i) instanceof DirNode childDir)
+                            stack.push(childDir);
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    void resyncAllExpandedAfterMutation()
+    {
+        assert SwingUtilities.isEventDispatchThread();
+        Set<VfsPath> snap = snapshotExpandedVfsPaths();
+        treeTableModel.resyncPaths(snap);
+        treeTableModel.mutated();
+        /* Re-expand snapshot paths that were auto-collapsed when empty (isLeaf became true) but
+         * now have children after the resync. */
+        treeTableModel.queueFilesystemOperation(fs -> SwingUtilities.invokeLater(() -> {
+            for (VfsPath p : snap)
+            {
+                DirNode n = treeTableModel.findNode(p);
+                if (n == null || n.getChildCount() == 0)
+                    continue;
+                TreePath tp = treeTableModel.buildTreePath(n);
+                if (!treeTable.isExpanded(tp))
+                    treeTable.expandPath(tp);
+            }
+        }));
+    }
+
+    void resyncAllExpandedAsync()
+    {
+        /* Called from FS thread after a mutation; schedule EDT resync that preserves expansion
+         * and re-expands empty dirs that gained children. */
+        SwingUtilities.invokeLater(this::resyncAllExpandedAfterMutation);
     }
 
     private void renameFile(
@@ -428,21 +516,8 @@ public class FilesystemPanel extends JPanel
         VfsPath newVfsPath = parentPath.resolve(newChild);
         treeTableModel.queueFilesystemOperation(fs -> {
             fs.moveFile(oldPath, newVfsPath);
-            SwingUtilities.invokeLater(() -> {
-                treeTableModel.resyncNode(parentPath);
-                treeTableModel.mutated();
-            });
+            resyncAllExpandedAsync();
         });
-    }
-
-    private static Bytes recursivelyAddPathsToZipfile(Filesystem fs, Iterable<TreePath> paths)
-            throws IOException
-    {
-        return fs.getFiles(
-                fs,
-                stream(paths)
-                        .map(path -> ((FileNode) path.getLastPathComponent()).getDirent().path())
-                        .collect(toImmutableList()));
     }
 
     /**
@@ -466,15 +541,12 @@ public class FilesystemPanel extends JPanel
         return true;
     }
 
-
-
     private void onMount(ComponentDelegate<JButton, ActionEvent> delegate)
     {
         treeTableModel.mount();
-        // Root is lazily populated in the model, but the JXTreeTable clears
-        // expansion on setRoot. Expand it after the EDT has processed the
-        // structure change so the initial file list becomes visible without
-        // requiring a manual click.
+        /* Root is lazily populated in the model, but the JXTreeTable clears expansion on
+         * setRoot. Expand it after the EDT has processed the structure change so the initial
+         * file list becomes visible without requiring a manual click. */
         SwingUtilities.invokeLater(() -> {
             Object root = treeTableModel.getRoot();
             if (root != null)

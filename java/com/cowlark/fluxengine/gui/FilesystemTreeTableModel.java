@@ -20,13 +20,18 @@ import sprouts.ValueSet;
 import sprouts.Var;
 import javax.swing.SwingUtilities;
 import javax.swing.tree.TreeNode;
+import javax.swing.tree.TreePath;
 import java.util.ArrayList;
-import java.util.Enumeration;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.function.Supplier;
 
 /**
  * {@code TreeTableModel} for a filesystem image.
@@ -58,8 +63,19 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel
                     .build())
             .build();
 
-    private final ImagerViewModel model;
-    private final BlockingQueue<FilesystemCaller> queue = new LinkedBlockingQueue<>();
+    final ImagerViewModel model;
+    final BlockingQueue<FilesystemCaller> queue = new LinkedBlockingQueue<>();
+    Supplier<Set<VfsPath>> expandedSupplier;
+
+    public void setExpandedSupplier(Supplier<Set<VfsPath>> supplier)
+    {
+        this.expandedSupplier = supplier;
+    }
+
+    BlockingQueue<FilesystemCaller> getQueue()
+    {
+        return queue;
+    }
 
     @Getter private final Var<Boolean> isMounted = Var.of(false);
     @Getter private final Var<Integer> bytesTotal = Var.of(0);
@@ -70,12 +86,10 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel
 
     enum LoadState
     {
-        NOT_LOADED,
-        LOADING,
-        LOADED
+        NOT_LOADED, LOADING, LOADED
     }
 
-    private class PlaceholderNode extends AbstractMutableTreeTableNode
+    class PlaceholderNode extends AbstractMutableTreeTableNode
     {
         @Override
         public Object getValueAt(int i)
@@ -158,9 +172,6 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel
         @Override
         public boolean isLeaf()
         {
-            // Let JXTreeTable show/hide the handle based on child count, not leaf flag alone.
-            // Dirs that are not yet loaded still need a handle, so they are not leaves.
-            // Once LOADED, emptiness is reflected by childCount==0.
             if (loadState != LoadState.LOADED)
                 return false;
             return super.isLeaf();
@@ -170,7 +181,7 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel
     public FilesystemTreeTableModel(ImagerViewModel model)
     {
         this.model = model;
-        // Initial empty root so JXTreeTable has something before first mount.
+        /* Initial empty root so JXTreeTable has something before first mount. */
         DirNode root = new DirNode(ROOT_DIRENT);
         setRoot(root);
         insertNodeInto(new PlaceholderNode(), root, 0);
@@ -186,20 +197,20 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel
                     isMounted.set(false);
                 });
 
-        // Reset model on EDT before the filesystem thread is usable. The view's
-        // JTree will clear its expandedPaths on setRoot; population is lazy.
-        // mount() is always called on EDT (button handler), so do this synchronously.
+        /* Reset model on EDT before the filesystem thread is usable. The view's JTree will clear
+         * its expandedPaths on setRoot; population is lazy. mount() is always called on EDT
+         * (button handler), so do this synchronously. */
         Runnable reset = () -> {
             DirNode root = new DirNode(ROOT_DIRENT);
-            // NOT_LOADED + placeholder ensures the root shows an expansion handle
-            // so the user can expand it to trigger the first list.
+            /* NOT_LOADED + placeholder ensures the root shows an expansion handle so the user
+             * can expand it to trigger the first list. */
             setRoot(root);
             insertNodeInto(new PlaceholderNode(), root, 0);
             isMounted.set(true);
             mutated();
-            // The root is visible expanded by default (JXTreeTable shows the
-            // placeholder row). Populate it automatically so the initial view is
-            // not stuck on "Loading..." — still lazy for all other dirs.
+            /* The root is visible expanded by default (JXTreeTable shows the placeholder row).
+             * Populate it automatically so the initial view is not stuck on "Loading..." — still
+             * lazy for all other dirs. */
             ensureLoaded(root);
         };
         if (SwingUtilities.isEventDispatchThread())
@@ -223,7 +234,7 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel
         queue.add(caller);
     }
 
-    private void updateFreeSpace()
+    void updateFreeSpace()
     {
         queue.add(fs -> {
             ImmutableMap<String, String> attrs = fs.getFilesystemMetadata();
@@ -249,9 +260,33 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel
         queue.add(fs -> fs.flushChanges());
     }
 
+    public void resyncPaths(Collection<VfsPath> paths)
+    {
+        assert SwingUtilities.isEventDispatchThread();
+        List<VfsPath> sorted = new ArrayList<>(paths);
+        sorted.sort(Comparator.comparingInt(p -> p.segments().size()));
+        for (VfsPath p : sorted)
+            resyncNode(p);
+    }
+
     public void discard()
     {
-        queue.add(fs -> fs.discardChanges());
+        assert SwingUtilities.isEventDispatchThread();
+        Set<VfsPath> snapshot = expandedSupplier != null ? expandedSupplier.get() : Set.of();
+        /* Capture immutable copy for the FS callback (still on EDT) */
+        Set<VfsPath> captured = new HashSet<>(snapshot);
+        queue.add(fs -> {
+            try
+            {
+                fs.discardChanges();
+            } finally
+            {
+                SwingUtilities.invokeLater(() -> {
+                    resyncPaths(captured);
+                    mutated();
+                });
+            }
+        });
     }
 
     public void unmount()
@@ -274,26 +309,13 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel
     }
 
     /**
-     * Called from the view's {@code TreeExpansionListener} when a directory is expanded.
-     * Safe to call redundantly; coalesces while LOADING and no-ops when LOADED.
-     */
-    public void requestPopulate(VfsPath path)
-    {
-        assert SwingUtilities.isEventDispatchThread();
-        DirNode dir = findNode(path);
-        if (dir == null)
-            return;
-        ensureLoaded(dir);
-    }
-
-    /**
      * Overload for the expansion listener that already has the node identity.
      */
     public void requestPopulate(DirNode dir)
     {
         assert SwingUtilities.isEventDispatchThread();
-        // dir must still be attached to this model; if orphaned, findNode will be null
-        // and we can safely no-op.
+        /* dir must still be attached to this model; if orphaned, findNode will be null and we
+         * can safely no-op. */
         if (dir.getParent() == null && dir != getRoot())
             return;
         ensureLoaded(dir);
@@ -318,12 +340,11 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel
             ensureLoaded(dir);
             return;
         }
-        // LOADED -> re-list
+        /* LOADED -> re-list. Keep existing children visible while loading; do not manipulate
+         * placeholder here. Removing the placeholder before the new listing arrives makes
+         * childCount temporarily 0 which JTree/JXTreeTable interprets as collapsed (see
+         * treeStructureChanged). */
         dir.setLoadState(LoadState.LOADING);
-        // Show transient loading placeholder while the FS thread works.
-        // Remove any stale placeholder first then insert fresh one.
-        removePlaceholderIfPresent(dir);
-        insertNodeInto(new PlaceholderNode(), dir, 0);
 
         VfsPath captured = path;
         queue.add(fs -> {
@@ -339,19 +360,19 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel
         });
     }
 
-    // -------------------------------------------------------------------------
-    // Internal: loading
-    // -------------------------------------------------------------------------
+    /* -------------------------------------------------------------------------
+     * Internal: loading
+     * ------------------------------------------------------------------------- */
 
-    private void ensureLoaded(DirNode dir)
+    void ensureLoaded(DirNode dir)
     {
         assert SwingUtilities.isEventDispatchThread();
         if (dir.getLoadState() != LoadState.NOT_LOADED)
             return;
 
         dir.setLoadState(LoadState.LOADING);
-        // Placeholder already present for NOT_LOADED dirs (inserted when the dir was
-        // created or after a failed load). Ensure one is there.
+        /* Placeholder already present for NOT_LOADED dirs (inserted when the dir was created or
+         * after a failed load). Ensure one is there. */
         if (!hasPlaceholder(dir))
             insertNodeInto(new PlaceholderNode(), dir, 0);
 
@@ -376,31 +397,32 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel
      * @param entries sorted dirents, or {@code null} on failure
      * @param error   non-null on failure
      */
-    private void applyListResult(DirNode dir, ImmutableList<Dirent> entries, Exception error)
+    void applyListResult(DirNode dir, ImmutableList<Dirent> entries, Exception error)
     {
         assert SwingUtilities.isEventDispatchThread();
 
-        // Abandon if this node is no longer attached (e.g. mount replaced the root
-        // while the FS thread was listing).
+        /* Abandon if this node is no longer attached (e.g. mount replaced the root while the FS
+         * thread was listing). */
         if (dir.getParent() == null && dir != getRoot())
             return;
 
-        removePlaceholderIfPresent(dir);
+        /* Do not remove placeholder yet. Keeping it until after diff avoids a transient 0-child
+         * state which JTree/JXTreeTable treats as collapsed (especially for empty dirs that
+         * become leaf). The placeholder is removed after the new children are in place. */
 
         if (error != null)
         {
-            // Per spec: reset to NOT_LOADED so next expand retries. No persistent
-            // FAILED state or placeholder.
+            /* Per spec: reset to NOT_LOADED so next expand retries. */
             dir.setLoadState(LoadState.NOT_LOADED);
-            insertNodeInto(new PlaceholderNode(), dir, 0);
-            // Still refresh free-space/capabilities in case the error was transient.
+            if (!hasPlaceholder(dir))
+                insertNodeInto(new PlaceholderNode(), dir, 0);
             return;
         }
 
         assert entries != null;
 
-        // Diff current children against new entries.
-        // Map existing non-placeholder children by path.
+        /* Diff current children against new entries. Map existing non-placeholder children by
+         * path. */
         Map<VfsPath, FsNode> existingByPath = new HashMap<>();
         List<FsNode> existingOrder = new ArrayList<>();
         for (int i = 0; i < dir.getChildCount(); i++)
@@ -413,25 +435,24 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel
             }
         }
 
-        // Build new sorted list of nodes, reusing identities where possible.
-        // We do a simple diff: remove stale, insert missing, reorder to sorted order,
-        // and update dirents for survivors (so rename/size changes are reflected).
-        // To keep expanded grandchildren alive, we must reuse the DirNode object
-        // for surviving directories.
+        /* Build new sorted list of nodes, reusing identities where possible. We do a simple
+         * diff: remove stale, insert missing, reorder to sorted order, and update dirents for
+         * survivors (so rename/size changes are reflected). To keep expanded grandchildren
+         * alive, we must reuse the DirNode object for surviving directories. */
         Map<VfsPath, Dirent> newByPath = new HashMap<>();
         for (Dirent d : entries)
             newByPath.put(d.path(), d);
 
-        // Remove stale children
+        /* Remove stale children */
         for (FsNode existing : List.copyOf(existingOrder))
         {
             if (!newByPath.containsKey(existing.vfsPath()))
                 removeNodeFromParent(existing);
         }
 
-        // Now insert/update in sorted order.
-        // After removals, dir.getChildCount() reflects only survivors; we reinsert
-        // in order by walking entries and ensuring each is at the expected index.
+        /* Now insert/update in sorted order. After removals, dir.getChildCount() reflects only
+         * survivors; we reinsert in order by walking entries and ensuring each is at the
+         * expected index. */
         for (int targetIndex = 0; targetIndex < entries.size(); targetIndex++)
         {
             Dirent wanted = entries.get(targetIndex);
@@ -439,23 +460,24 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel
 
             if (existing != null && existing.getParent() == dir)
             {
-                // Survivor: update dirent and move to correct index if needed.
+                /* Survivor: update dirent and move to correct index if needed. */
                 existing.setDirent(wanted);
                 int currentIndex = dir.getIndex(existing);
                 if (currentIndex != targetIndex)
                 {
-                    // DefaultTreeTableModel has no move; remove and reinsert.
+                    /* DefaultTreeTableModel has no move; remove and reinsert. */
                     removeNodeFromParent(existing);
                     insertNodeInto(existing, dir, targetIndex);
                 }
             } else
             {
-                // New child
+                /* New child */
                 FsNode newNode = switch (wanted.fileType())
                 {
-                    case IS_DIR -> {
+                    case IS_DIR ->
+                    {
                         DirNode dn = new DirNode(wanted);
-                        // New dirs are NOT_LOADED with a placeholder so they show a handle.
+                        /* New dirs are NOT_LOADED with a placeholder so they show a handle. */
                         dn.setLoadState(LoadState.NOT_LOADED);
                         yield dn;
                     }
@@ -468,13 +490,15 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel
         }
 
         dir.setLoadState(LoadState.LOADED);
+        /* Remove the Loading placeholder after the new children are in place. This avoids a
+         * transient 0-child state which JTree treats as collapsed. */
+        removePlaceholderIfPresent(dir);
 
-        // If the dir is now empty, it has 0 children and the view will hide the
-        // expansion handle automatically (DirNode.isLeaf() reflects LOADED+empty).
-        // No empty-directory placeholder per spec.
+        /* If the dir is now empty, it has 0 children and will appear empty. No empty-directory
+         * placeholder per spec. */
     }
 
-    private boolean hasPlaceholder(DirNode dir)
+    boolean hasPlaceholder(DirNode dir)
     {
         if (dir.getChildCount() == 0)
             return false;
@@ -484,7 +508,7 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel
         return false;
     }
 
-    private void removePlaceholderIfPresent(DirNode dir)
+    void removePlaceholderIfPresent(DirNode dir)
     {
         for (int i = dir.getChildCount() - 1; i >= 0; i--)
         {
@@ -494,9 +518,9 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Lookup helpers (no nodeMap)
-    // -------------------------------------------------------------------------
+    /* -------------------------------------------------------------------------
+     * Lookup helpers (no nodeMap)
+     * ------------------------------------------------------------------------- */
 
     /**
      * Finds the {@code DirNode} for {@code path} by walking from the root via
@@ -516,7 +540,7 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel
         DirNode cur = (DirNode) root;
         for (String seg : path.segments())
         {
-            if (cur.getLoadState() != LoadState.LOADED)
+            if (cur.getLoadState() == LoadState.NOT_LOADED)
                 return null;
             DirNode next = null;
             for (int i = 0; i < cur.getChildCount(); i++)
@@ -527,16 +551,16 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel
                     next = dn;
                     break;
                 }
-                // Also consider that a dir may have been listed but the child
-                // lookup by filename is correct even if there are FileNodes interleaved.
-                // So if not found among DirNodes, scan FileNodes too — but only DirNodes
-                // can be returned as the walk continues.
+                /* Also consider that a dir may have been listed but the child lookup by filename
+                 * is correct even if there are FileNodes interleaved. So if not found among
+                 * DirNodes, scan FileNodes too — but only DirNodes can be returned as the walk
+                 * continues. */
             }
-            // Fallback scan includes FileNodes for error detection, but for the walk
-            // we only follow DirNodes; if seg matches a FileNode it's not a directory.
+            /* Fallback scan includes FileNodes for error detection, but for the walk we only
+             * follow DirNodes; if seg matches a FileNode it's not a directory. */
             if (next == null)
             {
-                // Check if a file with that name exists (then path is not a dir)
+                /* Check if a file with that name exists (then path is not a dir) */
                 for (int i = 0; i < cur.getChildCount(); i++)
                 {
                     TreeNode child = cur.getChildAt(i);
@@ -554,7 +578,7 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel
      * Builds a {@code TreePath} for {@code node} by walking to the root.
      * Must be called on the EDT.
      */
-    javax.swing.tree.TreePath buildTreePath(FsNode node)
+    TreePath buildTreePath(FsNode node)
     {
         List<TreeNode> chain = new ArrayList<>();
         TreeNode cur = node;
@@ -563,13 +587,7 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel
             chain.add(0, cur);
             cur = cur.getParent();
         }
-        return new javax.swing.tree.TreePath(chain.toArray());
+        return new TreePath(chain.toArray());
     }
 
-    // Legacy API kept for incremental migration; delegates to resync.
-    // Not used by new panel code but left non-public to avoid external callers.
-    void legacyAddNode(DirNode dir, VfsPath child)
-    {
-        resyncNode(dir.vfsPath());
-    }
 }
