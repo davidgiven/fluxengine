@@ -14,6 +14,7 @@ import com.cowlark.fluxengine.vfs.VfsPath;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import lombok.Getter;
+import org.apache.commons.io.FileUtils;
 import org.jdesktop.swingx.treetable.AbstractMutableTreeTableNode;
 import org.jdesktop.swingx.treetable.DefaultTreeTableModel;
 import sprouts.ValueSet;
@@ -31,6 +32,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -67,16 +69,6 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel
     final BlockingQueue<FilesystemCaller> queue = new LinkedBlockingQueue<>();
     Supplier<Set<VfsPath>> expandedSupplier;
 
-    public void setExpandedSupplier(Supplier<Set<VfsPath>> supplier)
-    {
-        this.expandedSupplier = supplier;
-    }
-
-    BlockingQueue<FilesystemCaller> getQueue()
-    {
-        return queue;
-    }
-
     @Getter private final Var<Boolean> isMounted = Var.of(false);
     @Getter private final Var<Integer> bytesTotal = Var.of(0);
     @Getter private final Var<Integer> bytesUsed = Var.of(0);
@@ -104,6 +96,32 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel
         }
     }
 
+    enum Column
+    {
+        FILENAME("Filename", Dirent::filename),
+        FILETYPE("Type", Column::convertFiletype),
+        LENGTH("Length", de -> FileUtils.byteCountToDisplaySize(de.length())),
+        MODE("Mode", Dirent::mode);
+
+        @Getter private final String humanName;
+        private final Function<Dirent, String> converter;
+
+        Column(String humanName, Function<Dirent, String> converter)
+        {
+            this.humanName = humanName;
+            this.converter = converter;
+        }
+
+        private static String convertFiletype(Dirent de)
+        {
+            return switch (de.fileType())
+            {
+                case IS_DIR -> "directory";
+                case IS_FILE -> "file";
+            };
+        }
+    }
+
     abstract class FsNode extends AbstractMutableTreeTableNode
     {
         @Getter private Dirent dirent;
@@ -122,6 +140,18 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel
         {
             return dirent.path();
         }
+
+        @Override
+        public Object getValueAt(int i)
+        {
+            return Column.values()[i].converter.apply(getDirent());
+        }
+
+        @Override
+        public int getColumnCount()
+        {
+            return Column.values().length;
+        }
     }
 
     class FileNode extends FsNode
@@ -129,23 +159,6 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel
         public FileNode(Dirent dirent)
         {
             super(dirent);
-        }
-
-        @Override
-        public Object getValueAt(int i)
-        {
-            return switch (i)
-            {
-                case 0 -> getDirent().filename();
-                case 1 -> Integer.toString(getDirent().length());
-                default -> "";
-            };
-        }
-
-        @Override
-        public int getColumnCount()
-        {
-            return 2;
         }
     }
 
@@ -164,12 +177,6 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel
         }
 
         @Override
-        public int getColumnCount()
-        {
-            return 1;
-        }
-
-        @Override
         public boolean isLeaf()
         {
             if (loadState != LoadState.LOADED)
@@ -185,6 +192,11 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel
         DirNode root = new DirNode(ROOT_DIRENT);
         setRoot(root);
         insertNodeInto(new PlaceholderNode(), root, 0);
+    }
+
+    public void setExpandedSupplier(Supplier<Set<VfsPath>> supplier)
+    {
+        this.expandedSupplier = supplier;
     }
 
     public void mount()
@@ -299,13 +311,13 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel
     @Override
     public int getColumnCount()
     {
-        return 2;
+        return Column.values().length;
     }
 
     @Override
     public String getColumnName(int column)
     {
-        return column == 0 ? "Name" : "Size";
+        return Column.values()[column].getHumanName();
     }
 
     /**
