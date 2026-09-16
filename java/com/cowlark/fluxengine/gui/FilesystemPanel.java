@@ -25,6 +25,8 @@ import com.cowlark.fluxengine.vfs.Filesystem;
 import com.cowlark.fluxengine.vfs.Filesystem.Capability;
 import com.cowlark.fluxengine.vfs.Filesystem.Dirent;
 import com.cowlark.fluxengine.vfs.VfsPath;
+import com.cowlark.fluxengine.gui.FilesystemTreeTableModel.FsNode;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import org.apache.commons.io.FileUtils;
 import org.jdesktop.swingx.JXTreeTable;
@@ -41,11 +43,15 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import javax.swing.event.TreeExpansionEvent;
+import javax.swing.event.TreeExpansionListener;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 public class FilesystemPanel extends JPanel
 {
@@ -71,7 +77,25 @@ public class FilesystemPanel extends JPanel
         Val<Boolean> hasPendingChanges = treeTableModel.getHasPendingChanges();
 
         treeTable = new JXTreeTable(model.getFilesystemTreeTableModel());
-        treeTable.addTreeExpansionListener(model.getFilesystemTreeTableModel());
+        treeTable.addTreeExpansionListener(new TreeExpansionListener()
+        {
+            @Override
+            public void treeExpanded(TreeExpansionEvent event)
+            {
+                Object last = event.getPath().getLastPathComponent();
+                if (last instanceof DirNode dir)
+                    treeTableModel.requestPopulate(dir);
+                else if (last instanceof FsNode fsNode)
+                {
+                    // Non-dir nodes are not expandable; no-op.
+                }
+            }
+
+            @Override
+            public void treeCollapsed(TreeExpansionEvent event)
+            {
+            }
+        });
         treeTable.setRootVisible(true);
         treeTable.setShowGrid(true, true);
         treeTable.setLeafIcon(null);
@@ -172,7 +196,7 @@ public class FilesystemPanel extends JPanel
                                         "align left",
                                         button("Mount")
                                                 .isEnabledIf(allowedWhenNotMounted)
-                                                .onClick(delegate -> treeTableModel.mount()))
+                                                .onClick(this::onMount))
                                 .add(
                                         "align left", button("Discard")
                                                 .isEnabledIf(and(
@@ -234,10 +258,12 @@ public class FilesystemPanel extends JPanel
             FileNode node = (FileNode) Iterables.getOnlyElement(paths).getLastPathComponent();
             if (node.getDirent().fileType() == IS_FILE)
             {
+                VfsPath vfsPath = node.getDirent().path();
+                String filename = node.getDirent().filename();
                 UiUtils.promptAndSave(
-                        this, "Save file", node.getDirent().filename(), saver -> {
+                        this, "Save file", filename, saver -> {
                             treeTableModel.queueFilesystemOperation(fs -> {
-                                Bytes bytes = fs.getFile(node.getDirent().path());
+                                Bytes bytes = fs.getFile(vfsPath);
                                 saver.accept(bytes);
                             });
                         });
@@ -245,10 +271,16 @@ public class FilesystemPanel extends JPanel
             }
         }
 
+        // Snapshot paths on EDT before crossing to FS thread.
+        ImmutableList<VfsPath> snapshot = stream(paths)
+                .map(p -> ((FileNode) p.getLastPathComponent()).getDirent().path())
+                .collect(toImmutableList());
         UiUtils.promptAndSave(
                 this, "Save multiple files", "files.zip", saver -> {
                     treeTableModel.queueFilesystemOperation(fs -> {
-                        saver.accept(recursivelyAddPathsToZipfile(fs, paths));
+                        Bytes bytes = fs.getFiles(
+                                fs, snapshot);
+                        saver.accept(bytes);
                     });
                 });
     }
@@ -258,11 +290,12 @@ public class FilesystemPanel extends JPanel
     {
         TreePath path = Iterables.getOnlyElement(filesSelected.get());
         FileNode file = (FileNode) path.getLastPathComponent();
+        VfsPath vfsPath = file.getDirent().path();
         treeTableModel.queueFilesystemOperation(fs -> {
-            Bytes data = fs.getFile(file.getDirent().path());
+            Bytes data = fs.getFile(vfsPath);
             SwingUtilities.invokeLater(() -> FileViewerDialogue.show(
                     this,
-                    file.getDirent().path().toString(),
+                    vfsPath.toString(),
                     data));
         });
     }
@@ -271,6 +304,7 @@ public class FilesystemPanel extends JPanel
             ComponentDelegate<JButton, ActionEvent> delegate)
     {
         DirNode parent = getParentNodeOfSelection();
+        VfsPath parentPath = parent.getDirent().path();
 
         JFileChooser chooser = new JFileChooser();
         chooser.setDialogTitle("Open files");
@@ -280,15 +314,20 @@ public class FilesystemPanel extends JPanel
         if (result != JFileChooser.APPROVE_OPTION)
             return;
 
+        File[] selectedFiles = chooser.getSelectedFiles();
+
         treeTableModel.queueFilesystemOperation(fs -> {
-            for (File file : chooser.getSelectedFiles())
+            for (File file : selectedFiles)
             {
                 Bytes data = Bytes.readFromFile(file.toPath());
                 String leafName = file.getName();
-                VfsPath vfsName = parent.getDirent().path().resolve(leafName);
+                VfsPath vfsName = parentPath.resolve(leafName);
                 fs.putFile(vfsName, data);
-                SwingUtilities.invokeLater(() -> treeTableModel.addNode(parent, vfsName));
             }
+            SwingUtilities.invokeLater(() -> {
+                treeTableModel.resyncNode(parentPath);
+                treeTableModel.mutated();
+            });
         });
     }
 
@@ -296,20 +335,27 @@ public class FilesystemPanel extends JPanel
             ComponentDelegate<JButton, ActionEvent> delegate)
     {
         Tuple<TreePath> paths = filesSelected.get();
+        // Snapshot VfsPaths and parent paths on EDT before crossing to FS thread.
+        // Do not capture TreePath/FileNode across threads.
+        ImmutableList<VfsPath> vfsPaths = stream(paths)
+                .map(p -> ((FileNode) p.getLastPathComponent()).getDirent().path())
+                .collect(toImmutableList());
+        Set<VfsPath> parentPaths = new HashSet<>();
+        for (TreePath path : paths)
+        {
+            TreePath parentPath = path.getParentPath();
+            if (parentPath != null)
+                parentPaths.add(((FileNode) parentPath.getLastPathComponent()).getDirent().path());
+        }
 
         treeTableModel.queueFilesystemOperation(fs -> {
-            try
-            {
-                for (TreePath path : paths)
-                {
-                    FileNode file = (FileNode) path.getLastPathComponent();
-                    fs.deleteFileRecursively(file.getDirent().path());
-                    treeTableModel.removeNodeFromParent(file);
-                }
-            } finally
-            {
+            for (VfsPath vfsPath : vfsPaths)
+                fs.deleteFileRecursively(vfsPath);
+            SwingUtilities.invokeLater(() -> {
+                for (VfsPath parent : parentPaths)
+                    treeTableModel.resyncNode(parent);
                 treeTableModel.mutated();
-            }
+            });
         });
     }
 
@@ -317,10 +363,10 @@ public class FilesystemPanel extends JPanel
             ComponentDelegate<JButton, ActionEvent> delegate)
     {
         TreePath path = Iterables.getOnlyElement(filesSelected.get());
+        VfsPath vfsPath = ((FileNode) path.getLastPathComponent()).getDirent().path();
 
         treeTableModel.queueFilesystemOperation(fs -> {
-            FileNode file = (FileNode) path.getLastPathComponent();
-            Dirent de = file.getDirent();
+            Dirent de = fs.getDirent(vfsPath);
             SwingUtilities.invokeLater(() -> FileInfoDialogue.show(
                     this,
                     "File info: " + de.path().toString(),
@@ -339,12 +385,18 @@ public class FilesystemPanel extends JPanel
             ComponentDelegate<JButton, ActionEvent> delegate)
     {
         DirNode parent = getParentNodeOfSelection();
+        VfsPath parentPath = parent.getDirent().path();
 
         String childName = JOptionPane.showInputDialog(this, "Enter new directory name:");
-        VfsPath childVfsPath = parent.getDirent().path().resolve(childName);
+        if (childName == null || childName.isBlank())
+            return;
+        VfsPath childVfsPath = parentPath.resolve(childName);
         treeTableModel.queueFilesystemOperation(fs -> {
             fs.createDirectory(childVfsPath);
-            treeTableModel.addNode(parent, childVfsPath);
+            SwingUtilities.invokeLater(() -> {
+                treeTableModel.resyncNode(parentPath);
+                treeTableModel.mutated();
+            });
         });
     }
 
@@ -369,12 +421,16 @@ public class FilesystemPanel extends JPanel
         FileNode child = (FileNode) path.getLastPathComponent();
 
         String newChild = JOptionPane.showInputDialog(this, "Enter new leaf filename:");
-        VfsPath newVfsPath = parent.getDirent().path().resolve(newChild);
+        if (newChild == null || newChild.isBlank())
+            return;
+        VfsPath parentPath = parent.getDirent().path();
+        VfsPath oldPath = child.getDirent().path();
+        VfsPath newVfsPath = parentPath.resolve(newChild);
         treeTableModel.queueFilesystemOperation(fs -> {
-            fs.moveFile(child.getDirent().path(), newVfsPath);
+            fs.moveFile(oldPath, newVfsPath);
             SwingUtilities.invokeLater(() -> {
-                treeTableModel.addNode(parent, newVfsPath);
-                treeTableModel.removeNodeFromParent(child);
+                treeTableModel.resyncNode(parentPath);
+                treeTableModel.mutated();
             });
         });
     }
@@ -408,6 +464,26 @@ public class FilesystemPanel extends JPanel
             }
         }
         return true;
+    }
+
+
+
+    private void onMount(ComponentDelegate<JButton, ActionEvent> delegate)
+    {
+        treeTableModel.mount();
+        // Root is lazily populated in the model, but the JXTreeTable clears
+        // expansion on setRoot. Expand it after the EDT has processed the
+        // structure change so the initial file list becomes visible without
+        // requiring a manual click.
+        SwingUtilities.invokeLater(() -> {
+            Object root = treeTableModel.getRoot();
+            if (root != null)
+            {
+                TreePath rootPath = new TreePath(root);
+                if (!treeTable.isExpanded(rootPath))
+                    treeTable.expandPath(rootPath);
+            }
+        });
     }
 
     private static Val<Boolean> and(Val<Boolean> v1, Val<Boolean> v2)

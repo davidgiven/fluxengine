@@ -289,6 +289,22 @@ public abstract class Filesystem implements AutoCloseable
         {
             return this.filename.compareTo(other.filename);
         }
+
+        @Override
+        public boolean equals(Object obj)
+        {
+            if (obj == this)
+                return true;
+            if (obj instanceof Dirent other)
+                return path.equals(other.path);
+            return false;
+        }
+
+        @Override
+        public int hashCode()
+        {
+            return path.hashCode();
+        }
     }
 
     protected class FluxEngineFileSystemException extends FileSystemException
