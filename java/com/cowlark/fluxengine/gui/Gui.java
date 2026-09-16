@@ -16,7 +16,7 @@ public class Gui
     private final Preferences preferences = Preferences.userNodeForPackage(Gui.class);
     private PreferencesReaderWriter preferencesReaderWriter =
             new PreferencesReaderWriter(preferences);
-    private ImagerViewModel model = new ImagerViewModel(preferencesReaderWriter);
+    private ImageViewModel model = new ImageViewModel(preferencesReaderWriter);
 
     public static void main(String[] args)
     {

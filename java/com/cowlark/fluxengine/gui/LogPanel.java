@@ -20,11 +20,11 @@ import java.nio.charset.StandardCharsets;
 
 public class LogPanel extends JPanel
 {
-    private final ImagerViewModel model;
+    private final ImageViewModel model;
     private final JTextArea textArea;
     private final LogRenderer printingLogRenderer;
 
-    public LogPanel(ImagerViewModel model)
+    public LogPanel(ImageViewModel model)
     {
         this.model = model;
         textArea = new JTextArea();

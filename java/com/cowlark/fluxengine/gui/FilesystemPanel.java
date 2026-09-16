@@ -55,7 +55,7 @@ public class FilesystemPanel extends JPanel
 {
     private static final Logger logger = LoggerFactory.getLogger(FilesystemPanel.class);
 
-    final ImagerViewModel model;
+    final ImageViewModel model;
     final JXTreeTable treeTable;
     final FilesystemTreeTableModel treeTableModel;
     final TreeSelectionModel treeSelectionModel;
@@ -67,7 +67,7 @@ public class FilesystemPanel extends JPanel
         return treeTable;
     }
 
-    public FilesystemPanel(ImagerViewModel model)
+    public FilesystemPanel(ImageViewModel model)
     {
         this.model = model;
         this.treeTableModel = model.getFilesystemTreeTableModel();

@@ -65,7 +65,7 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel
                     .build())
             .build();
 
-    final ImagerViewModel model;
+    final ImageViewModel model;
     final BlockingQueue<FilesystemCaller> queue = new LinkedBlockingQueue<>();
     Supplier<Set<VfsPath>> expandedSupplier;
 
@@ -185,7 +185,7 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel
         }
     }
 
-    public FilesystemTreeTableModel(ImagerViewModel model)
+    public FilesystemTreeTableModel(ImageViewModel model)
     {
         this.model = model;
         /* Initial empty root so JXTreeTable has something before first mount. */

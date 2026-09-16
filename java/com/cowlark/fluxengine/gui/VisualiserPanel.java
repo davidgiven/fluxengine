@@ -24,7 +24,7 @@ public class VisualiserPanel extends JPanel
     public static final double WINDOW_PADDING_Y = 8;
     private static final float INNER_RADIUS = 50;
 
-    private final ImagerViewModel model;
+    private final ImageViewModel model;
     private DiskLayout currentLayout;
 
     private int width;
@@ -38,7 +38,7 @@ public class VisualiserPanel extends JPanel
     private Point2D.Double side0pos;
     private Point2D.Double side1pos;
 
-    public VisualiserPanel(ImagerViewModel model)
+    public VisualiserPanel(ImageViewModel model)
     {
         this.model = model;
 

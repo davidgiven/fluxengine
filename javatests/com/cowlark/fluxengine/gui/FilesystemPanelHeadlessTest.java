@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicReference;
 @RunWith(MockitoJUnitRunner.class)
 public class FilesystemPanelHeadlessTest
 {
-    @Mock ImagerViewModel mockModel;
+    @Mock ImageViewModel mockModel;
 
     private FakeFilesystem fakeFs;
     private FilesystemTreeTableModel model;

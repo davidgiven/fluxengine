@@ -47,10 +47,10 @@ public class ApplicationFrame extends JFrame
     private final SummaryPanel summaryPanel;
     private final FilesystemPanel filesystemPanel;
 
-    private final ImagerViewModel model;
+    private final ImageViewModel model;
     private final Var<Workflow> currentWorkflow = Var.of(Workflow.DISK_READING);
 
-    ApplicationFrame(ImagerViewModel model)
+    ApplicationFrame(ImageViewModel model)
     {
         this.model = model;
         summaryPanel = new SummaryPanel(model);
@@ -124,7 +124,7 @@ public class ApplicationFrame extends JFrame
     }
 
     private static @NonNull ViewSupplier<Workflow> createControlPanelCard(
-            ImagerViewModel model)
+            ImageViewModel model)
     {
         /* Disabling a Swing container does not disable its children, so
          * every interactive control inside the cards is bound to this

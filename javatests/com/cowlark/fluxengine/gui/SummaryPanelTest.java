@@ -14,7 +14,7 @@ import sprouts.Var;
 @RunWith(MockitoJUnitRunner.class)
 public class SummaryPanelTest
 {
-    @Mock private ImagerViewModel model;
+    @Mock private ImageViewModel model;
 
     @Test
     public void addPhysicalAndLogicalViews()

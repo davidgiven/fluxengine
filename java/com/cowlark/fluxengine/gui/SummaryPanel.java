@@ -31,13 +31,13 @@ import java.util.List;
 
 public class SummaryPanel extends JPanel
 {
-    private final ImagerViewModel model;
+    private final ImageViewModel model;
     private final int smallFont;
     private DiskLayout currentLayout;
     private HashMap<CylinderHead, SummaryButton> physicalTrackButtons = new HashMap<>();
     private HashMap<CylinderHead, SummaryButton> logicalTrackButtons = new HashMap<>();
 
-    public SummaryPanel(ImagerViewModel model)
+    public SummaryPanel(ImageViewModel model)
     {
         this.model = model;
         smallFont = UIManager.getFont("Label.font").getSize() / 3;

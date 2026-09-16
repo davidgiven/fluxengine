@@ -57,9 +57,9 @@ import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
 import java.util.function.Supplier;
 
-public class ImagerViewModel
+public class ImageViewModel
 {
-    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(ImagerViewModel.class);
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(ImageViewModel.class);
 
     private static final String DEFAULT_ADVANCED_SETTINGS = """
             # Enter any additional preferences here. For example:
@@ -91,7 +91,7 @@ public class ImagerViewModel
     @Getter(lazy = true) private final FilesystemTreeTableModel filesystemTreeTableModel =
             new FilesystemTreeTableModel(this);
 
-    ImagerViewModel(PreferencesReaderWriter preferencesReaderWriter)
+    ImageViewModel(PreferencesReaderWriter preferencesReaderWriter)
     {
         this.preferencesReaderWriter = preferencesReaderWriter;
 
