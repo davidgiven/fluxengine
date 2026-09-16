@@ -51,6 +51,7 @@ import swingtree.ComponentDelegate;
 import swingtree.UI;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
+import javax.swing.SwingUtilities;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
@@ -320,9 +321,21 @@ public class ImagerViewModel
                         try
                         {
                             while (true)
-                                queue.take().accept(filesystem);
-                        } catch (EmergencyStopException e)
-                        {
+                            {
+                                try
+                                {
+                                    queue.take().accept(filesystem);
+                                } catch (EmergencyStopException e)
+                                {
+                                    throw e;
+                                } catch (FluxEngineException | IOException e)
+                                {
+                                    SwingUtilities.invokeLater(() -> UI
+                                            .message("Filesystem error: " + e.getMessage())
+                                            .titled("Error")
+                                            .showAsError());
+                                }
+                            }
                         } catch (InterruptedException e)
                         {
                             Thread.currentThread().interrupt();
