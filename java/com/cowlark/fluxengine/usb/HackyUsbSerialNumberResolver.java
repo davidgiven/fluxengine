@@ -44,21 +44,6 @@ public final class HackyUsbSerialNumberResolver
      */
     public static String resolve(UsbDevice device) throws UsbException, UnsupportedEncodingException
     {
-        try
-        {
-            String serial = device.getSerialNumberString();
-            if (serial != null)
-            {
-                return serial;
-            }
-        } catch (UsbException e)
-        {
-            if (!isWindows())
-            {
-                throw e;
-            }
-        }
-
         if (isWindows())
         {
             UsbDeviceDescriptor descriptor = device.getUsbDeviceDescriptor();
@@ -67,21 +52,12 @@ public final class HackyUsbSerialNumberResolver
             return Windows.getSerialNumberForUsbId(vendorId, productId);
         }
 
-        return null;
+        return device.getSerialNumberString();
     }
 
     private static boolean isWindows()
     {
         return System.getProperty("os.name", "").toLowerCase(Locale.ROOT).contains("win");
-    }
-
-    /**
-     * True if the value looks like a genuine device-reported serial rather
-     * than a Windows-generated placeholder (e.g. "6&2c3d1a4&0&0002").
-     */
-    public static boolean looksLikeGenuineSerial(String serial)
-    {
-        return serial != null && !serial.contains("&");
     }
 
     /* Windows fallback using internal APIs. */

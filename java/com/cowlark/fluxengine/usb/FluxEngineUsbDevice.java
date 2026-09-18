@@ -35,11 +35,9 @@ import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.core.ByteWriter;
 import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.core.FluxEngineException;
-import javax.usb.UsbConfiguration;
-import javax.usb.UsbEndpoint;
-import javax.usb.UsbException;
-import javax.usb.UsbInterface;
-import javax.usb.UsbPipe;
+import com.google.common.collect.Iterables;
+
+import javax.usb.*;
 import java.util.List;
 
 /**
@@ -65,26 +63,15 @@ class FluxEngineUsbDevice extends UsbDevice
 
         try
         {
-            UsbInterface iface = null;
             try
             {
-                for (Object o : device.getUsbConfigurations())
-                {
-                    UsbConfiguration usbConfig = (UsbConfiguration) o;
-                    for (Object i : usbConfig.getUsbInterfaces())
-                    {
-                        UsbInterface candidate = (UsbInterface) i;
-                        if (candidate.getUsbEndpoints().size() >= 4)
-                            iface = candidate;
-                    }
-                }
-                if (iface == null)
-                    throw new FluxEngineException("FluxEngine: no suitable USB interface found");
+                UsbConfiguration usbConfig = device.getActiveUsbConfiguration();
+                if (usbConfig == null)
+                    throw new FluxEngineException("You need to install the Zadig driver");
+                usbInterface = usbConfig.getUsbInterface((byte)0);
+                usbInterface.claim((UsbInterfacePolicy) usbInterface -> true);
 
-                iface.claim();
-                usbInterface = iface;
-
-                List<UsbEndpoint> endpoints = iface.getUsbEndpoints();
+                List<UsbEndpoint> endpoints = usbInterface.getUsbEndpoints();
                 UsbPipe cOut = null;
                 UsbPipe cIn = null;
                 UsbPipe dOut = null;
@@ -136,6 +123,35 @@ class FluxEngineUsbDevice extends UsbDevice
                 e.addSuppressed(suppressed);
             }
             throw e;
+        }
+    }
+
+    @Override
+    public void close()
+    {
+        try
+        {
+            if (cmdOut != null)
+                cmdOut.close();
+            if (cmdIn != null)
+                cmdIn.close();
+            if (dataOut != null)
+                dataOut.close();
+            if (dataIn != null)
+                dataIn.close();
+        } catch (UsbException e)
+        {
+            throw new FluxEngineException("FluxEngine: USB error closing pipe: " + e.getMessage());
+        } finally
+        {
+            try
+            {
+                if (usbInterface != null)
+                    usbInterface.release();
+            } catch (UsbException e)
+            {
+                throw new FluxEngineException("FluxEngine: USB error: " + e.getMessage());
+            }
         }
     }
 
@@ -461,32 +477,4 @@ class FluxEngineUsbDevice extends UsbDevice
         return measurements;
     }
 
-    @Override
-    public void close()
-    {
-        try
-        {
-            if (cmdOut != null)
-                cmdOut.close();
-            if (cmdIn != null)
-                cmdIn.close();
-            if (dataOut != null)
-                dataOut.close();
-            if (dataIn != null)
-                dataIn.close();
-        } catch (UsbException e)
-        {
-            throw new FluxEngineException("FluxEngine: USB error closing pipe: " + e.getMessage());
-        } finally
-        {
-            try
-            {
-                if ((usbInterface != null) && usbInterface.isClaimed())
-                    usbInterface.release();
-            } catch (UsbException e)
-            {
-                throw new FluxEngineException("FluxEngine: USB error: " + e.getMessage());
-            }
-        }
-    }
 }
