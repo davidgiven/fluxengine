@@ -35,9 +35,13 @@ import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.core.ByteWriter;
 import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.core.FluxEngineException;
-import com.google.common.collect.Iterables;
-
-import javax.usb.*;
+import lombok.SneakyThrows;
+import org.slf4j.LoggerFactory;
+import javax.usb.UsbConfiguration;
+import javax.usb.UsbEndpoint;
+import javax.usb.UsbException;
+import javax.usb.UsbInterface;
+import javax.usb.UsbInterfacePolicy;
 import java.util.List;
 
 /**
@@ -45,15 +49,18 @@ import java.util.List;
  */
 class FluxEngineUsbDevice extends UsbDevice
 {
+    private static final org.slf4j.Logger logger =
+            LoggerFactory.getLogger(FluxEngineUsbDevice.class);
+
     private static final int MAX_TRANSFER = 32 * 1024;
 
     private final javax.usb.UsbDevice device;
     private final ConfigProto config;
     private final UsbInterface usbInterface;
-    private final UsbPipe cmdOut;
-    private final UsbPipe cmdIn;
-    private final UsbPipe dataOut;
-    private final UsbPipe dataIn;
+    private final CloseableUsbPipe cmdOut;
+    private final CloseableUsbPipe cmdIn;
+    private final CloseableUsbPipe dataOut;
+    private final CloseableUsbPipe dataIn;
     private final byte[] buffer = new byte[FRAME_SIZE];
 
     FluxEngineUsbDevice(javax.usb.UsbDevice device, ConfigProto config)
@@ -68,41 +75,15 @@ class FluxEngineUsbDevice extends UsbDevice
                 UsbConfiguration usbConfig = device.getActiveUsbConfiguration();
                 if (usbConfig == null)
                     throw new FluxEngineException("You need to install the Zadig driver");
-                usbInterface = usbConfig.getUsbInterface((byte)0);
+                usbInterface = usbConfig.getUsbInterface((byte) 0);
+                logger.atInfo().log("claiming USB device {}", usbInterface);
                 usbInterface.claim((UsbInterfacePolicy) usbInterface -> true);
 
                 List<UsbEndpoint> endpoints = usbInterface.getUsbEndpoints();
-                UsbPipe cOut = null;
-                UsbPipe cIn = null;
-                UsbPipe dOut = null;
-                UsbPipe dIn = null;
-                for (UsbEndpoint endpoint : endpoints)
-                {
-                    int address = endpoint.getUsbEndpointDescriptor().bEndpointAddress() & 0xff;
-                    UsbPipe pipe = endpoint.getUsbPipe();
-                    pipe.open();
-                    switch (address)
-                    {
-                        case FLUXENGINE_CMD_OUT_EP:
-                            cOut = pipe;
-                            break;
-                        case FLUXENGINE_CMD_IN_EP:
-                            cIn = pipe;
-                            break;
-                        case FLUXENGINE_DATA_OUT_EP:
-                            dOut = pipe;
-                            break;
-                        case FLUXENGINE_DATA_IN_EP:
-                            dIn = pipe;
-                            break;
-                    }
-                }
-                if (cOut == null || cIn == null || dOut == null || dIn == null)
-                    throw new FluxEngineException("FluxEngine: could not open all USB pipes");
-                cmdOut = cOut;
-                cmdIn = cIn;
-                dataOut = dOut;
-                dataIn = dIn;
+                cmdOut = new CloseableUsbPipe(endpoints, FLUXENGINE_CMD_OUT_EP);
+                cmdIn = new CloseableUsbPipe(endpoints, FLUXENGINE_CMD_IN_EP);
+                dataOut = new CloseableUsbPipe(endpoints, FLUXENGINE_DATA_OUT_EP);
+                dataIn = new CloseableUsbPipe(endpoints, FLUXENGINE_DATA_IN_EP);
             } catch (UsbException e)
             {
                 throw new FluxEngineException("FluxEngine: USB error: " + e.getMessage());
@@ -117,6 +98,7 @@ class FluxEngineUsbDevice extends UsbDevice
         {
             try
             {
+                logger.atInfo().setCause(e).log("opening device failed, cleaning up");
                 close();
             } catch (RuntimeException suppressed)
             {
@@ -127,6 +109,7 @@ class FluxEngineUsbDevice extends UsbDevice
     }
 
     @Override
+    @SneakyThrows
     public void close()
     {
         try
@@ -141,16 +124,21 @@ class FluxEngineUsbDevice extends UsbDevice
                 dataIn.close();
         } catch (UsbException e)
         {
-            throw new FluxEngineException("FluxEngine: USB error closing pipe: " + e.getMessage());
+            throw new FluxEngineException(
+                    "FluxEngine: USB error closing pipe: " + e.getMessage(),
+                    e);
         } finally
         {
             try
             {
                 if (usbInterface != null)
+                {
+                    logger.atInfo().log("releasing USB interface");
                     usbInterface.release();
+                }
             } catch (UsbException e)
             {
-                throw new FluxEngineException("FluxEngine: USB error: " + e.getMessage());
+                throw new FluxEngineException("FluxEngine: USB error: " + e.getMessage(), e);
             }
         }
     }
@@ -171,7 +159,7 @@ class FluxEngineUsbDevice extends UsbDevice
     {
         try
         {
-            cmdOut.syncSubmit(data);
+            cmdOut.get().syncSubmit(data);
         } catch (UsbException e)
         {
             throw new FluxEngineException("FluxEngine: command send failed: " + e.getMessage());
@@ -183,7 +171,7 @@ class FluxEngineUsbDevice extends UsbDevice
         byte[] data = new byte[len];
         try
         {
-            cmdIn.syncSubmit(data);
+            cmdIn.get().syncSubmit(data);
         } catch (UsbException e)
         {
             throw new FluxEngineException("FluxEngine: command recv failed: " + e.getMessage());
@@ -202,7 +190,7 @@ class FluxEngineUsbDevice extends UsbDevice
                 data[i] = (byte) bytes.getByte(ptr + i);
             try
             {
-                dataOut.syncSubmit(data);
+                dataOut.get().syncSubmit(data);
             } catch (UsbException e)
             {
                 throw new FluxEngineException("FluxEngine: data send failed: " + e.getMessage());
@@ -223,7 +211,7 @@ class FluxEngineUsbDevice extends UsbDevice
             int transferred;
             try
             {
-                transferred = dataIn.syncSubmit(data);
+                transferred = dataIn.get().syncSubmit(data);
             } catch (UsbException e)
             {
                 throw new FluxEngineException("FluxEngine: data recv failed: " + e.getMessage());
@@ -340,7 +328,11 @@ class FluxEngineUsbDevice extends UsbDevice
                     int offset = x * XSIZE * YSIZE + y * ZSIZE + z;
                     if ((bulkBuffer.getByte(offset) & 0xff) != (x + y + z) % 256)
                         throw new FluxEngineException(String.format(
-                                "data transfer corrupted at " + "0x%x %d.%d.%d", offset, x, y, z));
+                                "data transfer corrupted at " + "0x%x %d.%d.%d",
+                                offset,
+                                x,
+                                y,
+                                z));
                 }
 
         awaitReply(F_FRAME_BULK_WRITE_TEST_REPLY);
