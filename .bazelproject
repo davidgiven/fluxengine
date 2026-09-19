@@ -1,7 +1,0 @@
-directories:
-  .
-
-targets:
-  //...
-
-#bazel_binary: bazel.bat
