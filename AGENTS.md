@@ -33,12 +33,6 @@ Useful commands:
 - Because there is no WORKSPACE, Java rules are **not autoloaded**. Every BUILD file must
   explicitly load what it uses, e.g.
   `load("@rules_java//java:defs.bzl", "java_library", "java_binary", "java_plugin", "java_test")`.
-- `javax.usb.properties` must sit at the **classpath root** (the usb4java `Services`
-  constructor requires it via `UsbHostManager.getProperties()`). It lives at
-  `java/javax.usb.properties`, is exported from `java/BUILD.bazel`, and is pulled in as a
-  resource (`resources = ["//java:javax.usb.properties"]`) by the usb library. Bazel's
-  resource jarring strips the leading `java/`, so it lands at the jar root. Do not move it
-  into the package directory.
 - The `.deb` and `.rpm` installers are built with jpackage via the `jpackage` rule in
   `jpackage.bzl` (which uses the configured Java toolchain's `jpackage`). Because `rpmbuild`
   writes to `/var/tmp` and read-only sandbox paths by default, the rule stages everything
@@ -73,11 +67,17 @@ Useful commands:
 ## USB
 
 - `UsbFinder` (`java/com/cowlark/fluxengine/usb/`) is the Java port of
-  `lib/usb/usbfinder.{cc,h}`. It uses usb4java-javax (javax.usb API). `UsbFinder` is
-  Dagger-injectable (`@Inject` constructor, instance methods) and `findUsbDevices()`
-  returns an `ImmutableList<CandidateDevice>`.
+  `lib/usb/usbfinder.{cc,h}`. It uses `org.usb4java` directly (`Device`/`DeviceDescriptor`/
+  `DeviceHandle`/`LibUsb`); enumeration goes through a singleton `UsbContext` (explicit
+  `Context` via `LibUsb.init`/`exit` with shutdown hook) and `LibUsb.getDeviceList`/
+  `freeDeviceList` with `refDevice`/`unrefDevice` so `CandidateDevice.device` is a retained
+  `Device` (not an open handle). `HackyUsbSerialNumberResolver` still provides the Windows
+  SetupAPI fallback. `FluxEngineUsbDevice` opens the retained `Device` to a `DeviceHandle`,
+  claims interface 0, and uses `LibUsb.interruptTransfer` for `CMD_*` and
+  `LibUsb.bulkTransfer` for `DATA_*`.
 - `DeviceType` is an enum carrying its display name as a property (`getDeviceName()`).
-- jSerialComm is available for serial-port access (not yet used).
+- jSerialComm is available for serial-port access (used by Greaseweazle/Applesauce via
+  `Serial` and `findSerialPort`).
 
 ## Code style
 

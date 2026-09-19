@@ -168,7 +168,8 @@ public class ImageViewModel
 
     void refreshUsbDevices()
     {
-        usbDevices.set(Association
+        Association<String, CandidateDevice> old = usbDevices.get();
+        Association<String, CandidateDevice> next = Association
                 .between(String.class, UsbFinder.CandidateDevice.class)
                 .put(DEVICE_FLUXFILE, new CandidateDevice())
                 .put(DEVICE_SERIALPORT, new CandidateDevice())
@@ -176,7 +177,17 @@ public class ImageViewModel
                         .findUsbDevices()
                         .stream()
                         .map(candidate -> Pair.of(candidate.getSerial(), candidate))
-                        .collect(toList())));
+                        .collect(toList()));
+        usbDevices.set(next);
+        if (old != null)
+        {
+            for (Pair<String, CandidateDevice> e : old)
+            {
+                CandidateDevice c = e.second();
+                if (c != null)
+                    c.release();
+            }
+        }
     }
 
     void onReadDisk(ComponentDelegate<JButton, ActionEvent> delegate)

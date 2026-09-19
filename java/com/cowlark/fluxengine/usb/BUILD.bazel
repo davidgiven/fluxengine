@@ -20,7 +20,6 @@ java_library(
     name = "usb",
     srcs = glob(["*.java"]),
     plugins = ["//java/com/cowlark/fluxengine/wiring:lombok_plugin"],
-    resources = ["//java:javax.usb.properties"],
     deps = [
         ":usb_java_proto",
         "//java/com/cowlark/fluxengine/config:config_java_proto",
@@ -31,13 +30,12 @@ java_library(
         "//java/com/cowlark/fluxengine/wiring",
         "@maven//:com_fazecast_jSerialComm",
         "@maven//:com_google_guava_guava",
-        "@maven//:javax_usb_usb_api",
         "@maven//:net_java_dev_jna_jna",
         "@maven//:net_java_dev_jna_jna_platform",
         "@maven//:org_indunet_fastproto",
         "@maven//:org_indunet_fastproto_core",
         "@maven//:org_projectlombok_lombok",
         "@maven//:org_slf4j_slf4j_api",
-        "@maven//:org_usb4java_usb4java_javax",
+        "@maven//:org_usb4java_usb4java",
     ],
 )

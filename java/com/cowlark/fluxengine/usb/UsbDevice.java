@@ -43,6 +43,6 @@ public abstract class UsbDevice implements AutoCloseable
 
     protected String usbError(int error)
     {
-        return String.format("USB error %d", error);
+        return String.format("USB error %d (%s)", error, org.usb4java.LibUsb.errorName(error));
     }
 }

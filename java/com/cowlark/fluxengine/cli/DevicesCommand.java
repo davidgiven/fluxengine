@@ -22,31 +22,37 @@ public class DevicesCommand implements Command
     public void run(ImmutableList<String> args)
     {
         List<CandidateDevice> candidates = UsbFinder.findUsbDevices();
-        switch (candidates.size())
+        try
         {
-            case 0:
-                System.out.println("Detected no devices.");
-                break;
-
-            case 1:
-                System.out.println("Detected one device:");
-                break;
-
-            default:
-                System.out.printf("Detected %d devices:\n", candidates.size());
-        }
-
-        if (!candidates.isEmpty())
-        {
-            System.out.printf("%-15s %-30s %s\n", "Type", "Serial number", "Port (if any)");
-            for (CandidateDevice candidate : candidates)
+            switch (candidates.size())
             {
-                System.out.printf(
-                        "%-15s %-30s %s\n",
-                        candidate.type.getDeviceName(),
-                        candidate.serial,
-                        nullToEmpty(candidate.serialPort));
+                case 0:
+                    System.out.println("Detected no devices.");
+                    break;
+
+                case 1:
+                    System.out.println("Detected one device:");
+                    break;
+
+                default:
+                    System.out.printf("Detected %d devices:\n", candidates.size());
             }
+
+            if (!candidates.isEmpty())
+            {
+                System.out.printf("%-15s %-30s %s\n", "Type", "Serial number", "Port (if any)");
+                for (CandidateDevice candidate : candidates)
+                {
+                    System.out.printf(
+                            "%-15s %-30s %s\n",
+                            candidate.type.getDeviceName(),
+                            candidate.serial,
+                            nullToEmpty(candidate.serialPort));
+                }
+            }
+        } finally
+        {
+            UsbFinder.freeDevices(candidates);
         }
     }
 }

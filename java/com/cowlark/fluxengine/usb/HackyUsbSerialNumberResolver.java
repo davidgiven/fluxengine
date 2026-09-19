@@ -6,31 +6,30 @@ import com.sun.jna.Structure;
 import com.sun.jna.platform.win32.Guid.GUID;
 import com.sun.jna.win32.StdCallLibrary;
 import com.sun.jna.win32.W32APIOptions;
-
-import javax.usb.UsbDevice;
-import javax.usb.UsbDeviceDescriptor;
-import javax.usb.UsbException;
-import java.io.UnsupportedEncodingException;
+import org.usb4java.Device;
+import org.usb4java.DeviceDescriptor;
+import org.usb4java.DeviceHandle;
+import org.usb4java.LibUsb;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/// Resolves a USB device's serial number across Windows, macOS, and Linux.
-///
-/// Strategy: try javax.usb's UsbDevice.getSerialNumberString() first — this
-/// only requires a control transfer on endpoint 0, which macOS and Linux's
-/// libusb backends allow even while a class driver (CDC/ACM, FTDI, etc.)
-/// still owns the device's interfaces. Windows is the exception: libusb
-/// there can't open a device at all unless it's bound to WinUSB/libusbK/
-/// libusb-win32, so the direct call throws for devices left on their normal
-/// driver (e.g. a standard serial port device). In that case, fall back to
-/// a native SetupAPI lookup keyed on the VID/PID you already have from
-/// javax.usb — no driver changes required for this path.
-///
-/// Requires net.java.dev.jna:jna and jna-platform (only exercised on
-/// Windows; harmless to have as a dependency on other platforms).
+/* Resolves a USB device's serial number across Windows, macOS, and Linux.
+ *
+ * Strategy: try libusb's GetStringDescriptor (via usb4java) first — this
+ * only requires a control transfer on endpoint 0, which macOS and Linux's
+ * libusb backends allow even while a class driver (CDC/ACM, FTDI, etc.)
+ * still owns the device's interfaces. Windows is the exception: libusb
+ * there can't open a device at all unless it's bound to WinUSB/libusbK/
+ * libusb-win32, so the direct call throws for devices left on their normal
+ * driver (e.g. a standard serial port device). In that case, fall back to
+ * a native SetupAPI lookup keyed on the VID/PID you already have from the
+ * device descriptor — no driver changes required for this path.
+ *
+ * Requires net.java.dev.jna:jna and jna-platform (only exercised on
+ * Windows; harmless to have as a dependency on other platforms). */
 public final class HackyUsbSerialNumberResolver
 {
 
@@ -38,21 +37,41 @@ public final class HackyUsbSerialNumberResolver
     {
     }
 
-    /**
-     * @return the device's serial number, or null if it genuinely has none
-     * (iSerialNumber == 0 in its device descriptor).
-     */
-    public static String resolve(UsbDevice device) throws UsbException, UnsupportedEncodingException
+    /* @return the device's serial number, or null if it genuinely has none
+     * (iSerialNumber == 0 in its device descriptor) or it could not be read. */
+    public static String resolve(Device device, DeviceDescriptor descriptor)
     {
         if (isWindows())
         {
-            UsbDeviceDescriptor descriptor = device.getUsbDeviceDescriptor();
             int vendorId = descriptor.idVendor() & 0xFFFF;
             int productId = descriptor.idProduct() & 0xFFFF;
             return Windows.getSerialNumberForUsbId(vendorId, productId);
         }
 
-        return device.getSerialNumberString();
+        if (descriptor.iSerialNumber() == 0)
+            return null;
+
+        DeviceHandle handle = new DeviceHandle();
+        int rc = LibUsb.open(device, handle);
+        if (rc != LibUsb.SUCCESS)
+            return null;
+        try
+        {
+            return LibUsb.getStringDescriptor(handle, descriptor.iSerialNumber());
+        } finally
+        {
+            LibUsb.close(handle);
+        }
+    }
+
+    /* Convenience overload which fetches the descriptor itself. */
+    public static String resolve(Device device)
+    {
+        DeviceDescriptor descriptor = new DeviceDescriptor();
+        int rc = LibUsb.getDeviceDescriptor(device, descriptor);
+        if (rc != LibUsb.SUCCESS)
+            return null;
+        return resolve(device, descriptor);
     }
 
     private static boolean isWindows()
@@ -73,8 +92,8 @@ public final class HackyUsbSerialNumberResolver
                     String.format("^USB\\\\VID_%04X&PID_%04X\\\\([^\\\\]+)$", vendorId, productId),
                     Pattern.CASE_INSENSITIVE);
 
-            // classGuid = null + enumerator "USB" + DIGCF_ALLCLASSES enumerates
-            // every USB device node present, regardless of device class.
+            /* classGuid = null + enumerator "USB" + DIGCF_ALLCLASSES enumerates
+             * every USB device node present, regardless of device class. */
             Pointer deviceInfoSet = SetupApi.INSTANCE.SetupDiGetClassDevsW(
                     null,
                     "USB",
