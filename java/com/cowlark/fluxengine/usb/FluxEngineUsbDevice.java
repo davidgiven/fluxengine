@@ -1,7 +1,5 @@
 package com.cowlark.fluxengine.usb;
 
-import static com.cowlark.fluxengine.usb.LibUsbHelper.check;
-import static com.cowlark.fluxengine.usb.LibUsbHelper.checkReset;
 import static com.cowlark.fluxengine.wiring.FluxEngine.FLUXENGINE_CMD_IN_EP;
 import static com.cowlark.fluxengine.wiring.FluxEngine.FLUXENGINE_CMD_OUT_EP;
 import static com.cowlark.fluxengine.wiring.FluxEngine.FLUXENGINE_DATA_IN_EP;
@@ -63,6 +61,7 @@ class FluxEngineUsbDevice extends UsbDevice
     private final DeviceHandle handle;
     private final byte[] buffer = new byte[FRAME_SIZE];
     private boolean closed = false;
+    private boolean deviceNeedsReset = false;
 
     FluxEngineUsbDevice(UsbFinder.CandidateDevice candidate, ConfigProto config)
     {
@@ -123,9 +122,6 @@ class FluxEngineUsbDevice extends UsbDevice
             check(LibUsb.claimInterface(handle, 0), "FluxEngine: claimInterface failed");
             interfaceClaimed = true;
 
-            logger.atDebug().log("resetting USB device");
-            checkReset(LibUsb.resetDevice(handle));
-
             int version = getVersion();
             if (version != FLUXENGINE_PROTOCOL_VERSION)
                 throw new FluxEngineException(String.format(
@@ -157,6 +153,19 @@ class FluxEngineUsbDevice extends UsbDevice
         }
     }
 
+    /* Throws FluxEngineException with a formatted message if rc is not
+     * SUCCESS. The message is prefixed with context and suffixed with the
+     * libusb error name and string. */
+    private void check(int rc, String context)
+    {
+        if (rc != LibUsb.SUCCESS)
+        {
+            deviceNeedsReset = true;
+            throw new FluxEngineException(
+                    context + ": " + LibUsb.errorName(rc) + " " + LibUsb.strError(rc));
+        }
+    }
+
     @Override
     public void close()
     {
@@ -165,6 +174,12 @@ class FluxEngineUsbDevice extends UsbDevice
         closed = true;
         try
         {
+            if (deviceNeedsReset)
+            {
+                logger.atDebug().log("resetting USB device");
+                LibUsb.resetDevice(handle);
+            }
+
             int rc = LibUsb.releaseInterface(handle, 0);
             if (rc != LibUsb.SUCCESS && rc != LibUsb.ERROR_NO_DEVICE &&
                     rc != LibUsb.ERROR_NOT_FOUND)

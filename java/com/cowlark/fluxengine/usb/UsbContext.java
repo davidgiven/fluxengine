@@ -1,5 +1,6 @@
 package com.cowlark.fluxengine.usb;
 
+import com.cowlark.fluxengine.core.FluxEngineException;
 import org.slf4j.LoggerFactory;
 import org.usb4java.Context;
 import org.usb4java.LibUsb;
@@ -16,8 +17,11 @@ final class UsbContext
     static
     {
         Context ctx = new Context();
+        logger.atDebug().log("initialising libusb Context");
         int rc = LibUsb.init(ctx);
-        LibUsbHelper.check(rc, "LibUsb.init failed");
+        if (rc != LibUsb.SUCCESS)
+            throw new FluxEngineException("Failed to initialize libusb");
+
         CONTEXT = ctx;
         Runtime.getRuntime().addShutdownHook(new Thread(() ->
         {
