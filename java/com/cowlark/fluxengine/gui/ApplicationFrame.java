@@ -70,6 +70,7 @@ public class ApplicationFrame extends JFrame
                 .withPrefWidth(leftPaneWidth)
                 .withMinSize(leftPaneWidth, 0)
                 .withMaxSize(leftPaneWidth, Integer.MAX_VALUE)
+                .withVerticalScrollBarPolicy(UI.Active.ALWAYS)
                 .add(of(configurationPanel))));
 
         UIForSplitPane<JSplitPane> topPane =

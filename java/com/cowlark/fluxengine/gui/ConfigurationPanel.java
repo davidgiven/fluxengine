@@ -41,11 +41,16 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JViewport;
 import javax.swing.ListCellRenderer;
+import javax.swing.Scrollable;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import java.awt.Color;
+import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -56,7 +61,7 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-public class ConfigurationPanel extends JPanel
+public class ConfigurationPanel extends JPanel implements Scrollable
 {
     private static final ImmutableList<Boolean> YES_NO = ImmutableList.of(false, true);
     private static final ImmutableList<Integer> DRIVES = ImmutableList.of(0, 1);
@@ -203,9 +208,54 @@ public class ConfigurationPanel extends JPanel
     @Override
     public Dimension getPreferredSize()
     {
-        /* Preferred size is the maximum size so the grid is no wider
-         * than its two columns and the scroll pane can size to it. */
-        return getMaximumSize();
+        /* Preferred width is capped to two columns so the scroll pane
+         * sizes correctly; height remains the layout's preferred height
+         * so the panel contracts to its content and Scrollable can
+         * stretch it to the viewport when needed. */
+        Dimension pref = super.getPreferredSize();
+        int twoColumnMax = 340 + getInsets().left + getInsets().right;
+        if (pref.width > twoColumnMax)
+            pref.width = twoColumnMax;
+        return pref;
+    }
+
+    @Override
+    public Dimension getPreferredScrollableViewportSize()
+    {
+        return getPreferredSize();
+    }
+
+    @Override
+    public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction)
+    {
+        return 10;
+    }
+
+    @Override
+    public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction)
+    {
+        return 100;
+    }
+
+    @Override
+    public boolean getScrollableTracksViewportWidth()
+    {
+        return true;
+    }
+
+    @Override
+    public boolean getScrollableTracksViewportHeight()
+    {
+        /* When the preferred height is smaller than the viewport we stretch
+         * to fill the viewport so the advanced-settings text area (with
+         * grow/push) expands to the bottom. When the preferred height is
+         * larger the outer scroll pane scrolls normally. */
+        Container parent = getParent();
+        if (parent instanceof JViewport)
+        {
+            return parent.getHeight() > getPreferredSize().height;
+        }
+        return false;
     }
 
     /* Removes the existing UI and recreates it. */
@@ -354,7 +404,54 @@ public class ConfigurationPanel extends JPanel
     {
         return panel
                 .add("span 2, growx, wrap", namedSeparator("Advanced settings"))
-                .add("span 2, grow, push", scrollPane().add(textArea(model.getAdvancedSettings())));
+                .add(
+                        "span 2, grow, push",
+                        textArea(model.getAdvancedSettings()).peek(ta -> {
+                                    /* Keep the outer scroll pane's preferred size in
+                                     * sync with the document so the area contracts
+                                     * to the text height (and re-expands when the
+                                     * viewport is larger via Scrollable). */
+                                    ta.getDocument().addDocumentListener(
+                                            new javax.swing.event.DocumentListener()
+                                            {
+                                                private void update()
+                                                {
+                                                    SwingUtilities.invokeLater(() -> {
+                                                        revalidate();
+                                                        repaint();
+                                                        Container viewport = getParent();
+                                                        if (viewport instanceof JViewport)
+                                                            viewport.revalidate();
+                                                        Container scroll = viewport != null
+                                                                ? viewport.getParent()
+                                                                : null;
+                                                        if (scroll instanceof JScrollPane)
+                                                            scroll.revalidate();
+                                                    });
+                                                }
+
+                                                @Override
+                                                public void insertUpdate(
+                                                        javax.swing.event.DocumentEvent e)
+                                                {
+                                                    update();
+                                                }
+
+                                                @Override
+                                                public void removeUpdate(
+                                                        javax.swing.event.DocumentEvent e)
+                                                {
+                                                    update();
+                                                }
+
+                                                @Override
+                                                public void changedUpdate(
+                                                        javax.swing.event.DocumentEvent e)
+                                                {
+                                                    update();
+                                                }
+                                            });
+                                }));
     }
 
     /* A renderer which shows each device entry with the placeholder icon
