@@ -68,6 +68,9 @@ public interface Command
             Map<String, Supplier<? extends Command>> commands,
             ImmutableList<String> args) throws Exception
     {
+        if (args.isEmpty())
+            return false;
+
         Supplier<? extends Command> supplier = commands.get(args.getFirst());
         if (supplier != null)
         {
