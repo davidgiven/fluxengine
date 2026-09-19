@@ -4,4 +4,4 @@ directories:
 targets:
   //...
 
-bazel_binary: bazel.bat
+#bazel_binary: bazel.bat

@@ -57,7 +57,14 @@ def _jpackage_impl(ctx):
     }[package_type]
 
     jar = ctx.file.jar
-    out = ctx.actions.declare_file(ctx.attr.package_name + "_" + ctx.attr.app_version + "." + extension)
+    # When stamp is true, the output name cannot contain the stamped version
+    # (which is only known at execution time via the stable-status file). Use a
+    # generic name in that case; the package *inside* will still carry the
+    # stamped --app-version. CI uses wildcards (ccpp.yml) so this is fine.
+    if ctx.attr.stamp:
+        out = ctx.actions.declare_file(ctx.attr.package_name + "." + extension)
+    else:
+        out = ctx.actions.declare_file(ctx.attr.package_name + "_" + ctx.attr.app_version + "." + extension)
     launchers = _launcher_properties(ctx)
 
     # jpackage writes a lot of scratch state (a jlink runtime image and an app
@@ -75,10 +82,16 @@ def _jpackage_impl(ctx):
     # Windows). The GUI `fluxengine-gui` is an --add-launcher whose desktop
     # file's Name is defined in fluxengine-gui.properties ("FluxEngine") and
     # supplied via --resource-dir to avoid post-processing.
+    #
+    # Stamping: when stamp=True and --stamp is set, read STABLE_VERSION from
+    # the stable-status file (produced by scripts/workspace_status.sh via
+    # `bash scripts/workspace_status.sh`, which works on Linux/macOS and on
+    # Windows via Git bash). Fall back to app_version (1.0.0) otherwise.
+    stamp_inputs = [ctx.info_file] if ctx.attr.stamp else []
     ctx.actions.run_shell(
         outputs = [out],
         inputs = [jar] + [f for (_, f) in launchers] +\
-                 ([ctx.file.launcher_icon] if ctx.file.launcher_icon else []),
+                 ([ctx.file.launcher_icon] if ctx.file.launcher_icon else []) + stamp_inputs,
         tools = [java_runtime.files],
         use_default_shell_env = True,
         command = """
@@ -86,11 +99,11 @@ def _jpackage_impl(ctx):
             mkdir -p workdir/input workdir/tmp workdir/dest workdir/home workdir/rpmbuild workdir/resources
             cp -L "{jar}" workdir/input/
             chmod u+w workdir/input/*
-            printf '[Desktop Entry]\nName=FluxEngine\nComment=FluxEngine\nExec=APPLICATION_LAUNCHER\nIcon=APPLICATION_ICON\nTerminal=false\nType=Application\nCategories=DEPLOY_BUNDLE_CATEGORY\n' > workdir/resources/fluxengine-gui.desktop
+            printf '[Desktop Entry]\\nName=FluxEngine\\nComment=FluxEngine\\nExec=APPLICATION_LAUNCHER\\nIcon=APPLICATION_ICON\\nTerminal=false\\nType=Application\\nCategories=DEPLOY_BUNDLE_CATEGORY\\n' > workdir/resources/fluxengine-gui.desktop
             if [ "{package_type}" = "rpm" ]; then
                 WORKTMP="$(pwd)/workdir/tmp"
                 RPMPREFIX="$(pwd)/workdir/rpmbuild"
-                printf '%%_tmppath %s\n%%_builddir %s/BUILD\n%%_buildrootdir %s/BUILDROOT\n%%_sourcedir %s/SOURCES\n%%_specdir %s/SPECS\n%%_srcrpmdir %s/SRPMS\n%%_rpmdir %s/RPMS\n' "$WORKTMP" "$RPMPREFIX" "$RPMPREFIX" "$RPMPREFIX" "$RPMPREFIX" "$RPMPREFIX" "$RPMPREFIX" > workdir/home/.rpmmacros
+                printf '%%_tmppath %s\\n%%_builddir %s/BUILD\\n%%_buildrootdir %s/BUILDROOT\\n%%_sourcedir %s/SOURCES\\n%%_specdir %s/SPECS\\n%%_srcrpmdir %s/SRPMS\\n%%_rpmdir %s/RPMS\\n' "$WORKTMP" "$RPMPREFIX" "$RPMPREFIX" "$RPMPREFIX" "$RPMPREFIX" "$RPMPREFIX" "$RPMPREFIX" > workdir/home/.rpmmacros
             fi
             TMPDIR="$(pwd)/workdir/tmp"
             HOME="$(pwd)/workdir/home"
@@ -99,10 +112,18 @@ def _jpackage_impl(ctx):
             if [ "{package_type}" = "msi" ]; then WIN_CONSOLE="--win-console"; fi
             LINUX_PACKAGE_NAME=""
             if [ "{package_type}" = "deb" ] || [ "{package_type}" = "rpm" ]; then LINUX_PACKAGE_NAME="--linux-package-name {package_name}"; fi
+            # Determine app version: STABLE_VERSION from Bazel stamp, else fallback.
+            APP_VERSION="{app_version}"
+            if [ "{stamp}" = "True" ] && [ -f "{info_file}" ]; then
+                STABLE_VERSION=$(grep STABLE_VERSION "{info_file}" | cut -d' ' -f2)
+                if [ -n "$STABLE_VERSION" ]; then
+                    APP_VERSION="$STABLE_VERSION"
+                fi
+            fi
             "{jpackage}" -J-Djava.io.tmpdir="$(pwd)/workdir/tmp" --type {package_type} \
                 --name "{package_name}" \
                 $LINUX_PACKAGE_NAME \
-                --app-version "{app_version}" \
+                --app-version "$APP_VERSION" \
                 --input "$(pwd)/workdir/input" \
                 --main-jar "{main_jar}" \
                 --main-class "{main_class}" \
@@ -119,6 +140,8 @@ def _jpackage_impl(ctx):
             extension = extension,
             package_name = ctx.attr.package_name,
             app_version = ctx.attr.app_version,
+            stamp = str(ctx.attr.stamp),
+            info_file = ctx.info_file.path if ctx.attr.stamp else "",
             jar = jar.path,
             main_jar = jar.basename,
             main_class = ctx.attr.main_class,
@@ -138,7 +161,10 @@ def _jpackage_app_image_impl(ctx):
     jpackage_path = java_runtime.java_home + "/bin/jpackage"
 
     jar = ctx.file.jar
-    out = ctx.actions.declare_file(ctx.attr.package_name + "_" + ctx.attr.app_version + ".tar.xz")
+    if ctx.attr.stamp:
+        out = ctx.actions.declare_file(ctx.attr.package_name + ".tar.xz")
+    else:
+        out = ctx.actions.declare_file(ctx.attr.package_name + "_" + ctx.attr.app_version + ".tar.xz")
     launchers = _launcher_properties(ctx)
 
     # jpackage --type app-image writes a directory (with a jlink runtime image
@@ -150,10 +176,11 @@ def _jpackage_app_image_impl(ctx):
     # The main launcher is the CLI `fluxengine` (--win-console) and the GUI
     # `fluxengine-gui` is an --add-launcher. The GUI desktop file's Name is
     # supplied via --resource-dir (fluxengine-gui.desktop with Name=FluxEngine).
+    stamp_inputs = [ctx.info_file] if ctx.attr.stamp else []
     ctx.actions.run_shell(
         outputs = [out],
         inputs = [jar] + [f for (_, f) in launchers] +\
-                 ([ctx.file.launcher_icon] if ctx.file.launcher_icon else []),
+                 ([ctx.file.launcher_icon] if ctx.file.launcher_icon else []) + stamp_inputs,
         tools = [java_runtime.files],
         use_default_shell_env = True,
         command = """
@@ -165,9 +192,16 @@ def _jpackage_app_image_impl(ctx):
             TMPDIR="$(pwd)/workdir/tmp"
             HOME="$(pwd)/workdir/home"
             export TMPDIR HOME
+            APP_VERSION="{app_version}"
+            if [ "{stamp}" = "True" ] && [ -f "{info_file}" ]; then
+                STABLE_VERSION=$(grep STABLE_VERSION "{info_file}" | cut -d' ' -f2)
+                if [ -n "$STABLE_VERSION" ]; then
+                    APP_VERSION="$STABLE_VERSION"
+                fi
+            fi
             "{jpackage}" -J-Djava.io.tmpdir="$(pwd)/workdir/tmp" --type app-image \
                 --name "{package_name}" \
-                --app-version "{app_version}" \
+                --app-version "$APP_VERSION" \
                 --input "$(pwd)/workdir/input" \
                 --main-jar "{main_jar}" \
                 --main-class "{main_class}" \
@@ -185,6 +219,8 @@ def _jpackage_app_image_impl(ctx):
             jpackage = jpackage_path,
             package_name = ctx.attr.package_name,
             app_version = ctx.attr.app_version,
+            stamp = str(ctx.attr.stamp),
+            info_file = ctx.info_file.path if ctx.attr.stamp else "",
             jar = jar.path,
             main_jar = jar.basename,
             main_class = ctx.attr.main_class,
@@ -223,7 +259,11 @@ _jpackage_attrs = {
     ),
     "app_version": attr.string(
         mandatory = True,
-        doc = "Application version, e.g. '1.0.0'.",
+        doc = "Application version, e.g. '1.0.0'. Used as fallback when stamp is off.",
+    ),
+    "stamp": attr.bool(
+        default = False,
+        doc = "If true, use STABLE_VERSION from workspace status (scripts/workspace_status.sh) as app-version when --stamp is set. Falls back to app_version otherwise.",
     ),
     "package_type": attr.string(
         mandatory = True,

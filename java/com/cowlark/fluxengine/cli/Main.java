@@ -2,6 +2,7 @@ package com.cowlark.fluxengine.cli;
 
 import com.cowlark.fluxengine.core.LogRenderer;
 import com.cowlark.fluxengine.core.Logger;
+import com.cowlark.fluxengine.core.Version;
 import com.google.common.collect.ImmutableList;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -21,6 +22,15 @@ public class Main
     public static void main(String[] args) throws Exception
     {
         Logger.setLogger(LogRenderer.create(System.out)::add);
+
+        if (args.length != 0
+                && (args[0].equals("--version")
+                        || args[0].equals("-V")
+                        || args[0].equals("version")))
+        {
+            System.out.println(Version.get());
+            return;
+        }
 
         if (args.length == 0 || args[0].equals("--help"))
         {

@@ -10,6 +10,14 @@ common --tool_java_runtime_version=remotejdk_21
 # compilation (and Turbine can't run Lombok), so disable header compilation.
 build --java_header_compilation=false
 
+# Stamping: workspace status provides STABLE_VERSION as YYYY.MMDD.HHMM
+# (per-minute UTC, each component <65535 for MSI). Invoked as `bash` so it
+# works on Linux/macOS and on Windows via Git bash (C:\Program Files\Git\bin\bash.exe).
+# Use --config=stamp or --stamp together with this command. The stamp config
+# bundles both.
+build:stamp --stamp
+build:stamp --workspace_status_command="bash scripts/workspace_status.sh"
+
 # Dev machine toolchain workarounds: the system gcc is wrapped by ccache and
 # the system linker (lld) lives in /opt/bin, outside Bazel's default action PATH.
 build --repo_env=CC=/usr/bin/gcc
