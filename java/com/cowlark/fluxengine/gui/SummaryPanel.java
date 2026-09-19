@@ -26,6 +26,7 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -117,7 +118,7 @@ public class SummaryPanel extends JPanel
                     currentLayout.maxPhysicalCylinder - currentLayout.minPhysicalCylinder + 1 + 2;
             UIForPanel<SummaryPanel> ui = of(this).withLayout(
                     "wrap " + columns + ",gap 1 1,fill",
-                    "[sizegroup 1,grow,fill]",
+                    String.join("", Collections.nCopies(columns, "[sizegroup 1,grow,fill]")),
                     "grow,fill");
 
             ui = ui.add(

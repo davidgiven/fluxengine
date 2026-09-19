@@ -21,6 +21,7 @@ import sprouts.Val;
 import sprouts.Var;
 import sprouts.Viewable;
 import swingtree.UI;
+import swingtree.UI.Axis;
 import swingtree.UIForPanel;
 import swingtree.UIForSplitPane;
 import swingtree.UIForTabbedPane;
@@ -75,15 +76,21 @@ public class ApplicationFrame extends JFrame
 
         UIForSplitPane<JSplitPane> topPane =
                 splitPane(HORIZONTAL)
-                        .peek(pane -> pane.setResizeWeight(1.0))
+                        .peek(pane -> {
+                            pane.setResizeWeight(1.0);
+                        })
                         .add(
-                                TOP, tabbedPane()
-                                        .add(tab("Image").add(of(imagePanel).withPrefSize(sizePts(
-                                                500,
-                                                300))))
+                                TOP,
+                                tabbedPane()
+                                        .withMinSize(100, 0)
+                                        .add(tab("Image").add(of(imagePanel)))
                                         .add(tab("Log").add(of(logPanel)))
                                         .add(tab("Files").add(of(filesystemPanel))))
-                        .add(BOTTOM, tabbedPane().add(tab("Visualiser").add(of(visualiserPanel))));
+                        .add(
+                                BOTTOM,
+                                tabbedPane()
+                                        .withMinSize(100, 0)
+                                        .add(tab("Visualiser").add(of(visualiserPanel))));
 
         UIForPanel<JPanel> controlPanel =
                 panel("wrap 4, center, nogrid")
@@ -110,9 +117,24 @@ public class ApplicationFrame extends JFrame
                                         .onClick(model::onEmergencyStop));
 
         UIForTabbedPane<JTabbedPane> bottomPane =
-                tabbedPane().add(tab("Summary").add(panel("fillx, wrap 1, aligny center")
-                        .add("growx, h 100pt!", of(summaryPanel))
+                tabbedPane().add(tab("Summary").add(panel("fillx, wrap 1")
+                        .add("growx, pushx, hmin 100pt", of(summaryPanel))
                         .add("growx", controlPanel)));
+
+        UIForSplitPane<JSplitPane> outerSplit = splitPane(HORIZONTAL)
+                .peek(pane -> {
+                    pane.setResizeWeight(0.0);
+                    pane.setDividerLocation(leftPaneWidth);
+                    pane.setDividerSize(5);
+                    pane.setContinuousLayout(true);
+                })
+                .add(TOP, leftPane)
+                .add(
+                        BOTTOM,
+                        splitPane(Axis.VERTICAL)
+                                .peek(pane -> pane.setResizeWeight(1.0))
+                                .add(TOP, topPane)
+                                .add(BOTTOM, bottomPane));
 
         of(this)
                 .withOnCloseOperation(UI.OnWindowClose.DISPOSE)
@@ -120,12 +142,7 @@ public class ApplicationFrame extends JFrame
                 .peek(frame -> {
                     frame.setJMenuBar(ApplicationMenu.createMenu());
                 })
-                .add(panel("fill, wrap 2").add("growy", leftPane).add(
-                        "grow, push",
-                        splitPane(UI.Axis.VERTICAL)
-                                .peek(pane -> pane.setResizeWeight(1.0))
-                                .add(TOP, topPane)
-                                .add(BOTTOM, bottomPane)));
+                .add(outerSplit);
     }
 
     private static @NonNull ViewSupplier<Workflow> createControlPanelCard(
