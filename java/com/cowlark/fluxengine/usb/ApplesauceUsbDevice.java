@@ -12,6 +12,8 @@ import com.cowlark.fluxengine.core.Logger;
 import com.cowlark.fluxengine.data.Fluxmap;
 import com.cowlark.fluxengine.data.FluxmapReader;
 import com.cowlark.fluxengine.decoders.DecoderProto;
+import com.cowlark.fluxengine.wiring.FluxEngine;
+import com.cowlark.fluxengine.wiring.FluxEngine.VoltagesReplyFrame;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -351,7 +353,7 @@ class ApplesauceUsbDevice extends UsbDevice
     }
 
     @Override
-    public VoltageMeasurements measureVoltages()
+    public VoltagesReplyFrame measureVoltages()
     {
         throw new FluxEngineException("unsupported operation on the Applesauce");
     }

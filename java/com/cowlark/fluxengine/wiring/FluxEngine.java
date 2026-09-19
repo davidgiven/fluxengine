@@ -1,7 +1,20 @@
 package com.cowlark.fluxengine.wiring;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.indunet.fastproto.annotation.BinaryType;
+import org.indunet.fastproto.annotation.Expect;
+import org.indunet.fastproto.annotation.UInt16Type;
+import org.indunet.fastproto.annotation.UInt32Type;
+import org.indunet.fastproto.annotation.UInt8Type;
+
 /**
- * Wire protocol definitions for the FluxEngine hardware.
+ * Wire protocol definitions for the FluxEngine hardware, ported from protocol.h.
+ *
+ * <p>Each inner class corresponds to a struct in protocol.h and is annotated for
+ * use with FastProto. See RolandFilesystem.java for an example of FastProto usage.
  */
 public final class FluxEngine
 {
@@ -84,103 +97,170 @@ public final class FluxEngine
     {
     }
 
+    @Data
+    @Builder(setterPrefix = "set")
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class FrameHeader
     {
-        public int type;
-        public int size;
+        @UInt8Type(offset = 0) public int type;
+        @UInt8Type(offset = 1) public int size;
     }
 
+    @Data
+    @Builder(setterPrefix = "set")
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class AnyFrame
     {
-        public FrameHeader f;
+        @UInt8Type(offset = 0) public int type;
+        @UInt8Type(offset = 1) public int size;
     }
 
+    @Data
+    @Builder(setterPrefix = "set")
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class ErrorFrame
     {
-        public FrameHeader f;
-        public int error;
+        @Expect(offset = 0, bytes = {(byte) F_FRAME_ERROR, 3}) transient int _expects;
+        @UInt8Type(offset = 2) public int error;
     }
 
+    @Data
+    @Builder(setterPrefix = "set")
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class DebugFrame
     {
-        public FrameHeader f;
-        public byte[] payload = new byte[60];
+        @Expect(offset = 0, bytes = {(byte) F_FRAME_DEBUG, 62}) transient int _expects;
+        @BinaryType(offset = 2, length = 60) public byte[] payload;
     }
 
+    @Data
+    @Builder(setterPrefix = "set")
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class VersionFrame
     {
-        public FrameHeader f;
-        public int version;
+        @Expect(offset = 0, bytes = {(byte) F_FRAME_GET_VERSION_CMD, 2}) transient int _expects;
     }
 
+    @Data
+    @Builder(setterPrefix = "set")
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class VersionReplyFrame
+    {
+        @Expect(offset = 0, bytes = {(byte) F_FRAME_GET_VERSION_REPLY, 3}) transient int _expects;
+        @UInt8Type(offset = 2) public int version;
+    }
+
+    @Data
+    @Builder(setterPrefix = "set")
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class SeekFrame
     {
-        public FrameHeader f;
-        public int track;
+        @Expect(offset = 0, bytes = {(byte) F_FRAME_SEEK_CMD, 3}) transient int _expects;
+        @UInt8Type(offset = 2) public int track;
     }
 
+    @Data
+    @Builder(setterPrefix = "set")
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class MeasureSpeedFrame
     {
-        public FrameHeader f;
-        public int hardSectorCount;
+        @Expect(offset = 0, bytes = {(byte) F_FRAME_MEASURE_SPEED_CMD, 3}) transient int _expects;
+        @UInt8Type(offset = 2) public int hardSectorCount;
     }
 
-    public static class SpeedFrame
+    @Data
+    @Builder(setterPrefix = "set")
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class MeasureSpeedReplyFrame
     {
-        public FrameHeader f;
-        public int periodMs;
+        @Expect(offset = 0, bytes = {(byte) F_FRAME_MEASURE_SPEED_REPLY, 4}) transient int _expects;
+        @UInt16Type(offset = 2) public int periodMs;
     }
 
+    @Data
+    @Builder(setterPrefix = "set")
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class ReadFrame
     {
-        public FrameHeader f;
-        public int side;
-        public int synced;
-        public int milliseconds;
-        public int hardsecThresholdMs;
+        @Expect(offset = 0, bytes = {(byte) F_FRAME_READ_CMD, 7}) transient int _expects;
+        @UInt8Type(offset = 2) public int side;
+        @UInt8Type(offset = 3) public int synced;
+        @UInt16Type(offset = 4) public int milliseconds;
+        @UInt8Type(offset = 6) public int hardsecThresholdMs;
     }
 
+    @Data
+    @Builder(setterPrefix = "set")
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class WriteFrame
     {
-        public FrameHeader f;
-        public int side;
-        public long bytesToWrite;
-        public int hardsecThresholdMs;
+        @Expect(offset = 0, bytes = {(byte) F_FRAME_WRITE_CMD, 8}) transient int _expects;
+        @UInt8Type(offset = 2) public int side;
+        @UInt32Type(offset = 3) public long bytesToWrite;
+        @UInt8Type(offset = 7) public int hardsecThresholdMs;
     }
 
+    @Data
+    @Builder(setterPrefix = "set")
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class EraseFrame
     {
-        public FrameHeader f;
-        public int side;
-        public int hardsecThresholdMs;
+        @Expect(offset = 0, bytes = {(byte) F_FRAME_ERASE_CMD, 4}) transient int _expects;
+        @UInt8Type(offset = 2) public int side;
+        @UInt8Type(offset = 3) public int hardsecThresholdMs;
     }
 
+    @Data
+    @Builder(setterPrefix = "set")
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class SetDriveFrame
     {
-        public FrameHeader f;
-        public int drive;
-        public int highDensity;
-        public int indexMode;
+        @Expect(offset = 0, bytes = {(byte) F_FRAME_SET_DRIVE_CMD, 5}) transient int _expects;
+        @UInt8Type(offset = 2) public int drive;
+        @UInt8Type(offset = 3) public int highDensity;
+        @UInt8Type(offset = 4) public int indexMode;
     }
 
+    @Data
+    @Builder(setterPrefix = "set")
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class Voltages
     {
-        public int logic0Mv;
-        public int logic1Mv;
+        @UInt16Type(offset = 0) public int logic0Mv;
+        @UInt16Type(offset = 2) public int logic1Mv;
     }
 
-    public static class VoltagesFrame
+    @Data
+    @Builder(setterPrefix = "set")
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class VoltagesReplyFrame
     {
-        public FrameHeader f;
-        public Voltages outputBothOff = new Voltages();
-        public Voltages outputDrive0Selected = new Voltages();
-        public Voltages outputDrive1Selected = new Voltages();
-        public Voltages outputDrive0Running = new Voltages();
-        public Voltages outputDrive1Running = new Voltages();
-        public Voltages inputBothOff = new Voltages();
-        public Voltages inputDrive0Selected = new Voltages();
-        public Voltages inputDrive1Selected = new Voltages();
-        public Voltages inputDrive0Running = new Voltages();
-        public Voltages inputDrive1Running = new Voltages();
+        @Expect(offset = 0, bytes = {(byte) F_FRAME_MEASURE_VOLTAGES_REPLY, 42}) transient int
+                _expects;
+        public Voltages outputBothOff;
+        public Voltages outputDrive0Selected;
+        public Voltages outputDrive1Selected;
+        public Voltages outputDrive0Running;
+        public Voltages outputDrive1Running;
+        public Voltages inputBothOff;
+        public Voltages inputDrive0Selected;
+        public Voltages inputDrive1Selected;
+        public Voltages inputDrive0Running;
+        public Voltages inputDrive1Running;
     }
 }

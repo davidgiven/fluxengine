@@ -3,8 +3,8 @@ package com.cowlark.fluxengine.cli;
 import com.cowlark.fluxengine.config.ConfigBuilder;
 import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.usb.UsbFactory;
-import com.cowlark.fluxengine.usb.VoltageMeasurements;
-import com.cowlark.fluxengine.usb.Voltages;
+import com.cowlark.fluxengine.wiring.FluxEngine;
+import com.cowlark.fluxengine.wiring.FluxEngine.VoltagesReplyFrame;
 import com.google.common.collect.ImmutableList;
 
 /**
@@ -12,12 +12,12 @@ import com.google.common.collect.ImmutableList;
  */
 public class TestVoltagesCommand implements Command
 {
-    private static String displayVoltages(Voltages v)
+    private static String displayVoltages(FluxEngine.Voltages v)
     {
         return String.format(
                 "      Logic 1 / 0:  %.2fV / %.2fV\n",
-                v.logic0Mv() / 1000.0,
-                v.logic1Mv() / 1000.0);
+                v.logic0Mv / 1000.0,
+                v.logic1Mv / 1000.0);
     }
 
     @Override
@@ -34,7 +34,7 @@ public class TestVoltagesCommand implements Command
         try (UsbFactory usbFactory = new UsbFactory(config))
         {
             usbFactory.perform(device -> {
-                VoltageMeasurements voltages = device.measureVoltages();
+                VoltagesReplyFrame voltages = device.measureVoltages();
 
                 System.out.printf(
                         """

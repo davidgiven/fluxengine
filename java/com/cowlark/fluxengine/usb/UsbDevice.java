@@ -1,6 +1,8 @@
 package com.cowlark.fluxengine.usb;
 
 import com.cowlark.fluxengine.core.Bytes;
+import com.cowlark.fluxengine.wiring.FluxEngine;
+import com.cowlark.fluxengine.wiring.FluxEngine.VoltagesReplyFrame;
 
 /**
  * Base class for USB floppy drive devices, ported from lib/usb/usb.h.
@@ -31,11 +33,13 @@ public abstract class UsbDevice implements AutoCloseable
     public abstract void testBulkRead();
 
     /* Measures the voltages used by the device. */
-    public abstract VoltageMeasurements measureVoltages();
+    public abstract VoltagesReplyFrame measureVoltages();
 
     /* Closes the device, releasing any underlying resources. */
     @Override
-    public abstract void close();
+    public void close()
+    {
+    }
 
     protected String usbError(int error)
     {

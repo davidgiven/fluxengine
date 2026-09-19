@@ -21,7 +21,7 @@ public class CloseableUsbPipe implements AutoCloseable
             {
                 UsbPipe pipe = endpoint.getUsbPipe();
                 this.address = address;
-                logger.atInfo().log("opening pipe for {}", address);
+                logger.atDebug().log("opening pipe for {}", address);
                 pipe.open();
                 underlying = pipe;
                 return;
@@ -35,7 +35,7 @@ public class CloseableUsbPipe implements AutoCloseable
     @Override
     public void close() throws Exception
     {
-        logger.atInfo().log("closing pipe for {}", address);
+        logger.atDebug().log("closing pipe for {}", address);
         underlying.close();
     }
 

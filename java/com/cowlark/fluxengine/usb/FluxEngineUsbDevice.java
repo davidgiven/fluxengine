@@ -1,19 +1,58 @@
 package com.cowlark.fluxengine.usb;
 
+import static com.cowlark.fluxengine.wiring.FluxEngine.FLUXENGINE_CMD_IN_EP;
+import static com.cowlark.fluxengine.wiring.FluxEngine.FLUXENGINE_CMD_OUT_EP;
+import static com.cowlark.fluxengine.wiring.FluxEngine.FLUXENGINE_DATA_IN_EP;
+import static com.cowlark.fluxengine.wiring.FluxEngine.FLUXENGINE_DATA_OUT_EP;
+import static com.cowlark.fluxengine.wiring.FluxEngine.FLUXENGINE_PROTOCOL_VERSION;
+import static com.cowlark.fluxengine.wiring.FluxEngine.FRAME_SIZE;
+import static com.cowlark.fluxengine.wiring.FluxEngine.F_ERROR_BAD_COMMAND;
+import static com.cowlark.fluxengine.wiring.FluxEngine.F_ERROR_INTERNAL;
+import static com.cowlark.fluxengine.wiring.FluxEngine.F_ERROR_INVALID_VALUE;
+import static com.cowlark.fluxengine.wiring.FluxEngine.F_ERROR_UNDERRUN;
+import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_BULK_READ_TEST_CMD;
+import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_BULK_READ_TEST_REPLY;
+import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_BULK_WRITE_TEST_CMD;
+import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_BULK_WRITE_TEST_REPLY;
+import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_DEBUG;
+import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_ERASE_REPLY;
+import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_ERROR;
+import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_GET_VERSION_REPLY;
+import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_MEASURE_SPEED_REPLY;
+import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_MEASURE_VOLTAGES_CMD;
+import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_MEASURE_VOLTAGES_REPLY;
+import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_READ_REPLY;
+import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_SEEK_REPLY;
+import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_SET_DRIVE_REPLY;
+import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_WRITE_REPLY;
+import static com.cowlark.fluxengine.wiring.FluxEngine.ReadFrame;
+
 import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.core.ByteWriter;
 import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.core.FluxEngineException;
+import com.cowlark.fluxengine.wiring.FluxEngine;
+import com.cowlark.fluxengine.wiring.FluxEngine.AnyFrame;
+import com.cowlark.fluxengine.wiring.FluxEngine.DebugFrame;
+import com.cowlark.fluxengine.wiring.FluxEngine.EraseFrame;
+import com.cowlark.fluxengine.wiring.FluxEngine.MeasureSpeedFrame;
+import com.cowlark.fluxengine.wiring.FluxEngine.MeasureSpeedReplyFrame;
+import com.cowlark.fluxengine.wiring.FluxEngine.SeekFrame;
+import com.cowlark.fluxengine.wiring.FluxEngine.SetDriveFrame;
+import com.cowlark.fluxengine.wiring.FluxEngine.VersionFrame;
+import com.cowlark.fluxengine.wiring.FluxEngine.VersionReplyFrame;
+import com.cowlark.fluxengine.wiring.FluxEngine.VoltagesReplyFrame;
+import com.cowlark.fluxengine.wiring.FluxEngine.WriteFrame;
 import lombok.SneakyThrows;
+import org.indunet.fastproto.FastProto;
 import org.slf4j.LoggerFactory;
 import javax.usb.UsbConfiguration;
 import javax.usb.UsbEndpoint;
 import javax.usb.UsbException;
 import javax.usb.UsbInterface;
 import javax.usb.UsbInterfacePolicy;
+import javax.usb.UsbIrp;
 import java.util.List;
-
-import static com.cowlark.fluxengine.wiring.FluxEngine.*;
 
 /**
  * FluxEngine floppy drive device, ported from lib/usb/fluxengineusb.cc.
@@ -47,7 +86,7 @@ class FluxEngineUsbDevice extends UsbDevice
                 if (usbConfig == null)
                     throw new FluxEngineException("You need to install the Zadig driver");
                 usbInterface = usbConfig.getUsbInterface((byte) 0);
-                logger.atInfo().log("claiming USB device {}", usbInterface);
+                logger.atDebug().log("claiming USB device {}", usbInterface);
                 usbInterface.claim((UsbInterfacePolicy) usbInterface -> true);
 
                 List<UsbEndpoint> endpoints = usbInterface.getUsbEndpoints();
@@ -69,7 +108,7 @@ class FluxEngineUsbDevice extends UsbDevice
         {
             try
             {
-                logger.atInfo().setCause(e).log("opening device failed, cleaning up");
+                logger.atDebug().setCause(e).log("opening device failed, cleaning up");
                 close();
             } catch (RuntimeException suppressed)
             {
@@ -104,7 +143,7 @@ class FluxEngineUsbDevice extends UsbDevice
             {
                 if (usbInterface != null)
                 {
-                    logger.atInfo().log("releasing USB interface");
+                    logger.atDebug().log("releasing USB interface");
                     usbInterface.release();
                 }
             } catch (UsbException e)
@@ -119,13 +158,6 @@ class FluxEngineUsbDevice extends UsbDevice
         return System.nanoTime() / 1e9;
     }
 
-    private static Voltages readVoltages(byte[] r, int ptr)
-    {
-        int logic0 = (r[ptr] & 0xff) | ((r[ptr + 1] & 0xff) << 8);
-        int logic1 = (r[ptr + 2] & 0xff) | ((r[ptr + 3] & 0xff) << 8);
-        return new Voltages(logic0, logic1);
-    }
-
     private void usbCmdSend(byte[] data)
     {
         try
@@ -135,6 +167,11 @@ class FluxEngineUsbDevice extends UsbDevice
         {
             throw new FluxEngineException("FluxEngine: command send failed: " + e.getMessage());
         }
+    }
+
+    private void usbCmdSend(Object object)
+    {
+        usbCmdSend(FastProto.encode(object));
     }
 
     private byte[] usbCmdRecv(int len)
@@ -242,46 +279,51 @@ class FluxEngineUsbDevice extends UsbDevice
         }
     }
 
+    private <T> T awaitReply(int desired, Class<T> dataClass)
+    {
+        byte[] bytes = awaitReply(desired);
+        return FastProto.decode(bytes, dataClass);
+    }
+
     private int getVersion()
     {
-        byte[] f = {F_FRAME_GET_VERSION_CMD, 2};
-        usbCmdSend(f);
-        byte[] r = awaitReply(F_FRAME_GET_VERSION_REPLY);
-        return r[2] & 0xff;
+        usbCmdSend(new VersionFrame());
+        VersionReplyFrame reply = awaitReply(F_FRAME_GET_VERSION_REPLY, VersionReplyFrame.class);
+        return reply.getVersion();
     }
 
     @Override
     public void seek(int cylinder)
     {
-        byte[] f = {F_FRAME_SET_DRIVE_CMD,
-                5,
-                (byte) config.getDrive().getDrive(),
-                (byte) (config.getDrive().getHighDensity() ? 1 : 0),
-                (byte) 0};
-        usbCmdSend(f);
+        usbCmdSend(SetDriveFrame
+                .builder()
+                .setDrive(config.getDrive().getDrive())
+                .setHighDensity(config.getDrive().getHighDensity() ? 1 : 0)
+                .setIndexMode(0)
+                .build());
         awaitReply(F_FRAME_SET_DRIVE_REPLY);
 
-        byte[] f2 = {F_FRAME_SEEK_CMD, 3, (byte) cylinder};
-        usbCmdSend(f2);
+        usbCmdSend(SeekFrame.builder().setTrack(cylinder).build());
         awaitReply(F_FRAME_SEEK_REPLY);
     }
 
     @Override
     public double getRotationalPeriod()
     {
-        byte[] f = {F_FRAME_MEASURE_SPEED_CMD, 3, (byte) config.getDrive().getHardSectorCount()};
-        usbCmdSend(f);
+        usbCmdSend(MeasureSpeedFrame
+                .builder()
+                .setHardSectorCount(config.getDrive().getHardSectorCount())
+                .build());
 
-        byte[] r = awaitReply(F_FRAME_MEASURE_SPEED_REPLY);
-        int periodMs = (r[2] & 0xff) | ((r[3] & 0xff) << 8);
-        return periodMs * 1000000.0;
+        MeasureSpeedReplyFrame r =
+                awaitReply(F_FRAME_MEASURE_SPEED_REPLY, MeasureSpeedReplyFrame.class);
+        return r.getPeriodMs() * 1000000.0;
     }
 
     @Override
     public void testBulkWrite()
     {
-        byte[] f = {F_FRAME_BULK_WRITE_TEST_CMD, 2};
-        usbCmdSend(f);
+        usbCmdSend(AnyFrame.builder().setType(F_FRAME_BULK_WRITE_TEST_CMD).setSize(2).build());
 
         /* These must match the device. */
         final int XSIZE = 64;
@@ -318,8 +360,7 @@ class FluxEngineUsbDevice extends UsbDevice
     @Override
     public void testBulkRead()
     {
-        byte[] f = {F_FRAME_BULK_READ_TEST_CMD, 2};
-        usbCmdSend(f);
+        usbCmdSend(AnyFrame.builder().setType(F_FRAME_BULK_READ_TEST_CMD).setSize(2).build());
 
         /* These must match the device. */
         final int XSIZE = 64;
@@ -351,64 +392,65 @@ class FluxEngineUsbDevice extends UsbDevice
     @Override
     public Bytes read(int cylinder, int head, double readTimeNs)
     {
-        for (int i=0; i<config.getUsb().getFluxengine().getUnderrunRetries(); i++){
-            try {
+        for (int i = 0; i < config.getUsb().getFluxengine().getUnderrunRetries(); i++)
+        {
+            try
+            {
                 seek(cylinder);
 
-                Bytes f = new Bytes(0);
-                ByteWriter bw = f.writer();
-                bw.write8(F_FRAME_READ_CMD);
-                bw.write8(6);
-                bw.write8(head);
-                bw.write8(config.getDrive().getSyncWithIndex() ? 1 : 0);
-                int milliseconds = (int) (readTimeNs / 1e6);
-                bw.write8(milliseconds & 0xff);
-                bw.write8((milliseconds >> 8) & 0xff);
-                bw.write8((int) ((config.getDrive().getHardSectorThresholdNs() + 5e5) /
-                        1e6)); /* round to nearest ms */
-                usbCmdSend(f.toByteArray());
+                usbCmdSend(ReadFrame
+                        .builder()
+                        .setSide(head)
+                        .setSynced(config.getDrive().getSyncWithIndex() ? 1 : 0)
+                        .setMilliseconds((int) (readTimeNs / 1e6))
+                        .setHardsecThresholdMs((int) (
+                                (config.getDrive().getHardSectorThresholdNs() + 5e5) /
+                                        1e6) /* round to nearest ms */)
+                        .build());
 
                 Bytes buffer = usbDataRecv(1024 * 1024);
 
                 awaitReply(F_FRAME_READ_REPLY);
                 return buffer;
-            } catch (UsbUnderrunException e) {
+            } catch (UsbUnderrunException e)
+            {
                 logger.atInfo().log("USB underrun, retrying");
             }
         }
-        throw new FluxEngineException("Consistent USB underruns --- you don't have enough bandwidth");
+        throw new FluxEngineException(
+                "Consistent USB underruns --- you don't have enough " + "bandwidth");
     }
 
     @Override
     public void write(int cylinder, int head, Bytes bytes)
     {
-        for (int i=0; i<config.getUsb().getFluxengine().getUnderrunRetries(); i++){
-            try {
+        for (int i = 0; i < config.getUsb().getFluxengine().getUnderrunRetries(); i++)
+        {
+            try
+            {
                 seek(cylinder);
 
                 int safelen = bytes.size() & ~(FRAME_SIZE - 1);
                 Bytes safeBytes = bytes.slice(0, safelen);
 
-                Bytes f = new Bytes(0);
-                ByteWriter bw = f.writer();
-                bw.write8(F_FRAME_WRITE_CMD);
-                bw.write8(7);
-                bw.write8(head);
-                bw.write8(safelen & 0xff);
-                bw.write8((safelen >> 8) & 0xff);
-                bw.write8((safelen >> 16) & 0xff);
-                bw.write8((safelen >> 24) & 0xff);
-                bw.write8((int) ((config.getDrive().getHardSectorThresholdNs() + 5e5) /
-                        1e6)); /* round to nearest ms */
-                usbCmdSend(f.toByteArray());
+                usbCmdSend(WriteFrame
+                        .builder()
+                        .setSide(head)
+                        .setBytesToWrite(safelen)
+                        .setHardsecThresholdMs((int) (
+                                (config.getDrive().getHardSectorThresholdNs() + 5e5) /
+                                        1e6) /* round to nearest ms */)
+                        .build());
                 usbDataSend(safeBytes);
 
                 awaitReply(F_FRAME_WRITE_REPLY);
-            } catch (UsbUnderrunException e) {
+            } catch (UsbUnderrunException e)
+            {
                 logger.atInfo().log("USB underrun, retrying");
             }
         }
-        throw new FluxEngineException("Consistent USB underruns --- you don't have enough bandwidth");
+        throw new FluxEngineException(
+                "Consistent USB underruns --- you don't have enough " + "bandwidth");
     }
 
     @Override
@@ -416,48 +458,21 @@ class FluxEngineUsbDevice extends UsbDevice
     {
         seek(cylinder);
 
-        Bytes f = new Bytes(0);
-        ByteWriter bw = f.writer();
-        bw.write8(F_FRAME_ERASE_CMD);
-        bw.write8(3);
-        bw.write8(head);
-        bw.write8((int) ((config.getDrive().getHardSectorThresholdNs() + 5e5) /
-                1e6)); /* round to nearest ms */
-        usbCmdSend(f.toByteArray());
+        usbCmdSend(EraseFrame
+                .builder()
+                .setSide(head)
+                .setHardsecThresholdMs((int) ((config.getDrive().getHardSectorThresholdNs() + 5e5) /
+                        1e6))
+                .build());
 
         awaitReply(F_FRAME_ERASE_REPLY);
     }
 
     @Override
-    public VoltageMeasurements measureVoltages()
+    public VoltagesReplyFrame measureVoltages()
     {
-        byte[] f = {F_FRAME_MEASURE_VOLTAGES_CMD, 2};
-        usbCmdSend(f);
+        usbCmdSend(AnyFrame.builder().setType(F_FRAME_MEASURE_VOLTAGES_CMD).setSize(2).build());
 
-        byte[] r = awaitReply(F_FRAME_MEASURE_VOLTAGES_REPLY);
-
-        VoltageMeasurements measurements = new VoltageMeasurements();
-        int ptr = 2;
-        measurements.outputBothOff = readVoltages(r, ptr);
-        ptr += 4;
-        measurements.outputDrive0Selected = readVoltages(r, ptr);
-        ptr += 4;
-        measurements.outputDrive1Selected = readVoltages(r, ptr);
-        ptr += 4;
-        measurements.outputDrive0Running = readVoltages(r, ptr);
-        ptr += 4;
-        measurements.outputDrive1Running = readVoltages(r, ptr);
-        ptr += 4;
-        measurements.inputBothOff = readVoltages(r, ptr);
-        ptr += 4;
-        measurements.inputDrive0Selected = readVoltages(r, ptr);
-        ptr += 4;
-        measurements.inputDrive1Selected = readVoltages(r, ptr);
-        ptr += 4;
-        measurements.inputDrive0Running = readVoltages(r, ptr);
-        ptr += 4;
-        measurements.inputDrive1Running = readVoltages(r, ptr);
-        return measurements;
+        return awaitReply(F_FRAME_MEASURE_VOLTAGES_REPLY, VoltagesReplyFrame.class);
     }
-
 }

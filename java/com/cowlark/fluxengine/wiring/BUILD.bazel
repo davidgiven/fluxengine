@@ -12,4 +12,10 @@ java_plugin(
 java_library(
     name = "wiring",
     srcs = glob(["*.java"]),
+    plugins = ["//java/com/cowlark/fluxengine/wiring:lombok_plugin"],
+    deps = [
+        "@maven//:org_indunet_fastproto",
+        "@maven//:org_indunet_fastproto_core",
+        "@maven//:org_projectlombok_lombok",
+    ],
 )
