@@ -380,17 +380,20 @@ public class ImageViewModel
 
     void onEmergencyStop()
     {
-        Disposable operation = getCurrentDisposable().get();
-        if ((operation == null) || operation.isDisposed())
-            return;
+        if (getCurrentDisposable().isPresent())
+        {
+            Disposable operation = getCurrentDisposable().get();
+            if ((operation == null) || operation.isDisposed())
+                return;
 
-        ReadWriteFluxOperation.requestEmergencyStop();
-        operation.dispose();
+            ReadWriteFluxOperation.requestEmergencyStop();
+            operation.dispose();
 
-        /* Only clear the property once the dispose has actually happened;
-         * dispose() blocks until the worker thread has exited. */
-        getCurrentDisposable().set(From.VIEW_MODEL, null);
-        getDriveActivity().set(new DriveActivity(ActivityType.IDLE, 0, 0));
+            /* Only clear the property once the dispose has actually happened;
+             * dispose() blocks until the worker thread has exited. */
+            getCurrentDisposable().set(From.VIEW_MODEL, null);
+            getDriveActivity().set(new DriveActivity(ActivityType.IDLE, 0, 0));
+        }
     }
 
     void onEmergencyStop(ComponentDelegate<JButton, ActionEvent> delegate)
