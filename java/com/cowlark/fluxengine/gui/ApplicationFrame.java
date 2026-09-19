@@ -141,6 +141,7 @@ public class ApplicationFrame extends JFrame
                 .onClose(it -> {
                     model.onEmergencyStop();
                     dispose();
+                    System.exit(0);
                 })
                 .peek(frame -> {
                     frame.setJMenuBar(ApplicationMenu.createMenu());
