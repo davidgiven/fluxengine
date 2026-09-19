@@ -1,36 +1,5 @@
 package com.cowlark.fluxengine.usb;
 
-import static com.cowlark.fluxengine.wiring.FluxEngine.FLUXENGINE_CMD_IN_EP;
-import static com.cowlark.fluxengine.wiring.FluxEngine.FLUXENGINE_CMD_OUT_EP;
-import static com.cowlark.fluxengine.wiring.FluxEngine.FLUXENGINE_DATA_IN_EP;
-import static com.cowlark.fluxengine.wiring.FluxEngine.FLUXENGINE_DATA_OUT_EP;
-import static com.cowlark.fluxengine.wiring.FluxEngine.FLUXENGINE_PROTOCOL_VERSION;
-import static com.cowlark.fluxengine.wiring.FluxEngine.FRAME_SIZE;
-import static com.cowlark.fluxengine.wiring.FluxEngine.F_ERROR_BAD_COMMAND;
-import static com.cowlark.fluxengine.wiring.FluxEngine.F_ERROR_UNDERRUN;
-import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_BULK_READ_TEST_CMD;
-import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_BULK_READ_TEST_REPLY;
-import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_BULK_WRITE_TEST_CMD;
-import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_BULK_WRITE_TEST_REPLY;
-import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_DEBUG;
-import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_ERASE_CMD;
-import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_ERASE_REPLY;
-import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_ERROR;
-import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_GET_VERSION_CMD;
-import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_GET_VERSION_REPLY;
-import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_MEASURE_SPEED_CMD;
-import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_MEASURE_SPEED_REPLY;
-import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_MEASURE_VOLTAGES_CMD;
-import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_MEASURE_VOLTAGES_REPLY;
-import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_READ_CMD;
-import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_READ_REPLY;
-import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_SEEK_CMD;
-import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_SEEK_REPLY;
-import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_SET_DRIVE_CMD;
-import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_SET_DRIVE_REPLY;
-import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_WRITE_CMD;
-import static com.cowlark.fluxengine.wiring.FluxEngine.F_FRAME_WRITE_REPLY;
-
 import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.core.ByteWriter;
 import com.cowlark.fluxengine.core.Bytes;
@@ -43,6 +12,8 @@ import javax.usb.UsbException;
 import javax.usb.UsbInterface;
 import javax.usb.UsbInterfacePolicy;
 import java.util.List;
+
+import static com.cowlark.fluxengine.wiring.FluxEngine.*;
 
 /**
  * FluxEngine floppy drive device, ported from lib/usb/fluxengineusb.cc.
@@ -230,13 +201,19 @@ class FluxEngineUsbDevice extends UsbDevice
         int type = buffer[0] & 0xff;
         if (type != F_FRAME_ERROR)
             throw new FluxEngineException(String.format("bad USB reply 0x%2x", type));
-        switch (buffer[1] & 0xff)
+        switch (buffer[2] & 0xff)
         {
             case F_ERROR_BAD_COMMAND:
                 throw new FluxEngineException("device did not understand command");
 
             case F_ERROR_UNDERRUN:
-                throw new FluxEngineException("USB underrun (not enough bandwidth)");
+                throw new UsbUnderrunException();
+
+            case F_ERROR_INVALID_VALUE:
+                throw new FluxEngineException("device received a bad parameter");
+
+            case F_ERROR_INTERNAL:
+                throw new FluxEngineException("device experienced an internal error");
 
             default:
                 throw new FluxEngineException("unknown device error " + (buffer[1] & 0xff));
@@ -256,7 +233,7 @@ class FluxEngineUsbDevice extends UsbDevice
                 StringBuilder sb = new StringBuilder();
                 for (int i = 2; i < r.length && r[i] != 0; i++)
                     sb.append((char) r[i]);
-                System.out.println("dev: " + sb);
+                logger.atDebug().log("dev: {}", sb);
                 continue;
             }
             if (type != desired)
@@ -374,50 +351,64 @@ class FluxEngineUsbDevice extends UsbDevice
     @Override
     public Bytes read(int cylinder, int head, double readTimeNs)
     {
-        seek(cylinder);
+        for (int i=0; i<config.getUsb().getFluxengine().getUnderrunRetries(); i++){
+            try {
+                seek(cylinder);
 
-        Bytes f = new Bytes(0);
-        ByteWriter bw = f.writer();
-        bw.write8(F_FRAME_READ_CMD);
-        bw.write8(6);
-        bw.write8(head);
-        bw.write8(config.getDrive().getSyncWithIndex() ? 1 : 0);
-        int milliseconds = (int) (readTimeNs / 1e6);
-        bw.write8(milliseconds & 0xff);
-        bw.write8((milliseconds >> 8) & 0xff);
-        bw.write8((int) ((config.getDrive().getHardSectorThresholdNs() + 5e5) /
-                1e6)); /* round to nearest ms */
-        usbCmdSend(f.toByteArray());
+                Bytes f = new Bytes(0);
+                ByteWriter bw = f.writer();
+                bw.write8(F_FRAME_READ_CMD);
+                bw.write8(6);
+                bw.write8(head);
+                bw.write8(config.getDrive().getSyncWithIndex() ? 1 : 0);
+                int milliseconds = (int) (readTimeNs / 1e6);
+                bw.write8(milliseconds & 0xff);
+                bw.write8((milliseconds >> 8) & 0xff);
+                bw.write8((int) ((config.getDrive().getHardSectorThresholdNs() + 5e5) /
+                        1e6)); /* round to nearest ms */
+                usbCmdSend(f.toByteArray());
 
-        Bytes buffer = usbDataRecv(1024 * 1024);
+                Bytes buffer = usbDataRecv(1024 * 1024);
 
-        awaitReply(F_FRAME_READ_REPLY);
-        return buffer;
+                awaitReply(F_FRAME_READ_REPLY);
+                return buffer;
+            } catch (UsbUnderrunException e) {
+                logger.atInfo().log("USB underrun, retrying");
+            }
+        }
+        throw new FluxEngineException("Consistent USB underruns --- you don't have enough bandwidth");
     }
 
     @Override
     public void write(int cylinder, int head, Bytes bytes)
     {
-        seek(cylinder);
+        for (int i=0; i<config.getUsb().getFluxengine().getUnderrunRetries(); i++){
+            try {
+                seek(cylinder);
 
-        int safelen = bytes.size() & ~(FRAME_SIZE - 1);
-        Bytes safeBytes = bytes.slice(0, safelen);
+                int safelen = bytes.size() & ~(FRAME_SIZE - 1);
+                Bytes safeBytes = bytes.slice(0, safelen);
 
-        Bytes f = new Bytes(0);
-        ByteWriter bw = f.writer();
-        bw.write8(F_FRAME_WRITE_CMD);
-        bw.write8(7);
-        bw.write8(head);
-        bw.write8(safelen & 0xff);
-        bw.write8((safelen >> 8) & 0xff);
-        bw.write8((safelen >> 16) & 0xff);
-        bw.write8((safelen >> 24) & 0xff);
-        bw.write8((int) ((config.getDrive().getHardSectorThresholdNs() + 5e5) /
-                1e6)); /* round to nearest ms */
-        usbCmdSend(f.toByteArray());
-        usbDataSend(safeBytes);
+                Bytes f = new Bytes(0);
+                ByteWriter bw = f.writer();
+                bw.write8(F_FRAME_WRITE_CMD);
+                bw.write8(7);
+                bw.write8(head);
+                bw.write8(safelen & 0xff);
+                bw.write8((safelen >> 8) & 0xff);
+                bw.write8((safelen >> 16) & 0xff);
+                bw.write8((safelen >> 24) & 0xff);
+                bw.write8((int) ((config.getDrive().getHardSectorThresholdNs() + 5e5) /
+                        1e6)); /* round to nearest ms */
+                usbCmdSend(f.toByteArray());
+                usbDataSend(safeBytes);
 
-        awaitReply(F_FRAME_WRITE_REPLY);
+                awaitReply(F_FRAME_WRITE_REPLY);
+            } catch (UsbUnderrunException e) {
+                logger.atInfo().log("USB underrun, retrying");
+            }
+        }
+        throw new FluxEngineException("Consistent USB underruns --- you don't have enough bandwidth");
     }
 
     @Override

@@ -26,10 +26,16 @@ message ApplesauceProto {
   [(help) = "Enable verbose protocol logging", default = false];
 }
 
+message FluxEngineProto {
+  optional int32 underrun_retries = 1
+  [(help) = "Number of retries if a USB bandwidth underrun occurs", default = 10];
+}
+
 message UsbProto {
   optional string serial = 1
   [(help) = "serial number of FluxEngine or Greaseweazle device to use"];
 
   optional GreaseweazleProto greaseweazle = 2 [(help) = "Greaseweazle-specific options"];
   optional ApplesauceProto applesauce = 3 [(help) = "Applesauce-specific options"];
+  optional FluxEngineProto fluxengine = 4 [(help) = "FluxEngine-specific options"];
 }
