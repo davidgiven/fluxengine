@@ -30,6 +30,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
+import javax.swing.SwingUtilities;
 import java.awt.Color;
 import java.awt.Toolkit;
 import java.net.URL;
@@ -124,9 +125,17 @@ public class ApplicationFrame extends JFrame
         UIForSplitPane<JSplitPane> outerSplit = splitPane(HORIZONTAL)
                 .peek(pane -> {
                     pane.setResizeWeight(0.0);
-                    pane.setDividerLocation(leftPaneWidth);
                     pane.setDividerSize(5);
                     pane.setContinuousLayout(true);
+                    /* setDividerLocation(int) before the component is
+                     * realized has no effect (the split pane has zero size
+                     * so the location is clamped). Defer until after pack/
+                     * setVisible so the ConfigurationPanel gets its intended
+                     * width without needing a manual resize or sash touch.
+                     * withPrefWidth scales via UI.scale, so the divider must
+                     * be scaled the same way. */
+                    SwingUtilities.invokeLater(() -> pane.setDividerLocation(
+                            UI.scale(leftPaneWidth)));
                 })
                 .add(TOP, leftPane)
                 .add(
