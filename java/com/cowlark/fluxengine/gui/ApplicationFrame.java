@@ -138,7 +138,10 @@ public class ApplicationFrame extends JFrame
 
         of(this)
                 .withOnCloseOperation(UI.OnWindowClose.DISPOSE)
-                .onClose(it -> System.exit(0))
+                .onClose(it -> {
+                    model.onEmergencyStop();
+                    dispose();
+                })
                 .peek(frame -> {
                     frame.setJMenuBar(ApplicationMenu.createMenu());
                 })

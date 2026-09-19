@@ -378,7 +378,7 @@ public class ImageViewModel
                 });
     }
 
-    void onEmergencyStop(ComponentDelegate<JButton, ActionEvent> delegate)
+    void onEmergencyStop()
     {
         Disposable operation = getCurrentDisposable().get();
         if ((operation == null) || operation.isDisposed())
@@ -391,6 +391,11 @@ public class ImageViewModel
          * dispose() blocks until the worker thread has exited. */
         getCurrentDisposable().set(From.VIEW_MODEL, null);
         getDriveActivity().set(new DriveActivity(ActivityType.IDLE, 0, 0));
+    }
+
+    void onEmergencyStop(ComponentDelegate<JButton, ActionEvent> delegate)
+    {
+        onEmergencyStop();
     }
 
     private void performOperation(
