@@ -6,9 +6,7 @@ import org.usb4java.LibUsb;
 
 /* Singleton holder for the explicit libusb Context, ported from libusb_init
  * usage in lib/usb/usb.cc. The Context is initialised once via
- * LibUsb.init and lives until JVM shutdown; this keeps any retained
- * org.usb4java.Device objects (which require a live Context) valid between
- * UsbFinder.findUsbDevices and FluxEngineUsbDevice.open. */
+ * LibUsb.init and lives until JVM shutdown. */
 final class UsbContext
 {
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(UsbContext.class);

@@ -638,7 +638,10 @@ public final class Bytes implements List<Byte>
 
     public ByteBuffer toByteBuffer()
     {
-        return ByteBuffer.wrap(toByteArray());
+        ByteBuffer buffer = ByteBuffer.allocateDirect(size());
+        buffer.put(toByteArray());
+        buffer.flip();
+        return buffer;
     }
 
 

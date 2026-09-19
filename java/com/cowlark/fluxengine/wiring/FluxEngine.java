@@ -205,10 +205,13 @@ public final class FluxEngine
     @AllArgsConstructor
     public static class WriteFrame
     {
-        @Expect(offset = 0, bytes = {(byte) F_FRAME_WRITE_CMD, 8}) transient int _expects;
+        @Expect(offset = 0, bytes = {(byte) F_FRAME_WRITE_CMD, 12}) transient int _expects;
         @UInt8Type(offset = 2) public int side;
-        @UInt32Type(offset = 3) public long bytesToWrite;
-        @UInt8Type(offset = 7) public int hardsecThresholdMs;
+        @UInt32Type(offset = 4) public long bytesToWrite;
+        @UInt8Type(offset = 8) public int hardsecThresholdMs;
+        @UInt8Type(offset = 9) public int _pad1;
+        @UInt8Type(offset = 10) public int _pad2;
+        @UInt8Type(offset = 11) public int _pad3;
     }
 
     @Data

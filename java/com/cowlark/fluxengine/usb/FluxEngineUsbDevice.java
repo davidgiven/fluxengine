@@ -45,7 +45,6 @@ import com.cowlark.fluxengine.wiring.FluxEngine.VoltagesReplyFrame;
 import com.cowlark.fluxengine.wiring.FluxEngine.WriteFrame;
 import org.indunet.fastproto.FastProto;
 import org.slf4j.LoggerFactory;
-import org.usb4java.Device;
 import org.usb4java.DeviceHandle;
 import org.usb4java.LibUsb;
 import java.nio.ByteBuffer;
@@ -59,15 +58,13 @@ class FluxEngineUsbDevice extends UsbDevice
     private static final int MAX_TRANSFER = 32 * 1024;
     private static final long TIMEOUT_MS = 5000;
 
-    private final Device device;
     private final ConfigProto config;
     private final DeviceHandle handle;
     private final byte[] buffer = new byte[FRAME_SIZE];
     private boolean closed = false;
 
-    FluxEngineUsbDevice(Device device, ConfigProto config)
+    FluxEngineUsbDevice(UsbFinder.CandidateDevice candidate, ConfigProto config)
     {
-        this.device = device;
         this.config = config;
         this.handle = new DeviceHandle();
 
@@ -75,7 +72,7 @@ class FluxEngineUsbDevice extends UsbDevice
         boolean interfaceClaimed = false;
         try
         {
-            check(LibUsb.open(device, handle), "FluxEngine: USB open failed");
+            UsbFinder.openDevice(candidate, handle);
             handleOpened = true;
 
             /* Try to enable auto-detach of kernel driver where supported. */
@@ -152,7 +149,6 @@ class FluxEngineUsbDevice extends UsbDevice
                 }
                 if (handleOpened)
                     LibUsb.close(handle);
-                LibUsb.unrefDevice(device);
                 closed = true;
             } catch (RuntimeException suppressed)
             {
@@ -179,7 +175,6 @@ class FluxEngineUsbDevice extends UsbDevice
         } finally
         {
             LibUsb.close(handle);
-            LibUsb.unrefDevice(device);
         }
     }
 
@@ -248,7 +243,7 @@ class FluxEngineUsbDevice extends UsbDevice
                     transferred,
                     TIMEOUT_MS);
             check(rc, "FluxEngine: data send failed");
-            ptr += len;
+            ptr += transferred.get(0);
         }
     }
 
@@ -494,6 +489,7 @@ class FluxEngineUsbDevice extends UsbDevice
                 usbDataSend(safeBytes);
 
                 awaitReply(F_FRAME_WRITE_REPLY);
+                return;
             } catch (UsbUnderrunException e)
             {
                 logger.atInfo().log("USB underrun, retrying");

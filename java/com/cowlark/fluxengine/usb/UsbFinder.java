@@ -11,8 +11,10 @@ import lombok.experimental.Accessors;
 import org.usb4java.Context;
 import org.usb4java.Device;
 import org.usb4java.DeviceDescriptor;
+import org.usb4java.DeviceHandle;
 import org.usb4java.DeviceList;
 import org.usb4java.LibUsb;
+import java.nio.ByteBuffer;
 import java.util.Set;
 
 public class UsbFinder
@@ -56,14 +58,12 @@ public class UsbFinder
                 if (!VALID_DEVICES.contains(id))
                     continue;
 
-                /* Retain the Device beyond freeDeviceList; the caller (or
-                 * FluxEngineUsbDevice) is responsible for LibUsb.unrefDevice. */
-                LibUsb.refDevice(device);
-
                 CandidateDevice candidate = new CandidateDevice();
-                candidate.device = device;
                 candidate.id = id;
                 candidate.serial = getSerialNumber(device, descriptor);
+                candidate.busNumber = LibUsb.getBusNumber(device);
+                candidate.deviceAddress = LibUsb.getDeviceAddress(device);
+                candidate.portPath = getPortPath(device);
 
                 if (id == GREASEWEAZLE_ID)
                     candidate.type = DeviceType.GREASEWEAZLE;
@@ -79,16 +79,13 @@ public class UsbFinder
             }
         } finally
         {
-            /* unrefDevices=true decrements the ref added by getDeviceList;
-             * candidates we ref'd above stay alive with one ref. */
             LibUsb.freeDeviceList(list, true);
         }
         return candidates.build();
     }
 
     /* Selects a device to use, based on the configuration, ported from
-     * lib/usb/usb.cc. The returned CandidateDevice retains a Device ref;
-     * unused candidates are unref'd. */
+     * lib/usb/usb.cc. */
     public static CandidateDevice selectDevice(ConfigProtoOrBuilder config)
     {
         ImmutableList<CandidateDevice> candidates = findUsbDevices();
@@ -109,27 +106,72 @@ public class UsbFinder
                 }
             }
             if (found == null)
-            {
-                /* Unref all retained devices before throwing. */
-                freeDevices(candidates);
                 throw new ConfigException("serial number not found");
-            }
-            /* Unref the non-selected candidates. */
-            for (CandidateDevice c : candidates)
-                if (c != found && c.device != null)
-                    LibUsb.unrefDevice(c.device);
             return found;
         }
 
         if (candidates.size() == 1)
             return Iterables.getOnlyElement(candidates);
 
-        /* More than one candidate and no serial specified: unref all and fail.
-         * The caller does not receive a candidate, so no Device is leaked. */
-        freeDevices(candidates);
         throw new ConfigException(
                 "more than one device detected; you'll need to explicitly specify the serial "
                         + "number of the device you want");
+    }
+
+    /* Opens the USB device indicated by the candidate's location. The caller
+     * receives an open DeviceHandle; the underlying Device is not retained. */
+    static void openDevice(CandidateDevice candidate, DeviceHandle handle)
+    {
+        Context ctx = UsbContext.get();
+        DeviceList list = new DeviceList();
+        int rc = LibUsb.getDeviceList(ctx, list);
+        if (rc < 0)
+            throw new com.cowlark.fluxengine.core.FluxEngineException(
+                    "USB error: " + LibUsb.errorName(rc));
+        try
+        {
+            for (Device device : list)
+            {
+                if (LibUsb.getBusNumber(device) != candidate.busNumber)
+                    continue;
+                if (LibUsb.getDeviceAddress(device) != candidate.deviceAddress)
+                    continue;
+                /* If we have a port path, verify it as well for robustness
+                 * against address reuse. */
+                if (candidate.portPath != null && !candidate.portPath.isEmpty())
+                {
+                    ImmutableList<Integer> actual = getPortPath(device);
+                    if (!actual.equals(candidate.portPath))
+                        continue;
+                }
+                int openRc = LibUsb.open(device, handle);
+                if (openRc != LibUsb.SUCCESS)
+                    throw new com.cowlark.fluxengine.core.FluxEngineException(
+                            "FluxEngine: USB open failed: " + LibUsb.errorName(openRc) + " "
+                                    + LibUsb.strError(openRc));
+                return;
+            }
+            throw new com.cowlark.fluxengine.core.FluxEngineException(
+                    String.format(
+                            "USB device at bus %d address %d not found (was it unplugged?)",
+                            candidate.busNumber,
+                            candidate.deviceAddress));
+        } finally
+        {
+            LibUsb.freeDeviceList(list, true);
+        }
+    }
+
+    private static ImmutableList<Integer> getPortPath(Device device)
+    {
+        ByteBuffer buffer = ByteBuffer.allocateDirect(8);
+        int len = LibUsb.getPortNumbers(device, buffer);
+        if (len <= 0)
+            return ImmutableList.of();
+        ImmutableList.Builder<Integer> builder = ImmutableList.builder();
+        for (int i = 0; i < len; i++)
+            builder.add((int) buffer.get(i) & 0xff);
+        return builder.build();
     }
 
     private static String findSerialPort(int id, String serial)
@@ -151,18 +193,10 @@ public class UsbFinder
         return null;
     }
 
-    /* Frees the retained Device refs for a collection of candidates. Call this
-     * when you obtained a list via findUsbDevices and are done with it (e.g.
-     * DevicesCommand). Candidates whose device is null (synthetic entries such
-     * as DEVICE_FLUXFILE) are ignored. */
+    /* Retained for API compatibility; previously freed retained Device refs.
+     * Now a no-op as CandidateDevice no longer holds a Device reference. */
     public static void freeDevices(Iterable<CandidateDevice> devices)
     {
-        for (CandidateDevice c : devices)
-            if (c.device != null)
-            {
-                LibUsb.unrefDevice(c.device);
-                c.device = null;
-            }
     }
 
     public enum DeviceType
@@ -187,19 +221,18 @@ public class UsbFinder
     public static final class CandidateDevice
     {
         public DeviceType type;
-        public Device device;
         public int id;
         public String serial;
         public String serialPort;
+        public int busNumber;
+        public int deviceAddress;
+        public ImmutableList<Integer> portPath = ImmutableList.of();
 
-        /* Releases the retained Device ref if any. Safe to call multiple times. */
+        /* Retained for API compatibility; previously released the retained
+         * Device ref. Now a no-op as CandidateDevice no longer holds a
+         * Device reference. */
         public void release()
         {
-            if (device != null)
-            {
-                LibUsb.unrefDevice(device);
-                device = null;
-            }
         }
     }
 }

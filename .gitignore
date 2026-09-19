@@ -24,3 +24,5 @@ opencode.json
 fluxengine.iml
 /nbproject/private/
 images/
+.bazelbsp/
+

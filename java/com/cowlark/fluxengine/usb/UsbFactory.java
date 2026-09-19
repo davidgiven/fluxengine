@@ -66,7 +66,7 @@ public class UsbFactory implements AutoCloseable
                     candidateDevice.serialPort,
                     config,
                     config.getUsb().getApplesauce());
-            case FLUXENGINE -> new FluxEngineUsbDevice(candidateDevice.device, config);
+            case FLUXENGINE -> new FluxEngineUsbDevice(candidateDevice, config);
         };
 
         device.seek(config.getDrive().getDrive());
