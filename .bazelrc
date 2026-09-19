@@ -10,8 +10,8 @@ common --tool_java_runtime_version=remotejdk_21
 # compilation (and Turbine can't run Lombok), so disable header compilation.
 build --java_header_compilation=false
 
-# Stamping: workspace status provides STABLE_VERSION as YYYY.MMDD.HHMM
-# (per-minute UTC, each component <65535 for MSI). Invoked as `bash` so it
+# Stamping: workspace status provides STABLE_VERSION as YY.MM.DD.HHMM
+# (per-minute UTC, fits MSI 255.255.65535.65535). Invoked as `bash` so it
 # works on Linux/macOS and on Windows via Git bash (C:\Program Files\Git\bin\bash.exe).
 # Use --config=stamp or --stamp together with this command. The stamp config
 # bundles both.

@@ -6,8 +6,8 @@ import java.util.Properties;
 /* Provides the application version, supplied at build time via Bazel stamping.
  *
  * Bazel generates version.properties via scripts/version.bzl from
- * STABLE_VERSION (scripts/workspace_status.sh as YYYY.MMDD.HHMM per-minute UTC,
- * each component <65535 so valid for Windows MSI ProductVersion). The value is
+ * STABLE_VERSION (scripts/workspace_status.sh as YY.MM.DD.HHMM per-minute UTC,
+ * fits Windows MSI ProductVersion 255.255.65535.65535). The value is
  * also available as -Dfluxengine.version if set; otherwise the properties file
  * is read. When built without --stamp, falls back to 1.0.0-dev.
  */
