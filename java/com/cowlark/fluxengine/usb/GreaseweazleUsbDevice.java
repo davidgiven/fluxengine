@@ -37,8 +37,6 @@ import com.cowlark.fluxengine.core.ByteWriter;
 import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.core.FluxEngineException;
 import com.cowlark.fluxengine.external.GreaseweazleUtils;
-import com.cowlark.fluxengine.wiring.FluxEngine;
-import com.cowlark.fluxengine.wiring.FluxEngine.VoltagesReplyFrame;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.time.Duration;
 
@@ -472,7 +470,7 @@ class GreaseweazleUsbDevice extends UsbDevice
     }
 
     @Override
-    public VoltagesReplyFrame measureVoltages()
+    public VoltageMeasurements measureVoltages()
     {
         throw new FluxEngineException("unsupported operation on the Greaseweazle");
     }

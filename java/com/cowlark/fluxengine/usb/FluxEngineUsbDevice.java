@@ -33,6 +33,7 @@ import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.core.ByteWriter;
 import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.core.FluxEngineException;
+import com.cowlark.fluxengine.wiring.FluxEngine;
 import com.cowlark.fluxengine.wiring.FluxEngine.AnyFrame;
 import com.cowlark.fluxengine.wiring.FluxEngine.EraseFrame;
 import com.cowlark.fluxengine.wiring.FluxEngine.MeasureSpeedFrame;
@@ -119,9 +120,7 @@ class FluxEngineUsbDevice extends UsbDevice
             }
 
             logger.atDebug().log("claiming USB interface 0");
-            check(
-                    LibUsb.claimInterface(handle, 0),
-                    "FluxEngine: claimInterface failed");
+            check(LibUsb.claimInterface(handle, 0), "FluxEngine: claimInterface failed");
             interfaceClaimed = true;
 
             logger.atDebug().log("resetting USB device");
@@ -514,11 +513,35 @@ class FluxEngineUsbDevice extends UsbDevice
         awaitReply(F_FRAME_ERASE_REPLY);
     }
 
+    private static Voltages toVoltages(
+            FluxEngine.Voltages raw)
+    {
+        return Voltages
+                .builder()
+                .setLogic0Mv(raw.getLogic0Mv())
+                .setLogic1Mv(raw.getLogic1Mv())
+                .build();
+    }
+
     @Override
-    public VoltagesReplyFrame measureVoltages()
+    public VoltageMeasurements measureVoltages()
     {
         usbCmdSend(AnyFrame.builder().setType(F_FRAME_MEASURE_VOLTAGES_CMD).setSize(2).build());
 
-        return awaitReply(F_FRAME_MEASURE_VOLTAGES_REPLY, VoltagesReplyFrame.class);
+        VoltagesReplyFrame res =
+                awaitReply(F_FRAME_MEASURE_VOLTAGES_REPLY, VoltagesReplyFrame.class);
+        return VoltageMeasurements
+                .builder()
+                .setInputBothOff(toVoltages(res.voltages.get(0)))
+                .setInputDrive0Selected(toVoltages(res.voltages.get(1)))
+                .setInputDrive1Selected(toVoltages(res.voltages.get(2)))
+                .setInputDrive0Running(toVoltages(res.voltages.get(3)))
+                .setInputDrive1Running(toVoltages(res.voltages.get(4)))
+                .setOutputBothOff(toVoltages(res.voltages.get(5)))
+                .setOutputDrive0Selected(toVoltages(res.voltages.get(6)))
+                .setOutputDrive1Selected(toVoltages(res.voltages.get(7)))
+                .setOutputDrive0Running(toVoltages(res.voltages.get(8)))
+                .setOutputDrive1Running(toVoltages(res.voltages.get(9)))
+                .build();
     }
 }

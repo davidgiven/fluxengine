@@ -1,9 +1,12 @@
 package com.cowlark.fluxengine.usb;
 
+import lombok.Builder;
+
 /**
  * A set of FDD bus voltage readings, ported from struct voltages_frame in
  * protocol.h.
  */
+@Builder(setterPrefix = "set")
 public class VoltageMeasurements
 {
     public Voltages inputBothOff;

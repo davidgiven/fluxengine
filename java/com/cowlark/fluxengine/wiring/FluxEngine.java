@@ -6,9 +6,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.indunet.fastproto.annotation.BinaryType;
 import org.indunet.fastproto.annotation.Expect;
+import org.indunet.fastproto.annotation.StructArrayType;
 import org.indunet.fastproto.annotation.UInt16Type;
 import org.indunet.fastproto.annotation.UInt32Type;
 import org.indunet.fastproto.annotation.UInt8Type;
+import java.util.List;
 
 /**
  * Wire protocol definitions for the FluxEngine hardware, ported from protocol.h.
@@ -255,15 +257,7 @@ public final class FluxEngine
     {
         @Expect(offset = 0, bytes = {(byte) F_FRAME_MEASURE_VOLTAGES_REPLY, 42}) transient int
                 _expects;
-        public Voltages outputBothOff;
-        public Voltages outputDrive0Selected;
-        public Voltages outputDrive1Selected;
-        public Voltages outputDrive0Running;
-        public Voltages outputDrive1Running;
-        public Voltages inputBothOff;
-        public Voltages inputDrive0Selected;
-        public Voltages inputDrive1Selected;
-        public Voltages inputDrive0Running;
-        public Voltages inputDrive1Running;
+        @StructArrayType(offset = 2, length = 10, element = Voltages.class)
+        public List<Voltages> voltages;
     }
 }
