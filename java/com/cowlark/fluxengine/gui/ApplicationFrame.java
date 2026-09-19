@@ -65,8 +65,12 @@ public class ApplicationFrame extends JFrame
             setIconImage(Toolkit.getDefaultToolkit().getImage(iconUrl));
         setTitle("FluxEngine");
 
-        UIForTabbedPane<JTabbedPane> leftPane =
-                tabbedPane().add(tab("Configuration").add(scrollPane().add(of(configurationPanel))));
+        int leftPaneWidth = configurationPanel.getPreferredSize().width;
+        UIForTabbedPane<JTabbedPane> leftPane = tabbedPane().add(tab("Configuration").add(scrollPane()
+                .withPrefWidth(leftPaneWidth)
+                .withMinSize(leftPaneWidth, 0)
+                .withMaxSize(leftPaneWidth, Integer.MAX_VALUE)
+                .add(of(configurationPanel))));
 
         UIForSplitPane<JSplitPane> topPane =
                 splitPane(HORIZONTAL)

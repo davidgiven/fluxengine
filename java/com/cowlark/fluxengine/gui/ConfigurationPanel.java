@@ -45,6 +45,7 @@ import javax.swing.ListCellRenderer;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -61,7 +62,7 @@ public class ConfigurationPanel extends JPanel
     private static final ImmutableList<Integer> DRIVES = ImmutableList.of(0, 1);
     private static final ConfigProto GLOBAL_CONFIG = Formats.get("_global_options");
     private static final String LABEL_FORMAT = "wmax 100lp";
-    private static final String SETTING_FORMAT = "wmax 200lp, growx, pushx";
+    private static final String SETTING_FORMAT = "wmax 200lp, growx";
 
     /* Black-and-white device icons, recoloured at render time to the text
      * foreground and background colours (see deviceIcon()). */
@@ -188,12 +189,31 @@ public class ConfigurationPanel extends JPanel
         return String.format("<html>%s:</html>", StringUtils.capitalize(comment));
     }
 
+    @Override
+    public Dimension getMaximumSize()
+    {
+        Dimension max = super.getMaximumSize();
+        int twoColumnMax = 340 + getInsets().left + getInsets().right;
+        if (max.width > twoColumnMax) {
+            max.width = twoColumnMax;
+        }
+        return max;
+    }
+
+    @Override
+    public Dimension getPreferredSize()
+    {
+        /* Preferred size is the maximum size so the grid is no wider
+         * than its two columns and the scroll pane can size to it. */
+        return getMaximumSize();
+    }
+
     /* Removes the existing UI and recreates it. */
     private void rebuildUi()
     {
         removeAll();
 
-        UIForPanel<ConfigurationPanel> panel = of(this).withLayout("wrap 2, insets 5");
+        UIForPanel<ConfigurationPanel> panel = of(this).withLayout("wrap 2, insets 5 5 5 0");
 
         panel = buildFormatPane(panel);
         panel = buildDevicesPane(panel);
