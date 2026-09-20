@@ -6,10 +6,12 @@ import java.util.Properties;
 /* Provides the application version, supplied at build time via Bazel stamping.
  *
  * Bazel generates version.properties via scripts/version.bzl from
- * STABLE_VERSION (scripts/workspace_status.sh as YYYY.MMDD.HHMM per-minute UTC,
- * each component <65535 so valid for Windows MSI ProductVersion). The value is
- * also available as -Dfluxengine.version if set; otherwise the properties file
- * is read. When built without --stamp, falls back to 1.0.0-dev.
+ * STABLE_VERSION (scripts/workspace_status.sh as YY.MM.N per-minute UTC
+ * where N = (DD-1)*1440 + HH*60 + MM, fits MSI 255.255.65535 and macOS
+ * CFBundleVersion 1-3 integers). This is the same version passed to jpackage
+ * as --app-version, so Version.get() reports the installer version. The value
+ * is also available as -Dfluxengine.version if set; otherwise the properties
+ * file is read. When built without --stamp, falls back to 1.0.0-dev.
  */
 public final class Version
 {

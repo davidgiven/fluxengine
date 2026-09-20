@@ -84,7 +84,8 @@ def _jpackage_impl(ctx):
     # supplied via --resource-dir to avoid post-processing.
     #
     # Stamping: when stamp=True and --stamp is set, read STABLE_VERSION from
-    # the stable-status file (produced by scripts/workspace_status.sh via
+    # the stable-status file (produced by scripts/workspace_status.sh as
+    # YY.MM.N per-minute UTC, N = (DD-1)*1440+HH*60+MM, via
     # `bash scripts/workspace_status.sh`, which works on Linux/macOS and on
     # Windows via Git bash). Fall back to app_version (1.0.0) otherwise.
     stamp_inputs = [ctx.info_file] if ctx.attr.stamp else []
