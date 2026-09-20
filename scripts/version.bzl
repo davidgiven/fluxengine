@@ -1,4 +1,9 @@
-"""Generates version.properties containing fluxengine.version from Bazel stamp."""
+"""Generates version.properties containing fluxengine.version from Bazel stamp.
+
+STABLE_VERSION is produced by scripts/workspace_status.sh as YY.MM.N per-minute
+UTC (N = (DD-1)*1440+HH*60+MM) and is used as jpackage --app-version, so
+fluxengine.version matches the installer version.
+"""
 
 def _version_properties_impl(ctx):
     out = ctx.actions.declare_file("version.properties")
