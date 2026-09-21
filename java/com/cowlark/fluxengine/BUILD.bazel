@@ -64,7 +64,6 @@ jpackage(
     package_name = "fluxengine",
     extra_jars = ["@maven//:io_github_dsheirer_libusb4java_darwin_aarch64"],
     extra_jpackage_args = [
-        "--mac-sign",
         "--mac-package-name FluxEngine",
     ],
     jar = ":fluxengine_deploy.jar",
