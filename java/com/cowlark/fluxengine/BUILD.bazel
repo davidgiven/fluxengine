@@ -17,12 +17,12 @@ jpackage(
     name = "fluxengine_deb",
     package_name = "fluxengine",
     app_version = "1.0.0",
-    stamp = True,
     extra_launchers = [":fluxengine-gui.properties"],
     jar = ":fluxengine_deploy.jar",
     launcher_icon = "//extras:icon.png",
     main_class = "com.cowlark.fluxengine.cli.Main",
     package_type = "deb",
+    stamp = True,
     tags = ["manual"],
 )
 
@@ -30,12 +30,12 @@ jpackage(
     name = "fluxengine_rpm",
     package_name = "fluxengine",
     app_version = "1.0.0",
-    stamp = True,
     extra_launchers = [":fluxengine-gui.properties"],
     jar = ":fluxengine_deploy.jar",
     launcher_icon = "//extras:icon.png",
     main_class = "com.cowlark.fluxengine.cli.Main",
     package_type = "rpm",
+    stamp = True,
     tags = ["manual"],
 )
 
@@ -47,7 +47,6 @@ jpackage(
     name = "fluxengine_msi",
     package_name = "fluxengine",
     app_version = "1.0.0",
-    stamp = True,
     extra_launchers = [":fluxengine-gui.properties"],
     jar = ":fluxengine_deploy.jar",
     launcher_icon = select({
@@ -59,6 +58,7 @@ jpackage(
         "@platforms//os:windows": "msi",
         "//conditions:default": "unsupported",
     }),
+    stamp = True,
     tags = ["manual"],
 )
 
@@ -66,8 +66,11 @@ jpackage(
     name = "fluxengine_dmg",
     package_name = "FluxEngine",
     app_version = "1.0.0",
-    stamp = True,
     extra_jars = ["@maven//:io_github_dsheirer_libusb4java_darwin_aarch64"],
+    extra_jpackage_args = [
+        "--mac-sign",
+        "--mac-package-name FluxEngine",
+    ],
     jar = ":fluxengine_deploy.jar",
     launcher_icon = select({
         "@platforms//os:osx": "//extras:fluxengine_icns",
@@ -78,6 +81,7 @@ jpackage(
         "@platforms//os:osx": "dmg",
         "//conditions:default": "unsupported",
     }),
+    stamp = True,
     tags = ["manual"],
 )
 
@@ -85,10 +89,10 @@ jpackage_app_image(
     name = "fluxengine_app_image",
     package_name = "fluxengine",
     app_version = "1.0.0",
-    stamp = True,
     extra_launchers = [":fluxengine-gui.properties"],
     jar = ":fluxengine_deploy.jar",
     launcher_icon = "//extras:icon.png",
     main_class = "com.cowlark.fluxengine.cli.Main",
+    stamp = True,
     tags = ["manual"],
 )

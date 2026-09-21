@@ -122,8 +122,6 @@ def _jpackage_impl(ctx):
             if [ "{package_type}" = "msi" ]; then WIN_CONSOLE="--win-console"; fi
             LINUX_PACKAGE_NAME=""
             if [ "{package_type}" = "deb" ] || [ "{package_type}" = "rpm" ]; then LINUX_PACKAGE_NAME="--linux-package-name {package_name}"; fi
-            MAC_SIGN=""
-            if [ "{package_type}" = "dmg" ]; then MAC_SIGN="--mac-sign"; fi
             # Determine app version: STABLE_VERSION from Bazel stamp, else fallback.
             APP_VERSION="{app_version}"
             if [ "{stamp}" = "True" ] && [ -f "{info_file}" ]; then
@@ -140,7 +138,7 @@ def _jpackage_impl(ctx):
                 --main-jar "{main_jar}" \
                 --main-class "{main_class}" \
                 $WIN_CONSOLE \
-                $MAC_SIGN \
+                {extra_jpackage_args} \
                 --resource-dir "$(pwd)/workdir/resources" \
                 {add_launcher_args} \
                 --jlink-options "--strip-debug --no-header-files --no-man-pages --strip-native-commands" \
@@ -161,6 +159,7 @@ def _jpackage_impl(ctx):
             stage_extra_jars = stage_extra_jars,
             main_class = ctx.attr.main_class,
             add_launcher_args = _add_launcher_args(launchers),
+            extra_jpackage_args = " ".join(ctx.attr.extra_jpackage_args),
             out = out.path,
         ),
         mnemonic = "Jpackage" + package_type.title(),
@@ -229,6 +228,7 @@ def _jpackage_app_image_impl(ctx):
                 --input "$(pwd)/workdir/input" \
                 --main-jar "{main_jar}" \
                 --main-class "{main_class}" \
+                {extra_jpackage_args} \
                 --resource-dir "$(pwd)/workdir/resources" \
                 {add_launcher_args} \
                 --jlink-options "--strip-debug --no-header-files --no-man-pages --strip-native-commands" \
@@ -251,6 +251,7 @@ def _jpackage_app_image_impl(ctx):
             stage_extra_jars = stage_extra_jars,
             main_class = ctx.attr.main_class,
             add_launcher_args = _add_launcher_args(launchers),
+            extra_jpackage_args = " ".join(ctx.attr.extra_jpackage_args),
             out = out.path,
         ),
         mnemonic = "JpackageAppImage",
@@ -300,6 +301,10 @@ _jpackage_attrs = {
         values = _JPACKAGE_TYPES,
         doc = "The jpackage package type: deb/rpm (Linux), msi (Windows), dmg (macOS). " +
               "Use select() so this is only set to the matching platform.",
+    ),
+    "extra_jpackage_args": attr.string_list(
+        default = [],
+        doc = "Additional arguments to pass to jpackage verbatim.",
     ),
 }
 
