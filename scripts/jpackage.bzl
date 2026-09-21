@@ -66,8 +66,9 @@ def _jpackage_impl(ctx):
     else:
         out = ctx.actions.declare_file(ctx.attr.package_name + "_" + ctx.attr.app_version + "." + extension)
     launchers = _launcher_properties(ctx)
-    merge_extra_jars = "\n".join([
-        '            (cd workdir/native && "{jar_tool}" xf "{jar}")'.format(
+    stage_extra_jars = "\n".join([
+        ('            cp -L "{jar}" workdir/input/\n'
+         '            (cd workdir/input && "{jar_tool}" xf "{jar}")').format(
             jar_tool = java_runtime.java_home + "/bin/jar",
             jar = extra_jar.path,
         )
@@ -104,12 +105,9 @@ def _jpackage_impl(ctx):
         use_default_shell_env = True,
         command = """
             rm -rf workdir
-            mkdir -p workdir/input workdir/native workdir/tmp workdir/dest workdir/home workdir/rpmbuild workdir/resources
+            mkdir -p workdir/input workdir/tmp workdir/dest workdir/home workdir/rpmbuild workdir/resources
             cp -L "{jar}" workdir/input/
-{merge_extra_jars}
-            if [ -n "$(find workdir/native -type f -print -quit)" ]; then
-                "{jar_tool}" uf "workdir/input/{main_jar}" -C workdir/native .
-            fi
+{stage_extra_jars}
             chmod u+w workdir/input/*
             printf '[Desktop Entry]\\nName=FluxEngine\\nComment=FluxEngine\\nExec=APPLICATION_LAUNCHER\\nIcon=APPLICATION_ICON\\nTerminal=false\\nType=Application\\nCategories=DEPLOY_BUNDLE_CATEGORY\\n' > workdir/resources/fluxengine-gui.desktop
             if [ "{package_type}" = "rpm" ]; then
@@ -157,7 +155,7 @@ def _jpackage_impl(ctx):
             jar = jar.path,
             main_jar = jar.basename,
             jar_tool = java_runtime.java_home + "/bin/jar",
-            merge_extra_jars = merge_extra_jars,
+            stage_extra_jars = stage_extra_jars,
             main_class = ctx.attr.main_class,
             add_launcher_args = _add_launcher_args(launchers),
             out = out.path,
@@ -180,8 +178,9 @@ def _jpackage_app_image_impl(ctx):
     else:
         out = ctx.actions.declare_file(ctx.attr.package_name + "_" + ctx.attr.app_version + ".tar.xz")
     launchers = _launcher_properties(ctx)
-    merge_extra_jars = "\n".join([
-        '            (cd workdir/native && "{jar_tool}" xf "{jar}")'.format(
+    stage_extra_jars = "\n".join([
+        ('            cp -L "{jar}" workdir/input/\n'
+         '            (cd workdir/input && "{jar_tool}" xf "{jar}")').format(
             jar_tool = java_runtime.java_home + "/bin/jar",
             jar = extra_jar.path,
         )
@@ -206,12 +205,9 @@ def _jpackage_app_image_impl(ctx):
         use_default_shell_env = True,
         command = """
             rm -rf workdir
-            mkdir -p workdir/input workdir/native workdir/tmp workdir/dest workdir/home workdir/resources
+            mkdir -p workdir/input workdir/tmp workdir/dest workdir/home workdir/resources
             cp -L "{jar}" workdir/input/
-{merge_extra_jars}
-            if [ -n "$(find workdir/native -type f -print -quit)" ]; then
-                "{jar_tool}" uf "workdir/input/{main_jar}" -C workdir/native .
-            fi
+{stage_extra_jars}
             chmod u+w workdir/input/*
             printf '[Desktop Entry]\nName=FluxEngine\nComment=FluxEngine\nExec=APPLICATION_LAUNCHER\nIcon=APPLICATION_ICON\nTerminal=false\nType=Application\nCategories=DEPLOY_BUNDLE_CATEGORY\n' > workdir/resources/fluxengine-gui.desktop
             TMPDIR="$(pwd)/workdir/tmp"
@@ -249,7 +245,7 @@ def _jpackage_app_image_impl(ctx):
             jar = jar.path,
             main_jar = jar.basename,
             jar_tool = java_runtime.java_home + "/bin/jar",
-            merge_extra_jars = merge_extra_jars,
+            stage_extra_jars = stage_extra_jars,
             main_class = ctx.attr.main_class,
             add_launcher_args = _add_launcher_args(launchers),
             out = out.path,
