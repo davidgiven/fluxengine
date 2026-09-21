@@ -289,7 +289,7 @@ _jpackage_attrs = {
         doc = "The package name; also used for the output filename.",
     ),
     "app_version": attr.string(
-        mandatory = True,
+        default = "1.0.0",
         doc = "Application version, e.g. '1.0.0'. Used as fallback when stamp is off.",
     ),
     "stamp": attr.bool(
