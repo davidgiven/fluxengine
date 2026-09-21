@@ -64,7 +64,7 @@ jpackage(
 
 jpackage(
     name = "fluxengine_dmg",
-    package_name = "FluxEngine",
+    package_name = "fluxengine",
     app_version = "1.0.0",
     extra_jars = ["@maven//:io_github_dsheirer_libusb4java_darwin_aarch64"],
     extra_jpackage_args = [
