@@ -56,12 +56,16 @@ jobs:
           bazel test //... --test_output=errors
           bazel build //:fluxengine_dmg --config=stamp --test_output=errors
 
+      - name: Signing package
+        run: |
+          cd fluxengine
+          sh scripts/resign-dmg.sh bazel-bin/java/com/cowlark/fluxengine/fluxengine.dmg fluxengine-signed.dmg
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ${{ github.event.repository.name }}.${{ github.sha }}.osx.${{ runner.arch }}
           path: |
-            fluxengine/bazel-bin/java/com/cowlark/fluxengine/*.dmg
+            fluxengine/fluxengine-signed.dmg
 
   build-windows:
     runs-on: windows-latest
