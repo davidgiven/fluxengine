@@ -66,6 +66,13 @@ def _jpackage_impl(ctx):
     else:
         out = ctx.actions.declare_file(ctx.attr.package_name + "_" + ctx.attr.app_version + "." + extension)
     launchers = _launcher_properties(ctx)
+    merge_extra_jars = "\n".join([
+        '            (cd workdir/native && "{jar_tool}" xf "{jar}")'.format(
+            jar_tool = java_runtime.java_home + "/bin/jar",
+            jar = extra_jar.path,
+        )
+        for extra_jar in ctx.files.extra_jars
+    ])
 
     # jpackage writes a lot of scratch state (a jlink runtime image and an app
     # image) and chmods files in it. Do all the scratch work in a plain
@@ -91,14 +98,18 @@ def _jpackage_impl(ctx):
     stamp_inputs = [ctx.info_file] if ctx.attr.stamp else []
     ctx.actions.run_shell(
         outputs = [out],
-        inputs = [jar] + [f for (_, f) in launchers] +\
+        inputs = [jar] + ctx.files.extra_jars + [f for (_, f) in launchers] +\
                  ([ctx.file.launcher_icon] if ctx.file.launcher_icon else []) + stamp_inputs,
         tools = [java_runtime.files],
         use_default_shell_env = True,
         command = """
             rm -rf workdir
-            mkdir -p workdir/input workdir/tmp workdir/dest workdir/home workdir/rpmbuild workdir/resources
+            mkdir -p workdir/input workdir/native workdir/tmp workdir/dest workdir/home workdir/rpmbuild workdir/resources
             cp -L "{jar}" workdir/input/
+{merge_extra_jars}
+            if [ -n "$(find workdir/native -type f -print -quit)" ]; then
+                "{jar_tool}" uf "workdir/input/{main_jar}" -C workdir/native .
+            fi
             chmod u+w workdir/input/*
             printf '[Desktop Entry]\\nName=FluxEngine\\nComment=FluxEngine\\nExec=APPLICATION_LAUNCHER\\nIcon=APPLICATION_ICON\\nTerminal=false\\nType=Application\\nCategories=DEPLOY_BUNDLE_CATEGORY\\n' > workdir/resources/fluxengine-gui.desktop
             if [ "{package_type}" = "rpm" ]; then
@@ -145,6 +156,8 @@ def _jpackage_impl(ctx):
             info_file = ctx.info_file.path if ctx.attr.stamp else "",
             jar = jar.path,
             main_jar = jar.basename,
+            jar_tool = java_runtime.java_home + "/bin/jar",
+            merge_extra_jars = merge_extra_jars,
             main_class = ctx.attr.main_class,
             add_launcher_args = _add_launcher_args(launchers),
             out = out.path,
@@ -167,6 +180,13 @@ def _jpackage_app_image_impl(ctx):
     else:
         out = ctx.actions.declare_file(ctx.attr.package_name + "_" + ctx.attr.app_version + ".tar.xz")
     launchers = _launcher_properties(ctx)
+    merge_extra_jars = "\n".join([
+        '            (cd workdir/native && "{jar_tool}" xf "{jar}")'.format(
+            jar_tool = java_runtime.java_home + "/bin/jar",
+            jar = extra_jar.path,
+        )
+        for extra_jar in ctx.files.extra_jars
+    ])
 
     # jpackage --type app-image writes a directory (with a jlink runtime image
     # and the app launcher) and chmods files in it. Do the scratch work in a
@@ -180,14 +200,18 @@ def _jpackage_app_image_impl(ctx):
     stamp_inputs = [ctx.info_file] if ctx.attr.stamp else []
     ctx.actions.run_shell(
         outputs = [out],
-        inputs = [jar] + [f for (_, f) in launchers] +\
+        inputs = [jar] + ctx.files.extra_jars + [f for (_, f) in launchers] +\
                  ([ctx.file.launcher_icon] if ctx.file.launcher_icon else []) + stamp_inputs,
         tools = [java_runtime.files],
         use_default_shell_env = True,
         command = """
             rm -rf workdir
-            mkdir -p workdir/input workdir/tmp workdir/dest workdir/home workdir/resources
+            mkdir -p workdir/input workdir/native workdir/tmp workdir/dest workdir/home workdir/resources
             cp -L "{jar}" workdir/input/
+{merge_extra_jars}
+            if [ -n "$(find workdir/native -type f -print -quit)" ]; then
+                "{jar_tool}" uf "workdir/input/{main_jar}" -C workdir/native .
+            fi
             chmod u+w workdir/input/*
             printf '[Desktop Entry]\nName=FluxEngine\nComment=FluxEngine\nExec=APPLICATION_LAUNCHER\nIcon=APPLICATION_ICON\nTerminal=false\nType=Application\nCategories=DEPLOY_BUNDLE_CATEGORY\n' > workdir/resources/fluxengine-gui.desktop
             TMPDIR="$(pwd)/workdir/tmp"
@@ -224,6 +248,8 @@ def _jpackage_app_image_impl(ctx):
             info_file = ctx.info_file.path if ctx.attr.stamp else "",
             jar = jar.path,
             main_jar = jar.basename,
+            jar_tool = java_runtime.java_home + "/bin/jar",
+            merge_extra_jars = merge_extra_jars,
             main_class = ctx.attr.main_class,
             add_launcher_args = _add_launcher_args(launchers),
             out = out.path,
@@ -247,6 +273,10 @@ _jpackage_attrs = {
         allow_files = [".properties"],
         doc = "jpackage launcher properties files; " +
               "each launcher is named after the file (minus its .properties suffix).",
+    ),
+    "extra_jars": attr.label_list(
+        allow_files = [".jar"],
+        doc = "Additional runtime JARs copied beside the main application JAR.",
     ),
     "launcher_icon": attr.label(
         allow_single_file = [".png", ".ico", ".icns"],

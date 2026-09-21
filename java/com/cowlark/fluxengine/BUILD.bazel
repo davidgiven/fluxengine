@@ -68,6 +68,7 @@ jpackage(
     app_version = "1.0.0",
     stamp = True,
     extra_launchers = [":fluxengine-gui.properties"],
+    extra_jars = ["@maven//:io_github_dsheirer_libusb4java_darwin_aarch64"],
     jar = ":fluxengine_deploy.jar",
     launcher_icon = select({
         "@platforms//os:osx": "//extras:fluxengine_icns",
