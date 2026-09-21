@@ -122,6 +122,8 @@ def _jpackage_impl(ctx):
             if [ "{package_type}" = "msi" ]; then WIN_CONSOLE="--win-console"; fi
             LINUX_PACKAGE_NAME=""
             if [ "{package_type}" = "deb" ] || [ "{package_type}" = "rpm" ]; then LINUX_PACKAGE_NAME="--linux-package-name {package_name}"; fi
+            MAC_SIGN=""
+            if [ "{package_type}" = "dmg" ]; then MAC_SIGN="--mac-sign"; fi
             # Determine app version: STABLE_VERSION from Bazel stamp, else fallback.
             APP_VERSION="{app_version}"
             if [ "{stamp}" = "True" ] && [ -f "{info_file}" ]; then
@@ -138,6 +140,7 @@ def _jpackage_impl(ctx):
                 --main-jar "{main_jar}" \
                 --main-class "{main_class}" \
                 $WIN_CONSOLE \
+                $MAC_SIGN \
                 --resource-dir "$(pwd)/workdir/resources" \
                 {add_launcher_args} \
                 --jlink-options "--strip-debug --no-header-files --no-man-pages --strip-native-commands" \
