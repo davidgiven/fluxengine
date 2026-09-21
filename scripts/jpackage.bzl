@@ -67,7 +67,7 @@ def _jpackage_impl(ctx):
         out = ctx.actions.declare_file(ctx.attr.package_name + "_" + ctx.attr.app_version + "." + extension)
     launchers = _launcher_properties(ctx)
     stage_extra_jars = "\n".join([
-        ('            cp -L "{jar}" workdir/input/\n'
+        ('            cp -L "{jar}" workdir/input/\n' +
          '            (cd workdir/input && "{jar_tool}" xf "{jar}")').format(
             jar_tool = java_runtime.java_home + "/bin/jar",
             jar = extra_jar.path,
@@ -179,7 +179,7 @@ def _jpackage_app_image_impl(ctx):
         out = ctx.actions.declare_file(ctx.attr.package_name + "_" + ctx.attr.app_version + ".tar.xz")
     launchers = _launcher_properties(ctx)
     stage_extra_jars = "\n".join([
-        ('            cp -L "{jar}" workdir/input/\n'
+        ('            cp -L "{jar}" workdir/input/\n' +
          '            (cd workdir/input && "{jar_tool}" xf "{jar}")').format(
             jar_tool = java_runtime.java_home + "/bin/jar",
             jar = extra_jar.path,
