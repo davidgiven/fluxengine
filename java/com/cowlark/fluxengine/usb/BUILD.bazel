@@ -36,6 +36,7 @@ java_library(
         "@maven//:org_indunet_fastproto_core",
         "@maven//:org_projectlombok_lombok",
         "@maven//:org_slf4j_slf4j_api",
+        "@maven//:io_github_dsheirer_libusb4java_darwin_aarch64",
         "@maven//:org_usb4java_usb4java",
     ],
 )

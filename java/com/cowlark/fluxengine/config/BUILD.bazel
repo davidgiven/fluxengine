@@ -94,6 +94,7 @@ java_library(
         "@maven//:com_google_guava_guava",
         "@maven//:com_jayway_jsonpath_json_path",
         "@maven//:org_projectlombok_lombok",
+        "@maven//:io_github_dsheirer_libusb4java_darwin_aarch64",
         "@maven//:org_usb4java_usb4java",
     ],
 )
