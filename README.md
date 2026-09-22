@@ -128,6 +128,7 @@ choices because they can store multiple types of file system.
 | [`commodore`](doc/disk-commodore.md) | Commodore: 1541, 1581, 8050 and variations | 🦄 | 🦄 | CBMFS  |
 | [`eco1`](doc/disk-eco1.md) | VDS Eco1: CP/M; 1210kB 77-track mixed format DSHD | 🦖 |  | CPMFS  |
 | [`epsonpf10`](doc/disk-epsonpf10.md) | Epson PF-10: CP/M; 3.5" 40-track DSDD | 🦖 |  | CPMFS  |
+| [`epsonqx10`](doc/disk-epsonqx10.md) | Epson QX-10: CP/M; 5.25" 40-track DSDD | 🦖 | 🦖 | CPMFS  |
 | [`f85`](doc/disk-f85.md) | Durango F85: 461kB 5.25" 77-track SS | 🦖 |  |  |
 | [`fb100`](doc/disk-fb100.md) | Brother FB-100: 100kB 3.5" 40-track SSSD | 🦖 |  |  |
 | [`hplif`](doc/disk-hplif.md) | Hewlett-Packard LIF: a variety of disk formats used by HP | 🦄 | 🦄 | LIF  |
