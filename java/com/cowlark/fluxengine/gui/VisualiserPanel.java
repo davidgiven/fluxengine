@@ -42,7 +42,7 @@ public class VisualiserPanel extends JPanel
     {
         this.model = model;
 
-        setPreferredSize(dimensionPts(300, 600));
+        setPreferredSize(dimensionPts(250, 500));
 
         Viewable.cast(model.getDisk()).onChange(From.ALL, it -> diskChanged());
     }
