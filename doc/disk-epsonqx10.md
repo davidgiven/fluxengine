@@ -24,17 +24,17 @@ All variants are 5.25" DSDD, soft-sectored (single index hole), MFM,
 ## Options
 
   - Format variants:
-      - `300`: 300kB 5.25" 40-track DSDD, 16 sectors x 256 bytes
-      - `380`: 380kB 5.25" 40-track DSDD, 10 sectors x 512 bytes
-      - `320`: 320kB 5.25" 40-track DSDD mixed bootable
+      - `320`: 320kB 5.25" 40-track DSDD, 16 sectors x 256 bytes
+      - `400`: 400kB 5.25" 40-track DSDD, 10 sectors x 512 bytes
+      - `396`: 396kB 5.25" 40-track DSDD mixed bootable
 
 ## Examples
 
 To read:
 
-  - `fluxengine read -c epsonqx10 --300 -s drive:0 -o epsonqx10.img`
-  - `fluxengine read -c epsonqx10 --380 -s drive:0 -o epsonqx10.img`
   - `fluxengine read -c epsonqx10 --320 -s drive:0 -o epsonqx10.img`
+  - `fluxengine read -c epsonqx10 --400 -s drive:0 -o epsonqx10.img`
+  - `fluxengine read -c epsonqx10 --396 -s drive:0 -o epsonqx10.img`
 
 ## 320kB conventional variant (16 x 256 bytes)
 
@@ -43,8 +43,8 @@ CP/M transfer utilities:
 
   * 40 tracks x 2 sides x 16 sectors x 256 bytes = 327,680 bytes
   * Formatted capacity listed as 328 kbyte in the QX-10 Technical Manual
-    Troubleshooting guide; nominal CP/M capacity ~300 kB after reserving
-    2 system tracks.
+    Troubleshooting guide; nominal CP/M capacity ~288 kB after reserving
+    4 system tracks.
 
 Use this for a typical QX-10 CP/M data disk if you do not know which
 variant you have.
@@ -56,7 +56,7 @@ Identical physical geometry and rotation speed, but each track holds
 (4,096 bytes/track):
 
   * 40 tracks x 2 sides x 10 sectors x 512 bytes = 409,600 bytes raw
-  * Nominal CP/M capacity ~380 kB after 2 system tracks.
+  * Nominal CP/M capacity ~360 kB after 2 system tracks.
 
 The Epson CP/M External Reference Spec identifies both this and the
 16 x 256 layout as QX-10 formats; the BIOS listing notes the standard
@@ -73,6 +73,9 @@ FluxEngine's profile for this is:
   * tracks 0-1 (cylinders 0-1, both sides): 16 sectors x 256 bytes
   * tracks 2-39: 10 sectors x 512 bytes
 
+Note that the first _four_ tracks are still reserved, which means two
+16 sector tracks and two 10 sector tracks!
+
 Raw capacity with that split is 4 tracks x 4,096 + 76 tracks x 5,120 =
 405,504 bytes; however, this also gives the same ~380 kB of user space,
 as for the 400kB format, but with less reserved operating system space.
@@ -84,5 +87,4 @@ as for the 400kB format, but with less reserved operating system space.
   * [CP/M-80 Epson QX-10 External Reference Spec B2.20, 24 Feb 84 (vtda)](https://vtda.org/docs/computing/Epson/QX-10/CPM-80_Epson_QX-10_External_Reference_Spec_B2.20_24Feb84.pdf)
   * [Epson QX-10 User's Guide, James Hansen (bad copy 2) (vtda)](https://vtda.org/docs/computing/Epson/QX-10/Epson_QX-10_Users_Guide_JamesHansen(bad_copy2).pdf) - mixed layout
   * [QX-10 detail page](https://www.vintagecomputer.net/fjkraan/comp/qx10/detail.html)
-  * [PF-10 vs QX-10 note: PF-10 is 3.5" 512 bytes/sector](https://github.com/davidgiven/fluxengine/blob/master/java/com/cowlark/fluxengine/arch/epsonpf10.textpb)
 
