@@ -38,6 +38,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.file.InvalidPathException;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -212,6 +213,14 @@ public class UiUtils
                 try
                 {
                     data.writeToFile(file.toPath());
+                } catch (InvalidPathException e)
+                {
+                    JOptionPane.showMessageDialog(
+                            parent,
+                            "Could not save file because the filename is invalid: "
+                                + e.getMessage(),
+                            "Save Failed",
+                            JOptionPane.ERROR_MESSAGE);
                 } catch (FluxEngineException e)
                 {
                     JOptionPane.showMessageDialog(
