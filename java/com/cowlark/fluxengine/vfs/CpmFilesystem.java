@@ -6,7 +6,6 @@ import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_GETFSDATA;
 import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_LIST;
 import static com.cowlark.fluxengine.vfs.Filesystem.FileType.IS_FILE;
 
-import com.cowlark.fluxengine.core.ByteReader;
 import com.cowlark.fluxengine.core.ByteWriter;
 import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.data.CylinderHead;
@@ -14,6 +13,10 @@ import com.cowlark.fluxengine.data.CylinderHeadSector;
 import com.cowlark.fluxengine.data.LogicalTrackLayout;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import org.indunet.fastproto.FastProto;
+import org.indunet.fastproto.annotation.UInt16ArrayType;
+import org.indunet.fastproto.annotation.UInt8ArrayType;
+import org.indunet.fastproto.annotation.UInt8Type;
 import java.io.IOException;
 import java.nio.file.FileSystemException;
 import java.nio.file.InvalidPathException;
@@ -196,7 +199,9 @@ public class CpmFilesystem extends Filesystem
         builder.put(FilesystemAttributes.VOLUME_NAME.name(), "");
         builder.put(FilesystemAttributes.TOTAL_BLOCKS.name(), Integer.toString(filesystemBlocks));
         builder.put(FilesystemAttributes.USED_BLOCKS.name(), Integer.toString(usedBlocks));
-        builder.put(FilesystemAttributes.BLOCK_SIZE.name(), Integer.toString(config.getBlockSize()));
+        builder.put(
+                FilesystemAttributes.BLOCK_SIZE.name(),
+                Integer.toString(config.getBlockSize()));
         return builder.build();
     }
 
@@ -379,29 +384,59 @@ public class CpmFilesystem extends Filesystem
         Entry(Bytes bytes, int mapEntrySize, int index)
         {
             this.index = index;
-            allocationMap = new ArrayList<>();
 
-            int b0 = bytes.getByte(0) & 0xff;
-            if (b0 == 0xe5)
+            int st;
+            int[] f;
+            int xl, bc, xh;
+
+            switch (mapEntrySize)
+            {
+                case 1 ->
+                {
+                    Cpm8Dirent de = FastProto.decode(bytes.toByteArray(), Cpm8Dirent.class);
+                    st = de.st;
+                    f = de.f;
+                    xl = de.xl;
+                    bc = de.bc;
+                    xh = de.xh;
+                    records = de.rc;
+                    allocationMap = de.al;
+                }
+
+                case 2 ->
+                {
+                    Cpm16Dirent de = FastProto.decode(bytes.toByteArray(), Cpm16Dirent.class);
+                    st = de.st;
+                    f = de.f;
+                    xl = de.xl;
+                    bc = de.bc;
+                    xh = de.xh;
+                    records = de.rc;
+                    allocationMap = de.al;
+                }
+
+                default -> throw new IllegalArgumentException("Bad map entry size " + mapEntrySize);
+            }
+
+            if (st == 0xe5)
                 deleted = true;
-
-            user = b0 & 0x0f;
+            user = st & 0x0f;
 
             {
                 StringBuilder ss = new StringBuilder();
-                for (int i = 1; i <= 8; i++)
+                for (int i = 0; i < 7; i++)
                 {
-                    int c = bytes.getByte(i) & 0x7f;
+                    int c = f[i] & 0x7f;
                     if (c == ' ')
                         break;
                     ss.append((char) c);
                 }
-                for (int i = 9; i <= 11; i++)
+                for (int i = 8; i <= 10; i++)
                 {
-                    int c = bytes.getByte(i) & 0x7f;
+                    int c = f[i] & 0x7f;
                     if (c == ' ')
                         break;
-                    if (i == 9)
+                    if (i == 8)
                         ss.append('.');
                     ss.append((char) c);
                 }
@@ -410,40 +445,45 @@ public class CpmFilesystem extends Filesystem
 
             {
                 StringBuilder ss = new StringBuilder();
-                if ((bytes.getByte(9) & 0x80) != 0)
+                if ((f[8] & 0x80) != 0)
                     ss.append('R');
-                if ((bytes.getByte(10) & 0x80) != 0)
+                if ((f[9] & 0x80) != 0)
                     ss.append('S');
-                if ((bytes.getByte(11) & 0x80) != 0)
+                if ((f[10] & 0x80) != 0)
                     ss.append('A');
                 mode = ss.toString();
             }
 
-            extent = (bytes.getByte(12) & 0xff) | ((bytes.getByte(14) & 0xff) << 5);
-            records = bytes.getByte(15) & 0xff;
-
-            ByteReader br = new ByteReader(bytes);
-            br.seek(16);
-            switch (mapEntrySize)
-            {
-                case 1:
-                    for (int i = 0; i < 16; i++)
-                        allocationMap.add(br.read8() & 0xff);
-                    break;
-
-                case 2:
-                    for (int i = 0; i < 8; i++)
-                        allocationMap.add(br.readLe16() & 0xffff);
-                    break;
-
-                default:
-                    break;
-            }
+            extent = xl | (xh << 5);
         }
 
         String combinedFilename()
         {
+            if (user == 0)
+                return filename;
             return String.format("%d:%s", user, filename);
         }
+    }
+
+    public static class Cpm8Dirent
+    {
+        @UInt8Type(offset = 0) public int st;
+        @UInt8ArrayType(offset = 1, length = 11) public int[] f;
+        @UInt8Type(offset = 12) public int xl;
+        @UInt8Type(offset = 13) public int bc;
+        @UInt8Type(offset = 14) public int xh;
+        @UInt8Type(offset = 15) public int rc;
+        @UInt8ArrayType(offset = 16, length = 16) public ArrayList<Integer> al;
+    }
+
+    public static class Cpm16Dirent
+    {
+        @UInt8Type(offset = 0) public int st;
+        @UInt8ArrayType(offset = 1, length = 11) public int[] f;
+        @UInt8Type(offset = 12) public int xl;
+        @UInt8Type(offset = 13) public int bc;
+        @UInt8Type(offset = 14) public int xh;
+        @UInt8Type(offset = 15) public int rc;
+        @UInt16ArrayType(offset = 16, length = 8) public ArrayList<Integer> al;
     }
 }
