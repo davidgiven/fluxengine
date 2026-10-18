@@ -21,7 +21,7 @@ public abstract class FluxSource implements AutoCloseable
             case FLUXTYPE_TEST_PATTERN ->
                     new TestPatternFluxSource(fluxSourceProto.getTestPattern());
             case FLUXTYPE_SCP -> new ScpFluxSource(fluxSourceProto.getScp());
-            case FLUXTYPE_A2R -> new A2RFluxSource(fluxSourceProto.getA2R());
+            case FLUXTYPE_A2R -> A2RFluxSource.create(fluxSourceProto.getA2R());
             case FLUXTYPE_CWF -> new CwfFluxSource(fluxSourceProto.getCwf());
             case FLUXTYPE_DMK -> new DmkFluxSource(fluxSourceProto.getDmk());
             case FLUXTYPE_FLUX -> new Fl2FluxSource(fluxSourceProto.getFl2());

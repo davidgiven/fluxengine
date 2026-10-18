@@ -3,6 +3,7 @@ package com.cowlark.fluxengine.fluxsource;
 import static com.cowlark.fluxengine.external.DriveType.DRIVETYPE_40TRACK;
 import static com.cowlark.fluxengine.external.DriveType.DRIVETYPE_80TRACK;
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertThrows;
 import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
 
 import com.cowlark.fluxengine.config.ConfigBuilder;
@@ -10,6 +11,7 @@ import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.config.DriveProto;
 import com.cowlark.fluxengine.core.ByteWriter;
 import com.cowlark.fluxengine.core.Bytes;
+import com.cowlark.fluxengine.core.FluxEngineException;
 import com.cowlark.fluxengine.external.DriveType;
 import com.google.common.truth.extensions.proto.ProtoTruth;
 import org.junit.Test;
@@ -35,7 +37,7 @@ public class A2RFluxSourceTest
         for (int b : new int[]{'A', '2', 'R', '2', 0xff, 0x0a, 0x0d, 0x0a})
             bw.write8(b);
 
-        // INFO chunk: version, 32-char padding, disktype (=2, 3.5"), ...
+        /* INFO chunk: version, 32-char padding, disktype (=2, 3.5"), ... */
         writeChunk(bw, "INFO");
         int sizePos = bw.pos();
         bw.writeLe32(0);
@@ -50,20 +52,18 @@ public class A2RFluxSourceTest
         bw.writeLe32(infoEnd - sizePos - 4);
         bw.seek(infoEnd);
 
-        // STRM chunk: one record for track 0 head 0 with flux data 30,30 (pulses
-        // at 30 a2r ticks). The headed iterating sums bytes until non-0xff,
-        // so this encodes three intervals: 30, 30 and a trailing 255-less end.
+        /* STRM chunk: one record for track 0 head 0 with three intervals of 30 ticks. */
         writeChunk(bw, "STRM");
         int sizePos2 = bw.pos();
         bw.writeLe32(0);
-        bw.write8(0); // location: cylinder 0, head 0
-        bw.write8(0); // unused byte
-        bw.writeLe32(3); // data length
-        bw.writeLe32(0); // index
+        bw.write8(0); /* location: cylinder 0, head 0 */
+        bw.write8(0); /* unused byte */
+        bw.writeLe32(3); /* data length */
+        bw.writeLe32(0); /* index */
         bw.write8(30);
         bw.write8(30);
         bw.write8(30);
-        bw.write8(0xff); // stream terminator
+        bw.write8(0xff); /* stream terminator */
         int strmSize = bw.pos();
         bw.seek(sizePos2);
         bw.writeLe32(strmSize - sizePos2 - 4);
@@ -86,10 +86,12 @@ public class A2RFluxSourceTest
     {
         Path path = writeTempFile();
 
-        A2RFluxSource source = new A2RFluxSource(A2rFluxSourceProto
+        FluxSource source = A2RFluxSource.create(A2rFluxSourceProto
                 .newBuilder()
                 .setFilename(path.toString())
                 .build());
+
+        assertThat(source).isInstanceOf(A2R2FluxSource.class);
 
         FluxSourceIterator iterator =
                 source.readFlux(FluxReadParameters.builder().setCylinder(0).setHead(0).build());
@@ -113,5 +115,23 @@ public class A2RFluxSourceTest
                                 .setDriveType(DRIVETYPE_80TRACK)
                                 .build())
                         .build());
+    }
+    @Test
+    public void rejectsUnsupportedMagic() throws IOException
+    {
+        Path path = Files.createTempFile("flux", ".a2r");
+        try
+        {
+            for (byte[] magic : new byte[][] {
+                    {'A', '2', 'R', '3'}, {'N', 'O', 'P', 'E'}, {'A', '2'}, {}})
+            {
+                Files.write(path, magic);
+                assertThrows(FluxEngineException.class, () -> A2RFluxSource.create(
+                        A2rFluxSourceProto.newBuilder().setFilename(path.toString()).build()));
+            }
+        } finally
+        {
+            Files.delete(path);
+        }
     }
 }
