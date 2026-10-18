@@ -112,6 +112,15 @@ public class FilesystemPanelHeadlessTest
         awaitLoaded(VfsPath.of("/"));
     }
 
+    @Test
+    public void backgroundDropTargetsRoot() throws Exception
+    {
+        SwingUtilities.invokeAndWait(() -> {
+            assertThat(panel.getFileDropDirectory(-1)).isSameInstanceAs(model.getRoot());
+            assertThat(panel.getTreeTable().getFillsViewportHeight()).isTrue();
+        });
+    }
+
     private void awaitIdle() throws Exception
     {
         /* Pump the EDT. */
