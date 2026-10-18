@@ -11,13 +11,13 @@ import java.util.List;
  * Iterator over the flux revolutions of one track in an A2R file, ported from
  * lib/fluxsource/a2rfluxsource.cc.
  */
-class A2RFluxSourceIterator implements FluxSourceIterator
+class A2R2FluxSourceIterator implements FluxSourceIterator
 {
     private final List<Bytes> flux;
     private final double index;
     private int count;
 
-    A2RFluxSourceIterator(List<Bytes> flux, double index)
+    A2R2FluxSourceIterator(List<Bytes> flux, double index)
     {
         this.flux = flux;
         this.index = index;

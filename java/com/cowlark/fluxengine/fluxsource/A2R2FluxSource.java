@@ -120,7 +120,7 @@ public class A2R2FluxSource extends FluxSource
                 A2Rv2Flux entry =
                         v2data.get(new CylinderHead(parameters.cylinder(), parameters.head()));
                 if (entry != null)
-                    return new A2RFluxSourceIterator(entry.flux, entry.index);
+                    return new A2R2FluxSourceIterator(entry.flux, entry.index);
                 else
                     return new EmptyFluxSourceIterator();
             }
