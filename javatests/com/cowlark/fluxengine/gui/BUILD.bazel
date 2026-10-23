@@ -61,8 +61,14 @@ java_test(
     srcs = ["UiUtilsTest.java"],
     deps = [
         "//java/com/cowlark/fluxengine/gui",
+        "//java/com/cowlark/fluxengine/core",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
+        "@maven//:commons_io_commons_io",
+        "@maven//:net_bytebuddy_byte_buddy",
+        "@maven//:net_bytebuddy_byte_buddy_agent",
+        "@maven//:org_mockito_mockito_core",
+        "@maven//:org_objenesis_objenesis",
     ],
 )
 
@@ -87,5 +93,21 @@ java_test(
         "@maven//:org_mockito_mockito_core",
         "@maven//:org_objenesis_objenesis",
         "@maven//:org_swinglabs_swingx_swingx_all",
+    ],
+)
+
+java_test(
+    name = "FilesystemExecutorTest",
+    srcs = [
+        "FakeFilesystem.java",
+        "FilesystemExecutorTest.java",
+    ],
+    deps = [
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/gui",
+        "//java/com/cowlark/fluxengine/vfs",
+        "@maven//:com_google_guava_guava",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
     ],
 )

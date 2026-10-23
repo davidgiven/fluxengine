@@ -1,8 +1,27 @@
 package com.cowlark.fluxengine.gui;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertThrows;
 
+import com.cowlark.fluxengine.core.Bytes;
+import org.apache.commons.io.function.IORunnable;
+import org.apache.commons.io.function.IOSupplier;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
+import org.mockito.MockedConstruction;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -10,6 +29,124 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class UiUtilsTest
 {
+    @Test
+    public void wrapIOExceptionDefersCallbacksAndPreservesResults()
+    {
+        AtomicBoolean called = new AtomicBoolean();
+        Runnable runnable = UiUtils.wrapIOException(() -> {
+            called.set(true);
+        });
+        assertThat(called.get()).isFalse();
+        runnable.run();
+        assertThat(called.get()).isTrue();
+
+        called.set(false);
+        Supplier<String> supplier = UiUtils.wrapIOException(() -> {
+            called.set(true);
+            return "result";
+        });
+        assertThat(called.get()).isFalse();
+        assertThat(supplier.get()).isEqualTo("result");
+        assertThat(called.get()).isTrue();
+    }
+
+    @Test
+    public void wrapIOExceptionPreservesOriginalCause()
+    {
+        IOException failure = new IOException("disk error");
+        IORunnable runnable = () -> {
+            throw failure;
+        };
+        IOSupplier<String> supplier = () -> {
+            throw failure;
+        };
+        assertThat(assertThrows(UncheckedIOException.class,
+                UiUtils.wrapIOException(runnable)::run).getCause()).isSameInstanceAs(failure);
+        assertThat(assertThrows(UncheckedIOException.class,
+                UiUtils.wrapIOException(supplier)::get).getCause()).isSameInstanceAs(failure);
+    }
+
+    @Test
+    public void wrapIOExceptionLeavesRuntimeFailuresUnchanged()
+    {
+        IllegalStateException failure = new IllegalStateException("failure");
+        IORunnable runnable = () -> {
+            throw failure;
+        };
+        IOSupplier<String> supplier = () -> {
+            throw failure;
+        };
+        assertThat(assertThrows(IllegalStateException.class,
+                UiUtils.wrapIOException(runnable)::run)).isSameInstanceAs(failure);
+        assertThat(assertThrows(IllegalStateException.class,
+                UiUtils.wrapIOException(supplier)::get)).isSameInstanceAs(failure);
+    }
+
+    @Test
+    public void reportErrorUnwrapsFailuresAndIgnoresCancellation() throws Exception
+    {
+        SwingUtilities.invokeAndWait(() -> {
+            try (MockedStatic<JOptionPane> dialogs = Mockito.mockStatic(JOptionPane.class))
+            {
+                CompletableFuture<Void> failed = CompletableFuture.<Void>failedFuture(
+                        new CompletionException(new UncheckedIOException(new IOException("disk error"))))
+                        .exceptionallyAsync(UiUtils.reportError("Read failed"), UiUtils.EDT_EXECUTOR);
+                assertThat(failed.join()).isNull();
+                dialogs.verify(() -> JOptionPane.showMessageDialog(
+                        null, "disk error", "Read failed", JOptionPane.ERROR_MESSAGE));
+                CompletableFuture.<Void>failedFuture(new CompletionException(new CancellationException()))
+                        .exceptionallyAsync(UiUtils.reportError("Cancelled"), UiUtils.EDT_EXECUTOR).join();
+                dialogs.verifyNoMoreInteractions();
+            }
+        });
+    }
+
+    @Test
+    public void promptAndSaveReturnsDestination() throws Exception
+    {
+        Path directory = Files.createTempDirectory("fluxengine-save-test-");
+        Path output = directory.resolve("saved.txt");
+        try (MockedConstruction<JFileChooser> choosers = Mockito.mockConstruction(
+                JFileChooser.class, (chooser, context) -> {
+                    Mockito.when(chooser.showSaveDialog(null)).thenReturn(JFileChooser.APPROVE_OPTION);
+                    Mockito.when(chooser.getSelectedFile()).thenReturn(output.toFile());
+                }))
+        {
+            CompletableFuture<Bytes> result =
+                    UiUtils.promptAndSave(null, "Save file", "default.txt");
+            assertThat(result.isDone()).isFalse();
+            assertThat(Files.exists(output)).isFalse();
+            Mockito.verify(choosers.constructed().get(0)).showSaveDialog(null);
+            result.completeAsync(() -> new Bytes("saved contents"), Runnable::run);
+            SwingUtilities.invokeAndWait(() -> {});
+            assertThat(Files.readString(output)).isEqualTo("saved contents");
+        } finally
+        {
+            Files.deleteIfExists(output);
+            Files.delete(directory);
+        }
+    }
+
+    @Test
+    public void promptAndSaveCancelsFutureWhenDialogIsCancelled()
+    {
+        try (MockedConstruction<JFileChooser> choosers = Mockito.mockConstruction(
+                JFileChooser.class, (chooser, context) ->
+                        Mockito.when(chooser.showSaveDialog(null))
+                                .thenReturn(JFileChooser.CANCEL_OPTION)))
+        {
+            CompletableFuture<Bytes> result =
+                    UiUtils.promptAndSave(null, "Save file", "default.txt");
+            assertThat(result.isCancelled()).isTrue();
+            AtomicBoolean extracted = new AtomicBoolean();
+            result.completeAsync(() -> {
+                extracted.set(true);
+                return new Bytes("must not be extracted");
+            }, Runnable::run);
+            assertThat(extracted.get()).isFalse();
+        }
+    }
+
     private static byte[] bs(String s)
     {
         return s.getBytes(StandardCharsets.ISO_8859_1);
@@ -93,17 +230,17 @@ public class UiUtilsTest
     @Test
     public void mixedLineEndingsAreNormalised()
     {
-        // CRLF + LF
+        /* CRLF + LF */
         assertThat(UiUtils.buildSanitisedString(bs("a\r\n\nb"))).isEqualTo("a\n\nb");
-        // LF + CRLF
+        /* LF + CRLF */
         assertThat(UiUtils.buildSanitisedString(bs("a\n\r\nb"))).isEqualTo("a\n\nb");
-        // CR + LF
+        /* CR + LF */
         assertThat(UiUtils.buildSanitisedString(bs("a\r\nb\nc\rd"))).isEqualTo("a\nb\nc\nd");
-        // All three forms interleaved
+        /* All three forms interleaved */
         assertThat(UiUtils.buildSanitisedString(bs("x\r\ny\nz\ra"))).isEqualTo("x\ny\nz\na");
         assertThat(UiUtils.buildSanitisedString(bs("a\r\nb\rc\nd"))).isEqualTo("a\nb\nc\nd");
         assertThat(UiUtils.buildSanitisedString(bs("\r\n\n\r"))).isEqualTo("\n\n\n");
-        // Raw bytes: CRLF as 13,10
+        /* Raw bytes: CRLF as 13,10 */
         assertThat(UiUtils.buildSanitisedString(bs(13, 10, 10, 13))).isEqualTo("\n\n\n");
     }
 
@@ -113,14 +250,14 @@ public class UiUtilsTest
         assertThat(UiUtils.buildSanitisedString(bs(0))).isEqualTo("\\x00");
         assertThat(UiUtils.buildSanitisedString(bs(1))).isEqualTo("\\x01");
         assertThat(UiUtils.buildSanitisedString(bs(0x1f))).isEqualTo("\\x1f");
-        // \t (0x09) and \n (0x0a) are not escaped; \r (0x0d) becomes \n
-        assertThat(UiUtils.buildSanitisedString(bs(0x08))).isEqualTo("\\x08"); // backspace
-        assertThat(UiUtils.buildSanitisedString(bs(0x0b))).isEqualTo("\\x0b"); // vertical tab
-        assertThat(UiUtils.buildSanitisedString(bs(0x0c))).isEqualTo("\\x0c"); // form feed
+        /* \t (0x09) and \n (0x0a) are not escaped; \r (0x0d) becomes \n */
+        assertThat(UiUtils.buildSanitisedString(bs(0x08))).isEqualTo("\\x08"); /* backspace */
+        assertThat(UiUtils.buildSanitisedString(bs(0x0b))).isEqualTo("\\x0b"); /* vertical tab */
+        assertThat(UiUtils.buildSanitisedString(bs(0x0c))).isEqualTo("\\x0c"); /* form feed */
         assertThat(UiUtils.buildSanitisedString(bs(0x0e))).isEqualTo("\\x0e");
-        // DEL (127) is not printable
+        /* DEL (127) is not printable */
         assertThat(UiUtils.buildSanitisedString(bs(0x7f))).isEqualTo("\\x7f");
-        // NUL via string conversion
+        /* NUL via string conversion */
         assertThat(UiUtils.buildSanitisedString(bs("\u0000"))).isEqualTo("\\x00");
         assertThat(UiUtils.buildSanitisedString(bs("\u0001"))).isEqualTo("\\x01");
     }
@@ -131,13 +268,13 @@ public class UiUtilsTest
         assertThat(UiUtils.buildSanitisedString(bs(0x80))).isEqualTo("\\x80");
         assertThat(UiUtils.buildSanitisedString(bs(0xff))).isEqualTo("\\xff");
         assertThat(UiUtils.buildSanitisedString(bs(0xa0))).isEqualTo("\\xa0");
-        // Check that all bytes 128..255 produce \xXX in lower-case hex
+        /* Check that all bytes 128..255 produce \xXX in lower-case hex */
         assertThat(UiUtils.buildSanitisedString(bs(0x80, 0x81, 0xfe)))
                 .isEqualTo("\\x80\\x81\\xfe");
-        // High bytes via ISO-8859-1 string
+        /* High bytes via ISO-8859-1 string */
         assertThat(UiUtils.buildSanitisedString(bs("\u0080"))).isEqualTo("\\x80");
         assertThat(UiUtils.buildSanitisedString(bs("\u00ff"))).isEqualTo("\\xff");
-        // Ensure signed byte handling: (byte)0x80 == -128 should still be \x80
+        /* Ensure signed byte handling: (byte)0x80 == -128 should still be \x80 */
         assertThat(UiUtils.buildSanitisedString(new byte[] {(byte) 0x80})).isEqualTo("\\x80");
         assertThat(UiUtils.buildSanitisedString(new byte[] {(byte) 0xff})).isEqualTo("\\xff");
     }
@@ -145,13 +282,13 @@ public class UiUtilsTest
     @Test
     public void printableBoundaryIsCorrect()
     {
-        // 32 (space) and 126 (~) are the boundaries and should be preserved
+        /* 32 (space) and 126 (~) are the boundaries and should be preserved */
         assertThat(UiUtils.buildSanitisedString(bs(" "))).isEqualTo(" ");
         assertThat(UiUtils.buildSanitisedString(bs("~"))).isEqualTo("~");
         assertThat(UiUtils.buildSanitisedString(bs(32, 126))).isEqualTo(" ~");
         assertThat(UiUtils.buildSanitisedString(bs(32))).isEqualTo(" ");
         assertThat(UiUtils.buildSanitisedString(bs(126))).isEqualTo("~");
-        // 31 and 127 should be escaped
+        /* 31 and 127 should be escaped */
         assertThat(UiUtils.buildSanitisedString(bs(31))).isEqualTo("\\x1f");
         assertThat(UiUtils.buildSanitisedString(bs(127))).isEqualTo("\\x7f");
     }
@@ -163,7 +300,7 @@ public class UiUtilsTest
                 .isEqualTo("a\\x00b\nc\nd\\x7fe\\x80f");
         assertThat(UiUtils.buildSanitisedString(bs("Hello\u0001World\r\nNext\u007fLine\u00ff")))
                 .isEqualTo("Hello\\x01World\nNext\\x7fLine\\xff");
-        // Raw bytes mixed
+        /* Raw bytes mixed */
         assertThat(UiUtils.buildSanitisedString(bs('a', 0, 'b', 10, 'c', 13, 10, 'd', 0x7f, 'e', 0x80, 'f')))
                 .isEqualTo("a\\x00b\nc\nd\\x7fe\\x80f");
     }
@@ -172,7 +309,7 @@ public class UiUtilsTest
     public void hexFormattingIsLowerCaseZeroPadded()
     {
         assertThat(UiUtils.buildSanitisedString(bs(0x01))).isEqualTo("\\x01");
-        assertThat(UiUtils.buildSanitisedString(bs("\n"))).isEqualTo("\n"); // LF is preserved, not escaped
+        assertThat(UiUtils.buildSanitisedString(bs("\n"))).isEqualTo("\n"); /* LF is preserved, not escaped */
         assertThat(UiUtils.buildSanitisedString(bs(0x0f))).isEqualTo("\\x0f");
         assertThat(UiUtils.buildSanitisedString(bs(0x10))).isEqualTo("\\x10");
         assertThat(UiUtils.buildSanitisedString(bs(0x00))).isEqualTo("\\x00");
@@ -181,12 +318,12 @@ public class UiUtilsTest
     @Test
     public void byteArrayHandlesUnsignedCorrectly()
     {
-        // 255 via signed byte -1
+        /* 255 via signed byte -1 */
         assertThat(UiUtils.buildSanitisedString(new byte[] {(byte) 255})).isEqualTo("\\xff");
-        // Sequence of high bytes
+        /* Sequence of high bytes */
         assertThat(UiUtils.buildSanitisedString(new byte[] {(byte) 0x80, (byte) 0x90, (byte) 0xa0, (byte) 0xff}))
                 .isEqualTo("\\x80\\x90\\xa0\\xff");
-        // Printable still works with signed bytes: 'A' is 65
+        /* Printable still works with signed bytes: 'A' is 65 */
         assertThat(UiUtils.buildSanitisedString(new byte[] {65, 66, 67})).isEqualTo("ABC");
     }
 }

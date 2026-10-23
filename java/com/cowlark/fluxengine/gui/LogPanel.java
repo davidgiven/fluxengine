@@ -12,7 +12,6 @@ import sprouts.Vars;
 import sprouts.Viewables;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
-import javax.swing.SwingUtilities;
 import java.awt.Font;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -65,7 +64,7 @@ public class LogPanel extends JPanel
             public void write(byte[] b, int off, int len)
             {
                 String text = new String(b, off, len, StandardCharsets.UTF_8);
-                SwingUtilities.invokeLater(() -> add(text));
+                UiUtils.EDT_EXECUTOR.execute(() -> add(text));
             }
         });
     }
@@ -75,7 +74,7 @@ public class LogPanel extends JPanel
     public void observe(Observable<LogMessage> messages)
     {
         Disposable disposable =
-                messages.subscribe(panel -> SwingUtilities.invokeLater(() -> printingLogRenderer.add(
+                messages.subscribe(panel -> UiUtils.EDT_EXECUTOR.execute(() -> printingLogRenderer.add(
                         panel)));
     }
 }

@@ -3,7 +3,6 @@ package com.cowlark.fluxengine.gui;
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.google.common.collect.ImmutableList;
 import swingtree.threading.EventProcessor;
-import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import java.util.prefs.Preferences;
 
@@ -34,7 +33,7 @@ public class Gui
         UIManager.setLookAndFeel(new FlatDarkLaf());
         System.setProperty("apple.laf.useScreenMenuBar", "true");
 
-        SwingUtilities.invokeLater(() -> {
+        UiUtils.EDT_EXECUTOR.execute(() -> {
             ApplicationFrame frame = new ApplicationFrame(model);
             frame.pack();
             frame.setVisible(true);

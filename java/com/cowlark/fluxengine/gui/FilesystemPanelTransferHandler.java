@@ -5,6 +5,7 @@ import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_PUTFILE;
 import static com.cowlark.fluxengine.vfs.Filesystem.FileType.IS_FILE;
 
 import com.cowlark.fluxengine.core.Bytes;
+import com.cowlark.fluxengine.vfs.Filesystem;
 import com.cowlark.fluxengine.vfs.VfsPath;
 import com.google.common.collect.ImmutableList;
 import org.slf4j.Logger;
@@ -29,7 +30,8 @@ import java.util.concurrent.CompletionException;
 
 class FilesystemPanelTransferHandler extends TransferHandler
 {
-    private static final Logger logger = LoggerFactory.getLogger(FilesystemPanelTransferHandler.class);
+    private static final Logger logger =
+            LoggerFactory.getLogger(FilesystemPanelTransferHandler.class);
 
     private final FilesystemPanel filesystemPanel;
 
@@ -89,32 +91,26 @@ class FilesystemPanelTransferHandler extends TransferHandler
         {
             if (extracted != null)
                 return extracted;
-            extracted = new CompletableFuture<>();
-            filesystemPanel.treeTableModel.queueFilesystemOperation(fs -> {
-                try
+            extracted = CompletableFuture.supplyAsync(UiUtils.wrapIOException(() -> {
+                Filesystem fs = filesystemPanel.treeTableModel.getFilesystem();
+                /* Keep the files until application exit because native drop targets may
+                 * copy them later. */
+                Path directory = Files.createTempDirectory("fluxengine-export-");
+                directory.toFile().deleteOnExit();
+                ImmutableList.Builder<File> files = ImmutableList.builder();
+                for (VfsPath path : paths)
                 {
-                    /* Keep the files until application exit because native drop targets may
-                     * copy them later. */
-                    Path directory = Files.createTempDirectory("fluxengine-export-");
-                    directory.toFile().deleteOnExit();
-                    ImmutableList.Builder<File> files = ImmutableList.builder();
-                    for (VfsPath path : paths)
-                    {
-                        String name = path.getName();
-                        Path output = directory.resolve(name).normalize();
-                        if (!directory.equals(output.getParent()))
-                            throw new IOException("Invalid export filename: " + name);
-                        output.toFile().deleteOnExit();
-                        Bytes bytes = fs.getFile(path);
-                        bytes.writeToFile(output);
-                        files.add(output.toFile());
-                    }
-                    extracted.complete(files.build());
-                } catch (Exception e)
-                {
-                    extracted.completeExceptionally(e);
+                    String name = path.getName();
+                    Path output = directory.resolve(name).normalize();
+                    if (!directory.equals(output.getParent()))
+                        throw new IOException("Invalid export filename: " + name);
+                    output.toFile().deleteOnExit();
+                    Bytes bytes = fs.getFile(path);
+                    bytes.writeToFile(output);
+                    files.add(output.toFile());
                 }
-            });
+                return files.build();
+            }), filesystemPanel.treeTableModel.getExecutor());
             return extracted;
         }
 
@@ -146,8 +142,11 @@ class FilesystemPanelTransferHandler extends TransferHandler
                  * the EDT. */
                 SecondaryLoop loop =
                         Toolkit.getDefaultToolkit().getSystemEventQueue().createSecondaryLoop();
-                result.whenComplete((files, error) -> SwingUtilities.invokeLater(() -> loop.exit()));
-                loop.enter();
+                result.whenCompleteAsync((files, error) -> loop.exit(), UiUtils.EDT_EXECUTOR);
+
+                /* The executor can run inline if extraction finished before registration. */
+                if (!result.isDone())
+                    loop.enter();
             }
             try
             {

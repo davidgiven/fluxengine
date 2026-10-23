@@ -18,7 +18,6 @@ import com.cowlark.fluxengine.algorithms.EndWriteOperationLogMessage;
 import com.cowlark.fluxengine.algorithms.ReadWriteFluxOperation;
 import com.cowlark.fluxengine.config.ConfigBuilder;
 import com.cowlark.fluxengine.config.ConfigProto;
-import com.cowlark.fluxengine.core.EmergencyStopException;
 import com.cowlark.fluxengine.core.FluxEngineException;
 import com.cowlark.fluxengine.core.LogMessage;
 import com.cowlark.fluxengine.core.LogMessage.ErrorLogMessage;
@@ -34,7 +33,6 @@ import com.cowlark.fluxengine.usb.UsbFinder.CandidateDevice;
 import com.cowlark.fluxengine.vfs.BlockDevice;
 import com.cowlark.fluxengine.vfs.Filesystem;
 import com.cowlark.fluxengine.vfs.FilesystemOperation;
-import com.cowlark.fluxengine.vfs.FilesystemOperation.FilesystemCaller;
 import com.cowlark.fluxengine.vfs.InMemoryBlockDevice;
 import io.reactivex.rxjava3.disposables.Disposable;
 import lombok.Getter;
@@ -51,10 +49,8 @@ import swingtree.ComponentDelegate;
 import swingtree.UI;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
-import javax.swing.SwingUtilities;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
-import java.util.concurrent.BlockingQueue;
 import java.util.function.Supplier;
 
 public class ImageViewModel
@@ -318,7 +314,7 @@ public class ImageViewModel
     }
 
     void startFilesystemOperation(
-            BlockingQueue<FilesystemCaller> queue,
+            FilesystemExecutor executor,
             Image image,
             Runnable onExit)
     {
@@ -329,28 +325,8 @@ public class ImageViewModel
                     public void run(Filesystem filesystem) throws IOException
                     {
                         logger.atInfo().log("starting filesystem thread");
-                        try
-                        {
-                            while (true)
-                            {
-                                try
-                                {
-                                    queue.take().accept(filesystem);
-                                } catch (EmergencyStopException e)
-                                {
-                                    throw e;
-                                } catch (FluxEngineException | IOException e)
-                                {
-                                    SwingUtilities.invokeLater(() -> UI
-                                            .message("Filesystem error: " + e.getMessage())
-                                            .titled("Error")
-                                            .showAsError());
-                                }
-                            }
-                        } catch (InterruptedException e)
-                        {
-                            Thread.currentThread().interrupt();
-                        }
+                        executor.run(filesystem, error ->
+                                UiUtils.reportError("Filesystem error").apply(error));
                     }
 
                     @Override
@@ -362,11 +338,8 @@ public class ImageViewModel
                     @Override
                     protected void onEmergencyStop()
                     {
-                        // Unblock queue.take() waiting in run().
                         logger.atInfo().log("terminating filesystem thread");
-                        queue.add(fs -> {
-                            throw new EmergencyStopException();
-                        });
+                        executor.stop();
                     }
 
                     @Override

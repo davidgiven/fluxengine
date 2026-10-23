@@ -7,10 +7,11 @@ import static swingtree.UIFactoryMethods.popupMenu;
 import static swingtree.UIFactoryMethods.splitButton;
 
 import com.cowlark.fluxengine.core.Bytes;
-import com.cowlark.fluxengine.core.FluxEngineException;
 import io.reactivex.rxjava3.core.Scheduler;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import lombok.Builder;
+import org.apache.commons.io.function.IORunnable;
+import org.apache.commons.io.function.IOSupplier;
 import sprouts.Tuple;
 import sprouts.Val;
 import sprouts.Var;
@@ -38,15 +39,27 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.file.InvalidPathException;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class UiUtils
 {
-    public static final Scheduler EDT = Schedulers.from(SwingUtilities::invokeLater);
+    public static final Executor EDT_EXECUTOR = cb -> {
+        if (SwingUtilities.isEventDispatchThread())
+            cb.run();
+        else
+            SwingUtilities.invokeLater(cb);
+    };
+
+    public static final Scheduler EDT = Schedulers.from(EDT_EXECUTOR);
 
     static final float PIXELS_PER_POINT = 96f / 72f;
     static final Color HEADER_COLOUR = new Color(0x00b4d8);
@@ -179,22 +192,65 @@ public class UiUtils
                 });
     }
 
-    /**
-     * Prompts the user for a save location, then writes {@code data} to it.
-     */
-    static void promptAndSave(
+    public static Runnable wrapIOException(IORunnable callback)
+    {
+        return () -> {
+            try
+            {
+                callback.run();
+            } catch (IOException e)
+            {
+                throw new UncheckedIOException(e);
+            }
+        };
+    }
+
+    public static <T> Supplier<T> wrapIOException(IOSupplier<T> callback)
+    {
+        return () -> {
+            try
+            {
+                return callback.get();
+            } catch (IOException e)
+            {
+                throw new UncheckedIOException(e);
+            }
+        };
+    }
+
+    public static Function<Throwable, Void> reportError(String title)
+    {
+        return message -> {
+            while (message instanceof CompletionException || message instanceof UncheckedIOException)
+                message = message.getCause();
+            if (!(message instanceof CancellationException))
+            {
+                String text = message.getMessage();
+                EDT_EXECUTOR.execute(() -> JOptionPane.showMessageDialog(
+                        null, text, title, JOptionPane.ERROR_MESSAGE));
+            }
+            return null;
+        };
+    }
+
+    /* Prompts for a save location and returns a destination for bytes to write on the EDT.
+     * Cancelling the dialog or declining an overwrite cancels the future. */
+    static CompletableFuture<Bytes> promptAndSave(
             Component parent,
             String dialogTitle,
-            String defaultFileName,
-            Consumer<Consumer<Bytes>> dataSupplier)
+            String defaultFileName)
     {
+        CompletableFuture<Bytes> result = new CompletableFuture<>();
         JFileChooser chooser = new JFileChooser();
         chooser.setDialogTitle(dialogTitle);
         chooser.setSelectedFile(new File(defaultFileName));
 
-        int result = chooser.showSaveDialog(parent);
-        if (result != JFileChooser.APPROVE_OPTION)
-            return;
+        int choice = chooser.showSaveDialog(parent);
+        if (choice != JFileChooser.APPROVE_OPTION)
+        {
+            result.cancel(false);
+            return result;
+        }
 
         File file = chooser.getSelectedFile();
         if (file.exists())
@@ -205,34 +261,16 @@ public class UiUtils
                     "Confirm Overwrite",
                     JOptionPane.YES_NO_OPTION);
             if (overwrite != JOptionPane.YES_OPTION)
-                return;
+            {
+                result.cancel(false);
+                return result;
+            }
         }
 
-        Consumer<Bytes> saver = data -> {
-            SwingUtilities.invokeLater(() -> {
-                try
-                {
-                    data.writeToFile(file.toPath());
-                } catch (InvalidPathException e)
-                {
-                    JOptionPane.showMessageDialog(
-                            parent,
-                            "Could not save file because the filename is invalid: "
-                                + e.getMessage(),
-                            "Save Failed",
-                            JOptionPane.ERROR_MESSAGE);
-                } catch (FluxEngineException e)
-                {
-                    JOptionPane.showMessageDialog(
-                            parent,
-                            "Could not save file: " + e.getMessage(),
-                            "Save Failed",
-                            JOptionPane.ERROR_MESSAGE);
-                }
-            });
-        };
+        result.thenAcceptAsync(data -> data.writeToFile(file.toPath()), EDT_EXECUTOR)
+                .exceptionallyAsync(reportError("Could not save file"), EDT_EXECUTOR);
 
-        dataSupplier.accept(saver);
+        return result;
     }
 
     public static String buildSanitisedString(byte[] source)
