@@ -9,6 +9,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import sprouts.Association;
+import sprouts.From;
+import sprouts.Var;
+import com.cowlark.fluxengine.gui.ApplicationFrame.Workflow;
 import java.util.prefs.Preferences;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -23,6 +26,48 @@ public class PreferencesReaderWriterTest
         for (int i = 0; i < pairs.length; i += 2)
             result = result.put(pairs[i], pairs[i + 1]);
         return result;
+    }
+
+    @Test
+    public void workflowPreferenceRestoresSavedSelection()
+    {
+        when(preferences.get("workflow", "DISK_READING")).thenReturn("IMAGE_PROCESSING");
+        writer = new PreferencesReaderWriter(preferences);
+
+        assertThat(writer.makeEnumPreference("workflow", Workflow.DISK_READING).get())
+                .isEqualTo(Workflow.IMAGE_PROCESSING);
+    }
+
+    @Test
+    public void workflowPreferenceUsesDefaultWhenMissing()
+    {
+        when(preferences.get("workflow", "DISK_READING")).thenReturn("DISK_READING");
+        writer = new PreferencesReaderWriter(preferences);
+
+        assertThat(writer.makeEnumPreference("workflow", Workflow.DISK_READING).get())
+                .isEqualTo(Workflow.DISK_READING);
+    }
+
+    @Test
+    public void workflowPreferenceUsesDefaultForUnknownValue()
+    {
+        when(preferences.get("workflow", "DISK_READING")).thenReturn("OLD_WORKFLOW");
+        writer = new PreferencesReaderWriter(preferences);
+
+        assertThat(writer.makeEnumPreference("workflow", Workflow.DISK_READING).get())
+                .isEqualTo(Workflow.DISK_READING);
+    }
+
+    @Test
+    public void workflowPreferencePersistsSelectionChanges()
+    {
+        when(preferences.get("workflow", "DISK_READING")).thenReturn("DISK_READING");
+        writer = new PreferencesReaderWriter(preferences);
+        Var<Workflow> workflow = writer.makeEnumPreference("workflow", Workflow.DISK_READING);
+
+        workflow.set(From.VIEW, Workflow.DISK_WRITING);
+
+        verify(preferences).put("workflow", "DISK_WRITING");
     }
 
     @Test

@@ -1,6 +1,7 @@
 package com.cowlark.fluxengine.gui;
 
 import static com.cowlark.fluxengine.gui.UiUtils.EDT_EXECUTOR;
+import static com.cowlark.fluxengine.gui.PreferencesReaderWriter.WORKFLOW;
 import static com.cowlark.fluxengine.gui.UiUtils.createSplitButton;
 import static com.cowlark.fluxengine.gui.UiUtils.sizePts;
 import static swingtree.UI.Axis.HORIZONTAL;
@@ -50,11 +51,12 @@ public class ApplicationFrame extends JFrame
     private final FilesystemPanel filesystemPanel;
 
     private final ImageViewModel model;
-    private final Var<Workflow> currentWorkflow = Var.of(Workflow.DISK_READING);
+    private final Var<Workflow> currentWorkflow;
 
-    ApplicationFrame(ImageViewModel model)
+    ApplicationFrame(ImageViewModel model, PreferencesReaderWriter preferences)
     {
         this.model = model;
+        currentWorkflow = preferences.makeEnumPreference(WORKFLOW, Workflow.DISK_READING);
         summaryPanel = new SummaryPanel(model);
         logPanel = new LogPanel(model);
         imagePanel = new ImagePanel(model);

@@ -34,7 +34,7 @@ public class Gui
         System.setProperty("apple.laf.useScreenMenuBar", "true");
 
         UiUtils.EDT_EXECUTOR.execute(() -> {
-            ApplicationFrame frame = new ApplicationFrame(model);
+            ApplicationFrame frame = new ApplicationFrame(model, preferencesReaderWriter);
             frame.pack();
             frame.setVisible(true);
         });
