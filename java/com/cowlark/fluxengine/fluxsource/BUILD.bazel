@@ -24,6 +24,7 @@ java_library(
         ":fluxsource_java_proto",
         "//java/com/cowlark/fluxengine/config:common_java_proto",
         "//java/com/cowlark/fluxengine/config:config_java_proto",
+        "//java/com/cowlark/fluxengine/config:drive_java_proto",
         "//java/com/cowlark/fluxengine/core",
         "//java/com/cowlark/fluxengine/data",
         "//java/com/cowlark/fluxengine/external",
@@ -32,5 +33,8 @@ java_library(
         "//java/com/cowlark/fluxengine/wiring",
         "@com_google_protobuf//java/core",
         "@maven//:org_projectlombok_lombok",
+        "@maven//:com_google_guava_guava",
+        "@maven//:org_indunet_fastproto",
+        "@maven//:org_indunet_fastproto_core",
     ],
 )

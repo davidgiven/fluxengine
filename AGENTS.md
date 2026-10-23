@@ -82,6 +82,8 @@ Useful commands:
 ## Code style
 
 - Explicit types, no `var`.
+- Divide code into logical paragraphs separated by blank lines, with a block comment
+  introducing each paragraph to explain its purpose.
 - Prefer Guava utilities over hand-rolled checks: `Strings.nullToEmpty(...)` instead of
   explicit null checks; use `ImmutableList` for returned collections.
 - Prefer `System.out.printf(...)` over `System.out.println(String.format(...))`.

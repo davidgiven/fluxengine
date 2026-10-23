@@ -10,6 +10,12 @@ import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.core.FluxEngineException;
 import com.cowlark.fluxengine.data.Fluxmap;
 import com.cowlark.fluxengine.external.Scp;
+import com.cowlark.fluxengine.fluxsource.A2RFluxSource;
+import com.cowlark.fluxengine.fluxsource.A2R3FluxSource;
+import com.cowlark.fluxengine.fluxsource.A2rFluxSourceProto;
+import com.cowlark.fluxengine.fluxsource.FluxSource;
+import com.cowlark.fluxengine.fluxsource.FluxSourceIterator;
+import com.cowlark.fluxengine.fluxsource.FluxReadParameters;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -83,14 +89,14 @@ public class FluxSinkTest
         Path path = Files.createTempFile("flux", ".a2r");
         Files.delete(path);
 
-        A2RFluxSink sink = new A2RFluxSink(path.toString(), makeConfig());
+        A2R3FluxSink sink = new A2R3FluxSink(path.toString(), makeConfig());
         sink.addFlux(0, 0, makeFluxmap());
         sink.close();
 
         Bytes data = new Bytes(Files.readAllBytes(path));
         assertThat(data.size()).isGreaterThan(0);
-        /* File header: A2R2 then 0xff 0x0a 0x0d 0x0a. */
-        assertThat(new String(data.slice(0, 4).toByteArray())).isEqualTo("A2R2");
+        /* File header: A2R3 then 0xff 0x0a 0x0d 0x0a. */
+        assertThat(new String(data.slice(0, 4).toByteArray())).isEqualTo("A2R3");
         assertThat(data.getByte(4) & 0xff).isEqualTo(0xff);
         assertThat(data.getByte(5) & 0xff).isEqualTo(0x0a);
     }
@@ -138,8 +144,76 @@ public class FluxSinkTest
                 .build();
 
         FluxSinkFactory factory = FluxSinkFactory.create(config, null);
-        assertThat(factory).isInstanceOf(A2RFluxSinkFactory.class);
+        assertThat(factory).isInstanceOf(A2R3FluxSinkFactory.class);
         assertThat(factory.getPath()).isEqualTo("test.a2r");
         assertThat(factory.isHardware()).isFalse();
+    }
+    @Test
+    public void a2r3CaptureTypeBoundary() throws Exception
+    {
+        /* At 12 MHz, 6,000,000 ticks are exactly 2.5 revolutions at 300 RPM. */
+        Path path = Files.createTempFile("flux", ".a2r");
+        try
+        {
+            for (int duration : new int[] {5_999_999, 6_000_000, 6_000_001})
+            {
+                Fluxmap map = new Fluxmap();
+                map.appendInterval(duration).appendPulse();
+                try (A2R3FluxSink sink = new A2R3FluxSink(path.toString(), makeConfig()))
+                {
+                    sink.addFlux(0, 0, map);
+                }
+
+                /* Inspect the on-disk type independently of the reader. */
+                ByteReader reader = Bytes.readFromFile(path).reader();
+                reader.skip(8);
+                assertThat(reader.readLe32()).isEqualTo(0x4f464e49);
+                reader.skip(reader.readLe32());
+                assertThat(reader.readLe32()).isEqualTo(0x50435752);
+                reader.readLe32();
+                reader.skip(16);
+                assertThat(reader.read8()).isEqualTo('C');
+                assertThat(reader.read8()).isEqualTo(duration < 6_000_000 ? 1 : 3);
+            }
+        } finally
+        {
+            Files.delete(path);
+        }
+    }
+
+    @Test
+    public void a2r3RoundTripsCapturesAndIndexes() throws Exception
+    {
+        /* Record two captures at the same location, with two index signals per capture. */
+        Path path = Files.createTempFile("flux", ".a2r");
+        Fluxmap map = new Fluxmap();
+        map.appendInterval(100).appendPulse();
+        map.appendInterval(2_399_900).appendIndex();
+        map.appendInterval(2_400_000).appendIndex().appendPulse();
+        try
+        {
+            try (A2R3FluxSink sink = new A2R3FluxSink(path.toString(), makeConfig()))
+            {
+                sink.addFlux(0, 0, map);
+                sink.addFlux(0, 0, map);
+            }
+
+            /* Read the completed file through version dispatch and compare both captures. */
+            FluxSource source = A2RFluxSource.create(A2rFluxSourceProto.newBuilder()
+                    .setFilename(path.toString()).build());
+            assertThat(source).isInstanceOf(A2R3FluxSource.class);
+            FluxSourceIterator iterator = source.readFlux(FluxReadParameters.builder()
+                    .setCylinder(0).setHead(0).build());
+            for (int i = 0; i < 2; i++)
+            {
+                Fluxmap decoded = iterator.next();
+                assertThat(decoded.getIndexMarks()).containsExactly(200_000_000.0, 400_000_000.0);
+                assertThat(decoded.durationNs()).isWithin(100).of(map.durationNs());
+            }
+            assertThat(iterator.hasNext()).isFalse();
+        } finally
+        {
+            Files.delete(path);
+        }
     }
 }

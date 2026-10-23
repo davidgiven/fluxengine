@@ -23,6 +23,7 @@ java_library(
         ":fluxsink_java_proto",
         "//java/com/cowlark/fluxengine/config:common_java_proto",
         "//java/com/cowlark/fluxengine/config:config_java_proto",
+        "//java/com/cowlark/fluxengine/config:drive_java_proto",
         "//java/com/cowlark/fluxengine/core",
         "//java/com/cowlark/fluxengine/data",
         "//java/com/cowlark/fluxengine/decoders:decoders_java_proto",
@@ -32,5 +33,7 @@ java_library(
         "//java/com/cowlark/fluxengine/wiring",
         "@com_google_protobuf//java/core",
         "@maven//:org_apache_commons_commons_lang3",
+        "@maven//:org_indunet_fastproto",
+        "@maven//:org_indunet_fastproto_core",
     ],
 )
