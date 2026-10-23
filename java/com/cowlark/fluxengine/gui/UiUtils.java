@@ -237,13 +237,14 @@ public class UiUtils
      * Cancelling the dialog or declining an overwrite cancels the future. */
     static CompletableFuture<Bytes> promptAndSave(
             Component parent,
+            PreferencesReaderWriter preferences,
             String dialogTitle,
             String defaultFileName)
     {
         CompletableFuture<Bytes> result = new CompletableFuture<>();
-        JFileChooser chooser = new JFileChooser();
+        JFileChooser chooser = preferences.createFileChooser();
         chooser.setDialogTitle(dialogTitle);
-        chooser.setSelectedFile(new File(defaultFileName));
+        chooser.setSelectedFile(new File(chooser.getCurrentDirectory(), defaultFileName));
 
         int choice = chooser.showSaveDialog(parent);
         if (choice != JFileChooser.APPROVE_OPTION)

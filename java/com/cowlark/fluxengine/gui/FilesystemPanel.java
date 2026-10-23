@@ -292,7 +292,7 @@ public class FilesystemPanel extends JPanel
             {
                 VfsPath vfsPath = node.getDirent().path();
                 String filename = node.getDirent().filename();
-                UiUtils.promptAndSave(this, "Save file", filename).completeAsync(
+                UiUtils.promptAndSave(this, model.getPreferencesReaderWriter(), "Save file", filename).completeAsync(
                         wrapIOException(() -> {
                             Filesystem fs = treeTableModel.getFilesystem();
                             return fs.getFile(vfsPath);
@@ -305,7 +305,7 @@ public class FilesystemPanel extends JPanel
         ImmutableList<VfsPath> snapshot = stream(paths)
                 .map(p -> ((FileNode) p.getLastPathComponent()).getDirent().path())
                 .collect(toImmutableList());
-        UiUtils.promptAndSave(this, "Save multiple files", "files.zip").completeAsync(
+        UiUtils.promptAndSave(this, model.getPreferencesReaderWriter(), "Save multiple files", "files.zip").completeAsync(
                 wrapIOException(() -> {
                     Filesystem fs = treeTableModel.getFilesystem();
                     return fs.getFiles(fs, snapshot);
@@ -337,7 +337,7 @@ public class FilesystemPanel extends JPanel
         DirNode parent = getParentNodeOfSelection();
         VfsPath parentPath = parent.getDirent().path();
 
-        JFileChooser chooser = new JFileChooser();
+        JFileChooser chooser = model.getPreferencesReaderWriter().createFileChooser();
         chooser.setDialogTitle("Open files");
         chooser.setMultiSelectionEnabled(true);
 

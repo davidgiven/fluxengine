@@ -16,6 +16,7 @@ import java.util.concurrent.CompletionException;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
+import java.util.prefs.Preferences;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
@@ -29,6 +30,8 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class UiUtilsTest
 {
+    private final PreferencesReaderWriter preferences =
+            new PreferencesReaderWriter(Mockito.mock(Preferences.class));
     @Test
     public void wrapIOExceptionDefersCallbacksAndPreservesResults()
     {
@@ -110,13 +113,16 @@ public class UiUtilsTest
                 JFileChooser.class, (chooser, context) -> {
                     Mockito.when(chooser.showSaveDialog(null)).thenReturn(JFileChooser.APPROVE_OPTION);
                     Mockito.when(chooser.getSelectedFile()).thenReturn(output.toFile());
+                    Mockito.when(chooser.getCurrentDirectory()).thenReturn(directory.toFile());
                 }))
         {
             CompletableFuture<Bytes> result =
-                    UiUtils.promptAndSave(null, "Save file", "default.txt");
+                    UiUtils.promptAndSave(null, preferences, "Save file", "default.txt");
             assertThat(result.isDone()).isFalse();
             assertThat(Files.exists(output)).isFalse();
             Mockito.verify(choosers.constructed().get(0)).showSaveDialog(null);
+            Mockito.verify(choosers.constructed().get(0)).setSelectedFile(
+                    directory.resolve("default.txt").toFile());
             result.completeAsync(() -> new Bytes("saved contents"), Runnable::run);
             SwingUtilities.invokeAndWait(() -> {});
             assertThat(Files.readString(output)).isEqualTo("saved contents");
@@ -136,7 +142,7 @@ public class UiUtilsTest
                                 .thenReturn(JFileChooser.CANCEL_OPTION)))
         {
             CompletableFuture<Bytes> result =
-                    UiUtils.promptAndSave(null, "Save file", "default.txt");
+                    UiUtils.promptAndSave(null, preferences, "Save file", "default.txt");
             assertThat(result.isCancelled()).isTrue();
             AtomicBoolean extracted = new AtomicBoolean();
             result.completeAsync(() -> {

@@ -62,7 +62,7 @@ public class ImageViewModel
             # decoder.retries=0
             """;
 
-    private final PreferencesReaderWriter preferencesReaderWriter;
+    @Getter private final PreferencesReaderWriter preferencesReaderWriter;
 
     @Getter private Var<String> statusMessage = Var.of("Ready");
     @Getter private Var<String> selectedFormat;
@@ -217,7 +217,7 @@ public class ImageViewModel
 
     void onLoadDiskImage(ComponentDelegate<JButton, ActionEvent> delegate)
     {
-        JFileChooser fileChooser = new JFileChooser();
+        JFileChooser fileChooser = preferencesReaderWriter.createFileChooser();
         fileChooser.setDialogTitle("Load image file");
         fileChooser.setApproveButtonText("Load");
         if (fileChooser.showOpenDialog(null) != APPROVE_OPTION)
@@ -244,7 +244,7 @@ public class ImageViewModel
     {
         Image image = getDisk().get().image;
 
-        JFileChooser fileChooser = new JFileChooser();
+        JFileChooser fileChooser = preferencesReaderWriter.createFileChooser();
         fileChooser.setDialogTitle("Save image file");
         fileChooser.setApproveButtonText("Save");
         if (fileChooser.showSaveDialog(null) != APPROVE_OPTION)
@@ -269,7 +269,7 @@ public class ImageViewModel
         Disk disk = getDisk().get();
         FluxSource fluxSource = new MemoryFluxSource(disk);
 
-        JFileChooser fileChooser = new JFileChooser();
+        JFileChooser fileChooser = preferencesReaderWriter.createFileChooser();
         fileChooser.setDialogTitle("Save flux file");
         fileChooser.setApproveButtonText("Save");
         if (fileChooser.showSaveDialog(null) != APPROVE_OPTION)

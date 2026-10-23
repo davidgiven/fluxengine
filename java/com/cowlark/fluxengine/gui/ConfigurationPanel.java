@@ -53,7 +53,6 @@ import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
@@ -518,10 +517,7 @@ public class ConfigurationPanel extends JPanel implements Scrollable
 
     private void onUseFluxFile(ComponentDelegate<JButton, ActionEvent> delegate)
     {
-        JFileChooser fileChooser = new JFileChooser();
-        String oldFile = model.getSelectedFluxFile().get();
-        if (!isNullOrEmpty(oldFile))
-            fileChooser.setCurrentDirectory(new File(oldFile).getParentFile());
+        JFileChooser fileChooser = model.getPreferencesReaderWriter().createFileChooser();
         fileChooser.setDialogTitle("Open flux file");
         fileChooser.setApproveButtonText("Select");
         if (fileChooser.showOpenDialog(this) == APPROVE_OPTION)
