@@ -74,6 +74,7 @@ java_test(
     ],
     jvm_flags = ["-Djava.awt.headless=true"],
     deps = [
+        "//java/com/cowlark/fluxengine/core",
         "//java/com/cowlark/fluxengine/data",
         "//java/com/cowlark/fluxengine/gui",
         "//java/com/cowlark/fluxengine/vfs",

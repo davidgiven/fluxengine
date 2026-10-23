@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 
+import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.data.Disk;
 import com.cowlark.fluxengine.data.Image;
 import com.cowlark.fluxengine.gui.FilesystemTreeTableModel.DirNode;
@@ -19,6 +20,12 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import sprouts.Var;
 import javax.swing.SwingUtilities;
+import javax.swing.TransferHandler;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
+import java.io.File;
+import java.nio.file.Files;
+import java.util.List;
 import javax.swing.tree.TreePath;
 import java.util.HashSet;
 import java.util.Set;
@@ -116,9 +123,109 @@ public class FilesystemPanelHeadlessTest
     public void backgroundDropTargetsRoot() throws Exception
     {
         SwingUtilities.invokeAndWait(() -> {
-            assertThat(panel.getFileDropDirectory(-1)).isSameInstanceAs(model.getRoot());
+            TransferHandler.TransferSupport support =
+                    org.mockito.Mockito.mock(TransferHandler.TransferSupport.class);
+            javax.swing.JTable.DropLocation location =
+                    org.mockito.Mockito.mock(javax.swing.JTable.DropLocation.class);
+            when(support.isDrop()).thenReturn(true);
+            when(support.isDataFlavorSupported(DataFlavor.javaFileListFlavor)).thenReturn(true);
+            when(support.getSourceDropActions()).thenReturn(TransferHandler.COPY);
+            when(support.getDropLocation()).thenReturn(location);
+            when(location.getRow()).thenReturn(-1);
+            assertThat(panel.getTreeTable().getTransferHandler().canImport(support)).isTrue();
+            org.mockito.Mockito.verify(support).setDropAction(TransferHandler.COPY);
             assertThat(panel.getTreeTable().getFillsViewportHeight()).isTrue();
         });
+    }
+
+    @Test
+    public void draggingFilesExportsContentsAndRejectsDirectories() throws Exception
+    {
+        /* Populate a real file entry and supply its contents through the filesystem worker. */
+        VfsPath filePath = VfsPath.of("/extract.txt");
+        fakeFs = org.mockito.Mockito.spy(fakeFs);
+        fakeFs.addFile(filePath);
+        org.mockito.Mockito.doReturn(new Bytes("extracted contents"))
+                .when(fakeFs).getFile(filePath);
+        SwingUtilities.invokeAndWait(() -> model.resyncPaths(Set.of(VfsPath.root())));
+        awaitIdle();
+        awaitLoaded(VfsPath.root());
+        Clipboard clipboard = new Clipboard("test");
+
+        /* Export using the same TransferHandler entry points used by native drag-and-drop. */
+        SwingUtilities.invokeAndWait(() -> {
+            DirNode root = (DirNode) model.getRoot();
+            for (int i = 0; i < root.getChildCount(); i++)
+            {
+                FilesystemTreeTableModel.FsNode child =
+                        (FilesystemTreeTableModel.FsNode) root.getChildAt(i);
+                if (filePath.equals(child.vfsPath()))
+                    panel.getTreeTable().getTreeSelectionModel().setSelectionPath(
+                            model.buildTreePath(child));
+            }
+            TransferHandler handler = panel.getTreeTable().getTransferHandler();
+            assertThat(handler.getSourceActions(panel.getTreeTable()))
+                    .isEqualTo(TransferHandler.COPY);
+            handler.exportToClipboard(panel.getTreeTable(), clipboard, TransferHandler.COPY);
+            assertThat(clipboard.getContents(null).isDataFlavorSupported(
+                    DataFlavor.javaFileListFlavor)).isTrue();
+            panel.getTreeTable().getTreeSelectionModel().clearSelection();
+        });
+        org.mockito.Mockito.verify(fakeFs, org.mockito.Mockito.never()).getFile(filePath);
+        List<?> files = (List<?>) clipboard.getData(
+                DataFlavor.javaFileListFlavor);
+        assertThat(files).hasSize(1);
+        File exported = (File) files.get(0);
+        assertThat(exported.getName()).isEqualTo("extract.txt");
+        assertThat(Files.readString(exported.toPath())).isEqualTo("extracted contents");
+        assertThat(clipboard.getData(DataFlavor.javaFileListFlavor)).isSameInstanceAs(files);
+        org.mockito.Mockito.verify(fakeFs, org.mockito.Mockito.times(1)).getFile(filePath);
+
+        /* Directory selections must never initiate extraction. */
+        SwingUtilities.invokeAndWait(() -> {
+            panel.getTreeTable().getTreeSelectionModel().setSelectionPath(
+                    model.buildTreePath(model.findNode(VfsPath.of("/empty"))));
+            assertThat(panel.getTreeTable().getTransferHandler().getSourceActions(panel.getTreeTable()))
+                    .isEqualTo(TransferHandler.NONE);
+        });
+        Files.delete(exported.toPath());
+        Files.delete(exported.toPath().getParent());
+    }
+
+    @Test
+    public void draggingFilesRejectsCollidingNames() throws Exception
+    {
+        fakeFs.addFile(VfsPath.of("/same.txt"));
+        fakeFs.addFile(VfsPath.of("/empty/same.txt"));
+        SwingUtilities.invokeAndWait(() -> model.resyncPaths(Set.of(VfsPath.root())));
+        awaitIdle();
+        awaitLoaded(VfsPath.root());
+        SwingUtilities.invokeAndWait(() -> model.requestPopulate(model.findNode(VfsPath.of("/empty"))));
+        awaitIdle();
+        awaitLoaded(VfsPath.of("/empty"));
+
+        SwingUtilities.invokeAndWait(() -> {
+            panel.getTreeTable().getTreeSelectionModel().setSelectionPaths(new TreePath[] {
+                    model.buildTreePath(model.findNode(VfsPath.root())).pathByAddingChild(
+                            findFile(model.findNode(VfsPath.root()), "same.txt")),
+                    model.buildTreePath(model.findNode(VfsPath.of("/empty"))).pathByAddingChild(
+                            findFile(model.findNode(VfsPath.of("/empty")), "same.txt"))
+            });
+            assertThat(panel.getTreeTable().getTransferHandler().getSourceActions(panel.getTreeTable()))
+                    .isEqualTo(TransferHandler.NONE);
+        });
+    }
+
+    private Object findFile(DirNode directory, String name)
+    {
+        for (int i = 0; i < directory.getChildCount(); i++)
+        {
+            FilesystemTreeTableModel.FileNode file =
+                    (FilesystemTreeTableModel.FileNode) directory.getChildAt(i);
+            if (file.getDirent().filename().equals(name))
+                return file;
+        }
+        throw new AssertionError("Missing file: " + name);
     }
 
     private void awaitIdle() throws Exception

@@ -42,7 +42,6 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JTable;
 import javax.swing.TransferHandler;
 import javax.swing.SwingUtilities;
 import javax.swing.event.TreeExpansionEvent;
@@ -50,12 +49,9 @@ import javax.swing.event.TreeExpansionListener;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.event.ActionEvent;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.GraphicsEnvironment;
 import java.io.File;
-import java.io.IOException;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class FilesystemPanel extends JPanel
@@ -67,6 +63,7 @@ public class FilesystemPanel extends JPanel
     final FilesystemTreeTableModel treeTableModel;
     final TreeSelectionModel treeSelectionModel;
     final Var<Tuple<TreePath>> filesSelected;
+    final Val<Boolean> canDoMultiFileOperation;
     final Set<VfsPath> everExpanded = new HashSet<>();
 
     JXTreeTable getTreeTable()
@@ -130,6 +127,8 @@ public class FilesystemPanel extends JPanel
         treeTable.setFillsViewportHeight(true);
         treeTable.setDropMode(DropMode.ON);
         treeTable.setTransferHandler(createFileDropHandler());
+        if (!GraphicsEnvironment.isHeadless())
+            treeTable.setDragEnabled(true);
 
         filesSelected = Var.of(Tuple.of(TreePath.class));
         treeSelectionModel = treeTable.getTreeSelectionModel();
@@ -153,7 +152,7 @@ public class FilesystemPanel extends JPanel
                         !(Iterables
                                 .getOnlyElement(files)
                                 .getLastPathComponent() instanceof DirNode));
-        Val<Boolean> canDoMultiFileOperation = Viewable.of(
+        canDoMultiFileOperation = Viewable.of(
                 allowedWhenMounted,
                 filesSelected,
                 (mounted, files) -> isValidSelection(files) && (files.size() >= 1) && mounted);
@@ -347,79 +346,9 @@ public class FilesystemPanel extends JPanel
         });
     }
 
-    DirNode getFileDropDirectory(int row)
-    {
-        /* Background drops go to root; file rows remain invalid destinations. */
-        Object target;
-        if (row < 0)
-            target = treeTableModel.getRoot();
-        else
-        {
-            TreePath path = treeTable.getPathForRow(row);
-            target = path == null ? null : path.getLastPathComponent();
-        }
-        return target instanceof DirNode directory ? directory : null;
-    }
-
     private TransferHandler createFileDropHandler()
     {
-        return new TransferHandler()
-        {
-            @Override
-            public boolean canImport(TransferSupport support)
-            {
-                /* Only copy external files into a mounted filesystem that supports writes. */
-                if (!support.isDrop()
-                        || !support.isDataFlavorSupported(DataFlavor.javaFileListFlavor)
-                        || (support.getSourceDropActions() & COPY) == 0
-                        || !treeTableModel.getIsMounted().get()
-                        || !treeTableModel.getCapabilities().get().contains(OP_PUTFILE))
-                    return false;
-
-                /* Resolve the hovered directory, using root for empty table space. */
-                JTable.DropLocation location = (JTable.DropLocation) support.getDropLocation();
-                if (getFileDropDirectory(location.getRow()) == null)
-                    return false;
-                support.setDropAction(COPY);
-                return true;
-            }
-
-            @Override
-            public boolean importData(TransferSupport support)
-            {
-                if (!canImport(support))
-                    return false;
-
-                /* Snapshot the destination on the EDT before handing work to the filesystem. */
-                JTable.DropLocation location = (JTable.DropLocation) support.getDropLocation();
-                DirNode directory = getFileDropDirectory(location.getRow());
-                VfsPath parentPath = directory.vfsPath();
-                try
-                {
-                    /* Reject the entire drop if it contains directories or other non-files. */
-                    List<?> transferred = (List<?>) support.getTransferable()
-                            .getTransferData(DataFlavor.javaFileListFlavor);
-                    ImmutableList.Builder<File> files = ImmutableList.builder();
-                    for (Object item : transferred)
-                    {
-                        if (!(item instanceof File file) || !file.isFile())
-                            return false;
-                        files.add(file);
-                    }
-                    ImmutableList<File> snapshot = files.build();
-                    if (snapshot.isEmpty())
-                        return false;
-
-                    /* Queue the same import operation used by the file chooser. */
-                    putFiles(parentPath, snapshot);
-                    return true;
-                } catch (UnsupportedFlavorException | IOException e)
-                {
-                    logger.warn("Cannot import dropped files", e);
-                    return false;
-                }
-            }
-        };
+        return new FilesystemPanelTransferHandler(this);
     }
 
     private void putFiles(
@@ -439,7 +368,7 @@ public class FilesystemPanel extends JPanel
         putFiles(parentPath, ImmutableList.copyOf(chooser.getSelectedFiles()));
     }
 
-    private void putFiles(VfsPath parentPath, ImmutableList<File> files)
+    void putFiles(VfsPath parentPath, ImmutableList<File> files)
     {
         /* Read host files and write their contents on the filesystem worker thread. */
         treeTableModel.queueFilesystemOperation(fs -> {
@@ -611,13 +540,17 @@ public class FilesystemPanel extends JPanel
         });
     }
 
-    /**
-     * Returns true if the selection is valid — i.e. no selected path is an
-     * ancestor (or duplicate) of another selected path. Selections spanning
-     * multiple unrelated folders are fine.
-     */
+    /* A valid selection has unique filenames and no selected path that is an ancestor of
+     * another selected path. Selections spanning unrelated folders are otherwise allowed. */
     private static boolean isValidSelection(Tuple<TreePath> paths)
     {
+        Set<String> filenames = new HashSet<>();
+        for (TreePath path : paths)
+        {
+            if (!(path.getLastPathComponent() instanceof FileNode file)
+                    || !filenames.add(file.getDirent().filename()))
+                return false;
+        }
         for (int i = 0; i < paths.size(); i++)
         {
             for (int j = i + 1; j < paths.size(); j++)
@@ -663,4 +596,5 @@ public class FilesystemPanel extends JPanel
     {
         return v1.viewAs(Boolean.class, b -> !b);
     }
+
 }
