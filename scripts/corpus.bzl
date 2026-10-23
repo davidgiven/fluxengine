@@ -74,7 +74,7 @@ def define_corpus_tests():
         script = entry[1]
         flags = entry[2]
         name = _sanitize(format + script + flags)
-        for ext in ["scp", "flux"]:
+        for ext in ["scp", "flux", "a2r"]:
             test_name = "corpustest_%s_%s" % (name, ext)
             args = [format, ext]
             if flags:

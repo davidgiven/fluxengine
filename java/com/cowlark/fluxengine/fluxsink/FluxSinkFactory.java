@@ -19,7 +19,7 @@ public abstract class FluxSinkFactory implements AutoCloseable
         {
             case FLUXTYPE_DRIVE -> new HardwareFluxSinkFactory(config, usbFactorySupplier.get());
             case FLUXTYPE_A2R ->
-                    new A2RFluxSinkFactory(fluxSinkProto.getA2R().getFilename(), config);
+                    new A2R3FluxSinkFactory(fluxSinkProto.getA2R().getFilename(), config);
             case FLUXTYPE_AU -> new AuFluxSinkFactory(
                     fluxSinkProto.getAu().getDirectory(),
                     fluxSinkProto.getAu().getIndexMarkers());
