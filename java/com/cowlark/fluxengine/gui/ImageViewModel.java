@@ -18,7 +18,6 @@ import com.cowlark.fluxengine.algorithms.EndWriteOperationLogMessage;
 import com.cowlark.fluxengine.algorithms.ReadWriteFluxOperation;
 import com.cowlark.fluxengine.config.ConfigBuilder;
 import com.cowlark.fluxengine.config.ConfigProto;
-import com.cowlark.fluxengine.core.EmergencyStopException;
 import com.cowlark.fluxengine.core.FluxEngineException;
 import com.cowlark.fluxengine.core.LogMessage;
 import com.cowlark.fluxengine.core.LogMessage.ErrorLogMessage;
@@ -34,7 +33,6 @@ import com.cowlark.fluxengine.usb.UsbFinder.CandidateDevice;
 import com.cowlark.fluxengine.vfs.BlockDevice;
 import com.cowlark.fluxengine.vfs.Filesystem;
 import com.cowlark.fluxengine.vfs.FilesystemOperation;
-import com.cowlark.fluxengine.vfs.FilesystemOperation.FilesystemCaller;
 import com.cowlark.fluxengine.vfs.InMemoryBlockDevice;
 import io.reactivex.rxjava3.disposables.Disposable;
 import lombok.Getter;
@@ -51,10 +49,8 @@ import swingtree.ComponentDelegate;
 import swingtree.UI;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
-import javax.swing.SwingUtilities;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
-import java.util.concurrent.BlockingQueue;
 import java.util.function.Supplier;
 
 public class ImageViewModel
@@ -66,7 +62,7 @@ public class ImageViewModel
             # decoder.retries=0
             """;
 
-    private final PreferencesReaderWriter preferencesReaderWriter;
+    @Getter private final PreferencesReaderWriter preferencesReaderWriter;
 
     @Getter private Var<String> statusMessage = Var.of("Ready");
     @Getter private Var<String> selectedFormat;
@@ -221,7 +217,7 @@ public class ImageViewModel
 
     void onLoadDiskImage(ComponentDelegate<JButton, ActionEvent> delegate)
     {
-        JFileChooser fileChooser = new JFileChooser();
+        JFileChooser fileChooser = preferencesReaderWriter.createFileChooser();
         fileChooser.setDialogTitle("Load image file");
         fileChooser.setApproveButtonText("Load");
         if (fileChooser.showOpenDialog(null) != APPROVE_OPTION)
@@ -248,7 +244,7 @@ public class ImageViewModel
     {
         Image image = getDisk().get().image;
 
-        JFileChooser fileChooser = new JFileChooser();
+        JFileChooser fileChooser = preferencesReaderWriter.createFileChooser();
         fileChooser.setDialogTitle("Save image file");
         fileChooser.setApproveButtonText("Save");
         if (fileChooser.showSaveDialog(null) != APPROVE_OPTION)
@@ -273,7 +269,7 @@ public class ImageViewModel
         Disk disk = getDisk().get();
         FluxSource fluxSource = new MemoryFluxSource(disk);
 
-        JFileChooser fileChooser = new JFileChooser();
+        JFileChooser fileChooser = preferencesReaderWriter.createFileChooser();
         fileChooser.setDialogTitle("Save flux file");
         fileChooser.setApproveButtonText("Save");
         if (fileChooser.showSaveDialog(null) != APPROVE_OPTION)
@@ -318,7 +314,7 @@ public class ImageViewModel
     }
 
     void startFilesystemOperation(
-            BlockingQueue<FilesystemCaller> queue,
+            FilesystemExecutor executor,
             Image image,
             Runnable onExit)
     {
@@ -329,28 +325,8 @@ public class ImageViewModel
                     public void run(Filesystem filesystem) throws IOException
                     {
                         logger.atInfo().log("starting filesystem thread");
-                        try
-                        {
-                            while (true)
-                            {
-                                try
-                                {
-                                    queue.take().accept(filesystem);
-                                } catch (EmergencyStopException e)
-                                {
-                                    throw e;
-                                } catch (FluxEngineException | IOException e)
-                                {
-                                    SwingUtilities.invokeLater(() -> UI
-                                            .message("Filesystem error: " + e.getMessage())
-                                            .titled("Error")
-                                            .showAsError());
-                                }
-                            }
-                        } catch (InterruptedException e)
-                        {
-                            Thread.currentThread().interrupt();
-                        }
+                        executor.run(filesystem, error ->
+                                UiUtils.reportError("Filesystem error").apply(error));
                     }
 
                     @Override
@@ -362,11 +338,8 @@ public class ImageViewModel
                     @Override
                     protected void onEmergencyStop()
                     {
-                        // Unblock queue.take() waiting in run().
                         logger.atInfo().log("terminating filesystem thread");
-                        queue.add(fs -> {
-                            throw new EmergencyStopException();
-                        });
+                        executor.stop();
                     }
 
                     @Override

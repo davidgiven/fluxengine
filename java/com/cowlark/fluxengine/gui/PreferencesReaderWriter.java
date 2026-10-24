@@ -1,8 +1,16 @@
 package com.cowlark.fluxengine.gui;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 import com.google.common.base.Splitter;
+import com.google.common.base.Enums;
 import sprouts.Association;
 import sprouts.Pair;
+import sprouts.From;
+import sprouts.Var;
+import sprouts.Viewable;
+import javax.swing.JFileChooser;
+import java.io.File;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -16,6 +24,8 @@ public class PreferencesReaderWriter
     static final String FORMAT = "format";
     static final String DEVICE = "device";
     static final String DRIVE = "drive";
+    static final String WORKFLOW = "workflow";
+    static final String CURRENT_DIRECTORY = "current_directory";
     static final String ADVANCED_SETTINGS = "advanced_settings";
 
     static final String DEVICE_FLUXFILE = "fluxfile";
@@ -53,7 +63,7 @@ public class PreferencesReaderWriter
                 .withKeyValueSeparator(Splitter.on('=').limit(2))
                 .split(optionsString);
 
-        // Decode URL-encoded keys and values
+        /* Decode URL-encoded keys and values. */
         return rawMap
                 .entrySet()
                 .stream()
@@ -70,6 +80,31 @@ public class PreferencesReaderWriter
                 .map(entry -> encode(entry.first()) + "=" + encode(entry.second()))
                 .collect(Collectors.joining("&"));
         preferences.put(key, optionsString);
+    }
+
+    JFileChooser createFileChooser()
+    {
+        JFileChooser chooser = new JFileChooser();
+        String currentDirectory = getStringPreference(CURRENT_DIRECTORY, "");
+        if (!isNullOrEmpty(currentDirectory))
+            chooser.setCurrentDirectory(new File(currentDirectory));
+        /* Remember navigation even if the user subsequently cancels the dialog. */
+        chooser.addPropertyChangeListener(JFileChooser.DIRECTORY_CHANGED_PROPERTY, change -> {
+            File directory = (File) change.getNewValue();
+            if (directory != null)
+                setStringPreference(CURRENT_DIRECTORY, directory.getAbsolutePath());
+        });
+        return chooser;
+    }
+
+    <E extends Enum<E>> Var<E> makeEnumPreference(String name, E defaultValue)
+    {
+        E initial = Enums.getIfPresent(defaultValue.getDeclaringClass(),
+                getStringPreference(name, defaultValue.name())).or(defaultValue);
+        Var<E> value = Var.of(initial);
+        Viewable.cast(value).onChange(From.VIEW, change ->
+                setStringPreference(name, change.currentValue().orElseThrowUnchecked().name()));
+        return value;
     }
 
     String getStringPreference(String name, String defaultValue)

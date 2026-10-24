@@ -1,5 +1,7 @@
 package com.cowlark.fluxengine.gui;
 
+import static com.cowlark.fluxengine.gui.UiUtils.EDT_EXECUTOR;
+import static com.cowlark.fluxengine.gui.PreferencesReaderWriter.WORKFLOW;
 import static com.cowlark.fluxengine.gui.UiUtils.createSplitButton;
 import static com.cowlark.fluxengine.gui.UiUtils.sizePts;
 import static swingtree.UI.Axis.HORIZONTAL;
@@ -30,7 +32,6 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
-import javax.swing.SwingUtilities;
 import java.awt.Color;
 import java.awt.Toolkit;
 import java.net.URL;
@@ -50,11 +51,12 @@ public class ApplicationFrame extends JFrame
     private final FilesystemPanel filesystemPanel;
 
     private final ImageViewModel model;
-    private final Var<Workflow> currentWorkflow = Var.of(Workflow.DISK_READING);
+    private final Var<Workflow> currentWorkflow;
 
-    ApplicationFrame(ImageViewModel model)
+    ApplicationFrame(ImageViewModel model, PreferencesReaderWriter preferences)
     {
         this.model = model;
+        currentWorkflow = preferences.makeEnumPreference(WORKFLOW, Workflow.DISK_READING);
         summaryPanel = new SummaryPanel(model);
         logPanel = new LogPanel(model);
         imagePanel = new ImagePanel(model);
@@ -68,62 +70,55 @@ public class ApplicationFrame extends JFrame
         setTitle("FluxEngine");
 
         int leftPaneWidth = configurationPanel.getPreferredSize().width;
-        UIForTabbedPane<JTabbedPane> leftPane = tabbedPane().add(tab("Configuration").add(scrollPane()
-                .withPrefWidth(leftPaneWidth)
-                .withMinSize(leftPaneWidth, 0)
-                .withMaxSize(leftPaneWidth, Integer.MAX_VALUE)
-                .withVerticalScrollBarPolicy(UI.Active.ALWAYS)
-                .add(of(configurationPanel))));
+        UIForTabbedPane<JTabbedPane> leftPane =
+                tabbedPane().add(tab("Configuration").add(scrollPane()
+                        .withPrefWidth(leftPaneWidth)
+                        .withMinSize(leftPaneWidth, 0)
+                        .withMaxSize(leftPaneWidth, Integer.MAX_VALUE)
+                        .withVerticalScrollBarPolicy(UI.Active.ALWAYS)
+                        .add(of(configurationPanel))));
 
-        UIForSplitPane<JSplitPane> topPane =
-                splitPane(HORIZONTAL)
-                        .peek(pane -> {
-                            pane.setResizeWeight(1.0);
-                        })
-                        .add(
-                                TOP,
-                                tabbedPane()
-                                        .withMinSize(100, 0)
-                                        .add(tab("Image").add(of(imagePanel)))
-                                        .add(tab("Log").add(of(logPanel)))
-                                        .add(tab("Files").add(of(filesystemPanel))))
-                        .add(
-                                BOTTOM,
-                                tabbedPane()
-                                        .withMinSize(100, 0)
-                                        .add(tab("Visualiser").add(of(visualiserPanel))));
+        UIForSplitPane<JSplitPane> topPane = splitPane(HORIZONTAL).peek(pane -> {
+                    pane.setResizeWeight(1.0);
+                })
+                .add(
+                        TOP,
+                        tabbedPane().withMinSize(100, 0)
+                                .add(tab("Image").add(of(imagePanel)))
+                                .add(tab("Log").add(of(logPanel)))
+                                .add(tab("Files").add(of(filesystemPanel))))
+                .add(
+                        BOTTOM,
+                        tabbedPane().withMinSize(100, 0)
+                                .add(tab("Visualiser").add(of(visualiserPanel))));
 
-        UIForPanel<JPanel> controlPanel =
-                panel("wrap 4, center, nogrid")
-                        .add("aligny center", label("I want to"))
-                        .add(
-                                "aligny center",
-                                comboBox(currentWorkflow,
-                                        Workflow.values(),
-                                        Workflow::getDisplayName))
-                        .add(label(":"))
-                        .add(
-                                "aligny center",
-                                panel("fill, ins 0")
-                                        .withSizeExactly(sizePts(CARD_WIDTH_PTS, CARD_HEIGHT_PTS))
-                                        .add(
-                                                "align center",
-                                                currentWorkflow,
-                                                createControlPanelCard(model)))
-                        .add(
-                                "aligny center",
-                                button("Stop")
-                                        .isEnabledIf(model.getBusy())
-                                        .withForeground(Color.RED)
-                                        .onClick(model::onEmergencyStop));
+        UIForPanel<JPanel> controlPanel = panel("wrap 4, center, nogrid")
+                .add("aligny center", label("I want to"))
+                .add(
+                        "aligny center",
+                        comboBox(currentWorkflow, Workflow.values(), Workflow::getDisplayName))
+                .add(label(":"))
+                .add(
+                        "aligny center",
+                        panel("fill, ins 0")
+                                .withSizeExactly(sizePts(CARD_WIDTH_PTS, CARD_HEIGHT_PTS))
+                                .add(
+                                        "align center",
+                                        currentWorkflow,
+                                        createControlPanelCard(model)))
+                .add(
+                        "aligny center",
+                        button("Stop")
+                                .isEnabledIf(model.getBusy())
+                                .withForeground(Color.RED)
+                                .onClick(model::onEmergencyStop));
 
         UIForTabbedPane<JTabbedPane> bottomPane =
                 tabbedPane().add(tab("Summary").add(panel("fillx, wrap 1")
                         .add("growx, pushx, hmin 100pt", of(summaryPanel))
                         .add("growx", controlPanel)));
 
-        UIForSplitPane<JSplitPane> outerSplit = splitPane(HORIZONTAL)
-                .peek(pane -> {
+        UIForSplitPane<JSplitPane> outerSplit = splitPane(HORIZONTAL).peek(pane -> {
                     pane.setResizeWeight(0.0);
                     pane.setDividerSize(5);
                     pane.setContinuousLayout(true);
@@ -134,25 +129,20 @@ public class ApplicationFrame extends JFrame
                      * width without needing a manual resize or sash touch.
                      * withPrefWidth scales via UI.scale, so the divider must
                      * be scaled the same way. */
-                    SwingUtilities.invokeLater(() -> pane.setDividerLocation(
-                            UI.scale(leftPaneWidth)));
+                    EDT_EXECUTOR.execute(() -> pane.setDividerLocation(UI.scale(leftPaneWidth)));
                 })
                 .add(TOP, leftPane)
                 .add(
                         BOTTOM,
-                        splitPane(Axis.VERTICAL)
-                                .peek(pane -> pane.setResizeWeight(1.0))
+                        splitPane(Axis.VERTICAL).peek(pane -> pane.setResizeWeight(1.0))
                                 .add(TOP, topPane)
                                 .add(BOTTOM, bottomPane));
 
-        of(this)
-                .withOnCloseOperation(UI.OnWindowClose.DISPOSE)
-                .onClose(it -> {
+        of(this).withOnCloseOperation(UI.OnWindowClose.DISPOSE).onClose(it -> {
                     model.onEmergencyStop();
                     dispose();
                     System.exit(0);
-                })
-                .peek(frame -> {
+                }).peek(frame -> {
                     frame.setJMenuBar(ApplicationMenu.createMenu());
                 })
                 .add(outerSplit);

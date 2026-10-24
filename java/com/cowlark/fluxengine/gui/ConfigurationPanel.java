@@ -5,6 +5,7 @@ import static com.cowlark.fluxengine.config.OptionApplicabilityHint.FLUXFILE_SOU
 import static com.cowlark.fluxengine.config.OptionApplicabilityHint.HARDWARE_SOURCESINK;
 import static com.cowlark.fluxengine.gui.PreferencesReaderWriter.DEVICE_FLUXFILE;
 import static com.cowlark.fluxengine.gui.PreferencesReaderWriter.DEVICE_SERIALPORT;
+import static com.cowlark.fluxengine.gui.UiUtils.EDT_EXECUTOR;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static javax.swing.JFileChooser.APPROVE_OPTION;
@@ -13,7 +14,6 @@ import static swingtree.UI.of;
 import static swingtree.UI.panel;
 import static swingtree.UIFactoryMethods.button;
 import static swingtree.UIFactoryMethods.comboBox;
-import static swingtree.UIFactoryMethods.scrollPane;
 import static swingtree.UIFactoryMethods.separator;
 import static swingtree.UIFactoryMethods.textArea;
 
@@ -21,8 +21,8 @@ import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.config.OptionApplicabilityHint;
 import com.cowlark.fluxengine.config.OptionGroupProto;
 import com.cowlark.fluxengine.config.OptionProto;
-import com.cowlark.fluxengine.usb.UsbFinder;
 import com.cowlark.fluxengine.data.Formats;
+import com.cowlark.fluxengine.usb.UsbFinder;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -45,15 +45,14 @@ import javax.swing.JScrollPane;
 import javax.swing.JViewport;
 import javax.swing.ListCellRenderer;
 import javax.swing.Scrollable;
-import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.DocumentListener;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
@@ -199,9 +198,8 @@ public class ConfigurationPanel extends JPanel implements Scrollable
     {
         Dimension max = super.getMaximumSize();
         int twoColumnMax = 340 + getInsets().left + getInsets().right;
-        if (max.width > twoColumnMax) {
+        if (max.width > twoColumnMax)
             max.width = twoColumnMax;
-        }
         return max;
     }
 
@@ -287,11 +285,13 @@ public class ConfigurationPanel extends JPanel implements Scrollable
             Var<OptionProto> selected =
                     options.zoomTo(getOption(optionGroup), withOption(optionGroup));
 
-            panel = panel.add(LABEL_FORMAT, label(commentRenderer(optionGroup.getComment()))).add(
-                    SETTING_FORMAT, comboBox(
-                            selected,
-                            optionGroup.getOptionList(),
-                            ConfigurationPanel::optionRenderer));
+            panel = panel
+                    .add(LABEL_FORMAT, label(commentRenderer(optionGroup.getComment())))
+                    .add(
+                            SETTING_FORMAT, comboBox(
+                                    selected,
+                                    optionGroup.getOptionList(),
+                                    ConfigurationPanel::optionRenderer));
         }
 
         for (OptionProto option : config.getOptionList())
@@ -369,22 +369,26 @@ public class ConfigurationPanel extends JPanel implements Scrollable
             applicabilities.add(HARDWARE_SOURCESINK);
 
         if (applicabilities.contains(FLUXFILE_SOURCESINK))
-            panel = panel.add(LABEL_FORMAT, label("Flux file:")).add(
-                    SETTING_FORMAT,
-                    UI.textField(model.getSelectedFluxFile()).isEditableIf(false).peek(field -> {
-                        /* Show the tail of an over-long path: keep
-                         * the caret pinned to the end, since
-                         * alignment has no effect once the content
-                         * overflows. */
-                        Runnable pin =
-                                () -> SwingUtilities.invokeLater(() -> field.setCaretPosition(field
-                                        .getDocument()
-                                        .getLength()));
-                        pin.run();
-                        Viewable
-                                .cast(model.getSelectedFluxFile())
-                                .onChange(From.ALL, it -> pin.run());
-                    }));
+            panel = panel
+                    .add(LABEL_FORMAT, label("Flux file:"))
+                    .add(
+                            SETTING_FORMAT,
+                            UI
+                                    .textField(model.getSelectedFluxFile())
+                                    .isEditableIf(false)
+                                    .peek(field -> {
+                                        /* Show the tail of an over-long path: keep
+                                         * the caret pinned to the end, since
+                                         * alignment has no effect once the content
+                                         * overflows. */
+                                        Runnable pin =
+                                                () -> EDT_EXECUTOR.execute(() -> field.setCaretPosition(
+                                                        field.getDocument().getLength()));
+                                        pin.run();
+                                        Viewable
+                                                .cast(model.getSelectedFluxFile())
+                                                .onChange(From.ALL, it -> pin.run());
+                                    }));
 
         if (model.getSelectedDevice().get().equals(DEVICE_SERIALPORT))
             panel = panel
@@ -392,9 +396,13 @@ public class ConfigurationPanel extends JPanel implements Scrollable
                     .add(SETTING_FORMAT, UI.textField(model.getSelectedSerialPort()));
 
         if (applicabilities.contains(HARDWARE_SOURCESINK))
-            panel = panel.add(LABEL_FORMAT, label("Drive:")).add(
-                    SETTING_FORMAT,
-                    comboBox(model.getSelectedDrive(), DRIVES, ConfigurationPanel::driveRenderer));
+            panel = panel
+                    .add(LABEL_FORMAT, label("Drive:"))
+                    .add(
+                            SETTING_FORMAT, comboBox(
+                                    model.getSelectedDrive(),
+                                    DRIVES,
+                                    ConfigurationPanel::driveRenderer));
 
         panel = emitOptions(panel, model.getOptionsForDevice(), GLOBAL_CONFIG, applicabilities);
         return panel;
@@ -405,53 +413,50 @@ public class ConfigurationPanel extends JPanel implements Scrollable
         return panel
                 .add("span 2, growx, wrap", namedSeparator("Advanced settings"))
                 .add(
-                        "span 2, grow, push",
-                        textArea(model.getAdvancedSettings()).peek(ta -> {
-                                    /* Keep the outer scroll pane's preferred size in
-                                     * sync with the document so the area contracts
-                                     * to the text height (and re-expands when the
-                                     * viewport is larger via Scrollable). */
-                                    ta.getDocument().addDocumentListener(
-                                            new javax.swing.event.DocumentListener()
-                                            {
-                                                private void update()
-                                                {
-                                                    SwingUtilities.invokeLater(() -> {
-                                                        revalidate();
-                                                        repaint();
-                                                        Container viewport = getParent();
-                                                        if (viewport instanceof JViewport)
-                                                            viewport.revalidate();
-                                                        Container scroll = viewport != null
-                                                                ? viewport.getParent()
-                                                                : null;
-                                                        if (scroll instanceof JScrollPane)
-                                                            scroll.revalidate();
-                                                    });
-                                                }
+                        "span 2, grow, push", textArea(model.getAdvancedSettings()).peek(ta -> {
+                            /* Keep the outer scroll pane's preferred size in
+                             * sync with the document so the area contracts
+                             * to the text height (and re-expands when the
+                             * viewport is larger via Scrollable). */
+                            ta.getDocument().addDocumentListener(new DocumentListener()
+                            {
+                                private void update()
+                                {
+                                    EDT_EXECUTOR.execute(() -> {
+                                        revalidate();
+                                        repaint();
+                                        Container viewport = getParent();
+                                        if (viewport instanceof JViewport)
+                                            viewport.revalidate();
+                                        Container scroll =
+                                                viewport != null ? viewport.getParent() : null;
+                                        if (scroll instanceof JScrollPane)
+                                            scroll.revalidate();
+                                    });
+                                }
 
-                                                @Override
-                                                public void insertUpdate(
-                                                        javax.swing.event.DocumentEvent e)
-                                                {
-                                                    update();
-                                                }
+                                @Override
+                                public void insertUpdate(
+                                        javax.swing.event.DocumentEvent e)
+                                {
+                                    update();
+                                }
 
-                                                @Override
-                                                public void removeUpdate(
-                                                        javax.swing.event.DocumentEvent e)
-                                                {
-                                                    update();
-                                                }
+                                @Override
+                                public void removeUpdate(
+                                        javax.swing.event.DocumentEvent e)
+                                {
+                                    update();
+                                }
 
-                                                @Override
-                                                public void changedUpdate(
-                                                        javax.swing.event.DocumentEvent e)
-                                                {
-                                                    update();
-                                                }
-                                            });
-                                }));
+                                @Override
+                                public void changedUpdate(
+                                        javax.swing.event.DocumentEvent e)
+                                {
+                                    update();
+                                }
+                            });
+                        }));
     }
 
     /* A renderer which shows each device entry with the placeholder icon
@@ -512,10 +517,7 @@ public class ConfigurationPanel extends JPanel implements Scrollable
 
     private void onUseFluxFile(ComponentDelegate<JButton, ActionEvent> delegate)
     {
-        JFileChooser fileChooser = new JFileChooser();
-        String oldFile = model.getSelectedFluxFile().get();
-        if (!isNullOrEmpty(oldFile))
-            fileChooser.setCurrentDirectory(new File(oldFile).getParentFile());
+        JFileChooser fileChooser = model.getPreferencesReaderWriter().createFileChooser();
         fileChooser.setDialogTitle("Open flux file");
         fileChooser.setApproveButtonText("Select");
         if (fileChooser.showOpenDialog(this) == APPROVE_OPTION)

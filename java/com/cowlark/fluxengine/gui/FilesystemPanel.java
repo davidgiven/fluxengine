@@ -1,5 +1,8 @@
 package com.cowlark.fluxengine.gui;
 
+import static com.cowlark.fluxengine.gui.UiUtils.EDT_EXECUTOR;
+import static com.cowlark.fluxengine.gui.UiUtils.reportError;
+import static com.cowlark.fluxengine.gui.UiUtils.wrapIOException;
 import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_CREATEDIR;
 import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_DELETE;
 import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_GETDIRENT;
@@ -22,8 +25,8 @@ import com.cowlark.fluxengine.gui.FilesystemTreeTableModel.DirNode;
 import com.cowlark.fluxengine.gui.FilesystemTreeTableModel.FileNode;
 import com.cowlark.fluxengine.gui.FilesystemTreeTableModel.FsNode;
 import com.cowlark.fluxengine.vfs.FileAttributes;
+import com.cowlark.fluxengine.vfs.Filesystem;
 import com.cowlark.fluxengine.vfs.Filesystem.Capability;
-import com.cowlark.fluxengine.vfs.Filesystem.Dirent;
 import com.cowlark.fluxengine.vfs.VfsPath;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
@@ -37,19 +40,23 @@ import sprouts.Var;
 import sprouts.Viewable;
 import swingtree.ComponentDelegate;
 import swingtree.UI;
+import javax.swing.DropMode;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import javax.swing.TransferHandler;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeExpansionListener;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
+import java.awt.GraphicsEnvironment;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 public class FilesystemPanel extends JPanel
 {
@@ -60,6 +67,7 @@ public class FilesystemPanel extends JPanel
     final FilesystemTreeTableModel treeTableModel;
     final TreeSelectionModel treeSelectionModel;
     final Var<Tuple<TreePath>> filesSelected;
+    final Val<Boolean> canDoMultiFileOperation;
     final Set<VfsPath> everExpanded = new HashSet<>();
 
     JXTreeTable getTreeTable()
@@ -119,6 +127,13 @@ public class FilesystemPanel extends JPanel
         treeTable.setClosedIcon(null);
         treeTable.putClientProperty("FlatLaf.style", "showHorizontalLines: true");
 
+        /* Accept external files on directory rows without changing the current selection. */
+        treeTable.setFillsViewportHeight(true);
+        treeTable.setDropMode(DropMode.ON);
+        treeTable.setTransferHandler(createFileDropHandler());
+        if (!GraphicsEnvironment.isHeadless())
+            treeTable.setDragEnabled(true);
+
         filesSelected = Var.of(Tuple.of(TreePath.class));
         treeSelectionModel = treeTable.getTreeSelectionModel();
         treeSelectionModel.setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
@@ -141,40 +156,35 @@ public class FilesystemPanel extends JPanel
                         !(Iterables
                                 .getOnlyElement(files)
                                 .getLastPathComponent() instanceof DirNode));
-        Val<Boolean> canDoMultiFileOperation = Viewable.of(
+        canDoMultiFileOperation = Viewable.of(
                 allowedWhenMounted,
                 filesSelected,
                 (mounted, files) -> isValidSelection(files) && (files.size() >= 1) && mounted);
 
-        UI
-                .of(this)
-                .withLayout("fill, wrap 1, insets 5, hidemode 3")
+        UI.of(this).withLayout("fill, wrap 1, insets 5, hidemode 3")
                 .add(
-                        "growx", panel("insets 2")
+                        "growx",
+                        panel("insets 2")
                                 .add(
-                                        "align left",
-                                        button("Get")
+                                        "align left", button("Get")
                                                 .isEnabledIf(ifCapability(
                                                         canDoMultiFileOperation,
                                                         OP_GETFILE))
                                                 .onClick(this::getFile))
                                 .add(
-                                        "align left",
-                                        button("Put")
+                                        "align left", button("Put")
                                                 .isEnabledIf(ifCapability(
                                                         canDoSingleFileOperation,
                                                         OP_PUTFILE))
                                                 .onClick(this::putFiles))
                                 .add(
-                                        "align left",
-                                        button("Rename")
+                                        "align left", button("Rename")
                                                 .isEnabledIf(ifCapability(
                                                         canDoSingleFileOperation,
                                                         OP_MOVE))
                                                 .onClick(this::renameFile))
                                 .add(
-                                        "align left",
-                                        button("Delete")
+                                        "align left", button("Delete")
                                                 .isEnabledIf(ifCapability(
                                                         canDoMultiFileOperation,
                                                         OP_DELETE))
@@ -199,7 +209,8 @@ public class FilesystemPanel extends JPanel
                                                 .onClick(this::viewFile)))
                 .add(
                         "grow, push",
-                        scrollPane().add(UI.of(treeTable)).isVisibleIf(allowedWhenMounted))
+                        scrollPane()
+                                .add(UI.of(treeTable)).isVisibleIf(allowedWhenMounted))
                 .add(
                         "grow, push, align " + "center, w 100%!", html("""
                                 <html><center><b>Filesystem not mounted</b>
@@ -207,7 +218,8 @@ public class FilesystemPanel extends JPanel
                                 .withHorizontalAlignment(UI.HorizontalAlignment.CENTER)
                                 .isVisibleIf(notMounted))
                 .add(
-                        "growx", panel("insets 2")
+                        "growx",
+                        panel("insets 2")
                                 .add(
                                         "align left",
                                         button("Mount")
@@ -221,23 +233,7 @@ public class FilesystemPanel extends JPanel
                                                 .onClick(delegate -> {
                                                     Set<VfsPath> snap = snapshotExpandedVfsPaths();
                                                     treeTableModel.discard();
-                                                    treeTableModel.queueFilesystemOperation(fs -> SwingUtilities.invokeLater(
-                                                            () -> {
-                                                                for (VfsPath p : snap)
-                                                                {
-                                                                    DirNode n =
-                                                                            treeTableModel.findNode(
-                                                                                    p);
-                                                                    if (n == null ||
-                                                                            n.getChildCount() == 0)
-                                                                        continue;
-                                                                    TreePath tp =
-                                                                            treeTableModel.buildTreePath(
-                                                                                    n);
-                                                                    if (!treeTable.isExpanded(tp))
-                                                                        treeTable.expandPath(tp);
-                                                                }
-                                                            }));
+                                                    restoreExpandedPaths(snap);
                                                 }))
                                 .add(
                                         "align left", button("Commit")
@@ -296,13 +292,11 @@ public class FilesystemPanel extends JPanel
             {
                 VfsPath vfsPath = node.getDirent().path();
                 String filename = node.getDirent().filename();
-                UiUtils.promptAndSave(
-                        this, "Save file", filename, saver -> {
-                            treeTableModel.queueFilesystemOperation(fs -> {
-                                Bytes bytes = fs.getFile(vfsPath);
-                                saver.accept(bytes);
-                            });
-                        });
+                UiUtils.promptAndSave(this, model.getPreferencesReaderWriter(), "Save file", filename).completeAsync(
+                        wrapIOException(() -> {
+                            Filesystem fs = treeTableModel.getFilesystem();
+                            return fs.getFile(vfsPath);
+                        }), treeTableModel.getExecutor());
                 return;
             }
         }
@@ -311,13 +305,11 @@ public class FilesystemPanel extends JPanel
         ImmutableList<VfsPath> snapshot = stream(paths)
                 .map(p -> ((FileNode) p.getLastPathComponent()).getDirent().path())
                 .collect(toImmutableList());
-        UiUtils.promptAndSave(
-                this, "Save multiple files", "files.zip", saver -> {
-                    treeTableModel.queueFilesystemOperation(fs -> {
-                        Bytes bytes = fs.getFiles(fs, snapshot);
-                        saver.accept(bytes);
-                    });
-                });
+        UiUtils.promptAndSave(this, model.getPreferencesReaderWriter(), "Save multiple files", "files.zip").completeAsync(
+                wrapIOException(() -> {
+                    Filesystem fs = treeTableModel.getFilesystem();
+                    return fs.getFiles(fs, snapshot);
+                }), treeTableModel.getExecutor());
     }
 
     private void viewFile(
@@ -326,13 +318,17 @@ public class FilesystemPanel extends JPanel
         TreePath path = Iterables.getOnlyElement(filesSelected.get());
         FileNode file = (FileNode) path.getLastPathComponent();
         VfsPath vfsPath = file.getDirent().path();
-        treeTableModel.queueFilesystemOperation(fs -> {
-            Bytes data = fs.getFile(vfsPath);
-            SwingUtilities.invokeLater(() -> FileViewerDialogue.show(
-                    this,
-                    vfsPath.toString(),
-                    data));
-        });
+        CompletableFuture.supplyAsync(
+                wrapIOException(() -> treeTableModel.getFilesystem().getFile(vfsPath)),
+                treeTableModel.getExecutor()).thenAcceptAsync(
+                data -> {
+                    FileViewerDialogue.show(this, vfsPath.toString(), data);
+                }, EDT_EXECUTOR).exceptionallyAsync(reportError("Cannot view file"), EDT_EXECUTOR);
+    }
+
+    private TransferHandler createFileDropHandler()
+    {
+        return new FilesystemPanelTransferHandler(this);
     }
 
     private void putFiles(
@@ -341,7 +337,7 @@ public class FilesystemPanel extends JPanel
         DirNode parent = getParentNodeOfSelection();
         VfsPath parentPath = parent.getDirent().path();
 
-        JFileChooser chooser = new JFileChooser();
+        JFileChooser chooser = model.getPreferencesReaderWriter().createFileChooser();
         chooser.setDialogTitle("Open files");
         chooser.setMultiSelectionEnabled(true);
 
@@ -349,18 +345,26 @@ public class FilesystemPanel extends JPanel
         if (result != JFileChooser.APPROVE_OPTION)
             return;
 
-        File[] selectedFiles = chooser.getSelectedFiles();
+        putFiles(parentPath, ImmutableList.copyOf(chooser.getSelectedFiles()));
+    }
 
-        treeTableModel.queueFilesystemOperation(fs -> {
-            for (File file : selectedFiles)
-            {
-                Bytes data = Bytes.readFromFile(file.toPath());
-                String leafName = file.getName();
-                VfsPath vfsName = parentPath.resolve(leafName);
-                fs.putFile(vfsName, data);
-            }
-            resyncAllExpandedAsync();
-        });
+    void putFiles(VfsPath parentPath, ImmutableList<File> files)
+    {
+        /* Read host files and write their contents on the filesystem worker thread. */
+        CompletableFuture
+                .runAsync(
+                        wrapIOException(() -> {
+                            Filesystem fs = treeTableModel.getFilesystem();
+                            for (File file : files)
+                            {
+                                Bytes data = Bytes.readFromFile(file.toPath());
+                                String leafName = file.getName();
+                                VfsPath vfsName = parentPath.resolve(leafName);
+                                fs.putFile(vfsName, data);
+                            }
+                        }), treeTableModel.getExecutor())
+                .thenRunAsync(this::resyncAllExpandedAfterMutation, EDT_EXECUTOR)
+                .exceptionallyAsync(reportError("Cannot put files"), EDT_EXECUTOR);
     }
 
     private void deleteFiles(
@@ -371,11 +375,15 @@ public class FilesystemPanel extends JPanel
                 .map(p -> ((FileNode) p.getLastPathComponent()).getDirent().path())
                 .collect(toImmutableList());
 
-        treeTableModel.queueFilesystemOperation(fs -> {
-            for (VfsPath vfsPath : vfsPaths)
-                fs.deleteFileRecursively(vfsPath);
-            resyncAllExpandedAsync();
-        });
+        CompletableFuture
+                .runAsync(
+                        wrapIOException(() -> {
+                            Filesystem fs = treeTableModel.getFilesystem();
+                            for (VfsPath vfsPath : vfsPaths)
+                                fs.deleteFileRecursively(vfsPath);
+                        }), treeTableModel.getExecutor())
+                .thenRunAsync(this::resyncAllExpandedAfterMutation, EDT_EXECUTOR)
+                .exceptionallyAsync(reportError("Cannot delete files"), EDT_EXECUTOR);
     }
 
     private void infoFile(
@@ -384,20 +392,25 @@ public class FilesystemPanel extends JPanel
         TreePath path = Iterables.getOnlyElement(filesSelected.get());
         VfsPath vfsPath = ((FileNode) path.getLastPathComponent()).getDirent().path();
 
-        treeTableModel.queueFilesystemOperation(fs -> {
-            Dirent de = fs.getDirent(vfsPath);
-            SwingUtilities.invokeLater(() -> FileInfoDialogue.show(
-                    this,
-                    "File info: " + de.path().toString(),
-                    de
-                            .attributes()
-                            .entrySet()
-                            .stream()
-                            .collect(toImmutableMap(
-                                    e -> FileAttributes.getHumanName(e.getKey()),
-                                    e -> e.getValue()))));
-        });
-
+        CompletableFuture
+                .supplyAsync(
+                        wrapIOException(() -> treeTableModel.getFilesystem().getDirent(vfsPath)),
+                        treeTableModel.getExecutor())
+                .thenAcceptAsync(
+                        de -> {
+                            FileInfoDialogue.show(
+                                    this,
+                                    "File info: " + de.path().toString(),
+                                    de
+                                            .attributes()
+                                            .entrySet()
+                                            .stream()
+                                            .collect(toImmutableMap(
+                                                    e -> FileAttributes.getHumanName(
+                                                            e.getKey()),
+                                                    e -> e.getValue())));
+                        }, EDT_EXECUTOR)
+                .exceptionallyAsync(reportError("Cannot read file info"), EDT_EXECUTOR);
     }
 
     private void createDirectory(
@@ -410,10 +423,14 @@ public class FilesystemPanel extends JPanel
         if (childName == null || childName.isBlank())
             return;
         VfsPath childVfsPath = parentPath.resolve(childName);
-        treeTableModel.queueFilesystemOperation(fs -> {
-            fs.createDirectory(childVfsPath);
-            resyncAllExpandedAsync();
-        });
+        CompletableFuture
+                .runAsync(
+                        wrapIOException(() -> {
+                            Filesystem fs = treeTableModel.getFilesystem();
+                            fs.createDirectory(childVfsPath);
+                        }), treeTableModel.getExecutor())
+                .thenRunAsync(this::resyncAllExpandedAfterMutation, EDT_EXECUTOR)
+                .exceptionallyAsync(reportError("Cannot create directory"), EDT_EXECUTOR);
     }
 
     private DirNode getParentNodeOfSelection()
@@ -481,24 +498,28 @@ public class FilesystemPanel extends JPanel
         treeTableModel.mutated();
         /* Re-expand snapshot paths that were auto-collapsed when empty (isLeaf became true) but
          * now have children after the resync. */
-        treeTableModel.queueFilesystemOperation(fs -> SwingUtilities.invokeLater(() -> {
-            for (VfsPath p : snap)
-            {
-                DirNode n = treeTableModel.findNode(p);
-                if (n == null || n.getChildCount() == 0)
-                    continue;
-                TreePath tp = treeTableModel.buildTreePath(n);
-                if (!treeTable.isExpanded(tp))
-                    treeTable.expandPath(tp);
-            }
-        }));
+        restoreExpandedPaths(snap);
     }
 
-    void resyncAllExpandedAsync()
+    private CompletableFuture<Void> restoreExpandedPaths(Set<VfsPath> snapshot)
     {
-        /* Called from FS thread after a mutation; schedule EDT resync that preserves expansion
-         * and re-expands empty dirs that gained children. */
-        SwingUtilities.invokeLater(this::resyncAllExpandedAfterMutation);
+        /* Attach the continuation before submitting the barrier, so re-expansion is queued
+         * behind earlier listing results even when the EDT executor runs inline. */
+        CompletableFuture<Void> barrier = new CompletableFuture<>();
+        CompletableFuture<Void> restored = barrier.thenRunAsync(
+                () -> {
+                    for (VfsPath path : snapshot)
+                    {
+                        DirNode node = treeTableModel.findNode(path);
+                        if (node == null || node.getChildCount() == 0)
+                            continue;
+                        TreePath treePath = treeTableModel.buildTreePath(node);
+                        if (!treeTable.isExpanded(treePath))
+                            treeTable.expandPath(treePath);
+                    }
+                }, EDT_EXECUTOR);
+        barrier.completeAsync(() -> null, treeTableModel.getExecutor());
+        return restored;
     }
 
     private void renameFile(
@@ -514,19 +535,27 @@ public class FilesystemPanel extends JPanel
         VfsPath parentPath = parent.getDirent().path();
         VfsPath oldPath = child.getDirent().path();
         VfsPath newVfsPath = parentPath.resolve(newChild);
-        treeTableModel.queueFilesystemOperation(fs -> {
-            fs.moveFile(oldPath, newVfsPath);
-            resyncAllExpandedAsync();
-        });
+        CompletableFuture
+                .runAsync(
+                        wrapIOException(() -> {
+                            Filesystem fs = treeTableModel.getFilesystem();
+                            fs.moveFile(oldPath, newVfsPath);
+                        }), treeTableModel.getExecutor())
+                .thenRunAsync(this::resyncAllExpandedAfterMutation, EDT_EXECUTOR)
+                .exceptionallyAsync(reportError("Cannot rename file"), EDT_EXECUTOR);
     }
 
-    /**
-     * Returns true if the selection is valid — i.e. no selected path is an
-     * ancestor (or duplicate) of another selected path. Selections spanning
-     * multiple unrelated folders are fine.
-     */
+    /* A valid selection has unique filenames and no selected path that is an ancestor of
+     * another selected path. Selections spanning unrelated folders are otherwise allowed. */
     private static boolean isValidSelection(Tuple<TreePath> paths)
     {
+        Set<String> filenames = new HashSet<>();
+        for (TreePath path : paths)
+        {
+            if (!(path.getLastPathComponent() instanceof FileNode file) ||
+                    !filenames.add(file.getDirent().filename()))
+                return false;
+        }
         for (int i = 0; i < paths.size(); i++)
         {
             for (int j = i + 1; j < paths.size(); j++)
@@ -544,10 +573,11 @@ public class FilesystemPanel extends JPanel
     private void onMount(ComponentDelegate<JButton, ActionEvent> delegate)
     {
         treeTableModel.mount();
+
         /* Root is lazily populated in the model, but the JXTreeTable clears expansion on
          * setRoot. Expand it after the EDT has processed the structure change so the initial
          * file list becomes visible without requiring a manual click. */
-        SwingUtilities.invokeLater(() -> {
+        EDT_EXECUTOR.execute(() -> {
             Object root = treeTableModel.getRoot();
             if (root != null)
             {
@@ -572,4 +602,5 @@ public class FilesystemPanel extends JPanel
     {
         return v1.viewAs(Boolean.class, b -> !b);
     }
+
 }

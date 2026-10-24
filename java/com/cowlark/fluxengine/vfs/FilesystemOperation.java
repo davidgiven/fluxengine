@@ -59,8 +59,4 @@ public abstract class FilesystemOperation extends ReadWriteFluxOperation
         return blockDevice;
     }
 
-    public interface FilesystemCaller
-    {
-        void accept(Filesystem fs) throws IOException;
-    }
 }

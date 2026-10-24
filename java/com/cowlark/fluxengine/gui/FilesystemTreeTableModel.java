@@ -1,15 +1,16 @@
 package com.cowlark.fluxengine.gui;
 
+import static com.cowlark.fluxengine.gui.UiUtils.EDT_EXECUTOR;
 import static com.cowlark.fluxengine.vfs.Filesystem.FileType.IS_DIR;
 import static com.google.common.collect.ImmutableList.toImmutableList;
+import static com.google.common.base.Preconditions.checkState;
 
-import com.cowlark.fluxengine.core.EmergencyStopException;
 import com.cowlark.fluxengine.data.Image;
 import com.cowlark.fluxengine.vfs.FileAttributes;
+import com.cowlark.fluxengine.vfs.Filesystem;
 import com.cowlark.fluxengine.vfs.Filesystem.Capability;
 import com.cowlark.fluxengine.vfs.Filesystem.Dirent;
 import com.cowlark.fluxengine.vfs.FilesystemAttributes;
-import com.cowlark.fluxengine.vfs.FilesystemOperation.FilesystemCaller;
 import com.cowlark.fluxengine.vfs.VfsPath;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -30,8 +31,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.Executor;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -44,7 +45,7 @@ import java.util.function.Supplier;
  *       stores an {@code expanded} flag and never calls {@code expandPath}.</li>
  *   <li>Structure (which files exist, sort order, dirents) is owned by this model, but the
  *       authoritative data is on the filesystem thread. All {@code Filesystem} I/O runs on the
- *       filesystem thread via {@link #queueFilesystemOperation}; all model mutations run on the
+ *       filesystem thread via {@link #getExecutor}; all model mutations run on the
  *       EDT.</li>
  *   <li>Each {@code DirNode} has a {@link LoadState} driving the placeholder. A directory is only
  *       listed when it is expanded in the view. {@link #resyncNode} re-lists a single already-
@@ -66,7 +67,11 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel
             .build();
 
     final ImageViewModel model;
-    final BlockingQueue<FilesystemCaller> queue = new LinkedBlockingQueue<>();
+    private FilesystemExecutor filesystemExecutor = new FilesystemExecutor();
+    private final Executor executor = task -> {
+        getFilesystem();
+        filesystemExecutor.execute(task);
+    };
     Supplier<Set<VfsPath>> expandedSupplier;
 
     @Getter private final Var<Boolean> isMounted = Var.of(false);
@@ -202,8 +207,9 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel
     public void mount()
     {
         Image image = model.getDisk().mapTo(Image.class, disk -> disk.image).get();
+        filesystemExecutor = new FilesystemExecutor();
         model.startFilesystemOperation(
-                queue, image, () -> {
+                filesystemExecutor, image, () -> {
                     bytesTotal.set(0);
                     bytesUsed.set(0);
                     isMounted.set(false);
@@ -218,7 +224,7 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel
              * can expand it to trigger the first list. */
             setRoot(root);
             insertNodeInto(new PlaceholderNode(), root, 0);
-            isMounted.set(true);
+            filesystemExecutor.execute(() -> isMounted.set(true));
             mutated();
             /* The root is visible expanded by default (JXTreeTable shows the placeholder row).
              * Populate it automatically so the initial view is not stuck on "Loading..." — still
@@ -228,27 +234,37 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel
         if (SwingUtilities.isEventDispatchThread())
             reset.run();
         else
-            SwingUtilities.invokeLater(reset);
+            EDT_EXECUTOR.execute(reset);
     }
 
     /* Must be called from filesystem thread */
     public void mutated()
     {
         updateFreeSpace();
-        queue.add(fs -> {
+        filesystemExecutor.execute(() -> {
+            Filesystem fs = filesystemExecutor.getFilesystem();
             capabilities.set(ValueSet.of(Capability.class, fs.getCapabilities()));
             hasPendingChanges.set(fs.needsFlushing());
         });
     }
 
-    public void queueFilesystemOperation(FilesystemCaller caller)
+    /* Access the filesystem from callbacks scheduled on the filesystem executor. */
+    public Filesystem getFilesystem()
     {
-        queue.add(caller);
+        checkState(isMounted.get(), "Filesystem is not mounted");
+        return filesystemExecutor.getFilesystem();
+    }
+
+    public Executor getExecutor()
+    {
+        getFilesystem();
+        return executor;
     }
 
     void updateFreeSpace()
     {
-        queue.add(fs -> {
+        filesystemExecutor.execute(UiUtils.wrapIOException(() -> {
+            Filesystem fs = filesystemExecutor.getFilesystem();
             ImmutableMap<String, String> attrs = fs.getFilesystemMetadata();
             try
             {
@@ -264,12 +280,14 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel
                 bytesTotal.set(0);
                 bytesUsed.set(0);
             }
-        });
+        }));
     }
 
     public void commit()
     {
-        queue.add(fs -> fs.flushChanges());
+        getExecutor().execute(UiUtils.wrapIOException(() -> {
+            getFilesystem().flushChanges();
+        }));
     }
 
     public void resyncPaths(Collection<VfsPath> paths)
@@ -287,25 +305,22 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel
         Set<VfsPath> snapshot = expandedSupplier != null ? expandedSupplier.get() : Set.of();
         /* Capture immutable copy for the FS callback (still on EDT) */
         Set<VfsPath> captured = new HashSet<>(snapshot);
-        queue.add(fs -> {
-            try
-            {
-                fs.discardChanges();
-            } finally
-            {
-                SwingUtilities.invokeLater(() -> {
-                    resyncPaths(captured);
-                    mutated();
-                });
-            }
-        });
+        CompletableFuture<Void> discarded = new CompletableFuture<>();
+        discarded.whenCompleteAsync((unused, error) -> {
+            /* Refresh after both successful and failed discards, matching the previous finally
+             * block. Register before submission to preserve ordering with later FS barriers. */
+            resyncPaths(captured);
+            mutated();
+        }, EDT_EXECUTOR).exceptionallyAsync(UiUtils.reportError("Cannot discard changes"), EDT_EXECUTOR);
+        discarded.completeAsync(UiUtils.wrapIOException(() -> {
+            filesystemExecutor.getFilesystem().discardChanges();
+            return null;
+        }), filesystemExecutor);
     }
 
     public void unmount()
     {
-        queue.add(fs -> {
-            throw new EmergencyStopException();
-        });
+        filesystemExecutor.stop();
     }
 
     @Override
@@ -358,18 +373,7 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel
          * treeStructureChanged). */
         dir.setLoadState(LoadState.LOADING);
 
-        VfsPath captured = path;
-        queue.add(fs -> {
-            try
-            {
-                ImmutableList<Dirent> entries =
-                        fs.list(captured).values().stream().sorted().collect(toImmutableList());
-                SwingUtilities.invokeLater(() -> applyListResult(dir, entries, null));
-            } catch (Exception ex)
-            {
-                SwingUtilities.invokeLater(() -> applyListResult(dir, null, ex));
-            }
-        });
+        loadDirectory(dir, path);
     }
 
     /* -------------------------------------------------------------------------
@@ -388,18 +392,21 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel
         if (!hasPlaceholder(dir))
             insertNodeInto(new PlaceholderNode(), dir, 0);
 
-        VfsPath path = dir.vfsPath();
-        queue.add(fs -> {
-            try
-            {
-                ImmutableList<Dirent> entries =
-                        fs.list(path).values().stream().sorted().collect(toImmutableList());
-                SwingUtilities.invokeLater(() -> applyListResult(dir, entries, null));
-            } catch (Exception ex)
-            {
-                SwingUtilities.invokeLater(() -> applyListResult(dir, null, ex));
-            }
-        });
+        loadDirectory(dir, dir.vfsPath());
+    }
+
+    private void loadDirectory(DirNode dir, VfsPath path)
+    {
+        /* Attach the EDT callbacks before submitting the read so listing results are queued
+         * ahead of later filesystem barriers, even if the read completes immediately. */
+        CompletableFuture<ImmutableList<Dirent>> entries = new CompletableFuture<>();
+        entries.thenAcceptAsync(result -> applyListResult(dir, result, null), EDT_EXECUTOR)
+                .exceptionallyAsync(error -> {
+                    applyListResult(dir, null, error);
+                    return null;
+                }, EDT_EXECUTOR);
+        entries.completeAsync(UiUtils.wrapIOException(() -> filesystemExecutor.getFilesystem()
+                .list(path).values().stream().sorted().collect(toImmutableList())), filesystemExecutor);
     }
 
     /**
@@ -409,7 +416,7 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel
      * @param entries sorted dirents, or {@code null} on failure
      * @param error   non-null on failure
      */
-    void applyListResult(DirNode dir, ImmutableList<Dirent> entries, Exception error)
+    void applyListResult(DirNode dir, ImmutableList<Dirent> entries, Throwable error)
     {
         assert SwingUtilities.isEventDispatchThread();
 

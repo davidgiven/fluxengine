@@ -4,14 +4,18 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
+import static org.junit.Assert.assertThrows;
 
+import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.data.Disk;
 import com.cowlark.fluxengine.data.Image;
 import com.cowlark.fluxengine.gui.FilesystemTreeTableModel.DirNode;
 import com.cowlark.fluxengine.gui.FilesystemTreeTableModel.LoadState;
-import com.cowlark.fluxengine.vfs.FilesystemOperation.FilesystemCaller;
+import com.cowlark.fluxengine.vfs.Filesystem;
 import com.cowlark.fluxengine.vfs.VfsPath;
 import org.junit.Before;
+import org.junit.After;
+import com.cowlark.fluxengine.core.EmergencyStopException;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,10 +23,20 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import sprouts.Var;
 import javax.swing.SwingUtilities;
+import javax.swing.TransferHandler;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
+import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.util.List;
 import javax.swing.tree.TreePath;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -35,7 +49,10 @@ public class FilesystemPanelHeadlessTest
     private FilesystemTreeTableModel model;
     private FilesystemPanel panel;
     private Disk disk;
-    private BlockingQueue<FilesystemCaller> capturedQueue;
+    private FilesystemExecutor capturedExecutor;
+    private Thread filesystemThread;
+    private Runnable onFilesystemExit;
+    private final AtomicReference<Exception> filesystemError = new AtomicReference<>();
 
     @BeforeClass
     public static void headless()
@@ -46,7 +63,7 @@ public class FilesystemPanelHeadlessTest
     @Before
     public void setUp() throws Exception
     {
-        fakeFs = new FakeFilesystem();
+        fakeFs = org.mockito.Mockito.spy(new FakeFilesystem());
 
         /* The root already contains "/"; add an empty directory "/empty". */
         fakeFs.addEmptyDir(VfsPath.of("/empty"));
@@ -61,31 +78,24 @@ public class FilesystemPanelHeadlessTest
         model = new FilesystemTreeTableModel(mockModel);
         when(mockModel.getFilesystemTreeTableModel()).thenReturn(model);
 
-        /* Capture the queue used by mount and start a fake filesystem thread. */
+        /* Run the production executor with the fake filesystem on a dedicated worker. */
         doAnswer(inv -> {
-            capturedQueue = inv.getArgument(0);
-
-            /* The image argument is ignored for the fake filesystem. */
-            Thread t = new Thread(() -> {
-                while (true)
+            capturedExecutor = inv.getArgument(0);
+            onFilesystemExit = inv.getArgument(2);
+            filesystemThread = new Thread(() -> {
+                try
                 {
-                    try
-                    {
-                        FilesystemCaller c = capturedQueue.take();
-                        c.accept(fakeFs);
-                    } catch (InterruptedException e)
-                    {
-                        Thread.currentThread().interrupt();
-                        break;
-                    } catch (Exception e)
-                    {
-                        /* Swallow the exception as ImagerViewModel does (it shows a UI message). */
-                        e.printStackTrace();
-                    }
+                    capturedExecutor.run(fakeFs, error -> filesystemError.set((Exception) error));
+                } catch (EmergencyStopException e)
+                {
+                    /* Stopping the session unwinds the filesystem operation. */
+                } finally
+                {
+                    onFilesystemExit.run();
                 }
             });
-            t.setDaemon(true);
-            t.start();
+            filesystemThread.setDaemon(true);
+            filesystemThread.start();
             return null;
         }).when(mockModel).startFilesystemOperation(any(), any(), any());
 
@@ -112,6 +122,175 @@ public class FilesystemPanelHeadlessTest
         awaitLoaded(VfsPath.of("/"));
     }
 
+    @After
+    public void stopFilesystemThread() throws Exception
+    {
+        if (capturedExecutor != null)
+            capturedExecutor.stop();
+        if (filesystemThread != null)
+        {
+            filesystemThread.join(5000);
+            assertThat(filesystemThread.isAlive()).isFalse();
+        }
+    }
+
+    @Test
+    public void filesystemExecutorRunsCallbacksWithMountedFilesystem() throws Exception
+    {
+        assertThat(model.getFilesystem()).isSameInstanceAs(fakeFs);
+        CompletableFuture<Thread> worker = new CompletableFuture<>();
+        model.getExecutor().execute(() -> worker.complete(Thread.currentThread()));
+        Thread filesystemThread = worker.get(5, TimeUnit.SECONDS);
+        CompletableFuture<Filesystem> result =
+                CompletableFuture.supplyAsync(() -> {
+                    assertThat(Thread.currentThread()).isSameInstanceAs(filesystemThread);
+                    return model.getFilesystem();
+                }, model.getExecutor());
+        assertThat(result.get(5, TimeUnit.SECONDS)).isSameInstanceAs(fakeFs);
+    }
+
+    @Test
+    public void filesystemExecutorPreservesIoErrorHandling() throws Exception
+    {
+        IOException failure = new IOException("test filesystem failure");
+        model.getExecutor().execute(() -> {
+            throw new UncheckedIOException(failure);
+        });
+        CompletableFuture.runAsync(() -> {}, model.getExecutor()).get(5, TimeUnit.SECONDS);
+        assertThat(filesystemError.get()).isSameInstanceAs(failure);
+    }
+
+    @Test
+    public void filesystemAccessorsRejectUnmountedFilesystem() throws Exception
+    {
+        FilesystemTreeTableModel unmounted = new FilesystemTreeTableModel(mockModel);
+        assertThrows(IllegalStateException.class, unmounted::getFilesystem);
+        assertThrows(IllegalStateException.class, unmounted::getExecutor);
+
+        Executor executor = model.getExecutor();
+        SwingUtilities.invokeAndWait(onFilesystemExit);
+        assertThrows(IllegalStateException.class, model::getFilesystem);
+        assertThrows(IllegalStateException.class, model::getExecutor);
+        assertThrows(IllegalStateException.class, () -> executor.execute(() -> {}));
+    }
+
+    @Test
+    public void backgroundDropTargetsRoot() throws Exception
+    {
+        SwingUtilities.invokeAndWait(() -> {
+            TransferHandler.TransferSupport support =
+                    org.mockito.Mockito.mock(TransferHandler.TransferSupport.class);
+            javax.swing.JTable.DropLocation location =
+                    org.mockito.Mockito.mock(javax.swing.JTable.DropLocation.class);
+            when(support.isDrop()).thenReturn(true);
+            when(support.isDataFlavorSupported(DataFlavor.javaFileListFlavor)).thenReturn(true);
+            when(support.getSourceDropActions()).thenReturn(TransferHandler.COPY);
+            when(support.getDropLocation()).thenReturn(location);
+            when(location.getRow()).thenReturn(-1);
+            assertThat(panel.getTreeTable().getTransferHandler().canImport(support)).isTrue();
+            org.mockito.Mockito.verify(support).setDropAction(TransferHandler.COPY);
+            assertThat(panel.getTreeTable().getFillsViewportHeight()).isTrue();
+        });
+    }
+
+    @Test
+    public void draggingFilesExportsContentsAndRejectsDirectories() throws Exception
+    {
+        /* Populate a real file entry and supply its contents through the filesystem worker. */
+        VfsPath filePath = VfsPath.of("/extract.txt");
+        fakeFs.addFile(filePath);
+        org.mockito.Mockito.doReturn(new Bytes("extracted contents"))
+                .when(fakeFs).getFile(filePath);
+        SwingUtilities.invokeAndWait(() -> model.resyncPaths(Set.of(VfsPath.root())));
+        awaitIdle();
+        awaitLoaded(VfsPath.root());
+        Clipboard clipboard = new Clipboard("test");
+
+        /* Export using the same TransferHandler entry points used by native drag-and-drop. */
+        SwingUtilities.invokeAndWait(() -> {
+            DirNode root = (DirNode) model.getRoot();
+            for (int i = 0; i < root.getChildCount(); i++)
+            {
+                FilesystemTreeTableModel.FsNode child =
+                        (FilesystemTreeTableModel.FsNode) root.getChildAt(i);
+                if (filePath.equals(child.vfsPath()))
+                    panel.getTreeTable().getTreeSelectionModel().setSelectionPath(
+                            model.buildTreePath(child));
+            }
+            TransferHandler handler = panel.getTreeTable().getTransferHandler();
+            assertThat(handler.getSourceActions(panel.getTreeTable()))
+                    .isEqualTo(TransferHandler.COPY);
+            handler.exportToClipboard(panel.getTreeTable(), clipboard, TransferHandler.COPY);
+            assertThat(clipboard.getContents(null).isDataFlavorSupported(
+                    DataFlavor.javaFileListFlavor)).isTrue();
+            panel.getTreeTable().getTreeSelectionModel().clearSelection();
+        });
+        org.mockito.Mockito.verify(fakeFs, org.mockito.Mockito.never()).getFile(filePath);
+        CompletableFuture<List<?>> transferred = new CompletableFuture<>();
+        UiUtils.EDT_EXECUTOR.execute(() -> {
+            try
+            {
+                transferred.complete((List<?>) clipboard.getData(DataFlavor.javaFileListFlavor));
+            } catch (Exception e)
+            {
+                transferred.completeExceptionally(e);
+            }
+        });
+        List<?> files = transferred.get(5, TimeUnit.SECONDS);
+        assertThat(files).hasSize(1);
+        File exported = (File) files.get(0);
+        assertThat(exported.getName()).isEqualTo("extract.txt");
+        assertThat(Files.readString(exported.toPath())).isEqualTo("extracted contents");
+        assertThat(clipboard.getData(DataFlavor.javaFileListFlavor)).isSameInstanceAs(files);
+        org.mockito.Mockito.verify(fakeFs, org.mockito.Mockito.times(1)).getFile(filePath);
+
+        /* Directory selections must never initiate extraction. */
+        SwingUtilities.invokeAndWait(() -> {
+            panel.getTreeTable().getTreeSelectionModel().setSelectionPath(
+                    model.buildTreePath(model.findNode(VfsPath.of("/empty"))));
+            assertThat(panel.getTreeTable().getTransferHandler().getSourceActions(panel.getTreeTable()))
+                    .isEqualTo(TransferHandler.NONE);
+        });
+        Files.delete(exported.toPath());
+        Files.delete(exported.toPath().getParent());
+    }
+
+    @Test
+    public void draggingFilesRejectsCollidingNames() throws Exception
+    {
+        fakeFs.addFile(VfsPath.of("/same.txt"));
+        fakeFs.addFile(VfsPath.of("/empty/same.txt"));
+        SwingUtilities.invokeAndWait(() -> model.resyncPaths(Set.of(VfsPath.root())));
+        awaitIdle();
+        awaitLoaded(VfsPath.root());
+        SwingUtilities.invokeAndWait(() -> model.requestPopulate(model.findNode(VfsPath.of("/empty"))));
+        awaitIdle();
+        awaitLoaded(VfsPath.of("/empty"));
+
+        SwingUtilities.invokeAndWait(() -> {
+            panel.getTreeTable().getTreeSelectionModel().setSelectionPaths(new TreePath[] {
+                    model.buildTreePath(model.findNode(VfsPath.root())).pathByAddingChild(
+                            findFile(model.findNode(VfsPath.root()), "same.txt")),
+                    model.buildTreePath(model.findNode(VfsPath.of("/empty"))).pathByAddingChild(
+                            findFile(model.findNode(VfsPath.of("/empty")), "same.txt"))
+            });
+            assertThat(panel.getTreeTable().getTransferHandler().getSourceActions(panel.getTreeTable()))
+                    .isEqualTo(TransferHandler.NONE);
+        });
+    }
+
+    private Object findFile(DirNode directory, String name)
+    {
+        for (int i = 0; i < directory.getChildCount(); i++)
+        {
+            FilesystemTreeTableModel.FileNode file =
+                    (FilesystemTreeTableModel.FileNode) directory.getChildAt(i);
+            if (file.getDirent().filename().equals(name))
+                return file;
+        }
+        throw new AssertionError("Missing file: " + name);
+    }
+
     private void awaitIdle() throws Exception
     {
         /* Pump the EDT. */
@@ -132,17 +311,17 @@ public class FilesystemPanelHeadlessTest
                 hasLoading.set(hasLoadingNode((DirNode) model.getRoot()));
             });
             loading = hasLoading.get();
-            boolean queueEmpty = capturedQueue == null || capturedQueue.isEmpty();
+            CompletableFuture.runAsync(() -> {}, capturedExecutor).get(5, TimeUnit.SECONDS);
 
             /* The EDT queue must also be empty; invokeAndWait already drains it. */
-            if (!loading && queueEmpty)
+            if (!loading)
             {
                 /* Give the filesystem thread a moment to enqueue the next EDT task. */
                 Thread.sleep(50);
 
                 /* Re-check. */
                 SwingUtilities.invokeAndWait(() -> hasLoading.set(hasLoadingNode((DirNode) model.getRoot())));
-                if (!hasLoading.get() && (capturedQueue == null || capturedQueue.isEmpty()))
+                if (!hasLoading.get())
                     return;
             }
             Thread.sleep(20);
@@ -255,6 +434,24 @@ public class FilesystemPanelHeadlessTest
             assertThat(newDir).isNotNull();
             assertThat(model.hasPlaceholder(newDir)).isTrue();
         });
+    }
+
+    @Test
+    public void failedDirectoryListingCanBeRetried() throws Exception
+    {
+        org.mockito.Mockito.doThrow(new IOException("directory read failed"))
+                .doCallRealMethod().when(fakeFs).list(VfsPath.root());
+        SwingUtilities.invokeAndWait(() -> model.resyncNode(VfsPath.root()));
+        awaitIdle();
+        SwingUtilities.invokeAndWait(() -> {
+            DirNode root = model.findNode(VfsPath.root());
+            assertThat(root.getLoadState()).isEqualTo(LoadState.NOT_LOADED);
+            model.requestPopulate(root);
+        });
+        awaitIdle();
+        awaitLoaded(VfsPath.root());
+        SwingUtilities.invokeAndWait(() ->
+                assertThat(model.findNode(VfsPath.of("/empty"))).isNotNull());
     }
 
     @Test

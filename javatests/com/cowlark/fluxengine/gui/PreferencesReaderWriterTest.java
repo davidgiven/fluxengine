@@ -5,10 +5,20 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.MockedConstruction;
+import org.mockito.Mockito;
+import javax.swing.JFileChooser;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.io.File;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import sprouts.Association;
+import sprouts.From;
+import sprouts.Var;
+import com.cowlark.fluxengine.gui.ApplicationFrame.Workflow;
 import java.util.prefs.Preferences;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -23,6 +33,98 @@ public class PreferencesReaderWriterTest
         for (int i = 0; i < pairs.length; i += 2)
             result = result.put(pairs[i], pairs[i + 1]);
         return result;
+    }
+
+    @Test
+    public void fileChooserRestoresLastDirectory()
+    {
+        File directory = new File("saved-directory").getAbsoluteFile();
+        when(preferences.get("current_directory", "")).thenReturn(directory.getPath());
+        writer = new PreferencesReaderWriter(preferences);
+        try (MockedConstruction<JFileChooser> choosers = Mockito.mockConstruction(JFileChooser.class))
+        {
+            JFileChooser chooser = writer.createFileChooser();
+            verify(chooser).setCurrentDirectory(directory);
+        }
+    }
+
+    @Test
+    public void fileChooserNavigationIsRememberedEvenWhenCancelled()
+    {
+        File directory = new File("last-directory").getAbsoluteFile();
+        when(preferences.get("current_directory", "")).thenReturn("");
+        writer = new PreferencesReaderWriter(preferences);
+        try (MockedConstruction<JFileChooser> choosers = Mockito.mockConstruction(JFileChooser.class))
+        {
+            JFileChooser chooser = writer.createFileChooser();
+            ArgumentCaptor<PropertyChangeListener> listener =
+                    ArgumentCaptor.forClass(PropertyChangeListener.class);
+            verify(chooser).addPropertyChangeListener(
+                    Mockito.eq(JFileChooser.DIRECTORY_CHANGED_PROPERTY), listener.capture());
+            listener.getValue().propertyChange(new PropertyChangeEvent(
+                    chooser, JFileChooser.DIRECTORY_CHANGED_PROPERTY, null, directory));
+            when(chooser.showOpenDialog(null)).thenReturn(JFileChooser.CANCEL_OPTION);
+            assertThat(chooser.showOpenDialog(null)).isEqualTo(JFileChooser.CANCEL_OPTION);
+            verify(preferences).put("current_directory", directory.getPath());
+
+            when(preferences.get("current_directory", "")).thenReturn(directory.getPath());
+            JFileChooser next = new PreferencesReaderWriter(preferences).createFileChooser();
+            verify(next).setCurrentDirectory(directory);
+        }
+    }
+
+    @Test
+    public void fileChooserKeepsSystemDefaultWhenNoDirectoryIsSaved()
+    {
+        when(preferences.get("current_directory", "")).thenReturn("");
+        writer = new PreferencesReaderWriter(preferences);
+        try (MockedConstruction<JFileChooser> choosers = Mockito.mockConstruction(JFileChooser.class))
+        {
+            JFileChooser chooser = writer.createFileChooser();
+            verify(chooser, Mockito.never()).setCurrentDirectory(Mockito.any());
+        }
+    }
+
+    @Test
+    public void workflowPreferenceRestoresSavedSelection()
+    {
+        when(preferences.get("workflow", "DISK_READING")).thenReturn("IMAGE_PROCESSING");
+        writer = new PreferencesReaderWriter(preferences);
+
+        assertThat(writer.makeEnumPreference("workflow", Workflow.DISK_READING).get())
+                .isEqualTo(Workflow.IMAGE_PROCESSING);
+    }
+
+    @Test
+    public void workflowPreferenceUsesDefaultWhenMissing()
+    {
+        when(preferences.get("workflow", "DISK_READING")).thenReturn("DISK_READING");
+        writer = new PreferencesReaderWriter(preferences);
+
+        assertThat(writer.makeEnumPreference("workflow", Workflow.DISK_READING).get())
+                .isEqualTo(Workflow.DISK_READING);
+    }
+
+    @Test
+    public void workflowPreferenceUsesDefaultForUnknownValue()
+    {
+        when(preferences.get("workflow", "DISK_READING")).thenReturn("OLD_WORKFLOW");
+        writer = new PreferencesReaderWriter(preferences);
+
+        assertThat(writer.makeEnumPreference("workflow", Workflow.DISK_READING).get())
+                .isEqualTo(Workflow.DISK_READING);
+    }
+
+    @Test
+    public void workflowPreferencePersistsSelectionChanges()
+    {
+        when(preferences.get("workflow", "DISK_READING")).thenReturn("DISK_READING");
+        writer = new PreferencesReaderWriter(preferences);
+        Var<Workflow> workflow = writer.makeEnumPreference("workflow", Workflow.DISK_READING);
+
+        workflow.set(From.VIEW, Workflow.DISK_WRITING);
+
+        verify(preferences).put("workflow", "DISK_WRITING");
     }
 
     @Test
