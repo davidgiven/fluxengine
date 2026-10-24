@@ -18,6 +18,10 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JViewport;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.LookAndFeel;
+import com.formdev.flatlaf.FlatDarkLaf;
+import com.formdev.flatlaf.FlatLightLaf;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Graphics2D;
@@ -131,8 +135,8 @@ import java.io.IOException;
 
             /* At the centre, one inward notch increases both content width and view offset. */
             panel.zoom(-1, 200);
-            assertThat(viewport.getView().getWidth()).isEqualTo(480);
-            assertThat(viewport.getViewPosition().x).isEqualTo(40);
+            assertThat(viewport.getView().getWidth()).isEqualTo(472);
+            assertThat(viewport.getViewPosition().x).isEqualTo(36);
             panel.zoom(1, 200);
             assertThat(viewport.getViewPosition().x).isEqualTo(0);
             assertThat(viewport.getView().getWidth()).isEqualTo(400);
@@ -163,17 +167,26 @@ import java.io.IOException;
             BufferedImage image = paint(viewport);
             snapshot("captures", image);
 
+            /* Both timeline ends reserve blank space even where tick labels are clipped. */
+            int paper = viewport.getView().getBackground().getRGB();
+            for (int x : new int[]{0, 1, 18, 19, 380, 381, 398, 399})
+            {
+                for (int y = 0; y < image.getHeight(); y++)
+                    assertThat(image.getRGB(x, y)).isEqualTo(paper);
+            }
+
             /* Sample block interiors away from text, outlines, and the index marker. */
-            assertThat(image.getRGB(60, 10) & 0xffffff).isEqualTo(0xffffff);
-            assertThat(image.getRGB(260, 10) & 0xffffff).isEqualTo(0xd55e00);
-            assertThat(image.getRGB(200, 5) & 0xffffff).isEqualTo(0xff0000);
-            assertThat(image.getRGB(60, 50) & 0xffffff).isEqualTo(0xc8c8c8);
-            JPopupMenu menu = panel.contextMenuAt(new Point(60, 10));
+            assertThat(image.getRGB(80, 10) & 0xffffff).isEqualTo(UiUtils.DATA_OK_COLOUR.darker().getRGB() & 0xffffff);
+            assertThat(image.getRGB(260, 10)).isEqualTo(UiUtils.DATA_BAD_COLOUR.darker().getRGB());
+            assertThat(image.getRGB(200, 5) & 0xffffff).isEqualTo(UiUtils.DATA_BAD_COLOUR.getRGB() & 0xffffff);
+            assertThat(image.getRGB(80, 50)).isEqualTo(UiUtils.HEADER_COLOUR.darker().getRGB());
+            assertThat(image.getRGB(260, 50)).isEqualTo(UiUtils.DATA_BAD_COLOUR.darker().getRGB());
+            JPopupMenu menu = panel.contextMenuAt(new Point(80, 10));
             assertThat(menu.getComponentCount()).isEqualTo(3);
             assertThat(((JMenuItem) menu.getComponent(0)).getText())
                 .isEqualTo("Show sector summary");
-            assertThat(panel.contextMenuAt(new Point(60, 50)).getComponentCount()).isEqualTo(1);
-            assertThat(panel.contextMenuAt(new Point(60, 110))).isNull();
+            assertThat(panel.contextMenuAt(new Point(80, 50)).getComponentCount()).isEqualTo(1);
+            assertThat(panel.contextMenuAt(new Point(80, 110))).isNull();
 
             /* Reports include both captures even when their statuses differ. */
             assertThat(panel.sectorSummary(first.allSectors.getFirst()))
@@ -194,14 +207,14 @@ import java.io.IOException;
             JViewport viewport = viewport(panel);
             JComponent canvas = (JComponent) viewport.getView();
             BufferedImage normal = paint(viewport);
-            assertThat(normal.getRGB(120, 170) & 0xffffff).isEqualTo(0x4040ff);
+            assertThat(normal.getRGB(120, 170) & 0xffffff).isEqualTo(UiUtils.HEADER_COLOUR.getRGB() & 0xffffff);
             canvas.dispatchEvent(
                 new MouseEvent(canvas, MouseEvent.MOUSE_MOVED, 0, 0, 120, 10, 0, false));
             BufferedImage hovered = paint(viewport);
-            assertThat(hovered.getRGB(99, 10)).isNotEqualTo(normal.getRGB(99, 10));
+            assertThat(hovered.getRGB(120, 10)).isNotEqualTo(normal.getRGB(120, 10));
             canvas.dispatchEvent(
                 new MouseEvent(canvas, MouseEvent.MOUSE_EXITED, 0, 0, 120, 10, 0, false));
-            assertThat(paint(viewport).getRGB(99, 10)).isEqualTo(normal.getRGB(99, 10));
+            assertThat(paint(viewport).getRGB(120, 10)).isEqualTo(normal.getRGB(120, 10));
 
             /* A wheel event must zoom and be consumed instead of scrolling the outer panel. */
             MouseWheelEvent wheel = new MouseWheelEvent(canvas,
@@ -217,7 +230,7 @@ import java.io.IOException;
                 -1);
             canvas.dispatchEvent(wheel);
             assertThat(wheel.isConsumed()).isTrue();
-            assertThat(canvas.getWidth()).isEqualTo(480);
+            assertThat(canvas.getWidth()).isEqualTo(472);
             canvas.dispatchEvent(new MouseEvent(
                 canvas, MouseEvent.MOUSE_PRESSED, 0, 0, 240, 100, 1, false, MouseEvent.BUTTON1));
             canvas.dispatchEvent(new MouseEvent(canvas,
@@ -229,7 +242,7 @@ import java.io.IOException;
                 0,
                 false,
                 MouseEvent.NOBUTTON));
-            assertThat(viewport.getViewPosition().x).isEqualTo(60);
+            assertThat(viewport.getViewPosition().x).isEqualTo(56);
             assertThat(viewport.getViewPosition().y).isEqualTo(0);
             canvas.dispatchEvent(new MouseEvent(
                 canvas, MouseEvent.MOUSE_RELEASED, 0, 0, 240, 100, 1, false, MouseEvent.BUTTON1));
@@ -240,9 +253,55 @@ import java.io.IOException;
                 panel.zoom(-1, 200);
                 paint(viewport);
                 if (i == 32)
+                {
+                    viewport.setViewPosition(new Point((int) (canvas.getWidth() * 0.539), 0));
                     snapshot("raw-bits", paint(viewport));
+                }
             }
             panel.dispose();
+        });
+    }
+
+    @Test
+    public void paletteFollowsLightAndDarkThemes() throws Exception
+    {
+        SwingUtilities.invokeAndWait(() -> {
+            LookAndFeel original = UIManager.getLookAndFeel();
+            try
+            {
+                FluxViewerPanel panel = new FluxViewerPanel(null, ImmutableList.of(track(true)));
+                for (LookAndFeel theme : ImmutableList.of(new FlatLightLaf(), new FlatDarkLaf()))
+                {
+                    UIManager.setLookAndFeel(theme);
+                    SwingUtilities.updateComponentTreeUI(panel);
+                    JViewport viewport = viewport(panel);
+                    BufferedImage image = paint(viewport);
+                    assertThat(image.getRGB(10, 100))
+                            .isEqualTo(UIManager.getColor("Panel.background").getRGB());
+                    assertThat(image.getRGB(120, 10))
+                            .isEqualTo(UiUtils.DATA_OK_COLOUR.darker().getRGB());
+                    /* Semantic record fills remain consistent under both themes. */
+                    assertThat(image.getRGB(120, 50))
+                            .isEqualTo(UiUtils.HEADER_COLOUR.darker().getRGB());
+                    snapshot(theme instanceof FlatDarkLaf ? "dark-theme" : "light-theme", image);
+                }
+                panel.dispose();
+            }
+            catch (Exception exception)
+            {
+                throw new AssertionError(exception);
+            }
+            finally
+            {
+                try
+                {
+                    UIManager.setLookAndFeel(original);
+                }
+                catch (Exception exception)
+                {
+                    throw new AssertionError(exception);
+                }
+            }
         });
     }
 
