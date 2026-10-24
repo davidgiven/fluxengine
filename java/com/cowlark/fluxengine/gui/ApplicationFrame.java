@@ -47,6 +47,7 @@ public class ApplicationFrame extends JFrame
     private final VisualiserPanel visualiserPanel;
     private final ImagePanel imagePanel;
     private final LogPanel logPanel;
+    private final FluxPanel fluxPanel;
     private final SummaryPanel summaryPanel;
     private final FilesystemPanel filesystemPanel;
 
@@ -59,6 +60,7 @@ public class ApplicationFrame extends JFrame
         currentWorkflow = preferences.makeEnumPreference(WORKFLOW, Workflow.DISK_READING);
         summaryPanel = new SummaryPanel(model);
         logPanel = new LogPanel(model);
+        fluxPanel = new FluxPanel(model);
         imagePanel = new ImagePanel(model);
         visualiserPanel = new VisualiserPanel(model);
         configurationPanel = new ConfigurationPanel(model);
@@ -86,6 +88,7 @@ public class ApplicationFrame extends JFrame
                         tabbedPane().withMinSize(100, 0)
                                 .add(tab("Image").add(of(imagePanel)))
                                 .add(tab("Log").add(of(logPanel)))
+                                .add(tab("Flux").add(of(fluxPanel)))
                                 .add(tab("Files").add(of(filesystemPanel))))
                 .add(
                         BOTTOM,
