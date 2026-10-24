@@ -217,7 +217,7 @@ FluxEngine supports a number of ways to get or put flux. When using the `-s` or
 
 - `<filename.a2r>`
 
-  Write to a AppleSauce flux file. **Write only.**
+  Reads or writes an AppleSauce A2R file. Both v2 and v3 are supported for reading, but only v3 files can be written.
 
 - `kryoflux:<directory>`
 
