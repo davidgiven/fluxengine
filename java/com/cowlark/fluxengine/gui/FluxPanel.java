@@ -18,7 +18,6 @@ import java.awt.Rectangle;
 public class FluxPanel extends JPanel
 {
     private final ImageViewModel model;
-    private final FluxViewerPanel fluxViewerPanel;
     private final ViewerRows viewerRows;
     private Disposable fluxViewSubscription;
 
@@ -27,12 +26,10 @@ public class FluxPanel extends JPanel
         /* Create a flux viewer sharing the tab's model. */
         this.model = model;
         viewerRows = new ViewerRows();
-        fluxViewerPanel = createFluxViewer();
 
         /* Stack fixed-height viewers in rows, retaining the centre-window panels' padding. */
         of(viewerRows).withLayout("fillx, wrap 1, insets 3, gapy 2pt, aligny top")
-                .add("growx, pushx", of(fluxViewerPanel))
-                .add("growx, pushx", label("To add more flux views, select a track below")
+                .add("growx, pushx", label("To add flux views, select a track below")
                         .withHorizontalAlignment(HorizontalAlignment.CENTER));
 
         /* Scroll overflowing rows vertically while fitting them to the viewport width. */
@@ -69,16 +66,7 @@ public class FluxPanel extends JPanel
     private void openFluxView(ImmutableList<Track> tracks)
     {
         /* Insert new rows immediately before the instruction label. */
-        FluxViewerPanel viewer = createFluxViewer();
-        viewerRows.add(viewer, "growx, pushx", viewerRows.getComponentCount() - 1);
-        viewerRows.revalidate();
-        viewerRows.repaint();
-    }
-
-    /* Give every viewer the same close behavior, including the initial row. */
-    private FluxViewerPanel createFluxViewer()
-    {
-        FluxViewerPanel viewer = new FluxViewerPanel(model);
+        FluxViewerPanel viewer = new FluxViewerPanel(model, tracks);
         viewer.addInternalFrameListener(new InternalFrameAdapter()
         {
             @Override
@@ -89,8 +77,12 @@ public class FluxPanel extends JPanel
                 viewerRows.repaint();
             }
         });
-        return viewer;
+        viewerRows.add(viewer, "growx, pushx", viewerRows.getComponentCount() - 1);
+        viewerRows.revalidate();
+        viewerRows.repaint();
     }
+
+    /* Give every viewer the same close behavior, including the initial row. */
 
     /* Track the available width while preserving the full combined height of the rows. */
     private static class ViewerRows extends JPanel implements Scrollable
