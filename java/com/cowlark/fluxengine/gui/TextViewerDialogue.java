@@ -4,6 +4,7 @@ import static swingtree.UI.button;
 import static swingtree.UI.of;
 import static swingtree.UI.scrollPane;
 
+import com.formdev.flatlaf.util.UIScale;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
@@ -22,7 +23,7 @@ public class TextViewerDialogue extends JDialog
         /* Preserve report alignment and let long metadata and dumps scroll in either direction. */
         JTextArea area = new JTextArea(text);
         area.setEditable(false);
-        area.setFont(new Font(Font.MONOSPACED, Font.PLAIN, UiUtils.pointsToPixels(10)));
+        area.setFont(new Font(Font.MONOSPACED, Font.PLAIN, UIScale.scale(UiUtils.pointsToPixels(10))));
         area.setCaretPosition(0);
         of((JPanel) getContentPane())
             .withLayout("fill, wrap 1, insets 12, gap 8")

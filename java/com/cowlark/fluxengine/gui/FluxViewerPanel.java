@@ -17,6 +17,7 @@ import com.cowlark.fluxengine.decoders.DecoderProto;
 import com.cowlark.fluxengine.decoders.FluxDecoder;
 import com.cowlark.fluxengine.external.Crc;
 import com.google.common.collect.ImmutableList;
+import com.formdev.flatlaf.util.UIScale;
 import javax.swing.JComponent;
 import javax.swing.JInternalFrame;
 import javax.swing.JPanel;
@@ -50,13 +51,13 @@ import java.util.TreeSet;
 
 public class FluxViewerPanel extends JInternalFrame
 {
-    private static final int HEIGHT_PTS = 200;
+    private static final int HEIGHT_PTS = 100;
     private static final int BORDER = 4;
     private static final int CONTENT_PADDING = 5 * BORDER;
     private static final int MAX_WIDTH = Integer.MAX_VALUE - 1024;
     private static final double RENDER_LIMIT = 3000.0;
     private static final DecoderProto DECODER = DecoderProto.getDefaultInstance();
-    public static final int FONT_SIZE_PTS = 12;
+    public static final int FONT_SIZE_PTS = 7;
 
     private final ImmutableList<Track> tracks;
     private final ImmutableList<Capture> captures;
@@ -112,7 +113,7 @@ public class FluxViewerPanel extends JInternalFrame
         canvas.setFont(new Font(
                 Font.SANS_SERIF,
                 Font.PLAIN,
-                UiUtils.pointsToPixels(FONT_SIZE_PTS)));
+                UIScale.scale(UiUtils.pointsToPixels(FONT_SIZE_PTS))));
         JScrollPane scrollPane = new JScrollPane(
                 canvas,
                 JScrollPane.VERTICAL_SCROLLBAR_NEVER,
@@ -222,7 +223,7 @@ public class FluxViewerPanel extends JInternalFrame
         canvas.addMouseWheelListener(mouse);
 
         /* Keep each row a fixed height without contributing to the window's preferred width. */
-        int height = UiUtils.pointsToPixels(HEIGHT_PTS);
+        int height = UiUtils.pointsToPixels(UIScale.scale(HEIGHT_PTS));
         JPanel content = new JPanel();
         of(content).withLayout("fill, insets 0")
                 .add("grow, push", of(scrollPane));
