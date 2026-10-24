@@ -1,7 +1,7 @@
 package com.cowlark.fluxengine.gui;
 
-import static com.cowlark.fluxengine.gui.UiUtils.EDT_EXECUTOR;
 import static com.cowlark.fluxengine.gui.PreferencesReaderWriter.WORKFLOW;
+import static com.cowlark.fluxengine.gui.UiUtils.EDT_EXECUTOR;
 import static com.cowlark.fluxengine.gui.UiUtils.createSplitButton;
 import static com.cowlark.fluxengine.gui.UiUtils.sizePts;
 import static swingtree.UI.Axis.HORIZONTAL;
@@ -18,6 +18,7 @@ import static swingtree.UILayoutConstants.BOTTOM;
 import static swingtree.UILayoutConstants.TOP;
 
 import com.cowlark.fluxengine.gui.UiUtils.SplitPanelAction;
+import io.reactivex.rxjava3.disposables.Disposable;
 import org.jspecify.annotations.NonNull;
 import sprouts.Val;
 import sprouts.Var;
@@ -50,6 +51,8 @@ public class ApplicationFrame extends JFrame
     private final FluxPanel fluxPanel;
     private final SummaryPanel summaryPanel;
     private final FilesystemPanel filesystemPanel;
+    private final JTabbedPane centreTabs;
+    private Disposable fluxViewSubscription;
 
     private final ImageViewModel model;
     private final Var<Workflow> currentWorkflow;
@@ -80,20 +83,20 @@ public class ApplicationFrame extends JFrame
                         .withVerticalScrollBarPolicy(UI.Active.ALWAYS)
                         .add(of(configurationPanel))));
 
-        UIForSplitPane<JSplitPane> topPane = splitPane(HORIZONTAL).peek(pane -> {
-                    pane.setResizeWeight(1.0);
-                })
-                .add(
-                        TOP,
-                        tabbedPane().withMinSize(100, 0)
-                                .add(tab("Image").add(of(imagePanel)))
-                                .add(tab("Log").add(of(logPanel)))
-                                .add(tab("Flux").add(of(fluxPanel)))
-                                .add(tab("Files").add(of(filesystemPanel))))
-                .add(
-                        BOTTOM,
-                        tabbedPane().withMinSize(100, 0)
-                                .add(tab("Visualiser").add(of(visualiserPanel))));
+        /* Retain the centre tabs so flux-view requests can select their destination. */
+        centreTabs = tabbedPane().withMinSize(100, 0)
+                .add(tab("Image").add(of(imagePanel)))
+                .add(tab("Log").add(of(logPanel)))
+                .add(tab("Flux").add(of(fluxPanel)))
+                .add(tab("Files").add(of(filesystemPanel))).get(JTabbedPane.class);
+
+        UIForSplitPane<JSplitPane> topPane =
+                splitPane(HORIZONTAL).peek(pane -> pane.setResizeWeight(1.0))
+                        .add(TOP, of(centreTabs))
+                        .add(
+                                BOTTOM,
+                                tabbedPane().withMinSize(100, 0)
+                                        .add(tab("Visualiser").add(of(visualiserPanel))));
 
         UIForPanel<JPanel> controlPanel = panel("wrap 4, center, nogrid")
                 .add("aligny center", label("I want to"))
@@ -149,6 +152,29 @@ public class ApplicationFrame extends JFrame
                     frame.setJMenuBar(ApplicationMenu.createMenu());
                 })
                 .add(outerSplit);
+    }
+
+    /* Activate the flux tab for each request while this frame is attached. */
+    @Override
+    public void addNotify()
+    {
+        super.addNotify();
+        fluxViewSubscription = model
+                .getFluxViewRequests()
+                .observeOn(UiUtils.EDT)
+                .subscribe(tracks -> centreTabs.setSelectedComponent(fluxPanel));
+    }
+
+    /* Stop listening when the window is disposed, allowing it to be collected. */
+    @Override
+    public void removeNotify()
+    {
+        if (fluxViewSubscription != null)
+        {
+            fluxViewSubscription.dispose();
+            fluxViewSubscription = null;
+        }
+        super.removeNotify();
     }
 
     private static @NonNull ViewSupplier<Workflow> createControlPanelCard(
