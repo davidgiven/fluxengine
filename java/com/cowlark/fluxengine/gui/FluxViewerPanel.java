@@ -868,8 +868,13 @@ public class FluxViewerPanel extends JInternalFrame
     {
         return String.format(
                 Locale.ROOT,
-                "Sector status:     %s\nPhysical location: %s\nClock:             %.2fus / %s\n" +
-                        "Bytecode position: %d\nData CRC16:        %04x\n",
+                """
+                Sector status:     %s
+                Physical location: %s
+                Clock:             %.2fus / %s
+                Bytecode position: %d
+                Data CRC16:        %04x
+                """,
                 Sector.statusToString(sector.status),
                 sector.physicalLocation == null ? "unknown" : sector.physicalLocation,
                 sector.clockNs / 1000,
@@ -884,8 +889,13 @@ public class FluxViewerPanel extends JInternalFrame
     {
         return String.format(
                 Locale.ROOT,
-                "Bytecode position: %d\nStart:             %.2fms\nEnd:               %.2fms\n" +
-                        "Data CRC16:        %04x\n\n%s",
+                """
+                Bytecode position: %d
+                Start:             %.2fms
+                End:               %.2fms
+                Data CRC16:        %04x
+
+                %s""",
                 record.position,
                 record.startTimeNs / 1e6,
                 record.endTimeNs / 1e6,
