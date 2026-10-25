@@ -16,8 +16,8 @@ import com.cowlark.fluxengine.data.Track;
 import com.cowlark.fluxengine.decoders.DecoderProto;
 import com.cowlark.fluxengine.decoders.FluxDecoder;
 import com.cowlark.fluxengine.external.Crc;
-import com.google.common.collect.ImmutableList;
 import com.formdev.flatlaf.util.UIScale;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import javax.swing.JComponent;
 import javax.swing.JInternalFrame;
@@ -427,7 +427,8 @@ public class FluxViewerPanel extends JInternalFrame
                         sector.logicalLocation + " " + Sector.statusToString(sector.status));
             }
 
-            /* Show record extents, decoded bytes, and raw bits at their respective detail levels. */
+            /* Show record extents, decoded bytes, and raw bits at their respective detail levels
+            . */
             for (Record record : capture.track.records)
             {
                 Rectangle rect = block(capture, record.startTimeNs, record.endTimeNs, 1);
@@ -451,12 +452,15 @@ public class FluxViewerPanel extends JInternalFrame
         }
 
         /* Keep the timeline names at the visible left edge when the canvas is scrolled. */
+        Font normalFont = graphics.getFont();
+        graphics.setFont(normalFont.deriveFont(normalFont.getSize2D() * 0.75f));
         int labelX = Math.max(CONTENT_PADDING, visible.x) + BORDER;
         int labelHeight = graphics.getFontMetrics().getHeight();
         graphics.setColor(UiUtils.DATA_OK_COLOUR.darker());
         text(graphics, "Sectors", labelX, centre(0) - labelHeight);
         graphics.setColor(UiUtils.HEADER_COLOUR.darker());
         text(graphics, "Raw records", labelX, centre(1) - labelHeight);
+        graphics.setFont(normalFont);
 
         /* Overlay the interval ruler for the current pointer position. */
         drawRuler(graphics);
@@ -585,7 +589,8 @@ public class FluxViewerPanel extends JInternalFrame
                 Bits value = decoder.readBits(8);
                 if (value.size() < 8)
                     break;
-                String label = String.format(Locale.ROOT, "%02x", value.toBytes().getByte(0) & 0xff);
+                String label =
+                        String.format(Locale.ROOT, "%02x", value.toBytes().getByte(0) & 0xff);
 
                 /* Stop beyond the visible region and skip labels that are still to its left. */
                 int x = pixel(capture.offset + record.startTimeNs + reader.tell().getDurationNs());
@@ -609,11 +614,7 @@ public class FluxViewerPanel extends JInternalFrame
     }
 
     /* Draw raw bit values above the flux timeline. */
-    private void drawRawBits(
-            Graphics2D graphics,
-            Capture capture,
-            Record record,
-            Rectangle visible)
+    private void drawRawBits(Graphics2D graphics, Capture capture, Record record, Rectangle visible)
     {
         /* Reject records that cannot be decoded safely. */
         if (!(record.clockNs > 0) || !Double.isFinite(record.clockNs) ||
@@ -993,8 +994,22 @@ public class FluxViewerPanel extends JInternalFrame
         }
     }
 
-    private static String getTitle(ImmutableList<Track> tracks){
-        var ptl = Iterables.getFirst(tracks,null).ptl;
-        return String.format("Physical track c%dh%d", ptl.physicalCylinder, ptl.physicalHead);
+    private static String getTitle(ImmutableList<Track> tracks)
+    {
+        Track track = Iterables.getFirst(tracks, null);
+        if (track != null)
+        {
+            if (track.ptl != null)
+                return String.format(
+                        "Physical track c%dh%d",
+                        track.ptl.physicalCylinder,
+                        track.ptl.physicalHead);
+            else if (track.ltl != null)
+                return String.format(
+                        "Logical track c%dh%d",
+                        track.ltl.logicalCylinder,
+                        track.ltl.logicalHead);
+        }
+        return "Test track";
     }
 }
