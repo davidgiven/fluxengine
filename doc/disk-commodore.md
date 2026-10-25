@@ -30,10 +30,12 @@ quickly.)
   - a standard 1581 disk has 80 tracks and two sides, each with 10 sectors, 512
 	bytes long, and uses normal IBM encoding.
 
-  - an 8050 disk has 77 tracks and two sides, with four speed zones; the number
+  - an 8050 disk has 77 tracks and one sides, with four speed zones; the number
 	of sectors varies from 23 to 29, using GCR encoding. These will store
-	1042kB. These drives are peculiar because they are 100tpi and therefore the
+	521kB. These drives are peculiar because they are 100tpi and therefore the
 	disks cannot be read in normal 96tpi drives.
+
+  - an 8250 disk is the same as an 8050 disk but double sided, storing 1042kB.
 
   - a CMD FD2000 disk (a popular third-party Commodore disk drive) has 81
 	tracks and two sides, each with 10 1024-byte sectors, for a massive 1620kB
@@ -47,7 +49,8 @@ A CMD FD2000 disk (a popular third-party Commodore disk drive)
       - `171`: 171kB 1541, 35-track variant
       - `192`: 192kB 1541, 40-track variant
       - `800`: 800kB 3.5" 1581
-      - `1042`: 1042kB 5.25" 8051
+      - `521`: 521kB 5.25" 8050
+      - `1042`: 1042kB 5.25" 8250
       - `1620`: 1620kB, CMD FD2000
 
 ## Examples
@@ -57,6 +60,7 @@ To read:
   - `fluxengine read -c commodore --171 -s drive:0 -o commodore.d64`
   - `fluxengine read -c commodore --192 -s drive:0 -o commodore.d64`
   - `fluxengine read -c commodore --800 -s drive:0 -o commodore.d64`
+  - `fluxengine read -c commodore --521 -s drive:0 -o commodore.d64`
   - `fluxengine read -c commodore --1042 -s drive:0 -o commodore.d64`
   - `fluxengine read -c commodore --1620 -s drive:0 -o commodore.d64`
 

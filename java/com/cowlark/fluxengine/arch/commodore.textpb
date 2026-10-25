@@ -32,10 +32,12 @@ quickly.)
   - a standard 1581 disk has 80 tracks and two sides, each with 10 sectors, 512
 	bytes long, and uses normal IBM encoding.
 
-  - an 8050 disk has 77 tracks and two sides, with four speed zones; the number
+  - an 8050 disk has 77 tracks and one sides, with four speed zones; the number
 	of sectors varies from 23 to 29, using GCR encoding. These will store
-	1042kB. These drives are peculiar because they are 100tpi and therefore the
+	521kB. These drives are peculiar because they are 100tpi and therefore the
 	disks cannot be read in normal 96tpi drives.
+
+  - an 8250 disk is the same as an 8050 disk but double sided, storing 1042kB.
 
   - a CMD FD2000 disk (a popular third-party Commodore disk drive) has 81
 	tracks and two sides, each with 10 1024-byte sectors, for a massive 1620kB
@@ -225,8 +227,60 @@ option_group {
 	}
 
 	option {
+		name: "521"
+		comment: '521kB 5.25" 8050'
+
+		config {
+			layout {
+				format_type: FORMATTYPE_80TRACK
+				sides: 1
+				tracks: 77
+				layoutdata {
+					sector_size: 256
+				}
+				layoutdata {
+					track: 0
+					up_to_track: 38
+					physical {
+						start_sector: 0
+						count: 29
+					}
+				}
+				layoutdata {
+					track: 39
+					up_to_track: 52
+					physical {
+						start_sector: 0
+						count: 27
+					}
+				}
+				layoutdata {
+					track: 53
+					up_to_track: 63
+					physical {
+						start_sector: 0
+						count: 25
+					}
+				}
+				layoutdata {
+					track: 64
+					up_to_track: 76
+					physical {
+						start_sector: 0
+						count: 23
+					}
+				}
+			}
+
+			decoder {
+				c64 {}
+			}
+		}
+	}
+
+	option {
 		name: "1042"
-		comment: '1042kB 5.25" 8051'
+		comment: '1042kB 5.25" 8250'
 		
 		config {
 			layout {
