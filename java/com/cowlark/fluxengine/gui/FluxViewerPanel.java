@@ -27,6 +27,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JViewport;
 import javax.swing.Scrollable;
 import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 import javax.swing.plaf.basic.BasicInternalFrameUI;
 import java.awt.Color;
 import java.awt.Cursor;
@@ -64,12 +65,14 @@ public class FluxViewerPanel extends JInternalFrame
     private final ImmutableList<Capture> captures;
     private final TreeSet<Double> boundaries = new TreeSet<>();
     private final Canvas canvas;
-    private final JViewport viewport;
+    private final TimelineViewport viewport;
+    private final Timer interactionTimer;
     private final double totalDurationNs;
     private double nanosecondsPerPixel = 30;
     private boolean scaleInitialised;
     private Point dragPosition;
     private Point pointer;
+    private boolean interactionDirty;
     private boolean popupShown;
     private int previousScrollX;
 
@@ -118,9 +121,20 @@ public class FluxViewerPanel extends JInternalFrame
         JScrollPane scrollPane = new JScrollPane(
                 canvas,
                 JScrollPane.VERTICAL_SCROLLBAR_NEVER,
-                JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+                JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS)
+        {
+            @Override
+            protected JViewport createViewport()
+            {
+                return new TimelineViewport();
+            }
+        };
         scrollPane.setWheelScrollingEnabled(false);
-        viewport = scrollPane.getViewport();
+        viewport = (TimelineViewport) scrollPane.getViewport();
+
+        /* Apply the latest pointer and scroll state together at about 30 Hz. */
+        interactionTimer = new Timer(33, event -> processInteractionFrame());
+        interactionTimer.setCoalesce(true);
 
         /* Fit the timeline on first layout and preserve its scale on subsequent resizes. */
         viewport.addComponentListener(new ComponentAdapter()
@@ -143,7 +157,7 @@ public class FluxViewerPanel extends JInternalFrame
             if (pointer != null)
                 pointer.translate(scrollX - previousScrollX, 0);
             previousScrollX = scrollX;
-            canvas.repaint();
+            interactionDirty = true;
         });
 
         /* Track pointer movement, horizontal dragging, and native popup gestures. */
@@ -159,7 +173,7 @@ public class FluxViewerPanel extends JInternalFrame
             public void mouseExited(MouseEvent event)
             {
                 pointer = null;
-                canvas.repaint();
+                interactionDirty = true;
             }
 
             @Override
@@ -185,12 +199,12 @@ public class FluxViewerPanel extends JInternalFrame
                 {
                     Point position =
                             SwingUtilities.convertPoint(canvas, event.getPoint(), viewport);
-                    setScrollX((long) viewport.getViewPosition().x + dragPosition.x - position.x);
+                    setScrollX((long) viewport.requestedPosition().x + dragPosition.x - position.x);
                     dragPosition = position;
 
                     /* Restore pointer coordinates after moving the canvas beneath the mouse. */
                     pointer = new Point(viewport.getViewPosition().x + position.x, position.y);
-                    canvas.repaint();
+                    interactionDirty = true;
                 } else
                     trackPointer(event);
             }
@@ -308,25 +322,63 @@ public class FluxViewerPanel extends JInternalFrame
         if (totalDurationNs <= 0 || viewport.getWidth() <= 0)
             return;
 
-        /* Record the time under the pointer before changing scale. */
-        double time = (viewport.getViewPosition().x + (double) anchorX - CONTENT_PADDING) *
-                nanosecondsPerPixel;
+        /* Wheel zoom remains immediate, including any scroll position already awaiting a frame. */
+        viewport.immediate = true;
+        try
+        {
+            viewport.applyPendingPosition();
 
-        /* Apply wheel zoom and restore the anchor within the available scroll range. */
-        updateScale(Math.min(fitScale(), nanosecondsPerPixel * Math.pow(1.2, rotation)));
-        setScrollX(Math.round(CONTENT_PADDING + time / nanosecondsPerPixel - anchorX));
+            /* Record the time under the pointer before changing scale. */
+            double time = (viewport.getViewPosition().x + (double) anchorX - CONTENT_PADDING) *
+                    nanosecondsPerPixel;
+
+            /* Apply wheel zoom and restore the anchor within the available scroll range. */
+            updateScale(Math.min(fitScale(), nanosecondsPerPixel * Math.pow(1.2, rotation)));
+            setScrollX(Math.round(CONTENT_PADDING + time / nanosecondsPerPixel - anchorX));
+        }
+        finally
+        {
+            viewport.immediate = false;
+        }
     }
 
     private void setScrollX(long x)
     {
         int maximum = Math.max(0, canvas.getWidth() - viewport.getWidth());
-        viewport.setViewPosition(new Point((int) Math.max(0, Math.min(x, maximum)), 0));
+        viewport.setViewPosition(new Point((int) Math.clamp(x, 0, maximum), 0));
+    }
+
+    /* Commit only the latest interaction state, avoiding native scroll paints between ticks. */
+    void processInteractionFrame()
+    {
+        viewport.applyPendingPosition();
+        if (interactionDirty)
+        {
+            interactionDirty = false;
+            canvas.repaint();
+        }
+    }
+
+    /* Run the interaction timer only while the viewer belongs to a displayable hierarchy. */
+    @Override
+    public void addNotify()
+    {
+        super.addNotify();
+        interactionTimer.start();
+    }
+
+    @Override
+    public void removeNotify()
+    {
+        interactionTimer.stop();
+        viewport.applyPendingPosition();
+        super.removeNotify();
     }
 
     private void trackPointer(MouseEvent event)
     {
         pointer = event.getPoint();
-        canvas.repaint();
+        interactionDirty = true;
     }
 
     /* Coordinates shared by drawing and hit testing prevent drift between blocks and menus. */
@@ -427,8 +479,7 @@ public class FluxViewerPanel extends JInternalFrame
                         sector.logicalLocation + " " + Sector.statusToString(sector.status));
             }
 
-            /* Show record extents, decoded bytes, and raw bits at their respective detail levels
-            . */
+            /* Show record extents, decoded bytes, and raw bits at their respective detail levels. */
             for (Record record : capture.track.records)
             {
                 Rectangle rect = block(capture, record.startTimeNs, record.endTimeNs, 1);
@@ -537,7 +588,7 @@ public class FluxViewerPanel extends JInternalFrame
         try
         {
             g.setColor(pointer != null && rect.contains(pointer) ?
-                    blend(colour, canvas.getForeground(), 0.1) :
+                    UiUtils.blend(colour, canvas.getForeground(), 0.1) :
                     colour);
             g.fill(rect);
             g.setColor(canvas.getForeground());
@@ -666,7 +717,7 @@ public class FluxViewerPanel extends JInternalFrame
         }
     }
 
-    /* Density is normalized across all captures; close views draw individual transitions. */
+    /* Density is normalised across all captures; close views draw individual transitions. */
     private void drawFlux(Graphics2D graphics, Capture capture, Rectangle visible)
     {
         int half = blockHeight() / 2;
@@ -680,7 +731,7 @@ public class FluxViewerPanel extends JInternalFrame
             {
                 int index = x - pixel(capture.offset);
                 double density = index < capture.density.length ? capture.density[index] : 0;
-                graphics.setColor(blend(canvas.getBackground(), UiUtils.HEADER_COLOUR, density));
+                graphics.setColor(UiUtils.blend(canvas.getBackground(), UiUtils.HEADER_COLOUR, density));
                 graphics.fillRect(x, centre(4) - half, 1, blockHeight());
             }
         } else
@@ -705,20 +756,6 @@ public class FluxViewerPanel extends JInternalFrame
                 centre(4),
                 pixel(capture.offset + capture.duration),
                 centre(4));
-    }
-
-    /* Blend semantic highlights into the current theme's background rather than a fixed grey. */
-    private static Color blend(Color background, Color highlight, double factor)
-    {
-        return new Color(
-                interpolate(background.getRed(), highlight.getRed(), factor),
-                interpolate(background.getGreen(), highlight.getGreen(), factor),
-                interpolate(background.getBlue(), highlight.getBlue(), factor));
-    }
-
-    private static int interpolate(int low, int high, double factor)
-    {
-        return (int) (low + (high - low) * factor);
     }
 
     private void drawRuler(Graphics2D graphics)
@@ -869,12 +906,12 @@ public class FluxViewerPanel extends JInternalFrame
         return String.format(
                 Locale.ROOT,
                 """
-                Sector status:     %s
-                Physical location: %s
-                Clock:             %.2fus / %s
-                Bytecode position: %d
-                Data CRC16:        %04x
-                """,
+                        Sector status:     %s
+                        Physical location: %s
+                        Clock:             %.2fus / %s
+                        Bytecode position: %d
+                        Data CRC16:        %04x
+                        """,
                 Sector.statusToString(sector.status),
                 sector.physicalLocation == null ? "unknown" : sector.physicalLocation,
                 sector.clockNs / 1000,
@@ -890,12 +927,12 @@ public class FluxViewerPanel extends JInternalFrame
         return String.format(
                 Locale.ROOT,
                 """
-                Bytecode position: %d
-                Start:             %.2fms
-                End:               %.2fms
-                Data CRC16:        %04x
-
-                %s""",
+                        Bytecode position: %d
+                        Start:             %.2fms
+                        End:               %.2fms
+                        Data CRC16:        %04x
+                        
+                        %s""",
                 record.position,
                 record.startTimeNs / 1e6,
                 record.endTimeNs / 1e6,
@@ -948,12 +985,52 @@ public class FluxViewerPanel extends JInternalFrame
         }
     }
 
+    /* Delay native viewport scrolling as well as explicit repaint requests during interaction. */
+    private final class TimelineViewport extends JViewport
+    {
+        private Point pendingPosition;
+        private boolean immediate;
+
+        @Override
+        public void setViewPosition(Point position)
+        {
+            if (immediate || interactionTimer == null || !interactionTimer.isRunning())
+            {
+                pendingPosition = null;
+                super.setViewPosition(position);
+            }
+            else
+            {
+                pendingPosition = new Point(position);
+                interactionDirty = true;
+            }
+        }
+
+        /* Drag deltas accumulate against the latest requested position, even before it is drawn. */
+        Point requestedPosition()
+        {
+            return pendingPosition == null ? getViewPosition() : new Point(pendingPosition);
+        }
+
+        void applyPendingPosition()
+        {
+            if (pendingPosition == null)
+                return;
+            Point position = pendingPosition;
+            pendingPosition = null;
+            int maximum = Math.max(0, getViewSize().width - getExtentSize().width);
+            super.setViewPosition(new Point(Math.clamp(position.x, 0, maximum), 0));
+        }
+    }
+
     /* A wide timeline whose height always matches the viewport rather than scrolling vertically. */
     private final class Canvas extends JPanel implements Scrollable
     {
         @Override
         protected void paintComponent(Graphics graphics)
         {
+            /* Any paint consumes the latest interaction state, including native Swing paints. */
+            interactionDirty = false;
             super.paintComponent(graphics);
             Graphics2D copy = UiUtils.getGraphics2D(graphics.create());
             try

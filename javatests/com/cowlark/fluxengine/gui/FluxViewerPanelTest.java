@@ -17,6 +17,8 @@ import javax.imageio.ImageIO;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JViewport;
+import javax.swing.JScrollPane;
+import javax.swing.JScrollBar;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.LookAndFeel;
@@ -28,6 +30,8 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -301,6 +305,64 @@ import java.io.IOException;
                 {
                     throw new AssertionError(exception);
                 }
+            }
+        });
+    }
+
+    @Test
+    public void scrollingAndDraggingApplyOnlyTheLatestPositionPerFrame() throws Exception
+    {
+        SwingUtilities.invokeAndWait(() -> {
+            FluxViewerPanel panel = new FluxViewerPanel(null, ImmutableList.of(track(true)));
+            JViewport viewport = viewport(panel);
+            panel.zoom(-5, 0);
+            panel.addNotify();
+            try
+            {
+                /* Scrollbar motion updates its model immediately but defers the canvas movement. */
+                JScrollBar bar = find(panel, JScrollPane.class).getHorizontalScrollBar();
+                bar.setValueIsAdjusting(true);
+                bar.setValue(20);
+                bar.setValue(40);
+                bar.setValue(60);
+                assertThat(viewport.getViewPosition().x).isEqualTo(0);
+                panel.processInteractionFrame();
+                assertThat(viewport.getViewPosition().x).isEqualTo(60);
+                bar.setValueIsAdjusting(false);
+
+                /* A release before the tick still preserves the final requested position. */
+                bar.setValue(0);
+                panel.processInteractionFrame();
+                JComponent canvas = (JComponent) viewport.getView();
+                MouseEvent press = new MouseEvent(canvas, MouseEvent.MOUSE_PRESSED, 0, 0,
+                        200, 100, 0, 0, 1, false, MouseEvent.BUTTON1);
+                for (MouseListener listener : canvas.getMouseListeners())
+                    listener.mousePressed(press);
+                for (int x : new int[]{180, 160})
+                {
+                    MouseEvent drag = new MouseEvent(canvas, MouseEvent.MOUSE_DRAGGED, 0,
+                            MouseEvent.BUTTON1_DOWN_MASK, x, 100, 0, 0, 0, false, MouseEvent.NOBUTTON);
+                    for (MouseMotionListener listener : canvas.getMouseMotionListeners())
+                        listener.mouseDragged(drag);
+                }
+                MouseEvent release = new MouseEvent(canvas, MouseEvent.MOUSE_RELEASED, 0, 0,
+                        160, 100, 0, 0, 1, false, MouseEvent.BUTTON1);
+                for (MouseListener listener : canvas.getMouseListeners())
+                    listener.mouseReleased(release);
+                assertThat(viewport.getViewPosition().x).isEqualTo(0);
+                panel.processInteractionFrame();
+                assertThat(viewport.getViewPosition()).isEqualTo(new Point(40, 0));
+
+                /* Wheel zoom commits its anchored position without waiting for another tick. */
+                int width = canvas.getWidth();
+                panel.zoom(-1, 200);
+                assertThat(canvas.getWidth()).isGreaterThan(width);
+                assertThat(viewport.getViewPosition().x).isGreaterThan(40);
+            }
+            finally
+            {
+                panel.removeNotify();
+                panel.dispose();
             }
         });
     }

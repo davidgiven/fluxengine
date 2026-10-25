@@ -304,6 +304,20 @@ public class UiUtils
         return sb.toString();
     }
 
+    /* Blend semantic highlights into the current theme's background rather than a fixed grey. */
+    static Color blend(Color background, Color highlight, double factor)
+    {
+        return new Color(
+                interpolate(background.getRed(), highlight.getRed(), factor),
+                interpolate(background.getGreen(), highlight.getGreen(), factor),
+                interpolate(background.getBlue(), highlight.getBlue(), factor));
+    }
+
+    private static int interpolate(int low, int high, double factor)
+    {
+        return (int) (low + (high - low) * factor);
+    }
+
     @Builder(setterPrefix = "set")
     record SplitPanelAction(String label, Val<Boolean> isEnabled,
                             Consumer<ComponentDelegate<JButton, ActionEvent>> onClick)
