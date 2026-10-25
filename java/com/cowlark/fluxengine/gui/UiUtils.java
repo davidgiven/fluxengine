@@ -91,15 +91,19 @@ public class UiUtils
         return g2;
     }
 
+    public static int pointsToPixels(float widthPt)
+    {
+        return round(widthPt * PIXELS_PER_POINT);
+    }
 
     public static Dimension dimensionPts(float widthPt, float heightPt)
     {
-        return new Dimension(round(widthPt * PIXELS_PER_POINT), round(heightPt * PIXELS_PER_POINT));
+        return new Dimension(pointsToPixels(widthPt), pointsToPixels(heightPt));
     }
 
     public static Size sizePts(float widthPt, float heightPt)
     {
-        return Size.of(round(widthPt * PIXELS_PER_POINT), round(heightPt * PIXELS_PER_POINT));
+        return Size.of(pointsToPixels(widthPt), pointsToPixels(heightPt));
     }
 
     public static UIForAnySwing<?, ?> createSplitButton(
@@ -298,6 +302,20 @@ public class UiUtils
         }
 
         return sb.toString();
+    }
+
+    /* Blend semantic highlights into the current theme's background rather than a fixed grey. */
+    static Color blend(Color background, Color highlight, double factor)
+    {
+        return new Color(
+                interpolate(background.getRed(), highlight.getRed(), factor),
+                interpolate(background.getGreen(), highlight.getGreen(), factor),
+                interpolate(background.getBlue(), highlight.getBlue(), factor));
+    }
+
+    private static int interpolate(int low, int high, double factor)
+    {
+        return (int) (low + (high - low) * factor);
     }
 
     @Builder(setterPrefix = "set")

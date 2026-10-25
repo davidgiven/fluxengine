@@ -10,6 +10,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import sprouts.Var;
+import javax.swing.JButton;
+import java.awt.Component;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SummaryPanelTest
@@ -36,5 +38,19 @@ public class SummaryPanelTest
         int buttonRow = 82;
         int expected = 1 + header + 2 * buttonRow + 1 + 2 * buttonRow + header;
         assertThat(panel.getComponentCount()).isEqualTo(expected);
+
+        /* Both physical and logical cells expose the same hover and context-menu affordances. */
+        int buttons = 0;
+        for (Component component : panel.getComponents())
+        {
+            if (component instanceof JButton button)
+            {
+                assertThat(button.isRolloverEnabled()).isTrue();
+                assertThat(button.getComponentPopupMenu()).isNotNull();
+                assertThat(button.getActionListeners()).isNotEmpty();
+                buttons++;
+            }
+        }
+        assertThat(buttons).isEqualTo(320);
     }
 }

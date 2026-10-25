@@ -24,6 +24,8 @@ import com.cowlark.fluxengine.core.LogMessage.ErrorLogMessage;
 import com.cowlark.fluxengine.core.Logger;
 import com.cowlark.fluxengine.data.Disk;
 import com.cowlark.fluxengine.data.Image;
+import com.cowlark.fluxengine.data.Track;
+import com.google.common.collect.ImmutableList;
 import com.cowlark.fluxengine.fluxsource.FluxSource;
 import com.cowlark.fluxengine.fluxsource.MemoryFluxSource;
 import com.cowlark.fluxengine.gui.DriveActivity.ActivityType;
@@ -35,6 +37,8 @@ import com.cowlark.fluxengine.vfs.Filesystem;
 import com.cowlark.fluxengine.vfs.FilesystemOperation;
 import com.cowlark.fluxengine.vfs.InMemoryBlockDevice;
 import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.subjects.PublishSubject;
+import io.reactivex.rxjava3.subjects.Subject;
 import lombok.Getter;
 import org.apache.commons.lang3.function.Consumers;
 import org.slf4j.LoggerFactory;
@@ -73,6 +77,8 @@ public class ImageViewModel
     @Getter private Var<Integer> selectedDrive;
 
     @Getter private Vars<LogMessage> logQueue = Vars.of(LogMessage.class);
+    @Getter private final Subject<ImmutableList<Track>> fluxViewRequests =
+            PublishSubject.<ImmutableList<Track>>create().toSerialized();
     @Getter private Var<Disposable> currentDisposable = Var.ofNull(Disposable.class);
     @Getter private Var<Disk> disk = Var.of(new Disk());
     @Getter private Var<DriveActivity> driveActivity =
@@ -99,6 +105,12 @@ public class ImageViewModel
         selectedDrive = makeIntegerPreference(DRIVE, 0);
 
         refreshUsbDevices();
+    }
+
+    /* Entry point for opening the selected captures in a flux view. */
+    public void openFluxView(ImmutableList<Track> tracks)
+    {
+        fluxViewRequests.onNext(tracks);
     }
 
     private static void showFatalError(ErrorLogMessage m)

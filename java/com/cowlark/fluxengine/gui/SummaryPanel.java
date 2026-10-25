@@ -3,6 +3,8 @@ package com.cowlark.fluxengine.gui;
 import static com.cowlark.fluxengine.gui.UiUtils.getGraphics2D;
 import static swingtree.UI.label;
 import static swingtree.UI.of;
+import static swingtree.UIFactoryMethods.menuItem;
+import static swingtree.UIFactoryMethods.popupMenu;
 
 import com.cowlark.fluxengine.data.CylinderHead;
 import com.cowlark.fluxengine.data.Disk;
@@ -11,6 +13,8 @@ import com.cowlark.fluxengine.data.LogicalTrackLayout;
 import com.cowlark.fluxengine.data.PhysicalTrackLayout;
 import com.cowlark.fluxengine.data.Sector;
 import com.cowlark.fluxengine.data.Sector.Status;
+import com.cowlark.fluxengine.data.Track;
+import com.google.common.collect.ImmutableList;
 import sprouts.From;
 import sprouts.Viewable;
 import swingtree.UI.HorizontalAlignment;
@@ -19,6 +23,7 @@ import swingtree.UIForPanel;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.UIManager;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -93,11 +98,17 @@ public class SummaryPanel extends JPanel
                 SummaryButton button = logicalTrackButtons.get(lch);
                 if (button == null)
                     continue;
-                button.setTrackAnalysis(analyseTrack(
-                        disk,
-                        driveActivity,
-                        ltl.physicalCylinder,
-                        ltl.physicalHead));
+                TrackAnalysis analysis =
+                        analyseTrack(disk, driveActivity, ltl.physicalCylinder, ltl.physicalHead);
+
+                /* Include captures from every physical location belonging to this logical track. */
+                ImmutableList.Builder<Track> tracks = ImmutableList.builder();
+                currentLayout.layoutByPhysicalLocation.forEach((location, layout) -> {
+                    if (layout.logicalTrackLayout.equals(ltl))
+                        tracks.addAll(disk.tracksByPhysicalLocation.get(location));
+                });
+                analysis.tracks = tracks.build();
+                button.setTrackAnalysis(analysis);
             }
         }
 
@@ -230,6 +241,9 @@ public class SummaryPanel extends JPanel
         result.tooltip = "No data";
         result.label = "";
 
+        /* Snapshot every capture at this physical location, including an empty list if absent. */
+        result.tracks = ImmutableList.copyOf(disk.tracksByPhysicalLocation.get(pch));
+
         if (disk.tracksByPhysicalLocation.containsKey(pch))
         {
             List<Sector> sectors = disk.sectorsByPhysicalLocation.get(pch);
@@ -301,13 +315,14 @@ public class SummaryPanel extends JPanel
 
     private static class TrackAnalysis
     {
+        ImmutableList<Track> tracks;
         String tooltip;
         Color colour;
         String label;
     }
 
     /* A single cell of the summary grid. */
-    private static class SummaryButton extends JButton
+    private class SummaryButton extends JButton
     {
         private TrackAnalysis analysis;
 
@@ -322,6 +337,18 @@ public class SummaryPanel extends JPanel
             setMinimumSize(new Dimension(10, 10));
             setPreferredSize(new Dimension(15, 15));
             setBackground(StatusColour.NOT_PRESENT.getColour());
+
+            /* Share the standard context menu between right-click and primary-button actions. */
+            JPopupMenu menu = popupMenu()
+                    .add(menuItem("Show in flux viewer").onClick(e -> {
+                        SummaryPanel.this.model.openFluxView(analysis.tracks);
+                    })).get(JPopupMenu.class);
+            setComponentPopupMenu(menu);
+            addActionListener(event -> menu.show(this, 0, getHeight()));
+
+            /* Repaint custom cell decorations when the pointer enters or leaves the button. */
+            setRolloverEnabled(true);
+            getModel().addChangeListener(event -> repaint());
         }
 
         void setTrackAnalysis(TrackAnalysis analysis)
@@ -334,14 +361,26 @@ public class SummaryPanel extends JPanel
         @Override
         protected void paintComponent(Graphics g)
         {
+            /* Preserve the status colour while highlighting the cell under the pointer. */
+            Color colour = analysis != null ? analysis.colour : getBackground();
+            g.setColor(colour);
+            g.fillRect(0, 0, getWidth(), getHeight());
+            if (getModel().isRollover())
+            {
+                g.setColor(new Color(255, 255, 255, 48));
+                g.fillRect(0, 0, getWidth(), getHeight());
+            }
+
+            /* Outline each cell, using the foreground colour to emphasize the hovered cell. */
+            g.setColor(getModel().isRollover() ? getForeground() : colour.darker());
+            g.drawRect(0, 0, getWidth() - 1, getHeight() - 1);
+
             if (analysis != null)
             {
-                g.setColor(analysis.colour);
-                g.fillRect(0, 0, getWidth(), getHeight());
-
                 if (!analysis.label.isEmpty())
                 {
-                    Graphics2D g2 = getGraphics2D(g);
+                    /* Isolate the activity label's XOR drawing from the caller's graphics state. */
+                    Graphics2D g2 = getGraphics2D(g.create());
                     try
                     {
                         g2.setXORMode(Color.WHITE);

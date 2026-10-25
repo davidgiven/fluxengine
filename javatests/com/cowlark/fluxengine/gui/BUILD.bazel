@@ -111,3 +111,18 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "FluxViewerPanelTest",
+    srcs = ["FluxViewerPanelTest.java"],
+    jvm_flags = ["-Djava.awt.headless=true"],
+    deps = [
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/data",
+        "//java/com/cowlark/fluxengine/gui",
+        "@maven//:com_formdev_flatlaf",
+        "@maven//:com_google_guava_guava",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
