@@ -18,6 +18,7 @@ import com.cowlark.fluxengine.decoders.FluxDecoder;
 import com.cowlark.fluxengine.external.Crc;
 import com.google.common.collect.ImmutableList;
 import com.formdev.flatlaf.util.UIScale;
+import com.google.common.collect.Iterables;
 import javax.swing.JComponent;
 import javax.swing.JInternalFrame;
 import javax.swing.JPanel;
@@ -74,7 +75,7 @@ public class FluxViewerPanel extends JInternalFrame
 
     public FluxViewerPanel(ImageViewModel model, ImmutableList<Track> tracks)
     {
-        super("Flux view", false, true, false, false);
+        super(getTitle(tracks), false, true, false, false);
 
         /* Retain the captures supplied by the flux-view request. */
         this.tracks = tracks;
@@ -990,5 +991,10 @@ public class FluxViewerPanel extends JInternalFrame
         {
             return Math.max(1, visible.width - UiUtils.pointsToPixels(16));
         }
+    }
+
+    private static String getTitle(ImmutableList<Track> tracks){
+        var ptl = Iterables.getFirst(tracks,null).ptl;
+        return String.format("Physical track c%dh%d", ptl.physicalCylinder, ptl.physicalHead);
     }
 }
