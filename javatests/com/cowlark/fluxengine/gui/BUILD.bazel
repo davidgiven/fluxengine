@@ -3,6 +3,27 @@ load("@rules_java//java:defs.bzl", "java_test")
 package(default_visibility = ["//visibility:public"])
 
 java_test(
+    name = "CustomFormatTest",
+    srcs = ["CustomFormatTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/gui",
+        "//java/com/cowlark/fluxengine/config",
+        "//java/com/cowlark/fluxengine/config:config_java_proto",
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/usb",
+        "@maven//:com_google_guava_guava",
+        "@maven//:com_google_truth_truth",
+        "@maven//:io_github_globaltcad_sprouts",
+        "@maven//:io_github_globaltcad_swing_tree",
+        "@maven//:junit_junit",
+        "@maven//:net_bytebuddy_byte_buddy",
+        "@maven//:net_bytebuddy_byte_buddy_agent",
+        "@maven//:org_mockito_mockito_core",
+        "@maven//:org_objenesis_objenesis",
+    ],
+)
+
+java_test(
     name = "PreferencesReaderWriterTest",
     srcs = ["PreferencesReaderWriterTest.java"],
     deps = [

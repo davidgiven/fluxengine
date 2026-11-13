@@ -1,7 +1,9 @@
 package com.cowlark.fluxengine.gui;
 
+import com.cowlark.fluxengine.core.FluxEngineException;
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.google.common.collect.ImmutableList;
+import swingtree.UI;
 import swingtree.threading.EventProcessor;
 import javax.swing.UIManager;
 import java.util.prefs.Preferences;
@@ -37,6 +39,19 @@ public class Gui
             ApplicationFrame frame = new ApplicationFrame(model, preferencesReaderWriter);
             frame.pack();
             frame.setVisible(true);
+
+            /* Restore after the window is visible so load errors have a usable GUI. */
+            String filename = model.getCustomFormatFilename().get();
+            if (!filename.isEmpty())
+            {
+                try
+                {
+                    model.onCustomFormatChanged(filename);
+                } catch (FluxEngineException e)
+                {
+                    UI.message(e.getMessage()).showAsError();
+                }
+            }
         });
 
         EventProcessor.DECOUPLED.join();
