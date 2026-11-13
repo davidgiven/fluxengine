@@ -120,14 +120,15 @@ $ fluxengine write -c ibm --1440 -c config.textpb -i image.img
 $ fluxengine write -c ibm --1440 -i image.img --encoder.ibm.trackdata.emit_iam=false
 ```
 
-Both the above invocations are equivalent. The text files use [Google's
-protobuf syntax](https://developers.google.com/protocol-buffers), which is
-hierarchical, type-safe, and easy to read.
+Both the above invocations are equivalent. The text files can use either of [Google's
+protobuf syntax](https://developers.google.com/protocol-buffers),
+or [Protowire's PXF format](https://github.com/trendvidia/protowire); these are
+hierarchical, type-safe, and easy to read (and are semantically identical, just with different syntax).
 
 The `ibm` string above is actually a reference to an internal configuration file
 containing all the settings for writing PC disks, and the `--1140` refers to a
-specific definition inside it. You may specify as many profile names or textpb
-files as you wish; they are all merged left to right. You can see all these
+specific definition inside it. You may specify as many profile names, `textpb`
+files, or `PXF` files as you wish; they are all merged left to right. You can see all these
 settings by doing:
 
 ```

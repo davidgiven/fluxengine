@@ -35,7 +35,6 @@ code in the boot loader, which ends Zone 4 with track 47 on head 0
 and track 39 on Head 1.
 
 FluxEngine can read and write both the single-sided and double-sided variants. 
-
 ## Options
 
   - Format variants:
@@ -59,4 +58,3 @@ To write:
   - [The Victor 9000 technical reference manual](http://bitsavers.org/pdf/victor/victor9000/Victor9000TechRef_Jun82.pdf)
 
   - [DiskFerret's Victor 9000 format guide](https://discferret.com/wiki/Victor_9000_format)
-

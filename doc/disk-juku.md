@@ -26,7 +26,6 @@ Mostly 800kB (786kB) DSDD disks were used, but there are also
   - [How to read/write Juku disk images?](https://j3k.infoaed.ee/kettad/)
   - [List of recovered Juku software](https://j3k.infoaed.ee/tarkvara-kataloog/)
   - [System disks for E5104](https://elektroonikamuuseum.ee/juku_arvuti_tarkvara.html)
-
 ## Options
 
   - Format variants:

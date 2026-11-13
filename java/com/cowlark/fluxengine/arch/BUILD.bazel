@@ -35,28 +35,26 @@ java_library(
     ],
 )
 
-FORMATS = [f[:-7] for f in glob(["*.textpb"])]
+FORMATS = [f[:-4] for f in glob(["*.pxf"])]
 
 [
     genrule(
-        name = "%s_bin" % f,
-        srcs = ["%s.textpb" % f],
-        outs = ["formats/%s.bin" % f],
-        tools = ["//java/com/cowlark/fluxengine/buildtools:protoencode"],
-        cmd = "$(location //java/com/cowlark/fluxengine/buildtools:protoencode) " +
-              "$(location %s.textpb) $(location formats/%s.bin)" % (f, f),
+        name = "%s_resource" % f,
+        srcs = ["%s.pxf" % f],
+        outs = ["formats/%s.pxf" % f],
+        cmd = "cp $(SRCS) $@",
     )
     for f in FORMATS
 ]
 
 genrule(
     name = "names",
-    srcs = ["%s.textpb" % f for f in FORMATS],
+    srcs = glob(["*.pxf"]),
     outs = ["formats/names.txt"],
     cmd = "printf '%%s\\n' %s > $(location formats/names.txt)" % " ".join(FORMATS),
 )
 
 filegroup(
     name = "formats_files",
-    srcs = ["formats/%s.bin" % f for f in FORMATS] + ["formats/names.txt"],
+    srcs = ["formats/%s.pxf" % f for f in FORMATS] + ["formats/names.txt"],
 )

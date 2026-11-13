@@ -39,4 +39,12 @@ public class FormatsTest
         assertThat(Formats.all()).contains("ibm");
         assertThat(Formats.all()).contains("_global_options");
     }
+
+    /* Every bundled format must be readable, including nested repeated fields. */
+    @Test
+    public void loadsEveryConfig()
+    {
+        for (String name : Formats.all())
+            assertThat(Formats.get(name)).isNotNull();
+    }
 }

@@ -32,7 +32,6 @@ kaydiag.lbr
 kayinfo.lbr
 ...etc...
 ```
-
 ## Options
 
   - Format variants:
@@ -49,4 +48,3 @@ To read:
 ## References
 
   - [The Ampro Little Board](http://oldcomputers.net/ampro-little-board.html)
-

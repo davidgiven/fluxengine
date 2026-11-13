@@ -18,11 +18,14 @@ import com.cowlark.fluxengine.algorithms.EndWriteOperationLogMessage;
 import com.cowlark.fluxengine.algorithms.ReadWriteFluxOperation;
 import com.cowlark.fluxengine.config.ConfigBuilder;
 import com.cowlark.fluxengine.config.ConfigProto;
+import com.cowlark.fluxengine.config.OptionGroupProto;
+import com.cowlark.fluxengine.config.OptionProto;
 import com.cowlark.fluxengine.core.FluxEngineException;
 import com.cowlark.fluxengine.core.LogMessage;
 import com.cowlark.fluxengine.core.LogMessage.ErrorLogMessage;
 import com.cowlark.fluxengine.core.Logger;
 import com.cowlark.fluxengine.data.Disk;
+import com.cowlark.fluxengine.data.Formats;
 import com.cowlark.fluxengine.data.Image;
 import com.cowlark.fluxengine.data.Track;
 import com.google.common.collect.ImmutableList;
@@ -55,10 +58,19 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
 import java.util.function.Supplier;
 
 public class ImageViewModel
 {
+    static final String CUSTOM_FORMAT = "(custom format)";
+
+    /* The custom slot has a stable identity independent of the loaded file's metadata. */
+    @Getter private Var<String> customFormatFilename;
+    private volatile ConfigProto customFormat;
+
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(ImageViewModel.class);
 
     private static final String DEFAULT_ADVANCED_SETTINGS = """
@@ -98,6 +110,8 @@ public class ImageViewModel
         this.preferencesReaderWriter = preferencesReaderWriter;
 
         selectedFormat = makeStringPreference(FORMAT, "ibm");
+        customFormatFilename = makeStringPreference(
+                PreferencesReaderWriter.CUSTOM_FORMAT_FILENAME, "");
         selectedDevice = makeStringPreference(DEVICE, DEVICE_FLUXFILE);
         selectedFluxFile = makeStringPreference(DEVICE_FLUXFILE, "");
         selectedSerialPort = makeStringPreference(DEVICE_SERIALPORT, "");
@@ -105,6 +119,72 @@ public class ImageViewModel
         selectedDrive = makeIntegerPreference(DRIVE, 0);
 
         refreshUsbDevices();
+    }
+
+    /* Built-in formats and the custom slot share one selector, but not a global cache. */
+    ImmutableList<String> getFormatNames()
+    {
+        return ImmutableList.<String>builder()
+                .addAll(Formats.all().stream()
+                        .filter(name -> !Formats.get(name).getIsExtension()).toList())
+                .add(CUSTOM_FORMAT)
+                .build();
+    }
+
+    /* Unloaded custom formats expose no options until a file is selected successfully. */
+    ConfigProto getFormatConfig(String name)
+    {
+        if (name.equals(CUSTOM_FORMAT))
+            return customFormat != null ? customFormat : ConfigProto.getDefaultInstance();
+        ConfigProto config = Formats.get(name);
+        return config != null ? config : ConfigProto.getDefaultInstance();
+    }
+
+    /* Parse before publishing changes; explicit notifications also support same-path reloads.
+     * GUI callers invoke this method on the EDT. */
+    public void onCustomFormatChanged(String filename)
+    {
+        ConfigProto config;
+        try
+        {
+            config = Formats.parse(Files.readAllBytes(Path.of(filename)));
+        } catch (IOException | FluxEngineException | InvalidPathException e)
+        {
+            throw new FluxEngineException(
+                    "cannot load custom format '" + filename + "': " + e.getMessage(), e);
+        }
+
+        /* Keep only choices still represented by the new format definition. */
+        Association<String, String> saved = preferencesReaderWriter.getOptionsForFormat(CUSTOM_FORMAT);
+        Association<String, String> compatible = Association.between(String.class, String.class);
+        for (Pair<String, String> choice : saved)
+        {
+            boolean valid = config.getOptionList().stream()
+                    .anyMatch(option -> option.getName().equals(choice.first()) && choice.second().isEmpty());
+            for (OptionGroupProto group : config.getOptionGroupList())
+            {
+                for (OptionProto option : group.getOptionList())
+                {
+                    if (group.getName().isEmpty())
+                        valid |= option.getName().equals(choice.first()) && choice.second().isEmpty();
+                    else
+                        valid |= group.getName().equals(choice.first())
+                                && option.getName().equals(choice.second());
+                }
+            }
+            if (valid)
+                compatible = compatible.put(choice.first(), choice.second());
+        }
+
+        /* Listeners must see the complete snapshot and filtered preferences when notified. */
+        preferencesReaderWriter.setOptionsForFormat(CUSTOM_FORMAT, compatible);
+        customFormat = config;
+        preferencesReaderWriter.setStringPreference(
+                PreferencesReaderWriter.CUSTOM_FORMAT_FILENAME, filename);
+        if (customFormatFilename.get().equals(filename))
+            customFormatFilename.fireChange(From.VIEW_MODEL);
+        else
+            customFormatFilename.set(From.VIEW_MODEL, filename);
     }
 
     /* Entry point for opening the selected captures in a flux view. */
@@ -409,12 +489,19 @@ public class ImageViewModel
                 }, () -> currentDisposable.set(From.VIEW_MODEL, null)));
     }
 
-    private ConfigBuilder makeConfigBuilderWithFormat()
+    ConfigBuilder makeConfigBuilderWithFormat()
     {
         Logger.setLogger(Consumers.nop());
         ConfigBuilder builder = new ConfigBuilder();
         builder.loadConfigFile("_global_options");
-        builder.loadConfigFile(selectedFormat.get());
+        if (selectedFormat.get().equals(CUSTOM_FORMAT))
+        {
+            if (customFormat == null)
+                throw new FluxEngineException("Select a custom format file first");
+            builder.mergeConfig(customFormat);
+        }
+        else
+            builder.loadConfigFile(selectedFormat.get());
 
         for (Pair<String, String> e : getOptionsForFormat(selectedFormat.get()).get())
             builder.applyOption(e.first(), e.second());

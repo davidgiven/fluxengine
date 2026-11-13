@@ -6,7 +6,6 @@ Epson PF-10
 The Epson PF10 is the disk unit for the Epson Z80 series of 'laptops', running
 CP/M. It uses a single-sided 40-track 3.5" format, which is unusual, but the
 format itself is yet another IBM scheme variant.
-
 ## Options
 
 (no options)

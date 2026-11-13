@@ -12,7 +12,6 @@ with a sector number of 66 on a disk, which can horribly confuse things. The
 Atari profiles below are configured to ignore these.
 
 Be aware that many PC drives (including mine) won't do the 82 track formats. 
-
 ## Options
 
   - Format variants:
@@ -58,4 +57,3 @@ To write:
   - [Atari ST Floppy Drive Software
         Information](https://info-coach.fr/atari/software/FD-Soft.php) by Jean
         Louis-Guerin
-

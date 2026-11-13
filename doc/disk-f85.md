@@ -27,7 +27,6 @@ disks; I don't have access to an image of one so don't know how they work
 (there's a suspicious looking spare byte in the sector header which could
 store the side). As always, if you have one, please [get in
 touch](https://github.com/davidgiven/fluxengine/issues/new).
-
 ## Options
 
 (no options)
@@ -44,4 +43,3 @@ There's amazingly little information about these things.
 
   * [Chuck Guzis' F85 page](http://www.sydex.com/durango/durango.html) with
     lots of pictures
-

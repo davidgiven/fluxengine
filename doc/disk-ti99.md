@@ -13,7 +13,6 @@ was controlled by a standard FD1771 or FD179x chip, meaning a relatively normal
 IBM-scheme disk format of 35 tracks containing nine 256-byte sectors.
 
 FluxEngine can read these.
-
 ## Options
 
 (no options)

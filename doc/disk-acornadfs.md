@@ -17,7 +17,6 @@ then all the way up side 1. However, FluxEngine uses traditional disk images
 with alternating sides, with the blocks from track 0 side 0 then track 0 side
 1 then track 1 side 0 etc. Most Acorn emulators will use both formats, but
 they might require nudging as the side order can't be reliably autodetected.
-
 ## Options
 
   - Format variants:

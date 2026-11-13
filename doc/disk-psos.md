@@ -15,7 +15,6 @@ anything about it.
 
 The floppy disk format itself is an IBM scheme variation with 1024-byte sectors
 and, oddly, swapped sides.
-
 ## Options
 
 (no options)

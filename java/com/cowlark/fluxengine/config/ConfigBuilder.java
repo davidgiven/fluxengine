@@ -14,7 +14,6 @@ import com.cowlark.fluxengine.fluxsource.FluxSource;
 import com.cowlark.fluxengine.imagereader.ImageReader;
 import com.cowlark.fluxengine.usb.UsbFinder;
 import com.google.common.collect.ImmutableList;
-import com.google.protobuf.TextFormat;
 import lombok.SneakyThrows;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -87,21 +86,23 @@ public class ConfigBuilder
             return this;
         }
 
-        String contents;
+        /* Read external files before parsing them with the shared format decoder. */
+        byte[] contents;
         try
         {
-            contents = Files.readString(Path.of(name));
+            contents = Files.readAllBytes(Path.of(name));
         } catch (IOException e)
         {
             throw new ConfigException("Cannot open '" + name + "': " + e.getMessage());
         }
 
+        /* Merge only after parsing succeeds, leaving the current config intact on failure. */
         try
         {
-            TextFormat.merge(contents, proto);
-        } catch (TextFormat.ParseException e)
+            proto.mergeFrom(Formats.parse(contents));
+        } catch (FluxEngineException e)
         {
-            throw new ConfigException("couldn't load external config proto");
+            throw new ConfigException("couldn't load external config '" + name + "': " + e.getMessage());
         }
 
         return this;
@@ -322,9 +323,8 @@ public class ConfigBuilder
         if (info != null)
             return applyOption(info, value);
 
-        // Not an option – try as config key.
-        // ProtoPath.set will throw ConfigException / ProtoPathNotFoundException
-        // if the path is invalid; let it propagate.
+        /* Not an option: try as a config key. ProtoPath.set will throw ConfigException or
+         * ProtoPathNotFoundException if the path is invalid; let it propagate. */
         set(key, value);
         return this;
     }

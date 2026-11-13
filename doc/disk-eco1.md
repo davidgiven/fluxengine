@@ -24,7 +24,6 @@ The standard `read ibm` command will autodetect and read these disks, but due
 to the format confusing the size autodetection the images need postprocessing
 to be useful, so there's a custom profile for the Eco1 which produces sensible
 images.
-
 ## Options
 
 (no options)
@@ -39,4 +38,3 @@ To read:
 
   - [Apulio Retrocomputing's page on the
 	Eco1](https://www.apuliaretrocomputing.it/wordpress/?p=8976)
-

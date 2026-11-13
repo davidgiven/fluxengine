@@ -35,7 +35,6 @@ There is a generic decoder which should adjust automatically to whichever disk
 format you are using, but it's unreliable and not recommended. This format
 should also be used if you are writing images such as DIM which specify the
 image format. FluxEngine will use these parameters.
-
 ## Options
 
   - Format variants:
@@ -117,4 +116,3 @@ Neither the FluxEngine or Greaseweazle hardware can currently command a
 tri-mode drive to spin at 360rpm. However on both devices the FluxEngine
 software is capable of both reading and writing 300rpm disks at 360rpm and vice
 versa, so it shouldn't matter.
-

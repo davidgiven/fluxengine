@@ -15,7 +15,6 @@ and just use the 512 bytes of main sector data. If you want it, specify a
 Bizarrely, the data in each sector is stored with all the odd bits first, and
 then all the even bits. This is tied into the checksum algorithm, which is
 distinctly subpar and not particularly good at detecting errors.
-
 ## Options
 
   - Sector size:
@@ -38,4 +37,3 @@ To write:
     Layout](https://wiki.amigaos.net/wiki/Amiga_Floppy_Boot_Process_and_Physical_Layout)
 
   - [The Amiga Disk File FAQ](http://lclevy.free.fr/adflib/adf_info.html)
-

@@ -6,7 +6,6 @@ Digital RX50
 The Digital RX50 is one of the external floppy drive units used by Digital's
 range of computers, especially the DEC Rainbow microcomputer. It is a fairly
 vanilla single-sided IBM scheme variation.
-
 ## Options
 
 (no options)

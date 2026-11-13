@@ -18,5 +18,7 @@ java_library(
         "@com_google_protobuf//java/core",
         "@maven//:com_google_guava_guava",
         "@maven//:org_projectlombok_lombok",
+        "@maven//:org_protowire_protowire_pxf",
+        "@maven//:org_protowire_protowire_pxf_runtime",
     ],
 )

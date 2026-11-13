@@ -22,6 +22,7 @@ public class PreferencesReaderWriter
 {
     static final String DEVICE_OPTIONS = "device_options";
     static final String FORMAT = "format";
+    static final String CUSTOM_FORMAT_FILENAME = "custom_format_filename";
     static final String DEVICE = "device";
     static final String DRIVE = "drive";
     static final String WORKFLOW = "workflow";

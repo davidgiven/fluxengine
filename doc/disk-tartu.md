@@ -23,7 +23,6 @@ density, using MFM and with up to 780kB on a double-sided 80 track disk.
 </div>
 
 FluxEngine supports reading and writing Tartu disks with CP/M filesystem access.
-
 ## Options
 
   - Format variants:
@@ -45,4 +44,3 @@ To write:
 ## References
 
   - [The Estonia Museum of Electronics](https://www.elektroonikamuuseum.ee/tartu_arvuti_lugu.html)
-

@@ -33,7 +33,6 @@ do anything about that.
 If you find one of these misaligned disks then *please* [get in
 touch](https://github.com/davidgiven/fluxengine/issues/new); I want to
 investigate.
-
 ## Options
 
   - Format variants:
@@ -125,4 +124,3 @@ files in and out. However, you'll need to change the media type bytes at
 offsets 0x015 and 0x100 from 0x58 to 0xf0 before mtools will touch it. The
 supplied `brother240tool` will do this. Additionally, FluxEngine's own FAT
 file system supports this.
-

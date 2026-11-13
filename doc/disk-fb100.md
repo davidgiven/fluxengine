@@ -21,7 +21,6 @@ ID data used for filesystem management.
 
 There was also apparently a TPDD-2 which could store twice as much data, but
 I don't have access to one of those disks.
-
 ## Options
 
 (no options)
@@ -45,4 +44,3 @@ To read:
 
   - [Knitting machine FB-100
 	resources](http://www.k2g2.org/wiki:brother_fb-100)
-

@@ -35,7 +35,6 @@ clever.
 Macintosh computers never really used the twelve bytes of metadata and the
 standard for disk images is to omit it. If you want them, specify that you want
 524-byte sectors. The metadata will follow the 512 bytes of user data.
-
 ## Options
 
   - Format variants:
@@ -70,4 +69,3 @@ To write:
   - [The DiskCopy 4.2
         format](https://www.discferret.com/wiki/Apple_DiskCopy_4.2), described on
         the DiskFerret website.
-

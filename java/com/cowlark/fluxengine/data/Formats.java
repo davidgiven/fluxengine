@@ -3,7 +3,7 @@ package com.cowlark.fluxengine.data;
 import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.core.FluxEngineException;
 import com.google.common.collect.ImmutableList;
-import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.TextFormat;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -11,16 +11,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import org.protowire.pxf.Pxf;
+import org.protowire.pxf.PxfException;
 
 /**
  * The built-in format configurations, loaded on demand from the classpath
- * resources generated from the textpb files in java/com/cowlark/fluxengine/arch,
- * ported from the C++ `formats` map in lib/config.
+ * PXF resources in java/com/cowlark/fluxengine/arch.
  */
 public final class Formats
 {
     private static final String RESOURCE_DIR = "formats";
-    private static final String RESOURCE_SUFFIX = ".bin";
+    private static final String RESOURCE_SUFFIX = ".pxf";
     private static final String NAMES_RESOURCE = RESOURCE_DIR + "/names.txt";
 
     private static final ConcurrentHashMap<String, ConfigProto> cache = new ConcurrentHashMap<>();
@@ -51,6 +52,7 @@ public final class Formats
 
     private static ConfigProto load(String name)
     {
+        /* Read the source configuration from the classpath. */
         String resource = "/" + RESOURCE_DIR + "/" + name + RESOURCE_SUFFIX;
         byte[] data;
         try (InputStream stream = Formats.class.getResourceAsStream(resource))
@@ -63,12 +65,40 @@ public final class Formats
             throw new FluxEngineException("cannot read format resource " + resource + ": " + e);
         }
 
+        /* Include the resource name when reporting malformed built-in configurations. */
         try
         {
-            return ConfigProto.parseFrom(data);
-        } catch (InvalidProtocolBufferException e)
+            return parse(data);
+        } catch (FluxEngineException e)
         {
-            throw new FluxEngineException("invalid format data in " + resource + ": " + e);
+            throw new FluxEngineException("invalid format data in " + resource + ": " + e, e);
+        }
+    }
+
+    /* Parses PXF, retaining textproto support for older configurations. */
+    public static ConfigProto parse(byte[] data)
+    {
+        ConfigProto.Builder builder = ConfigProto.newBuilder();
+        try
+        {
+            Pxf.unmarshal(data, builder);
+            return builder.build();
+        } catch (PxfException pxfException)
+        {
+            /* A failed decode may have modified the builder, so start afresh. */
+            builder = ConfigProto.newBuilder();
+            try
+            {
+                TextFormat.merge(new String(data, StandardCharsets.UTF_8), builder);
+                return builder.build();
+            } catch (TextFormat.ParseException textprotoException)
+            {
+                pxfException.addSuppressed(textprotoException);
+                throw new FluxEngineException(
+                        "invalid format data: PXF: " + pxfException
+                                + "; textproto: " + textprotoException,
+                        pxfException);
+            }
         }
     }
 

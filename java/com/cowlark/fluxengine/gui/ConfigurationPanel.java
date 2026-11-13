@@ -7,7 +7,6 @@ import static com.cowlark.fluxengine.gui.PreferencesReaderWriter.DEVICE_FLUXFILE
 import static com.cowlark.fluxengine.gui.PreferencesReaderWriter.DEVICE_SERIALPORT;
 import static com.cowlark.fluxengine.gui.UiUtils.EDT_EXECUTOR;
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static javax.swing.JFileChooser.APPROVE_OPTION;
 import static swingtree.UI.label;
 import static swingtree.UI.of;
@@ -21,16 +20,15 @@ import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.config.OptionApplicabilityHint;
 import com.cowlark.fluxengine.config.OptionGroupProto;
 import com.cowlark.fluxengine.config.OptionProto;
+import com.cowlark.fluxengine.core.FluxEngineException;
 import com.cowlark.fluxengine.data.Formats;
 import com.cowlark.fluxengine.usb.UsbFinder;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.apache.commons.lang3.StringUtils;
 import org.jspecify.annotations.Nullable;
 import sprouts.Association;
 import sprouts.From;
-import sprouts.Pair;
 import sprouts.Var;
 import sprouts.Viewable;
 import swingtree.ComponentDelegate;
@@ -47,6 +45,8 @@ import javax.swing.ListCellRenderer;
 import javax.swing.Scrollable;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import java.io.File;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -73,22 +73,22 @@ public class ConfigurationPanel extends JPanel implements Scrollable
     private static final BufferedImage HARDWARE_IMAGE = UiUtils.loadImage("/hardware.png");
     private static final BufferedImage FLUXFILE_IMAGE = UiUtils.loadImage("/fluxfile.png");
 
-    private static ImmutableMap<String, ConfigProto> formatData = Formats
-            .all()
-            .stream()
-            .map(it -> Pair.of(it, Formats.get(it)))
-            .filter(p -> !p.second().getIsExtension())
-            .collect(toImmutableMap(Pair::first, Pair::second));
     private final ImageViewModel model;
 
     public ConfigurationPanel(ImageViewModel model)
     {
         this.model = model;
 
-        Viewable.cast(model.getSelectedFormat()).onChange(From.ALL, it -> rebuildUi());
-        Viewable.cast(model.getSelectedDevice()).onChange(From.ALL, it -> rebuildUi());
-        Viewable.cast(model.getSelectedFluxFile()).onChange(From.ALL, it -> rebuildUi());
-        Viewable.cast(model.getUsbDevices()).onChange(From.ALL, it -> rebuildUi());
+        Viewable.cast(model.getSelectedFormat()).onChange(
+                From.ALL, it -> EDT_EXECUTOR.execute(this::rebuildUi));
+        Viewable.cast(model.getSelectedDevice()).onChange(
+                From.ALL, it -> EDT_EXECUTOR.execute(this::rebuildUi));
+        Viewable.cast(model.getSelectedFluxFile()).onChange(
+                From.ALL, it -> EDT_EXECUTOR.execute(this::rebuildUi));
+        Viewable.cast(model.getUsbDevices()).onChange(
+                From.ALL, it -> EDT_EXECUTOR.execute(this::rebuildUi));
+        Viewable.cast(model.getCustomFormatFilename()).onChange(
+                From.ALL, it -> EDT_EXECUTOR.execute(this::rebuildUi));
         rebuildUi();
     }
 
@@ -163,9 +163,10 @@ public class ConfigurationPanel extends JPanel implements Scrollable
         return yesno ? "Yes" : "No";
     }
 
-    private static String formatRenderer(String format)
+    private String formatRenderer(String format)
     {
-        return formatData.get(format).getShortname();
+        return format.equals(ImageViewModel.CUSTOM_FORMAT)
+                ? ImageViewModel.CUSTOM_FORMAT : model.getFormatConfig(format).getShortname();
     }
 
     private static String optionRenderer(@Nullable OptionProto option)
@@ -326,18 +327,65 @@ public class ConfigurationPanel extends JPanel implements Scrollable
                 .add(
                         SETTING_FORMAT, comboBox(
                                 model.getSelectedFormat(),
-                                ImmutableList.copyOf(formatData.keySet()),
-                                ConfigurationPanel::formatRenderer).onSelection(it -> model
+                                model.getFormatNames(),
+                                this::formatRenderer).onSelection(it -> model
                                 .getSelectedFormat()
                                 .set(From.VIEW, (String) it.get().getSelectedItem())));
+        if (model.getSelectedFormat().get().equals(ImageViewModel.CUSTOM_FORMAT))
+        {
+            /* Custom-file controls belong to the selected format, above its options. */
+            String filename = model.getCustomFormatFilename().get();
+            panel = panel
+                    .add(LABEL_FORMAT, label("Path:"))
+                    .add(SETTING_FORMAT + ", wmin 0, wrap",
+                            UI.textField(filename).isEditableIf(false).peek(field -> {
+                                /* A fixed column count keeps long paths out of layout sizing.
+                                 * Pin the caret to the end to show the filename when clipped. */
+                                field.setName("customFormatPath");
+                                field.setColumns(1);
+                                field.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+                                field.setToolTipText(filename);
+                                field.setCaretPosition(field.getDocument().getLength());
+                            }))
+                    .add(SETTING_FORMAT + ", skip 1, wrap",
+                            panel("fillx, insets 0", "[0:pref:, grow, fill, sg buttons][0:pref:, grow, fill, sg buttons]")
+                                    .add("wmin 0", button("Select file").onClick(it ->
+                                            EDT_EXECUTOR.execute(this::onSelectCustomFormat)))
+                                    .add("wmin 0",
+                                            button("Reload file").isEnabledIf(!filename.isEmpty())
+                                                    .onClick(it -> EDT_EXECUTOR.execute(() ->
+                                                            loadCustomFormat(model.getCustomFormatFilename().get())))));
+        }
         panel = emitOptions(
                 panel,
                 model.getOptionsForFormat(model.getSelectedFormat().get()),
-                formatData.getOrDefault(
-                        model.getSelectedFormat().get(),
-                        ConfigProto.getDefaultInstance()),
+                model.getFormatConfig(model.getSelectedFormat().get()),
                 ImmutableSet.of());
         return panel;
+    }
+
+    /* Reuse the remembered chooser directory and allow reselecting the current file. */
+    private void onSelectCustomFormat()
+    {
+        JFileChooser chooser = model.getPreferencesReaderWriter().createFileChooser();
+        chooser.setDialogTitle("Select custom format file");
+        chooser.setFileFilter(new FileNameExtensionFilter("PXF format files (*.pxf)", "pxf"));
+        String filename = model.getCustomFormatFilename().get();
+        if (!filename.isEmpty())
+            chooser.setSelectedFile(new File(filename));
+        if (chooser.showOpenDialog(this) == APPROVE_OPTION)
+            loadCustomFormat(chooser.getSelectedFile().getAbsolutePath());
+    }
+
+    private void loadCustomFormat(String filename)
+    {
+        try
+        {
+            model.onCustomFormatChanged(filename);
+        } catch (FluxEngineException e)
+        {
+            UI.message(e.getMessage()).showAsError();
+        }
     }
 
     private UIForPanel<ConfigurationPanel> buildDevicesPane(UIForPanel<ConfigurationPanel> panel)

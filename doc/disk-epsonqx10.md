@@ -20,7 +20,6 @@ Troubleshooting guide (May 83).
 All variants are 5.25" DSDD, soft-sectored (single index hole), MFM,
 250 kbit/s, 300 RPM, 48 TPI, 40 cylinders, 2 sides. Sector numbering is
 1-based and the controller uses the normal IBM scheme.
-
 ## Options
 
   - Format variants:
@@ -48,7 +47,6 @@ CP/M transfer utilities:
 
 Use this for a typical QX-10 CP/M data disk if you do not know which
 variant you have.
-
 ## 400kB alternate / Valdocs-associated variant (10 x 512 bytes)
 
 Identical physical geometry and rotation speed, but each track holds
@@ -61,7 +59,6 @@ Identical physical geometry and rotation speed, but each track holds
 The Epson CP/M External Reference Spec identifies both this and the
 16 x 256 layout as QX-10 formats; the BIOS listing notes the standard
 implementation as 512-byte sectors with 10 sectors per track.
-
 ## 396kB mixed-format bootable variant
 
 Some QX-10 system/boot media use a mixed organisation: early tracks use
@@ -79,7 +76,6 @@ Note that the first _four_ tracks are still reserved, which means two
 Raw capacity with that split is 4 tracks x 4,096 + 76 tracks x 5,120 =
 405,504 bytes; however, this also gives the same ~380 kB of user space,
 as for the 400kB format, but with less reserved operating system space.
-
 ## References
 
   * [QX-10 Technical Manual Troubleshooting, May 83 (bitsavers)](http://www.bitsavers.org/pdf/epson/QX-10/QX-10_Technical_Manual_Troubleshooting_May83.pdf)
@@ -87,4 +83,3 @@ as for the 400kB format, but with less reserved operating system space.
   * [CP/M-80 Epson QX-10 External Reference Spec B2.20, 24 Feb 84 (vtda)](https://vtda.org/docs/computing/Epson/QX-10/CPM-80_Epson_QX-10_External_Reference_Spec_B2.20_24Feb84.pdf)
   * [Epson QX-10 User's Guide, James Hansen (bad copy 2) (vtda)](https://vtda.org/docs/computing/Epson/QX-10/Epson_QX-10_Users_Guide_JamesHansen(bad_copy2).pdf) - mixed layout
   * [QX-10 detail page](https://www.vintagecomputer.net/fjkraan/comp/qx10/detail.html)
-

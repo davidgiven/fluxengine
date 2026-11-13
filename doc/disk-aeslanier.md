@@ -28,7 +28,6 @@ FluxEngine can read these, but I only have a single, fairly poor example of a
 disk image, and I've had to make a lot of guesses as to the sector format
 based on what looks right. If anyone knows _anything_ about these disks,
 [please get in touch](https://github.com/davidgiven/fluxengine/issues/new).
-
 ## Options
 
 (no options)
@@ -45,4 +44,3 @@ To read:
     Operations](http://www.hartetechnologies.com/manuals/Shugart/50664-1_SA800_TheorOp_May78.pdf):
     talks about MMFM a lot, but the Lanier machines didn't use this disk
     format.
-
