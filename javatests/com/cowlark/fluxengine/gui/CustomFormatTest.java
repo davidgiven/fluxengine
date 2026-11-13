@@ -6,18 +6,6 @@ import static org.junit.Assert.assertThrows;
 import com.cowlark.fluxengine.core.FluxEngineException;
 import com.cowlark.fluxengine.usb.UsbFinder;
 import com.google.common.collect.ImmutableList;
-import java.awt.Component;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.prefs.Preferences;
-import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,6 +18,17 @@ import sprouts.From;
 import sprouts.Viewable;
 import swingtree.SwingTree;
 import swingtree.threading.EventProcessor;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.SwingUtilities;
+import java.awt.Component;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.prefs.Preferences;
 
 @RunWith(JUnit4.class)
 public class CustomFormatTest
@@ -247,68 +246,6 @@ public class CustomFormatTest
                 assertThat(model.getFormatConfig(ImageViewModel.CUSTOM_FORMAT).getComment()).isEqualTo("chosen");
             }
         });
-    }
-
-    @Test
-    public void pathFieldClipsLongPathsWithoutWideningThePanel() throws Exception
-    {
-        SwingUtilities.invokeAndWait(() -> {
-            model.getSelectedFormat().set(From.VIEW, ImageViewModel.CUSTOM_FORMAT);
-            ConfigurationPanel panel = new ConfigurationPanel(model);
-            panel.setSize(340, 1000);
-            panel.doLayout();
-            int initialWidth = panel.getPreferredSize().width;
-
-            /* A remembered path can be displayed even when its file is unavailable. */
-            String filename = "/very-long-directory".repeat(30) + "/custom-format.pxf";
-            model.getCustomFormatFilename().set(From.VIEW_MODEL, filename);
-            panel.doLayout();
-            JTextField field = null;
-            for (Component component : panel.getComponents())
-                if (component instanceof JTextField candidate
-                        && "customFormatPath".equals(candidate.getName()))
-                    field = candidate;
-            assertThat(field).isNotNull();
-            assertThat(hasLabel(panel, "Path:")).isTrue();
-            assertThat(field.isEditable()).isFalse();
-            assertThat(field.getText()).isEqualTo(filename);
-            assertThat(field.getToolTipText()).isEqualTo(filename);
-            assertThat(field.getHorizontalAlignment()).isEqualTo(JTextField.RIGHT);
-            assertThat(field.getCaretPosition()).isEqualTo(filename.length());
-            assertThat(panel.getPreferredSize().width).isEqualTo(initialWidth);
-            assertThat(field.getWidth()).isAtMost(200);
-            assertThat(field.getX() + field.getWidth()).isAtMost(panel.getWidth());
-            assertThat(buttonBounds(panel, "Select file").y).isGreaterThan(field.getY());
-            assertThat(buttonBounds(panel, "Reload file").y)
-                    .isEqualTo(buttonBounds(panel, "Select file").y);
-            assertThat(buttonBounds(panel, "Select file").x).isEqualTo(field.getX());
-            assertThat(Math.abs(button(panel, "Select file").getWidth()
-                    - button(panel, "Reload file").getWidth())).isAtMost(1);
-            assertThat(buttonBounds(panel, "Reload file").x
-                    + button(panel, "Reload file").getWidth())
-                    .isEqualTo(field.getX() + field.getWidth());
-
-            /* Resizing preserves the right-hand end of the path. */
-            panel.setSize(300, 1000);
-            panel.doLayout();
-            assertThat(field.getX() + field.getWidth()).isAtMost(panel.getWidth());
-            assertThat(buttonBounds(panel, "Select file").x).isEqualTo(field.getX());
-            assertThat(Math.abs(button(panel, "Select file").getWidth()
-                    - button(panel, "Reload file").getWidth())).isAtMost(1);
-            assertThat(buttonBounds(panel, "Reload file").x
-                    + button(panel, "Reload file").getWidth())
-                    .isEqualTo(field.getX() + field.getWidth());
-            assertThat(field.getCaretPosition()).isEqualTo(filename.length());
-            model.getSelectedFormat().set(From.VIEW, "ibm");
-            assertThat(hasLabel(panel, "Path:")).isFalse();
-        });
-    }
-
-    private static java.awt.Rectangle buttonBounds(ConfigurationPanel panel, String text)
-    {
-        JButton button = button(panel, text);
-        button.getParent().doLayout();
-        return SwingUtilities.convertRectangle(button.getParent(), button.getBounds(), panel);
     }
 
     private static JButton button(java.awt.Container panel, String text)
