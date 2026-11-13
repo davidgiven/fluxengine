@@ -19,7 +19,6 @@ Due to the nature of the track ordering on side 1, an .nsi image reader and
 writer are provided for double-sided disks.  The .nsi image writer supports
 both single- and double-sided disks; however single-sided .nsi images are
 equivalent to .img images.
-
 ## Options
 
   - Format variants:
@@ -47,4 +46,3 @@ To write:
     Page 33 documents sector format for single- and double-density.
 
 [northstar_mds]: http://bitsavers.org/pdf/northstar/boards/Northstar_MDS-A-D_1978.pdf
-

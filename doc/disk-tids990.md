@@ -17,7 +17,6 @@ href="https://www.old-computers.com/museum/computer.asp?st=1&c=1025">old-compute
 </div>
 
 FluxEngine will read and write these (but only the DSDD MFM variant).
-
 ## Options
 
 (no options)
@@ -36,4 +35,3 @@ To write:
 
   - [The FD1000 Depot Maintenance
         Manual](http://www.bitsavers.org/pdf/ti/990/disk/2261885-9701_FD1000depotVo1_Jan81.pdf)
-

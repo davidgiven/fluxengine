@@ -6,7 +6,6 @@ ICL Model 30
 The ICL Model 30 is a reasonably standard CP/M machine using 35-track single
 density disks and the traditional CP/M 128-byte secotrs --- 30 of them per
 track! Other than that it's another IBM scheme variation.
-
 ## Options
 
 (no options)

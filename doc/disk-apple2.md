@@ -41,7 +41,6 @@ the same underlying disk format. The complication here is that the AppleDOS
 filesystem only supports up to 50 tracks, so it needs tweaking to support
 larger disks. It treats the second side of the disk as a completely different
 volume.
-
 ## Options
 
   - Format variants:
@@ -71,4 +70,3 @@ To write:
   - [Beneath Apple DOS](https://fabiensanglard.net/fd_proxy/prince_of_persia/Beneath%20Apple%20DOS.pdf)
 
   - [MAME's ap2_dsk.cpp file](https://github.com/mamedev/mame/blob/4263a71e64377db11392c458b580c5ae83556bc7/src/lib/formats/ap2_dsk.cpp)
-

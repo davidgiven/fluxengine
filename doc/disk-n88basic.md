@@ -9,7 +9,6 @@ variant, and is very similar to some mixed-format CP/M disk formats, where
 track 0 side 0 uses 128-byte single density sectors and the rest of the disk
 uses 512-byte double density sectors. (The reason for this is that the PC8800
 boot ROM could only read single density data.)
-
 ## Options
 
 (no options)

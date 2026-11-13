@@ -49,7 +49,6 @@ twice the number of tracks, HCS; the second side's tracks in opposite order
 logically followed the first side (e.g., tracks 77-153). Micropolis disks
 tended to be the latter. FluxEngine always emits CHS format disks, so you may
 need to apply extra options to change the format if desired.
-
 ## Options
 
   - Format variants:
@@ -90,4 +89,3 @@ To write:
 [micropolis1040/1050]: http://www.bitsavers.org/pdf/micropolis/metafloppy/1084-01_1040_1050_Users_Manual_Apr79.pdf
 [vectordualmode]: http://bitsavers.org/pdf/vectorGraphic/hardware/7200-1200-02-1_Dual-Mode_Disk_Controller_Board_Engineering_Documentation_Feb81.pdf
 [altairz80]: http://www.bitsavers.org/simh.trailing-edge.com_201206/pdf/altairz80_doc.pdf
-

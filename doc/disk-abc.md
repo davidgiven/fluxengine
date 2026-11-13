@@ -8,7 +8,6 @@ started production of the ABC, the Ai Business Computer, a decently specced CP/M
 floppy drives, GBIP ports, and a maths coprocessor.
 
 The floppy disks it uses are relatively normal 35-track IBM scheme disks, with cylinder 0 reserved as the boot track.
-
 ## Options
 
 (no options)
@@ -26,4 +25,3 @@ To write:
 ## References
 
   - [DoPECC's page on the ABC 24](https://dopecc.net/computers/ai/)
-

@@ -29,6 +29,26 @@ public class ConfigBuilderTest
     }
 
     @Test
+    public void loadConfigFileMergesPxf() throws IOException
+    {
+        /* External PXF files use the same decoder as bundled formats. */
+        Path file = Files.createTempFile("config", ".pxf");
+        try
+        {
+            Files.writeString(file,
+                    "shortname = \"myconfig\"\ntracks = \"c=0:2\"\ndocumentation = [\"first\" \"second\"]\n");
+            ConfigProto proto = builder().loadConfigFile(file.toString()).build();
+
+            assertThat(proto.getShortname()).isEqualTo("myconfig");
+            assertThat(proto.getTracks()).isEqualTo("c=0:2");
+            assertThat(proto.getDocumentationList()).containsExactly("first", "second").inOrder();
+        } finally
+        {
+            Files.deleteIfExists(file);
+        }
+    }
+
+    @Test
     public void loadConfigFileMergesTextproto() throws IOException
     {
         Path file = Files.createTempFile("config", ".textproto");
@@ -489,7 +509,7 @@ public class ConfigBuilderTest
         builder.applyOptions("");
         builder.applyOptions("   \n\n");
         builder.applyOptions(null);
-        // default drivetype 80 should still apply
+        /* The default drivetype of 80 should still apply. */
         assertThat(builder.build().getDrive().getTracks()).isEqualTo("c0-80h0-1");
     }
 
@@ -546,7 +566,7 @@ public class ConfigBuilderTest
     @Test
     public void applyOptionsConfigKeyFallsBackFromOption()
     {
-        // 'decoder.retries' is a config key, not an option – ensure fallback works
+        /* 'decoder.retries' is a config key, not an option; ensure fallback works. */
         ConfigBuilder builder = builder();
         builder.applyOptions("decoder.retries=5");
         assertThat(builder.build().getDecoder().getRetries()).isEqualTo(5);

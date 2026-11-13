@@ -39,7 +39,6 @@ A track is:
 
 The checksum is just the unsigned integer sum of all the words in the sector.
 Words are all stored little-endian.
-
 ## Options
 
   - Format variants:
@@ -66,4 +65,3 @@ To read:
   - [a random post on the HxC2001 support
     forum](http://torlus.com/floppy/forum/viewtopic.php?t=1384) with lots of
     information on the format
-

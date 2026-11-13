@@ -19,7 +19,6 @@ the venerable IBM floppy disk scheme, so allowing 315kB of storage per disk.
 If you have access to flux files for MS2000 disks, please [get in
 touch](https://github.com/davidgiven/cpm65/issues/new) --- I would like to add
 better support for these.
-
 ## Options
 
 (no options)
@@ -30,4 +29,3 @@ better support for these.
 
   - [The EMMA-02 emulator](https://www.emma02.hobby-site.com/ms2000.html), which
     supports the MS2000 and provides information on it.
-

@@ -10,7 +10,6 @@ sector size is 256 bytes. Side byte in sector ID record is not used and always
 set to 0.
 
 FluxEngine can read and write these.
-
 ## Options
 
   - Format variants:

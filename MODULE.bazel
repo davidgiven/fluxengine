@@ -35,6 +35,7 @@ maven.install(
         "org.objenesis:objenesis:3.3",
         "org.slf4j:slf4j-simple:2.0.17",
         "org.indunet:fastproto:4.1.0",
+        "org.protowire:protowire-pxf:2.0.1",
         "net.java.dev.jna:jna:5.19.1",
         "net.java.dev.jna:jna-platform:5.19.1",
         "com.google.truth.extensions:truth-proto-extension:1.4.5",

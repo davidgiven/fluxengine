@@ -11,7 +11,6 @@ They could use either standard Apple II 140kB disks, or a proprietary 840kb
 MFM-based double-sided format. FluxEngine supports both of these; this profile
 is for the proprietary format. for the Apple II format, use the `apple2`
 profile.
-
 ## Options
 
 (no options)
@@ -33,4 +32,3 @@ To write:
 
   - [Forum thread with (some) documentation on the
         format](https://torlus.com/floppy/forum/viewtopic.php?t=1385)
-

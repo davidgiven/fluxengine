@@ -42,7 +42,6 @@ quickly.)
 	of storage. This also uses IBM encoding.
 
 A CMD FD2000 disk (a popular third-party Commodore disk drive) 
-
 ## Options
 
   - Format variants:
@@ -75,4 +74,3 @@ To write:
 
   - [Ruud's Commodore Site: 1541](http://www.baltissen.org/newhtm/1541c.htm):
     documentation on the 1541 disk format.
-

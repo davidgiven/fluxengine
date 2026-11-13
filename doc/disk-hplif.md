@@ -10,7 +10,6 @@ bizarrely _still_ supported by HP-UX systems.
 
 Floppy-disk wise, they're yet more variations of the standard IBM floppy
 encoding scheme.
-
 ## Options
 
   - Format variants:
@@ -39,4 +38,3 @@ To write:
 
   * [A summary of the Hewlett Packard floppy disk
     formats](http://www.bitsavers.org/pdf/hp/disc/912x/HP_Flexible_Disk_Formats.pdf)
-

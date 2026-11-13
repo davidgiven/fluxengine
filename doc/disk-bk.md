@@ -13,7 +13,6 @@ used a relatively normal double-sided IBM scheme format with 80 sectors and ten
 sectors per track, resulting in 800kB disks. The format is, in fact, identical
 to the Atari ST 800kB format. Either 5.25" or 3.5" drives were used depending
 on what was available at the time, with the same format on both.
-
 ## Options
 
 (no options)

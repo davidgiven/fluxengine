@@ -13,7 +13,6 @@ used as another volume.
 They come in two varieties, 40 track and 80 track. These should both work.
 Some rare disks are both at the same time. FluxEngine can read these but it
 requires a bit of fiddling as they have the same tracks on twice.
-
 ## Options
 
   - Format variants:
@@ -35,4 +34,3 @@ To write:
 ## References
 
   - [The Acorn DFS disc format](https://beebwiki.mdfs.net/Acorn_DFS_disc_format)
-

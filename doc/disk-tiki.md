@@ -7,7 +7,6 @@ The Tiki 100 is a Z80-based Norwegian microcomputer from the mid 1980s intended
 for eductional use. It mostly ran an unbranded CP/M clone, and uses fairly
 normal CP/M disks --- IBM scheme and from 128 to 512 bytes per sector depending
 on the precise format. 
-
 ## Options
 
   - Format variants:
