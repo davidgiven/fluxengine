@@ -34,7 +34,7 @@ option_group = [
                         drive_type = DRIVETYPE_80TRACK
                     }
                 }
-            }
+            },
             {
                 name = "40"
                 comment = "40 track drive"
@@ -45,7 +45,7 @@ option_group = [
                         drive_type = DRIVETYPE_40TRACK
                     }
                 }
-            }
+            },
             {
                 name = "160"
                 comment = "160 track Apple II drive"
@@ -59,7 +59,7 @@ option_group = [
             }
         ]
 
-    }
+    },
     {
         comment = "Drive rotational speed"
         name = "drivespeed"
@@ -73,7 +73,7 @@ option_group = [
 
                 config {
                 }
-            }
+            },
             {
                 name = "300"
                 comment = "300rpm (200ms)"
@@ -83,7 +83,7 @@ option_group = [
                         rotational_period_ms = 200
                     }
                 }
-            }
+            },
             {
                 name = "360"
                 comment = "360rpm (166ms)"
@@ -96,7 +96,7 @@ option_group = [
             }
         ]
 
-    }
+    },
     {
         comment = "Bus interface"
         name = "bus"
@@ -107,7 +107,7 @@ option_group = [
                 name = "pc"
                 comment = "PC drive interface"
                 set_by_default = true
-            }
+            },
             {
                 name = "shugart"
                 comment = "Shugart bus interface (only on Greaseweazle)"
@@ -119,7 +119,7 @@ option_group = [
                         }
                     }
                 }
-            }
+            },
             {
                 name = "appleii"
                 comment = "Apple II bus interface (only on Greaseweazle)"

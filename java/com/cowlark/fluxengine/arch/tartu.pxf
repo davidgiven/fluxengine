@@ -25,7 +25,7 @@ density, using MFM and with up to 780kB on a double-sided 80 track disk.
 </div>
 
 FluxEngine supports reading and writing Tartu disks with CP/M filesystem access.
-"""
+""",
     """
 ## References
 
@@ -80,7 +80,7 @@ option_group = [
                         sides = 2
                     }
                 }
-            }
+            },
             {
                 name = "780"
                 comment = "780kB 5.25\" 80-track DSDD"

@@ -61,7 +61,7 @@ option_group = [
                         ]
                     }
                 }
-            }
+            },
             {
                 name = "320"
                 comment = "320kB 3.5\" or 5.25\" 80-track SSDD; M format"
@@ -82,7 +82,7 @@ option_group = [
                         ]
                     }
                 }
-            }
+            },
             {
                 name = "640"
                 comment = "640kB 3.5\" or 5.25\" 80-track DSDD; L format"
@@ -103,7 +103,7 @@ option_group = [
                         ]
                     }
                 }
-            }
+            },
             {
                 name = "800"
                 comment = "800kB 3.5\" 80-track DSDD; D and E formats"
@@ -124,7 +124,7 @@ option_group = [
                         ]
                     }
                 }
-            }
+            },
             {
                 name = "1600"
                 comment = "1600kB 3.5\" 80-track DSHD; F formats"

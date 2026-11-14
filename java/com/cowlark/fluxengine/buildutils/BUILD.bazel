@@ -1,0 +1,14 @@
+load("@rules_java//java:defs.bzl", "java_binary")
+
+java_binary(
+    name = "lint_pxf",
+    srcs = ["LintPxf.java"],
+    main_class = "com.cowlark.fluxengine.buildutils.LintPxf",
+    visibility = ["//java/com/cowlark/fluxengine/arch:__pkg__"],
+    deps = [
+        "//java/com/cowlark/fluxengine/config:config_java_proto",
+        "@com_google_protobuf//java/core",
+        "@maven//:org_protowire_protowire_pxf",
+        "@maven//:org_protowire_protowire_pxf_runtime",
+    ],
+)

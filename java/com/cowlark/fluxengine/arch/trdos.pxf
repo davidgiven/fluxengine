@@ -74,7 +74,7 @@ option_group = [
                         ]
                     }
                 }
-            }
+            },
             {
                 name = "320ssdd"
                 comment = "320kB 80-track single-sided"
@@ -95,7 +95,7 @@ option_group = [
                         ]
                     }
                 }
-            }
+            },
             {
                 name = "320dsdd"
                 comment = "320kB 40-track double-sided"
@@ -116,7 +116,7 @@ option_group = [
                         ]
                     }
                 }
-            }
+            },
             {
                 name = "160sssd"
                 comment = "160kB 40-track single-sided"

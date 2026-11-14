@@ -19,7 +19,7 @@ href="https://www.old-computers.com/museum/computer.asp?st=1&c=1025">old-compute
 </div>
 
 FluxEngine will read and write these (but only the DSDD MFM variant).
-"""
+""",
     """
 ## References
 
@@ -47,31 +47,31 @@ layout {
             sector_size = 288
             physical {
                 sector = [
-                    1
-                    22
-                    17
-                    12
-                    7
-                    2
-                    23
-                    18
-                    13
-                    8
-                    3
-                    24
-                    19
-                    14
-                    9
-                    4
-                    25
-                    20
-                    15
-                    10
-                    5
-                    0
-                    21
-                    16
-                    11
+                    1,
+                    22,
+                    17,
+                    12,
+                    7,
+                    2,
+                    23,
+                    18,
+                    13,
+                    8,
+                    3,
+                    24,
+                    19,
+                    14,
+                    9,
+                    4,
+                    25,
+                    20,
+                    15,
+                    10,
+                    5,
+                    0,
+                    21,
+                    16,
+                    11,
                     6
                 ]
 

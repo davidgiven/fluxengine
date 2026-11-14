@@ -12,7 +12,7 @@ bizarrely _still_ supported by HP-UX systems.
 
 Floppy-disk wise, they're yet more variations of the standard IBM floppy
 encoding scheme.
-"""
+""",
     """
 ## References
 
@@ -66,21 +66,21 @@ option_group = [
                                 sector_size = 256
                                 physical {
                                     sector = [
-                                        1
-                                        5
-                                        9
-                                        13
-                                        2
-                                        6
-                                        10
-                                        14
-                                        3
-                                        7
-                                        11
-                                        15
-                                        4
-                                        8
-                                        12
+                                        1,
+                                        5,
+                                        9,
+                                        13,
+                                        2,
+                                        6,
+                                        10,
+                                        14,
+                                        3,
+                                        7,
+                                        11,
+                                        15,
+                                        4,
+                                        8,
+                                        12,
                                         16
                                     ]
 
@@ -104,7 +104,7 @@ option_group = [
                         }
                     }
                 }
-            }
+            },
             {
                 name = "608"
                 comment = "608kB 3.5\" 76-track DSDD; HP9122 format"
@@ -118,21 +118,21 @@ option_group = [
                                 sector_size = 256
                                 physical {
                                     sector = [
-                                        1
-                                        5
-                                        9
-                                        13
-                                        2
-                                        6
-                                        10
-                                        14
-                                        3
-                                        7
-                                        11
-                                        15
-                                        4
-                                        8
-                                        12
+                                        1,
+                                        5,
+                                        9,
+                                        13,
+                                        2,
+                                        6,
+                                        10,
+                                        14,
+                                        3,
+                                        7,
+                                        11,
+                                        15,
+                                        4,
+                                        8,
+                                        12,
                                         16
                                     ]
 
@@ -156,7 +156,7 @@ option_group = [
                         }
                     }
                 }
-            }
+            },
             {
                 name = "616"
                 comment = "616kB 3.5\" 77-track DSDD"
@@ -191,10 +191,11 @@ option_group = [
                         }
                     }
                 }
-            }
+            },
             {
                 name = "770"
                 comment = "770kB 3.5\" 77-track DSDD"
+                set_by_default = true
 
                 config {
                     layout {
@@ -205,10 +206,10 @@ option_group = [
                                 sector_size = 1024
                                 physical {
                                     sector = [
-                                        1
-                                        2
-                                        3
-                                        4
+                                        1,
+                                        2,
+                                        3,
+                                        4,
                                         5
                                     ]
 

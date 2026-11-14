@@ -39,7 +39,7 @@ layout {
                 start_sector = 1
                 count = 26
             }
-        }
+        },
         {
             track = 0
             side = 0
@@ -62,7 +62,7 @@ encoder {
                 idam_byte = 21844
                 dam_byte = 21829
                 gap_fill_byte = 37460
-            }
+            },
             {
                 track = 0
                 head = 0

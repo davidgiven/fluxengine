@@ -21,7 +21,7 @@ Due to the nature of the track ordering on side 1, an .nsi image reader and
 writer are provided for double-sided disks.  The .nsi image writer supports
 both single- and double-sided disks; however single-sided .nsi images are
 equivalent to .img images.
-"""
+""",
     """
 ## References
 
@@ -87,7 +87,7 @@ option_group = [
                         ]
                     }
                 }
-            }
+            },
             {
                 name = "175"
                 comment = "175kB 5.25\" 40-track SSDD hard-sectored"
@@ -103,7 +103,7 @@ option_group = [
                         ]
                     }
                 }
-            }
+            },
             {
                 name = "350"
                 comment = "350kB 5.25\" 40-track DSDD hard-sectored"
