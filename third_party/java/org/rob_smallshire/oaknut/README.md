@@ -11,8 +11,8 @@ The source and translated tests retain oaknut's [MIT license](LICENSE).
 
 - `org.rob_smallshire.oaknut.adfs`: floppy image creation, detection,
   directories, old/new allocation maps, paths, validation and repair.
-- `org.rob_smallshire.oaknut.discimage`: write-through sector views and
-  physical/logical surface mapping.
+- `org.rob_smallshire.oaknut.discimage`: random-access storage, lazy write-through
+  sector views, and physical/logical surface mapping.
 - `org.rob_smallshire.oaknut.file`: Acorn attributes, metadata, timestamps,
   text encoding, host metadata import/export, INF files and xattrs.
 - `org.rob_smallshire.oaknut.filesystem`: validation findings and explicit fixes.
@@ -57,8 +57,36 @@ also available for images with ambiguous contents.
 `validate()` returns findings without changing the image. Call `fix()` on
 selected repairable findings to repair stale old-directory checksums,
 remove unreachable entries, truncate partially held files, and reconcile
-the free-space map with a truncated capture. Each mutation restores the
-original image if validation, serialization, allocation or another step fails.
+the free-space map with a truncated capture. Buffer- and file-backed handles
+restore the original image if a mutation fails.
+
+## Lazy storage adapters
+
+Implement `discimage.Storage` to expose a byte-addressed device with its size,
+exact-length reads and writes, optional read-only status, and optional flush.
+`Adfs.fromStorage(storage, false)` detects the floppy format without loading
+its contents into a whole-image buffer. There is also an overload accepting
+an explicit `AdfsFormat`. Creating or slicing a `SectorsView` performs no I/O;
+reads and writes access only the referenced ranges. Mounting reads allocation
+maps and directories needed for format/layout detection, not file contents.
+
+The boolean controls mutation rollback. `false` disables oaknut's whole-image
+snapshots when the storage owner provides transactions, as FluxEngine's
+`BlockDevice` does. After a failed mutation in this mode, discard the backing
+transaction and reopen the handle. `true` retains oaknut rollback, which reads
+the whole image before a mutation. `fromBuffer` and `fromFile` keep rollback
+enabled. Calling `toByteArray()` explicitly still reads the whole image.
+
+Storage is borrowed: closing an ADFS handle calls `Storage.flush()` but never
+closes the underlying device. Flush need not commit its owner's transaction;
+the FluxEngine adapter writes through to pending block changes and leaves
+commit/revert to the filesystem lifecycle. Its per-mount block cache is
+populated lazily and discarded on dismount.
+
+`Storage` methods can throw `IOException`. Sector views preserve their existing
+unchecked buffer-style API by wrapping failures in `UncheckedIOException`;
+`fromStorage` unwraps opening failures back to the original `IOException`.
+`DiscImage.buffer()` remains available only for buffer-backed images.
 
 ## Java API choices and upstream behavior
 

@@ -1,6 +1,9 @@
 package org.rob_smallshire.oaknut.discimage;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThrows;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,6 +16,80 @@ import java.util.List;
 @RunWith(JUnit4.class)
 public class DiscImageTest
 {
+    @Test
+    public void storageViewsDoNotReadUntilAccessed() throws Exception
+    {
+        byte[] backing = new byte[32];
+        int[] reads = {0};
+        Storage storage = new Storage()
+        {
+            @Override
+            public int size()
+            {
+                return backing.length;
+            }
+
+            @Override
+            public void read(int offset, byte[] destination, int start, int length)
+            {
+                reads[0]++;
+                System.arraycopy(backing, offset, destination, start, length);
+            }
+
+            @Override
+            public void write(int offset, byte[] source, int start, int length)
+            {
+                System.arraycopy(source, start, backing, offset, length);
+            }
+        };
+        DiscImage image = new DiscImage(
+                storage,
+                List.of(new SurfaceSpec(2, 2, 4, 0, 16), new SurfaceSpec(2, 2, 4, 8, 16)));
+        SectorsView view = new UnifiedDisc(image).bytes(14, 4).slice(1, 2);
+        assertEquals(0, reads[0]);
+        view.write(0, new byte[]{11, 12});
+        assertEquals(0, reads[0]);
+        assertEquals(11, backing[23]);
+        assertEquals(12, backing[8]);
+        assertArrayEquals(new byte[]{11, 12}, view.toByteArray());
+        assertEquals(2, reads[0]);
+    }
+
+    @Test
+    public void storageViewReportsFailuresWithoutChangingTheCause()
+    {
+        java.io.IOException cause = new java.io.IOException("read failure");
+        Storage storage = new Storage()
+        {
+            @Override
+            public int size()
+            {
+                return 16;
+            }
+
+            @Override
+            public void read(int offset, byte[] destination, int start, int length)
+                    throws java.io.IOException
+            {
+                throw cause;
+            }
+
+            @Override
+            public void write(int offset, byte[] source, int start, int length)
+                    throws java.io.IOException
+            {
+                throw cause;
+            }
+        };
+        SectorsView view = new SectorsView(storage, 0, storage.size());
+        assertSame(
+                cause,
+                assertThrows(java.io.UncheckedIOException.class, () -> view.get(0)).getCause());
+        assertSame(
+                cause,
+                assertThrows(java.io.UncheckedIOException.class, () -> view.put(0, 1)).getCause());
+    }
+
     @Test
     public void fragmentedViewsWriteThroughAcrossBoundaries()
     {

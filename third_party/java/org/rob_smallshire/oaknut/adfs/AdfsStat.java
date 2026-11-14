@@ -1,7 +1,7 @@
 package org.rob_smallshire.oaknut.adfs;
 
-import org.rob_smallshire.oaknut.file.AcornMeta;
 import org.rob_smallshire.oaknut.file.Access;
+import org.rob_smallshire.oaknut.file.AcornMeta;
 
 /* Copyright (c) 2026 Robert Smallshire. MIT license; see ../LICENSE. */
 public record AdfsStat(String name, int length, long loadAddress, long executionAddress,

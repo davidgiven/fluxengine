@@ -1,19 +1,24 @@
 package org.rob_smallshire.oaknut.file;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
-import org.junit.Test;
 import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.rob_smallshire.oaknut.adfs.Adfs;
+import org.rob_smallshire.oaknut.adfs.AdfsFormat;
+import org.rob_smallshire.oaknut.adfs.AdfsPath;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.List;
-import org.rob_smallshire.oaknut.adfs.Adfs;
-import org.rob_smallshire.oaknut.adfs.AdfsFormat;
-import org.rob_smallshire.oaknut.adfs.AdfsPath;
 
 /* Copyright (c) 2026 Robert Smallshire. MIT license; see the oaknut LICENSE.
  * Ported metadata, text-I/O, access and host-bridge scenarios. */

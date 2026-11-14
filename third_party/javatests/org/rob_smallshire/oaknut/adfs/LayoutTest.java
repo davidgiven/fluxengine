@@ -1,14 +1,17 @@
 package org.rob_smallshire.oaknut.adfs;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import java.util.List;
-import java.util.ArrayList;
 import org.rob_smallshire.oaknut.discimage.SectorsView;
 import org.rob_smallshire.oaknut.file.Access;
+import java.util.ArrayList;
+import java.util.List;
 
 /* Copyright (c) 2026 Robert Smallshire. MIT license; see the oaknut LICENSE.
  * Directory serialization, format creation and map mutation cases from upstream's unit tests. */

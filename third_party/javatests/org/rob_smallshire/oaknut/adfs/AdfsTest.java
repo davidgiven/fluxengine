@@ -1,21 +1,24 @@
 package org.rob_smallshire.oaknut.adfs;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
-import org.junit.Test;
 import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import java.nio.ByteBuffer;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.Instant;
-import java.util.Arrays;
-import java.util.List;
+import org.rob_smallshire.oaknut.discimage.SectorsView;
 import org.rob_smallshire.oaknut.file.Access;
 import org.rob_smallshire.oaknut.file.AcornMeta;
-import org.rob_smallshire.oaknut.discimage.SectorsView;
+import java.nio.ByteBuffer;
+import java.nio.file.Path;
+import java.time.Instant;
+import java.util.List;
 
 /* Copyright (c) 2026 Robert Smallshire. MIT license; see
  * ../../../../../../../java/org/rob_smallshire/oaknut/LICENSE. Ported floppy scenarios from
@@ -234,8 +237,7 @@ public class AdfsTest
                 assertEquals(100, adfs.path("$.Directory with a long name").list().size());
                 for (int i = 0; i < 100; i++)
                     assertArrayEquals(
-                            new byte[]{(byte) i},
-                            adfs
+                            new byte[]{(byte) i}, adfs
                                     .path(String.format(
                                             "$.Directory with a long name.File number %03d",
                                             i))

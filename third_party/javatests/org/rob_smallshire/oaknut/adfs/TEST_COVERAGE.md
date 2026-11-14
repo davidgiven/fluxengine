@@ -14,7 +14,10 @@ fixtures, recorded snapshots, or external image downloads are required.
   addresses, checksums, name heaps, staged writes, fragmented allocation across
   holes and zones, and full free-space maps.
 - `DiscImageTest`: noncontiguous write-through views, surface interleaving,
-  logical sector order, read-only buffers and bounds checks.
+  logical sector order, read-only buffers, lazy storage and I/O error propagation.
+- `StorageTest`: opening and reading without accessing file contents or unused
+  space eagerly, mutations without rollback snapshots, optional rollback,
+  opening failures, and write-through persistence for every floppy format.
 - `FileUtilitiesTest`: access conventions, timestamps, Acorn text, INF and
   filename metadata, import/export precedence, and extended attributes.
 

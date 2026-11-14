@@ -1,18 +1,17 @@
 package org.rob_smallshire.oaknut.adfs;
 
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 import com.google.common.collect.ImmutableList;
 import org.rob_smallshire.oaknut.file.Access;
 import org.rob_smallshire.oaknut.file.AcornMeta;
 import org.rob_smallshire.oaknut.file.HostBridge;
 import org.rob_smallshire.oaknut.file.MetaFormat;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Path;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 /* Copyright (c) 2026 Robert Smallshire. MIT license; see ../LICENSE.
  * Lightweight absolute Acorn path. Navigation remains available after its disc is closed. */

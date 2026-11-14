@@ -1,8 +1,8 @@
 package org.rob_smallshire.oaknut.adfs;
 
 import com.google.common.collect.ImmutableList;
-import java.util.ArrayList;
 import org.rob_smallshire.oaknut.discimage.SurfaceSpec;
+import java.util.ArrayList;
 
 /* Copyright (c) 2026 Robert Smallshire. MIT license; see ../LICENSE.
  * Supported floppy formats. L_SEQUENTIAL stores all of each side consecutively. */

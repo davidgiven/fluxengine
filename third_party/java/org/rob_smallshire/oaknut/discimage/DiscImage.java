@@ -1,20 +1,25 @@
 package org.rob_smallshire.oaknut.discimage;
 
-import java.nio.ByteBuffer;
-import java.util.List;
 import com.google.common.collect.ImmutableList;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.List;
 
 /* Copyright (c) 2026 Robert Smallshire. MIT license; see ../LICENSE.
  * Physical image storage; short images remain short so missing sectors cannot appear valid. */
 public final class DiscImage
 {
-    private final ByteBuffer buffer;
+    private final Storage storage;
     private final ImmutableList<SurfaceSpec> surfaces;
 
     public DiscImage(ByteBuffer buffer, List<SurfaceSpec> surfaces)
     {
-        this.buffer = buffer.slice();
+        this(new BufferStorage(buffer), surfaces);
+    }
+
+    public DiscImage(Storage storage, List<SurfaceSpec> surfaces)
+    {
+        this.storage = storage;
         this.surfaces = ImmutableList.copyOf(surfaces);
         if (surfaces.isEmpty())
             throw new IllegalArgumentException("No surfaces");
@@ -27,7 +32,9 @@ public final class DiscImage
 
     public ByteBuffer buffer()
     {
-        return buffer.duplicate();
+        if (storage instanceof BufferStorage buffer)
+            return buffer.buffer();
+        throw new UnsupportedOperationException("Storage is not buffer-backed");
     }
 
     public Surface surface(int side)
@@ -39,14 +46,14 @@ public final class DiscImage
     {
         SurfaceSpec spec = surfaces.get(side);
         java.util.Objects.checkFromIndexSize(first, count, spec.sectors());
-        ArrayList<ByteBuffer> parts = new ArrayList<>();
+        ArrayList<SectorsView> parts = new ArrayList<>();
         for (int sector = first; sector < first + count; sector++)
         {
             int offset = spec.offset(sector);
-            if (offset + spec.bytesPerSector() > buffer.capacity())
+            if (offset + spec.bytesPerSector() > storage.size())
                 throw new IndexOutOfBoundsException("Sector lies beyond truncated image");
-            parts.add(buffer.slice(offset, spec.bytesPerSector()));
+            parts.add(new SectorsView(storage, offset, spec.bytesPerSector()));
         }
-        return new SectorsView(parts);
+        return SectorsView.join(parts);
     }
 }

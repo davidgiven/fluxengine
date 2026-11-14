@@ -1,5 +1,8 @@
 package org.rob_smallshire.oaknut.adfs;
 
+import com.google.common.collect.ImmutableList;
+import org.rob_smallshire.oaknut.discimage.SectorsView;
+import org.rob_smallshire.oaknut.discimage.UnifiedDisc;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -7,9 +10,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import com.google.common.collect.ImmutableList;
-import org.rob_smallshire.oaknut.discimage.SectorsView;
-import org.rob_smallshire.oaknut.discimage.UnifiedDisc;
 
 /* Copyright (c) 2026 Robert Smallshire. MIT license; see ../LICENSE.
  * FileCore allocation cells and FreeLink chains. Fragment order starts at the ID's home zone. */
@@ -20,6 +20,7 @@ public final class NewMap
     private final Map<Integer, List<Fragment>> fragments = new LinkedHashMap<>();
     private DiscRecord record;
     private int freeBytes;
+
     public NewMap(SectorsView map, DiscRecord record, UnifiedDisc disc) throws AdfsMapException
     {
         this.map = map;

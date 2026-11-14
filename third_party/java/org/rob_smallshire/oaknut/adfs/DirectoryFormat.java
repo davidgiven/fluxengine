@@ -1,12 +1,11 @@
 package org.rob_smallshire.oaknut.adfs;
 
+import org.rob_smallshire.oaknut.discimage.SectorsView;
+import org.rob_smallshire.oaknut.file.Access;
+import org.rob_smallshire.oaknut.file.AcornEncoding;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import java.nio.charset.StandardCharsets;
-import org.rob_smallshire.oaknut.discimage.SectorsView;
-import org.rob_smallshire.oaknut.file.AcornEncoding;
-import org.rob_smallshire.oaknut.file.Access;
 
 /* Copyright (c) 2026 Robert Smallshire. MIT license; see ../LICENSE.
  * Old, New and Big directory codecs. Serialization is staged before touching an image. */

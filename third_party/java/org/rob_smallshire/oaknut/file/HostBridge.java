@@ -2,13 +2,13 @@ package org.rob_smallshire.oaknut.file;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.file.Path;
-import java.nio.file.Files;
-import java.nio.file.attribute.UserDefinedFileAttributeView;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.UserDefinedFileAttributeView;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.LinkedHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

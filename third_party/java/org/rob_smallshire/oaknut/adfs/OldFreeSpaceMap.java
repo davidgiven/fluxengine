@@ -1,10 +1,10 @@
 package org.rob_smallshire.oaknut.adfs;
 
+import com.google.common.collect.ImmutableList;
+import org.rob_smallshire.oaknut.discimage.SectorsView;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import com.google.common.collect.ImmutableList;
-import org.rob_smallshire.oaknut.discimage.SectorsView;
 
 /* Copyright (c) 2026 Robert Smallshire. MIT license; see ../LICENSE.
  * First-fit allocation in the two 256-byte old-map sectors. */

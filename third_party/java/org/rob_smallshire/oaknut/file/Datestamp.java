@@ -1,7 +1,7 @@
 package org.rob_smallshire.oaknut.file;
 
-import java.time.Instant;
 import java.time.Duration;
+import java.time.Instant;
 
 /* Copyright (c) 2026 Robert Smallshire. MIT license; see ../LICENSE.
  * The timezone-free Acorn epoch is represented as UTC in the Java API. */

@@ -1,31 +1,35 @@
 package org.rob_smallshire.oaknut.adfs;
 
+import com.google.common.collect.ImmutableList;
+import org.rob_smallshire.oaknut.discimage.BufferStorage;
+import org.rob_smallshire.oaknut.discimage.DiscImage;
+import org.rob_smallshire.oaknut.discimage.SectorsView;
+import org.rob_smallshire.oaknut.discimage.Storage;
+import org.rob_smallshire.oaknut.discimage.UnifiedDisc;
+import org.rob_smallshire.oaknut.file.Access;
+import org.rob_smallshire.oaknut.file.AcornEncoding;
+import org.rob_smallshire.oaknut.file.AcornMeta;
+import org.rob_smallshire.oaknut.filesystem.ValidationFinding;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.file.Path;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import com.google.common.collect.ImmutableList;
-import org.rob_smallshire.oaknut.discimage.DiscImage;
-import org.rob_smallshire.oaknut.discimage.SectorsView;
-import org.rob_smallshire.oaknut.discimage.UnifiedDisc;
-import org.rob_smallshire.oaknut.file.Access;
-import org.rob_smallshire.oaknut.file.AcornMeta;
-import org.rob_smallshire.oaknut.file.AcornEncoding;
-import org.rob_smallshire.oaknut.filesystem.ValidationFinding;
 
 /* Copyright (c) 2026 Robert Smallshire. MIT license; see ../LICENSE.
  * Standalone floppy ADFS handle. Paths resolve against live directory data on every operation. */
 public final class Adfs implements AutoCloseable
 {
-    private final ByteBuffer buffer;
+    private final Storage storage;
+    private final boolean rollbackEnabled;
     private final AdfsFormat format;
     private final UnifiedDisc disc;
     private final FileChannel channel;
@@ -42,11 +46,22 @@ public final class Adfs implements AutoCloseable
             FileChannel channel,
             MappedByteBuffer mapping) throws AdfsException
     {
-        this.buffer = buffer.slice();
+        this(new BufferStorage(buffer), format, channel, mapping, true);
+    }
+
+    private Adfs(
+            Storage storage,
+            AdfsFormat format,
+            FileChannel channel,
+            MappedByteBuffer mapping,
+            boolean rollbackEnabled) throws AdfsException
+    {
+        this.storage = storage;
+        this.rollbackEnabled = rollbackEnabled;
         this.format = format;
         this.channel = channel;
         this.mapping = mapping;
-        disc = new UnifiedDisc(new DiscImage(this.buffer, format.surfaces()));
+        disc = new UnifiedDisc(new DiscImage(storage, format.surfaces()));
         loadMaps();
     }
 
@@ -150,13 +165,50 @@ public final class Adfs implements AutoCloseable
         return result;
     }
 
+    /* External storage is borrowed. Disable rollback when its owner supplies transactions.
+     * Views report subsequent storage failures as UncheckedIOException; opening unwraps them. */
+    public static Adfs fromStorage(Storage storage, boolean rollbackEnabled) throws IOException
+    {
+        try
+        {
+            return detect(storage, false, null, null, rollbackEnabled);
+        } catch (UncheckedIOException e)
+        {
+            throw e.getCause();
+        }
+    }
+
+    public static Adfs fromStorage(Storage storage, AdfsFormat format, boolean rollbackEnabled)
+            throws IOException
+    {
+        try
+        {
+            Adfs result = new Adfs(storage, format, null, null, rollbackEnabled);
+            result.readDirectory(result.rootAddress);
+            return result;
+        } catch (UncheckedIOException e)
+        {
+            throw e.getCause();
+        }
+    }
+
     private static Adfs detect(
             ByteBuffer buffer,
             boolean sequential,
             FileChannel channel,
             MappedByteBuffer mapping) throws AdfsException
     {
-        int size = buffer.remaining();
+        return detect(new BufferStorage(buffer), sequential, channel, mapping, true);
+    }
+
+    private static Adfs detect(
+            Storage storage,
+            boolean sequential,
+            FileChannel channel,
+            MappedByteBuffer mapping,
+            boolean rollbackEnabled) throws AdfsException
+    {
+        int size = storage.size();
         AdfsException last = null;
         List<AdfsFormat> candidates = new ArrayList<>();
         for (AdfsFormat f : AdfsFormat.values())
@@ -165,7 +217,7 @@ public final class Adfs implements AutoCloseable
         /* A truncated old-map image is described by its map, not the file length. */
         if (size >= 512)
         {
-            int declared = (int) new SectorsView(buffer).readLe(252, 3) * 256;
+            int declared = (int) new SectorsView(storage, 0, size).readLe(252, 3) * 256;
             if (declared > size)
             {
                 candidates.clear();
@@ -185,7 +237,7 @@ public final class Adfs implements AutoCloseable
         {
             try
             {
-                Adfs adfs = new Adfs(buffer, f, channel, mapping);
+                Adfs adfs = new Adfs(storage, f, channel, mapping, rollbackEnabled);
                 adfs.readDirectory(adfs.rootAddress);
                 int count = adfs.directoryScore();
                 if (count >= 1000000)
@@ -353,7 +405,7 @@ public final class Adfs implements AutoCloseable
 
     public boolean readOnly()
     {
-        return buffer.isReadOnly();
+        return storage.isReadOnly();
     }
 
     public boolean usesTypedMetadata()
@@ -364,7 +416,7 @@ public final class Adfs implements AutoCloseable
     public byte[] toByteArray() throws AdfsException
     {
         requireOpen();
-        return new SectorsView(buffer).toByteArray();
+        return new SectorsView(storage, 0, storage.size()).toByteArray();
     }
 
     public int totalSize() throws AdfsException
@@ -438,7 +490,7 @@ public final class Adfs implements AutoCloseable
             mutation.run();
             return;
         }
-        byte[] snapshot = toByteArray();
+        byte[] snapshot = rollbackEnabled ? toByteArray() : null;
         int previousRoot = rootAddress;
         inTransaction = true;
         try
@@ -446,9 +498,12 @@ public final class Adfs implements AutoCloseable
             mutation.run();
         } catch (AdfsException | RuntimeException e)
         {
-            new SectorsView(buffer).write(0, snapshot);
-            rootAddress = previousRoot;
-            loadMaps();
+            if (rollbackEnabled)
+            {
+                new SectorsView(storage, 0, storage.size()).write(0, snapshot);
+                rootAddress = previousRoot;
+                loadMaps();
+            }
             throw e;
         } finally
         {
@@ -459,6 +514,7 @@ public final class Adfs implements AutoCloseable
     public void flush() throws IOException
     {
         requireOpen();
+        storage.flush();
         if (mapping != null && !readOnly())
             mapping.force();
     }
@@ -590,7 +646,7 @@ public final class Adfs implements AutoCloseable
         return oldMap.allocate(
                 (size + 255) / 256,
                 directory && format == AdfsFormat.D ? 4 : 1,
-                buffer.capacity() / 256);
+                storage.size() / 256);
     }
 
     private void release(Directory parent, DirectoryEntry entry) throws AdfsException
@@ -945,9 +1001,9 @@ public final class Adfs implements AutoCloseable
         {
             String child = path + "." + e.name();
             if (findings && newMap == null && e.length() > 0 &&
-                    (long) e.discAddress() * 256 + e.length() > buffer.capacity())
+                    (long) e.discAddress() * 256 + e.length() > storage.size())
             {
-                int held = Math.max(0, buffer.capacity() - e.discAddress() * 256);
+                int held = Math.max(0, storage.size() - e.discAddress() * 256);
                 boolean remove = e.directory() || held == 0;
                 String description = remove ?
                         "remove " + child :
@@ -995,15 +1051,15 @@ public final class Adfs implements AutoCloseable
         for (String message : newMap == null ? oldMap.validate() : newMap.validate())
             result.add(new ValidationFinding("$", message, null));
         walk(rootAddress, "$", new HashSet<>(), result, true);
-        if (newMap == null && oldMap.totalSize() > buffer.capacity() &&
+        if (newMap == null && oldMap.totalSize() > storage.size() &&
                 result.stream().anyMatch(f -> f.message().contains("past the end of the image")))
             result.add(new ValidationFinding(
                     "Disc size",
                     "The free-space map gives " + oldMap.totalSectors() +
-                            " sectors, but the image holds " + buffer.capacity() / 256,
+                            " sectors, but the image holds " + storage.size() / 256,
                     new org.rob_smallshire.oaknut.filesystem.Fix(
-                            "set the disc size to " + buffer.capacity() / 256 + " sectors",
-                            () -> transaction(() -> oldMap.shrinkTo(buffer.capacity() / 256)))));
+                            "set the disc size to " + storage.size() / 256 + " sectors",
+                            () -> transaction(() -> oldMap.shrinkTo(storage.size() / 256)))));
         return ImmutableList.copyOf(result);
     }
 
@@ -1031,12 +1087,12 @@ public final class Adfs implements AutoCloseable
             throw new AdfsException("Compaction supports old directories only, as upstream");
         requireWritable();
         Adfs replacement = create(format, title(), bootOption(), oldMap.discId());
-        replacement.oldMap.shrinkTo(Math.min(oldMap.totalSectors(), buffer.capacity() / 256));
+        replacement.oldMap.shrinkTo(Math.min(oldMap.totalSectors(), storage.size() / 256));
         int count = copyTree(root(), replacement.root());
         transaction(() -> {
-            new SectorsView(buffer).write(
+            new SectorsView(storage, 0, storage.size()).write(
                     0,
-                    java.util.Arrays.copyOf(replacement.toByteArray(), buffer.capacity()));
+                    java.util.Arrays.copyOf(replacement.toByteArray(), storage.size()));
             loadMaps();
         });
         return count;
