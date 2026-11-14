@@ -1,0 +1,10 @@
+load("@rules_java//java:defs.bzl", "java_test")
+
+java_test(
+    name = "DiscImageTest",
+    srcs = glob(["*.java"]),
+    deps = [
+        "//third_party/java/org/rob_smallshire/oaknut/discimage",
+        "@maven//:junit_junit",
+    ],
+)

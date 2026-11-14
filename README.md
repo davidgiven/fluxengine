@@ -254,5 +254,12 @@ written by Dave Koelle, taken from
 https://web.archive.org/web/20210207124255/davekoelle.com/alphanum.html. It is
 MIT licensed. Please see the source for the full text.
 
+As an exception, `third_party/java/org/rob_smallshire/oaknut` contains a Java
+port of oaknut's ADFS floppy-disc library and supporting utilities, written by
+Robert Smallshire, taken from https://github.com/rob-smallshire/oaknut. It is
+MIT licensed, copyright © 2026 Robert Smallshire. Please see
+[the oaknut license](third_party/java/org/rob_smallshire/oaknut/LICENSE) for the
+full text.
+
 __Important:__ The aggregate license for FluxEngine source or binary packages is
 GPL 2.0.
