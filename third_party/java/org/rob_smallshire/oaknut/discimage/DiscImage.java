@@ -21,11 +21,19 @@ public final class DiscImage
     }
 
     public ImmutableList<SurfaceSpec> surfaces()
-    { return surfaces; }
+    {
+        return surfaces;
+    }
+
     public ByteBuffer buffer()
-    { return buffer.duplicate(); }
+    {
+        return buffer.duplicate();
+    }
+
     public Surface surface(int side)
-    { return new Surface(this, side); }
+    {
+        return new Surface(this, side);
+    }
 
     public SectorsView sectors(int side, int first, int count)
     {

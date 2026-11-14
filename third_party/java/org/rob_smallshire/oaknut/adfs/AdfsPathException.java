@@ -4,5 +4,7 @@ package org.rob_smallshire.oaknut.adfs;
 public class AdfsPathException extends AdfsException
 {
     public AdfsPathException(String message)
-    { super(message); }
+    {
+        super(message);
+    }
 }

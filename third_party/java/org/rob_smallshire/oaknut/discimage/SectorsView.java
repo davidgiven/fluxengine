@@ -18,15 +18,24 @@ public final class SectorsView
     }
 
     public SectorsView(ByteBuffer buffer)
-    { this(List.of(buffer)); }
+    {
+        this(List.of(buffer));
+    }
 
     public static SectorsView wrap(byte[] bytes)
-    { return new SectorsView(ByteBuffer.wrap(bytes)); }
+    {
+        return new SectorsView(ByteBuffer.wrap(bytes));
+    }
 
     public int size()
-    { return length; }
+    {
+        return length;
+    }
+
     public boolean isReadOnly()
-    { return buffers.stream().anyMatch(ByteBuffer::isReadOnly); }
+    {
+        return buffers.stream().anyMatch(ByteBuffer::isReadOnly);
+    }
 
     public int get(int index)
     {
@@ -49,7 +58,7 @@ public final class SectorsView
         {
             if (index < buffer.capacity())
             {
-                buffer.put(index, (byte)value);
+                buffer.put(index, (byte) value);
                 return;
             }
             index -= buffer.capacity();
@@ -88,7 +97,9 @@ public final class SectorsView
     }
 
     public byte[] toByteArray()
-    { return read(0, length); }
+    {
+        return read(0, length);
+    }
 
     public void write(int offset, byte[] bytes)
     {
@@ -109,7 +120,7 @@ public final class SectorsView
         Objects.checkFromIndexSize(offset, size, length);
         long value = 0;
         for (int i = 0; i < size; i++)
-            value |= (long)get(offset + i) << (8 * i);
+            value |= (long) get(offset + i) << (8 * i);
         return value;
     }
 
@@ -117,6 +128,6 @@ public final class SectorsView
     {
         Objects.checkFromIndexSize(offset, size, length);
         for (int i = 0; i < size; i++)
-            put(offset + i, (int)(value >>> (8 * i)) & 255);
+            put(offset + i, (int) (value >>> (8 * i)) & 255);
     }
 }

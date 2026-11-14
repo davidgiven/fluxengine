@@ -4,5 +4,7 @@ package org.rob_smallshire.oaknut.adfs;
 public class AdfsDirectoryFullException extends AdfsDirectoryException
 {
     public AdfsDirectoryFullException(String message)
-    { super(message); }
+    {
+        super(message);
+    }
 }

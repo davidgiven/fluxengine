@@ -6,7 +6,10 @@ import java.nio.charset.StandardCharsets;
  * Strict field encodings prevent a failed serialization from replacing characters. */
 public final class AcornEncoding
 {
-    private AcornEncoding() {}
+    private AcornEncoding()
+    {
+    }
+
     public static byte[] encode(String value, boolean ascii)
     {
         int limit = ascii ? 127 : 255;
@@ -31,7 +34,7 @@ public final class AcornEncoding
             int value = b & (old ? 127 : 255);
             if (value == 0 || value == 13)
                 break;
-            result.append((char)value);
+            result.append((char) value);
         }
         return result.toString();
     }

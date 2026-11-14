@@ -19,11 +19,19 @@ public final class UnifiedDisc
     }
 
     public int sectorSize()
-    { return sectorSize; }
+    {
+        return sectorSize;
+    }
+
     public int sectors()
-    { return image.surfaces().stream().mapToInt(SurfaceSpec::sectors).sum(); }
+    {
+        return image.surfaces().stream().mapToInt(SurfaceSpec::sectors).sum();
+    }
+
     public int size()
-    { return sectors() * sectorSize; }
+    {
+        return sectors() * sectorSize;
+    }
 
     public SectorsView sectorRange(int start, int count)
     {

@@ -4,5 +4,7 @@ package org.rob_smallshire.oaknut.adfs;
 public class AdfsMapException extends AdfsException
 {
     public AdfsMapException(String message)
-    { super(message); }
+    {
+        super(message);
+    }
 }

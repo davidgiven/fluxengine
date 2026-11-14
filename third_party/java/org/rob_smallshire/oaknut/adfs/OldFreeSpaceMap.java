@@ -10,13 +10,13 @@ import org.rob_smallshire.oaknut.discimage.SectorsView;
  * First-fit allocation in the two 256-byte old-map sectors. */
 public final class OldFreeSpaceMap
 {
-    public record Extent(int start, int length)
-    {
-    }
     private final SectorsView data;
 
     public OldFreeSpaceMap(SectorsView data) throws AdfsMapException
-    { this(data, true); }
+    {
+        this(data, true);
+    }
+
     public OldFreeSpaceMap(SectorsView data, boolean verify) throws AdfsMapException
     {
         if (data.size() < 512)
@@ -56,26 +56,41 @@ public final class OldFreeSpaceMap
     }
 
     public int totalSectors()
-    { return (int)data.readLe(252, 3); }
+    {
+        return (int) data.readLe(252, 3);
+    }
+
     public int totalSize()
-    { return totalSectors() * 256; }
+    {
+        return totalSectors() * 256;
+    }
+
     public int discId()
-    { return (int)data.readLe(507, 2); }
+    {
+        return (int) data.readLe(507, 2);
+    }
+
     public int bootOption()
-    { return data.get(509); }
+    {
+        return data.get(509);
+    }
+
     public void setBootOption(int option)
     {
         data.put(509, option & 255);
         refresh();
     }
+
     public int freeSpace()
-    { return entries().stream().mapToInt(Extent::length).sum() * 256; }
+    {
+        return entries().stream().mapToInt(Extent::length).sum() * 256;
+    }
 
     public ImmutableList<Extent> entries()
     {
         ImmutableList.Builder<Extent> result = ImmutableList.builder();
         for (int i = 0; i < Math.min(82, data.get(510) / 3); i++)
-            result.add(new Extent((int)data.readLe(i * 3, 3), (int)data.readLe(256 + i * 3, 3)));
+            result.add(new Extent((int) data.readLe(i * 3, 3), (int) data.readLe(256 + i * 3, 3)));
         return result.build();
     }
 
@@ -95,7 +110,10 @@ public final class OldFreeSpaceMap
     }
 
     public int allocate(int sectors) throws AdfsMapException
-    { return allocate(sectors, 1, totalSectors()); }
+    {
+        return allocate(sectors, 1, totalSectors());
+    }
+
     public int allocate(int sectors, int alignment, int limit) throws AdfsMapException
     {
         if (sectors <= 0 || alignment <= 0)
@@ -134,8 +152,9 @@ public final class OldFreeSpaceMap
                 Extent prev = merged.getLast();
                 if (prev.start() + prev.length() == e.start())
                 {
-                    merged.set(merged.size() - 1,
-                               new Extent(prev.start(), prev.length() + e.length()));
+                    merged.set(
+                            merged.size() - 1,
+                            new Extent(prev.start(), prev.length() + e.length()));
                     continue;
                 }
             }
@@ -148,8 +167,7 @@ public final class OldFreeSpaceMap
     {
         if (sectors < 1 || sectors > totalSectors())
             throw new IllegalArgumentException("Invalid disc size");
-        List<Extent> trimmed =
-            entries()
+        List<Extent> trimmed = entries()
                 .stream()
                 .filter(e -> e.start() < sectors)
                 .map(e -> new Extent(e.start(), Math.min(e.length(), sectors - e.start())))
@@ -160,7 +178,10 @@ public final class OldFreeSpaceMap
     }
 
     public long[] afsInfoPointers()
-    { return new long[] {data.readLe(246, 4), data.readLe(502, 4)}; }
+    {
+        return new long[]{data.readLe(246, 4), data.readLe(502, 4)};
+    }
+
     public void installAfsPointers(long first, long second)
     {
         if (first < 0 || first > 0xffffffffL || second < 0 || second > 0xffffffffL)
@@ -174,7 +195,7 @@ public final class OldFreeSpaceMap
     {
         StringBuilder name = new StringBuilder();
         for (int i = 0; i < 5; i++)
-            name.append((char)data.get(502 + i)).append((char)data.get(247 + i));
+            name.append((char) data.get(502 + i)).append((char) data.get(247 + i));
         return name.toString().replaceFirst("[\\x00 ]+$", "");
     }
 
@@ -188,5 +209,9 @@ public final class OldFreeSpaceMap
             data.put(247 + i, padded.charAt(i * 2 + 1));
         }
         refresh();
+    }
+
+    public record Extent(int start, int length)
+    {
     }
 }

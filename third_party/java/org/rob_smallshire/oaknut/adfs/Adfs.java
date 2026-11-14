@@ -36,10 +36,11 @@ public final class Adfs implements AutoCloseable
     private boolean closed;
     private boolean inTransaction;
 
-    private Adfs(ByteBuffer buffer,
-                 AdfsFormat format,
-                 FileChannel channel,
-                 MappedByteBuffer mapping) throws AdfsException
+    private Adfs(
+            ByteBuffer buffer,
+            AdfsFormat format,
+            FileChannel channel,
+            MappedByteBuffer mapping) throws AdfsException
     {
         this.buffer = buffer.slice();
         this.format = format;
@@ -49,40 +50,18 @@ public final class Adfs implements AutoCloseable
         loadMaps();
     }
 
-    private void loadMaps() throws AdfsException
+    public static Adfs create(AdfsFormat format) throws AdfsException
     {
-        try
-        {
-            if (format.newMap())
-            {
-                DiscRecord dr = DiscRecord.parse(disc.bytes(format.zones == 1 ? 4 : 0xdc0, 60), 0);
-                if (!dr.looksValid() || dr.density() == 0 || dr.discSize() != format.size())
-                    throw new AdfsFormatException("Unsupported floppy disc record");
-                int boot = dr.bootmap();
-                dr = DiscRecord.parse(disc.bytes(boot + 4, 60), 0);
-                newMap = new NewMap(disc.bytes(boot, dr.zones() * dr.sectorSize() * 2), dr, disc);
-                if (!newMap.validate().isEmpty())
-                    throw new AdfsMapException("Invalid zone checksum");
-                rootAddress = dr.root();
-            }
-            else
-            {
-                oldMap = new OldFreeSpaceMap(disc.bytes(0, 512));
-                rootAddress = format == AdfsFormat.D ? 4 : 2;
-            }
-        }
-        catch (IndexOutOfBoundsException | ArithmeticException e)
-        {
-            throw new AdfsFormatException("Truncated or malformed floppy image");
-        }
+        return create(format, "", 0, 0);
     }
 
-    public static Adfs create(AdfsFormat format) throws AdfsException
-    { return create(format, "", 0, 0); }
     public static Adfs create(AdfsFormat format, String title) throws AdfsException
-    { return create(format, title, 0, 0); }
+    {
+        return create(format, title, 0, 0);
+    }
+
     public static Adfs create(AdfsFormat format, String title, int boot, int id)
-        throws AdfsException
+            throws AdfsException
     {
         if (boot < 0 || boot > 3)
             throw new IllegalArgumentException("Invalid boot option");
@@ -96,20 +75,24 @@ public final class Adfs implements AutoCloseable
         if (format.newMap())
         {
             DiscRecord record = DiscRecord.forFormat(
-                format, title.length() > 10 ? title.substring(0, 10) : title, id, boot);
+                    format,
+                    title.length() > 10 ? title.substring(0, 10) : title,
+                    id,
+                    boot);
             root = NewMap.format(disc.bytes(0, format.size()), record);
-            Directory dir = new Directory("$",
-                                          format.big() ? "" : title,
-                                          record.root(),
-                                          record.root(),
-                                          List.of(),
-                                          0,
-                                          format.big() ? "SBPr" : "Nick",
-                                          format.big() ? 2048 : 0);
-            disc.bytes(root, format.directoryFormat.size())
-                .write(0, format.directoryFormat.serialize(dir));
-        }
-        else
+            Directory dir = new Directory(
+                    "$",
+                    format.big() ? "" : title,
+                    record.root(),
+                    record.root(),
+                    List.of(),
+                    0,
+                    format.big() ? "SBPr" : "Nick",
+                    format.big() ? 2048 : 0);
+            disc
+                    .bytes(root, format.directoryFormat.size())
+                    .write(0, format.directoryFormat.serialize(dir));
+        } else
         {
             SectorsView map = disc.bytes(0, 512);
             root = format == AdfsFormat.D ? 4 : 2;
@@ -123,13 +106,20 @@ public final class Adfs implements AutoCloseable
             map.put(255, OldFreeSpaceMap.checksum(map, 0));
             map.put(511, OldFreeSpaceMap.checksum(map, 256));
             Directory dir = new Directory(
-                "$", title, root, root, List.of(), 0, format == AdfsFormat.D ? "Nick" : "Hugo", 0);
+                    "$",
+                    title,
+                    root,
+                    root,
+                    List.of(),
+                    0,
+                    format == AdfsFormat.D ? "Nick" : "Hugo",
+                    0);
             byte[] rootBytes = format.directoryFormat.serialize(dir);
             if (format.directoryFormat == DirectoryFormat.OLD)
             {
-                java.util.Arrays.fill(rootBytes, 0x4cc, 0x4d6, (byte)0);
+                java.util.Arrays.fill(rootBytes, 0x4cc, 0x4d6, (byte) 0);
                 rootBytes[0x4cc] = '$';
-                java.util.Arrays.fill(rootBytes, 0x4d9, 0x4ec, (byte)0);
+                java.util.Arrays.fill(rootBytes, 0x4d9, 0x4ec, (byte) 0);
                 byte[] titleBytes = AcornEncoding.encode(title, true);
                 System.arraycopy(titleBytes, 0, rootBytes, 0x4d9, titleBytes.length);
             }
@@ -139,11 +129,20 @@ public final class Adfs implements AutoCloseable
     }
 
     public static Adfs fromBuffer(byte[] buffer) throws AdfsException
-    { return fromBuffer(ByteBuffer.wrap(buffer)); }
+    {
+        return fromBuffer(ByteBuffer.wrap(buffer));
+    }
+
     public static Adfs fromBuffer(ByteBuffer buffer) throws AdfsException
-    { return detect(buffer, false, null, null); }
+    {
+        return detect(buffer, false, null, null);
+    }
+
     public static Adfs fromBuffer(ByteBuffer buffer, boolean preferSequential) throws AdfsException
-    { return detect(buffer, preferSequential, null, null); }
+    {
+        return detect(buffer, preferSequential, null, null);
+    }
+
     public static Adfs fromBuffer(ByteBuffer buffer, AdfsFormat format) throws AdfsException
     {
         Adfs result = new Adfs(buffer, format, null, null);
@@ -151,9 +150,11 @@ public final class Adfs implements AutoCloseable
         return result;
     }
 
-    private static Adfs
-    detect(ByteBuffer buffer, boolean sequential, FileChannel channel, MappedByteBuffer mapping)
-        throws AdfsException
+    private static Adfs detect(
+            ByteBuffer buffer,
+            boolean sequential,
+            FileChannel channel,
+            MappedByteBuffer mapping) throws AdfsException
     {
         int size = buffer.remaining();
         AdfsException last = null;
@@ -164,7 +165,7 @@ public final class Adfs implements AutoCloseable
         /* A truncated old-map image is described by its map, not the file length. */
         if (size >= 512)
         {
-            int declared = (int)new SectorsView(buffer).readLe(252, 3) * 256;
+            int declared = (int) new SectorsView(buffer).readLe(252, 3) * 256;
             if (declared > size)
             {
                 candidates.clear();
@@ -194,46 +195,51 @@ public final class Adfs implements AutoCloseable
                     best = adfs;
                     bestCount = count;
                 }
-            }
-            catch (AdfsException | IllegalArgumentException e)
+            } catch (AdfsException | IllegalArgumentException e)
             {
                 last = e instanceof AdfsException a ? a : new AdfsFormatException(e.getMessage());
             }
         }
         if (best != null)
             return best;
-        throw new AdfsFormatException("Unrecognised ADFS floppy image" +
-                                      (last == null ? "" : ": " + last.getMessage()));
+        throw new AdfsFormatException(
+                "Unrecognised ADFS floppy image" + (last == null ? "" : ": " + last.getMessage()));
     }
 
     public static Adfs fromFile(Path path) throws IOException
-    { return fromFile(path, false); }
-    public static Adfs fromFile(Path path, boolean readOnly) throws IOException
-    { return fromFile(path, readOnly, null); }
-    public static Adfs fromFile(Path path, boolean readOnly, AdfsFormat explicitFormat)
-        throws IOException
     {
-        FileChannel channel =
-            readOnly ? FileChannel.open(path, StandardOpenOption.READ)
-                     : FileChannel.open(path, StandardOpenOption.READ, StandardOpenOption.WRITE);
+        return fromFile(path, false);
+    }
+
+    public static Adfs fromFile(Path path, boolean readOnly) throws IOException
+    {
+        return fromFile(path, readOnly, null);
+    }
+
+    public static Adfs fromFile(Path path, boolean readOnly, AdfsFormat explicitFormat)
+            throws IOException
+    {
+        FileChannel channel = readOnly ?
+                FileChannel.open(path, StandardOpenOption.READ) :
+                FileChannel.open(path, StandardOpenOption.READ, StandardOpenOption.WRITE);
         try
         {
-            MappedByteBuffer mapping = channel.map(readOnly ? FileChannel.MapMode.READ_ONLY
-                                                            : FileChannel.MapMode.READ_WRITE,
-                                                   0,
-                                                   channel.size());
+            MappedByteBuffer mapping = channel.map(
+                    readOnly ? FileChannel.MapMode.READ_ONLY : FileChannel.MapMode.READ_WRITE,
+                    0,
+                    channel.size());
             if (explicitFormat != null)
             {
                 Adfs result = new Adfs(mapping, explicitFormat, channel, mapping);
                 result.readDirectory(result.rootAddress);
                 return result;
             }
-            return detect(mapping,
-                          path.toString().toLowerCase(java.util.Locale.ROOT).endsWith(".adf"),
-                          channel,
-                          mapping);
-        }
-        catch (IOException | RuntimeException e)
+            return detect(
+                    mapping,
+                    path.toString().toLowerCase(java.util.Locale.ROOT).endsWith(".adf"),
+                    channel,
+                    mapping);
+        } catch (IOException | RuntimeException e)
         {
             channel.close();
             throw e;
@@ -241,9 +247,12 @@ public final class Adfs implements AutoCloseable
     }
 
     public static Adfs createFile(Path path, AdfsFormat format, String title) throws IOException
-    { return createFile(path, format, title, 0); }
+    {
+        return createFile(path, format, title, 0);
+    }
+
     public static Adfs createFile(Path path, AdfsFormat format, String title, int bootOption)
-        throws IOException
+            throws IOException
     {
         try (Adfs blank = create(format, title, bootOption, 0))
         {
@@ -251,6 +260,7 @@ public final class Adfs implements AutoCloseable
         }
         return fromFile(path, false, format);
     }
+
     public static Adfs createFile(Path path) throws IOException
     {
         String name = path.getFileName().toString();
@@ -258,47 +268,134 @@ public final class Adfs implements AutoCloseable
         return createFile(path, AdfsFormat.forExtension(dot < 0 ? "" : name.substring(dot)), "");
     }
 
+    private static List<DirectoryEntry> sorted(List<DirectoryEntry> entries)
+    {
+        return entries
+                .stream()
+                .sorted(Comparator.comparing(e -> DirectoryFormat.nameKey(e.name())))
+                .toList();
+    }
+
+    private static List<String> keys(List<String> parts)
+    {
+        return parts.stream().map(DirectoryFormat::nameKey).toList();
+    }
+
+    private static int copyTree(AdfsPath source, AdfsPath target) throws AdfsException
+    {
+        int count = 0;
+        for (AdfsPath path : source.list())
+        {
+            AdfsPath dest = target.resolve(path.name());
+            if (path.isDirectory())
+            {
+                dest.mkdir();
+                dest.setTitle(path.title());
+                count += copyTree(path, dest);
+            } else
+                dest.writeBytes(path.readBytes(), path.stat().metadata());
+            dest.setMetadata(path.stat().metadata());
+            count++;
+        }
+        return count;
+    }
+
+    private void loadMaps() throws AdfsException
+    {
+        try
+        {
+            if (format.newMap())
+            {
+                DiscRecord dr = DiscRecord.parse(disc.bytes(format.zones == 1 ? 4 : 0xdc0, 60), 0);
+                if (!dr.looksValid() || dr.density() == 0 || dr.discSize() != format.size())
+                    throw new AdfsFormatException("Unsupported floppy disc record");
+                int boot = dr.bootmap();
+                dr = DiscRecord.parse(disc.bytes(boot + 4, 60), 0);
+                newMap = new NewMap(disc.bytes(boot, dr.zones() * dr.sectorSize() * 2), dr, disc);
+                if (!newMap.validate().isEmpty())
+                    throw new AdfsMapException("Invalid zone checksum");
+                rootAddress = dr.root();
+            } else
+            {
+                oldMap = new OldFreeSpaceMap(disc.bytes(0, 512));
+                rootAddress = format == AdfsFormat.D ? 4 : 2;
+            }
+        } catch (IndexOutOfBoundsException | ArithmeticException e)
+        {
+            throw new AdfsFormatException("Truncated or malformed floppy image");
+        }
+    }
+
     public AdfsFormat format()
-    { return format; }
+    {
+        return format;
+    }
+
     public AdfsGeometry geometry()
-    { return AdfsGeometry.of(format); }
+    {
+        return AdfsGeometry.of(format);
+    }
+
     public AdfsPath root()
-    { return new AdfsPath(this, List.of()); }
+    {
+        return new AdfsPath(this, List.of());
+    }
+
     public AdfsPath path(String path)
-    { return root().resolve(path); }
+    {
+        return root().resolve(path);
+    }
+
     public boolean closed()
-    { return closed; }
+    {
+        return closed;
+    }
+
     public boolean readOnly()
-    { return buffer.isReadOnly(); }
+    {
+        return buffer.isReadOnly();
+    }
+
     public boolean usesTypedMetadata()
-    { return format.directoryFormat != DirectoryFormat.OLD; }
+    {
+        return format.directoryFormat != DirectoryFormat.OLD;
+    }
+
     public byte[] toByteArray() throws AdfsException
     {
         requireOpen();
         return new SectorsView(buffer).toByteArray();
     }
+
     public int totalSize() throws AdfsException
     {
         requireOpen();
         return newMap == null ? oldMap.totalSize() : newMap.discRecord().discSize();
     }
+
     public int freeSpace() throws AdfsException
     {
         requireOpen();
         return newMap == null ? oldMap.freeSpace() : newMap.freeSpace();
     }
+
     public String discName() throws AdfsException
     {
         requireOpen();
         return newMap == null ? oldMap.discName() : newMap.discRecord().discName();
     }
+
     public int bootOption() throws AdfsException
     {
         requireOpen();
         return newMap == null ? oldMap.bootOption() : newMap.discRecord().bootOption();
     }
+
     public String title() throws AdfsException
-    { return format.big() ? discName() : root().title(); }
+    {
+        return format.big() ? discName() : root().title();
+    }
+
     public void setTitle(String title) throws AdfsException
     {
         if (!format.big())
@@ -309,6 +406,7 @@ public final class Adfs implements AutoCloseable
         AcornEncoding.checkTitle(title, 10, false);
         transaction(() -> newMap.setDiscName(title));
     }
+
     public void setBootOption(int option) throws AdfsException
     {
         if (option < 0 || option > 3)
@@ -324,16 +422,14 @@ public final class Adfs implements AutoCloseable
         if (closed)
             throw new AdfsClosedException("Filesystem is closed");
     }
+
     private void requireWritable() throws AdfsException
     {
         requireOpen();
         if (readOnly())
             throw new AdfsReadOnlyException("Filesystem is read-only");
     }
-    @FunctionalInterface
-    interface Mutation {
-        void run() throws AdfsException;
-    }
+
     void transaction(Mutation mutation) throws AdfsException
     {
         requireWritable();
@@ -348,15 +444,13 @@ public final class Adfs implements AutoCloseable
         try
         {
             mutation.run();
-        }
-        catch (AdfsException | RuntimeException e)
+        } catch (AdfsException | RuntimeException e)
         {
             new SectorsView(buffer).write(0, snapshot);
             rootAddress = previousRoot;
             loadMaps();
             throw e;
-        }
-        finally
+        } finally
         {
             inTransaction = false;
         }
@@ -368,15 +462,16 @@ public final class Adfs implements AutoCloseable
         if (mapping != null && !readOnly())
             mapping.force();
     }
-    @Override public void close() throws IOException
+
+    @Override
+    public void close() throws IOException
     {
         if (closed)
             return;
         try
         {
             flush();
-        }
-        finally
+        } finally
         {
             closed = true;
             if (channel != null)
@@ -390,14 +485,15 @@ public final class Adfs implements AutoCloseable
         requireOpen();
         try
         {
-            return newMap == null ? disc.bytes(address * 256, size).toByteArray()
-                                  : newMap.readObject(address, size);
-        }
-        catch (IndexOutOfBoundsException e)
+            return newMap == null ?
+                    disc.bytes(address * 256, size).toByteArray() :
+                    newMap.readObject(address, size);
+        } catch (IndexOutOfBoundsException e)
         {
             throw new AdfsBeyondImageException("Object lies beyond image: " + address);
         }
     }
+
     void writeObject(int address, byte[] bytes) throws AdfsException
     {
         try
@@ -405,17 +501,17 @@ public final class Adfs implements AutoCloseable
             if (newMap == null)
             {
                 int paddedSize = (bytes.length + 255) / 256 * 256;
-                disc.bytes(address * 256, paddedSize)
-                    .write(0, java.util.Arrays.copyOf(bytes, paddedSize));
-            }
-            else
+                disc
+                        .bytes(address * 256, paddedSize)
+                        .write(0, java.util.Arrays.copyOf(bytes, paddedSize));
+            } else
                 newMap.writeObjectData(address, bytes);
-        }
-        catch (IndexOutOfBoundsException e)
+        } catch (IndexOutOfBoundsException e)
         {
             throw new AdfsBeyondImageException("Object lies beyond image: " + address);
         }
     }
+
     Directory readDirectory(int address) throws AdfsException
     {
         int size = format.directoryFormat.size();
@@ -424,12 +520,12 @@ public final class Adfs implements AutoCloseable
             long declared = SectorsView.wrap(readObject(address, 28)).readLe(12, 4);
             if (declared > format.size())
                 throw new AdfsDirectoryException("Invalid directory size " + declared);
-            size = (int)declared;
+            size = (int) declared;
         }
         if (size < format.directoryFormat.size() || size > format.size())
             throw new AdfsDirectoryException("Invalid directory size " + size);
         Directory result =
-            format.directoryFormat.parse(SectorsView.wrap(readObject(address, size)), address);
+                format.directoryFormat.parse(SectorsView.wrap(readObject(address, size)), address);
         String previous = null;
         for (DirectoryEntry e : result.entries())
         {
@@ -440,6 +536,7 @@ public final class Adfs implements AutoCloseable
         }
         return result;
     }
+
     Directory directory(List<String> parts) throws AdfsException
     {
         Directory dir = readDirectory(rootAddress);
@@ -452,25 +549,28 @@ public final class Adfs implements AutoCloseable
         }
         return dir;
     }
+
     Directory parent(List<String> parts) throws AdfsException
     {
         if (parts.isEmpty())
             throw new AdfsPathException("Operation cannot replace root");
         return directory(parts.subList(0, parts.size() - 1));
     }
+
     DirectoryEntry entry(List<String> parts) throws AdfsException
     {
         if (parts.isEmpty())
         {
             Directory root = directory(parts);
-            return new DirectoryEntry("$",
-                                      0,
-                                      0,
-                                      format.directoryFormat.size(),
-                                      rootAddress,
-                                      root.sequence(),
-                                      Access.WR | Access.PR,
-                                      true);
+            return new DirectoryEntry(
+                    "$",
+                    0,
+                    0,
+                    format.directoryFormat.size(),
+                    rootAddress,
+                    root.sequence(),
+                    Access.WR | Access.PR,
+                    true);
         }
         DirectoryEntry e = parent(parts).find(parts.getLast());
         if (e == null)
@@ -487,24 +587,25 @@ public final class Adfs implements AutoCloseable
         }
         if (size == 0)
             return 0;
-        return oldMap.allocate((size + 255) / 256,
-                               directory && format == AdfsFormat.D ? 4 : 1,
-                               buffer.capacity() / 256);
+        return oldMap.allocate(
+                (size + 255) / 256,
+                directory && format == AdfsFormat.D ? 4 : 1,
+                buffer.capacity() / 256);
     }
+
     private void release(Directory parent, DirectoryEntry entry) throws AdfsException
     {
         if (newMap == null)
         {
             if (entry.length() > 0)
                 oldMap.free(entry.discAddress(), (entry.length() + 255) / 256);
-        }
-        else
+        } else
         {
             int id = entry.discAddress() >>> 8;
-            boolean shared =
-                parent.discAddress() >>> 8 == id ||
-                parent.entries().stream().anyMatch(
-                    e -> !e.name().equals(entry.name()) && e.discAddress() >>> 8 == id);
+            boolean shared = parent.discAddress() >>> 8 == id || parent
+                    .entries()
+                    .stream()
+                    .anyMatch(e -> !e.name().equals(entry.name()) && e.discAddress() >>> 8 == id);
             if (!shared)
                 newMap.freeObject(entry.discAddress());
         }
@@ -513,7 +614,7 @@ public final class Adfs implements AutoCloseable
     private int allocateFile(Directory parent, byte[] bytes) throws AdfsException
     {
         if (newMap != null && bytes.length > 0 &&
-            bytes.length < newMap.minFragmentBytes() - format.sectorSize)
+                bytes.length < newMap.minFragmentBytes() - format.sectorSize)
         {
             ArrayList<Integer> ids = new ArrayList<>();
             if ((parent.discAddress() & 255) == 1 && parent.discAddress() != rootAddress)
@@ -525,18 +626,17 @@ public final class Adfs implements AutoCloseable
             {
                 if (newMap.fragmentCount(id) != 1)
                     continue;
-                int usedEnd = parent.discAddress() >>> 8 == id
-                                  ? format.directoryFormat.size() / format.sectorSize
-                                  : 0;
+                int usedEnd = parent.discAddress() >>> 8 == id ?
+                        format.directoryFormat.size() / format.sectorSize :
+                        0;
                 for (DirectoryEntry e : parent.entries())
                     if (e.discAddress() >>> 8 == id)
                         usedEnd = Math.max(
-                            usedEnd,
-                            Math.max(0, (e.discAddress() & 255) - 1) +
-                                Math.max(1,
-                                         (e.length() + format.sectorSize - 1) / format.sectorSize));
+                                usedEnd, Math.max(0, (e.discAddress() & 255) - 1) + Math.max(
+                                        1,
+                                        (e.length() + format.sectorSize - 1) / format.sectorSize));
                 if (usedEnd + (bytes.length + format.sectorSize - 1) / format.sectorSize <=
-                    newMap.fragmentCapacity(id) / format.sectorSize)
+                        newMap.fragmentCapacity(id) / format.sectorSize)
                 {
                     int address = (id << 8) | (usedEnd + 1);
                     writeObject(address, bytes);
@@ -546,8 +646,8 @@ public final class Adfs implements AutoCloseable
         }
         int address = allocate(bytes.length, false);
         if (newMap != null &&
-            newMap.fragmentCapacity(address >>> 8) - bytes.length > format.sectorSize &&
-            bytes.length < newMap.minFragmentBytes())
+                newMap.fragmentCapacity(address >>> 8) - bytes.length > format.sectorSize &&
+                bytes.length < newMap.minFragmentBytes())
             address |= 1;
         writeObject(address, bytes);
         return address;
@@ -564,8 +664,7 @@ public final class Adfs implements AutoCloseable
                 try
                 {
                     newMap.growFragment(address, needed);
-                }
-                catch (AdfsDiscFullException e)
+                } catch (AdfsDiscFullException e)
                 {
                     int previous = address;
                     address = allocate(needed, true);
@@ -574,49 +673,43 @@ public final class Adfs implements AutoCloseable
                     {
                         rootAddress = address;
                         newMap.setRoot(address, needed);
-                    }
-                    else
+                    } else
                     {
                         Directory parent = parent(parts);
                         int nextAddress = address;
-                        List<DirectoryEntry> entries =
-                            parent.entries()
+                        List<DirectoryEntry> entries = parent
+                                .entries()
                                 .stream()
-                                .map(entry
-                                     -> DirectoryFormat.nameKey(entry.name())
-                                                .equals(DirectoryFormat.nameKey(parts.getLast()))
-                                            ? entry.withAddress(nextAddress, needed)
-                                            : entry)
+                                .map(entry -> DirectoryFormat
+                                        .nameKey(entry.name())
+                                        .equals(DirectoryFormat.nameKey(parts.getLast())) ?
+                                        entry.withAddress(nextAddress, needed) :
+                                        entry)
                                 .toList();
                         persist(parent.withEntries(entries), parts.subList(0, parts.size() - 1));
                     }
                 }
-                dir = new Directory(dir.name(),
-                                    dir.title(),
-                                    parts.isEmpty() ? address : dir.parentAddress(),
-                                    address,
-                                    dir.entries(),
-                                    dir.sequence(),
-                                    dir.signature(),
-                                    needed);
+                dir = new Directory(
+                        dir.name(),
+                        dir.title(),
+                        parts.isEmpty() ? address : dir.parentAddress(),
+                        address,
+                        dir.entries(),
+                        dir.sequence(),
+                        dir.signature(),
+                        needed);
             }
         }
         writeObject(address, format.directoryFormat.serialize(dir));
         return address;
     }
-    private static List<DirectoryEntry> sorted(List<DirectoryEntry> entries)
-    {
-        return entries.stream()
-            .sorted(Comparator.comparing(e -> DirectoryFormat.nameKey(e.name())))
-            .toList();
-    }
+
     private void checkName(String name) throws AdfsPathException
     {
         try
         {
             format.directoryFormat.validateName(name);
-        }
-        catch (IllegalArgumentException e)
+        } catch (IllegalArgumentException e)
         {
             throw new AdfsPathException(e.getMessage());
         }
@@ -642,17 +735,18 @@ public final class Adfs implements AutoCloseable
             entries.remove(existing);
             Directory allocationParent = parent.withEntries(entries);
             int address = allocateFile(allocationParent, bytes);
-            int access = meta.access() != null ? meta.access()
-                         : existing == null    ? Access.WR | Access.PR
-                                               : existing.access();
-            entries.add(new DirectoryEntry(parts.getLast(),
-                                           meta.loadAddress(),
-                                           meta.executionAddress(),
-                                           bytes.length,
-                                           address,
-                                           0,
-                                           access,
-                                           false));
+            int access = meta.access() != null ?
+                    meta.access() :
+                    existing == null ? Access.WR | Access.PR : existing.access();
+            entries.add(new DirectoryEntry(
+                    parts.getLast(),
+                    meta.loadAddress(),
+                    meta.executionAddress(),
+                    bytes.length,
+                    address,
+                    0,
+                    access,
+                    false));
             persist(parent.withEntries(sorted(entries)), parts.subList(0, parts.size() - 1));
         });
     }
@@ -665,24 +759,26 @@ public final class Adfs implements AutoCloseable
             if (parent.find(parts.getLast()) != null)
                 throw new AdfsEntryExistsException("Entry already exists");
             int address = allocate(format.directoryFormat.size(), true);
-            Directory child = new Directory(parts.getLast(),
-                                            format.big() ? "" : parts.getLast(),
-                                            parent.discAddress(),
-                                            address,
-                                            List.of(),
-                                            0,
-                                            parent.signature(),
-                                            format.big() ? 2048 : 0);
+            Directory child = new Directory(
+                    parts.getLast(),
+                    format.big() ? "" : parts.getLast(),
+                    parent.discAddress(),
+                    address,
+                    List.of(),
+                    0,
+                    parent.signature(),
+                    format.big() ? 2048 : 0);
             writeObject(address, format.directoryFormat.serialize(child));
             ArrayList<DirectoryEntry> entries = new ArrayList<>(parent.entries());
-            entries.add(new DirectoryEntry(parts.getLast(),
-                                           0,
-                                           0,
-                                           format.directoryFormat.size(),
-                                           address,
-                                           0,
-                                           Access.WR | Access.PR,
-                                           true));
+            entries.add(new DirectoryEntry(
+                    parts.getLast(),
+                    0,
+                    0,
+                    format.directoryFormat.size(),
+                    address,
+                    0,
+                    Access.WR | Access.PR,
+                    true));
             persist(parent.withEntries(sorted(entries)), parts.subList(0, parts.size() - 1));
         });
     }
@@ -710,25 +806,27 @@ public final class Adfs implements AutoCloseable
         transaction(() -> {
             Directory parent = parent(parts);
             DirectoryEntry old = entry(parts);
-            DirectoryEntry replacement =
-                new DirectoryEntry(old.name(),
-                                   meta.loadAddress(),
-                                   meta.executionAddress(),
-                                   old.length(),
-                                   old.discAddress(),
-                                   old.sequence(),
-                                   meta.access() == null ? old.access() : meta.access(),
-                                   old.directory());
-            persist(parent.withEntries(parent.entries()
-                                           .stream()
-                                           .map(e
-                                                -> e == old ? replacement
-                                                   : DirectoryFormat.nameKey(e.name()).equals(
-                                                         DirectoryFormat.nameKey(old.name()))
-                                                       ? replacement
-                                                       : e)
-                                           .toList()),
-                    parts.subList(0, parts.size() - 1));
+            DirectoryEntry replacement = new DirectoryEntry(
+                    old.name(),
+                    meta.loadAddress(),
+                    meta.executionAddress(),
+                    old.length(),
+                    old.discAddress(),
+                    old.sequence(),
+                    meta.access() == null ? old.access() : meta.access(),
+                    old.directory());
+            persist(
+                    parent.withEntries(parent
+                            .entries()
+                            .stream()
+                            .map(e -> e == old ?
+                                    replacement :
+                                    DirectoryFormat
+                                            .nameKey(e.name())
+                                            .equals(DirectoryFormat.nameKey(old.name())) ?
+                                            replacement :
+                                            e)
+                            .toList()), parts.subList(0, parts.size() - 1));
         });
     }
 
@@ -737,15 +835,16 @@ public final class Adfs implements AutoCloseable
         format.directoryFormat.validateTitle(title);
         transaction(() -> {
             Directory dir = directory(parts);
-            persist(new Directory(dir.name(),
-                                  title,
-                                  dir.parentAddress(),
-                                  dir.discAddress(),
-                                  dir.entries(),
-                                  dir.sequence(),
-                                  dir.signature(),
-                                  dir.bigSize()),
-                    parts);
+            persist(
+                    new Directory(
+                            dir.name(),
+                            title,
+                            dir.parentAddress(),
+                            dir.discAddress(),
+                            dir.entries(),
+                            dir.sequence(),
+                            dir.signature(),
+                            dir.bigSize()), parts);
         });
     }
 
@@ -757,7 +856,7 @@ public final class Adfs implements AutoCloseable
             checkName(target.getLast());
             DirectoryEntry entry = entry(source);
             if (entry.directory() && target.size() > source.size() &&
-                keys(target.subList(0, source.size())).equals(keys(source)))
+                    keys(target.subList(0, source.size())).equals(keys(source)))
                 throw new AdfsPathException("Cannot move a directory inside itself");
             Directory from = parent(source), to = parent(target);
             boolean same = from.discAddress() == to.discAddress();
@@ -765,16 +864,16 @@ public final class Adfs implements AutoCloseable
             if (collision != null)
                 throw new AdfsEntryExistsException("Target exists");
             ArrayList<DirectoryEntry> sourceEntries = new ArrayList<>(from.entries());
-            sourceEntries.removeIf(
-                e
-                -> DirectoryFormat.nameKey(e.name()).equals(DirectoryFormat.nameKey(entry.name())));
+            sourceEntries.removeIf(e -> DirectoryFormat
+                    .nameKey(e.name())
+                    .equals(DirectoryFormat.nameKey(entry.name())));
             if (same)
             {
                 sourceEntries.add(entry.withName(target.getLast()));
-                persist(from.withEntries(sorted(sourceEntries)),
+                persist(
+                        from.withEntries(sorted(sourceEntries)),
                         source.subList(0, source.size() - 1));
-            }
-            else
+            } else
             {
                 /* A shared fragment cannot follow a file into another sibling group. */
                 DirectoryEntry moved = entry.withName(target.getLast());
@@ -787,13 +886,12 @@ public final class Adfs implements AutoCloseable
                 ArrayList<DirectoryEntry> targetEntries = new ArrayList<>(to.entries());
                 targetEntries.add(moved);
                 persist(from.withEntries(sourceEntries), source.subList(0, source.size() - 1));
-                persist(to.withEntries(sorted(targetEntries)),
+                persist(
+                        to.withEntries(sorted(targetEntries)),
                         target.subList(0, target.size() - 1));
             }
         });
     }
-    private static List<String> keys(List<String> parts)
-    { return parts.stream().map(DirectoryFormat::nameKey).toList(); }
 
     /* Validation walks each reachable directory once, reporting repeated addresses as cycles. */
     private int directoryScore() throws AdfsException
@@ -802,11 +900,13 @@ public final class Adfs implements AutoCloseable
         int count = walk(rootAddress, "$", new HashSet<>(), errors, false);
         return count + (errors.isEmpty() ? 1000000 : 0);
     }
-    private int walk(int address,
-                     String path,
-                     Set<Integer> seen,
-                     List<ValidationFinding> errors,
-                     boolean findings)
+
+    private int walk(
+            int address,
+            String path,
+            Set<Integer> seen,
+            List<ValidationFinding> errors,
+            boolean findings)
     {
         if (!seen.add(address))
         {
@@ -817,8 +917,7 @@ public final class Adfs implements AutoCloseable
         try
         {
             dir = readDirectory(address);
-        }
-        catch (AdfsException | IllegalArgumentException e)
+        } catch (AdfsException | IllegalArgumentException e)
         {
             errors.add(new ValidationFinding(path, e.getMessage(), null));
             return 0;
@@ -832,13 +931,12 @@ public final class Adfs implements AutoCloseable
                 int stored = bytes.get(1279), actual = DirectoryFormat.OLD.checksum(bytes);
                 if (stored != 0 && stored != actual)
                     errors.add(new ValidationFinding(
-                        path, "Stale old-directory check byte", () -> transaction(() -> {
-                            byte[] raw = readObject(address, 1280);
-                            raw[1279] = (byte)DirectoryFormat.OLD.checksum(SectorsView.wrap(raw));
-                            writeObject(address, raw);
-                        })));
-            }
-            catch (AdfsException e)
+                            path, "Stale old-directory check byte", () -> transaction(() -> {
+                        byte[] raw = readObject(address, 1280);
+                        raw[1279] = (byte) DirectoryFormat.OLD.checksum(SectorsView.wrap(raw));
+                        writeObject(address, raw);
+                    })));
+            } catch (AdfsException e)
             {
                 errors.add(new ValidationFinding(path, e.getMessage(), null));
             }
@@ -847,18 +945,18 @@ public final class Adfs implements AutoCloseable
         {
             String child = path + "." + e.name();
             if (findings && newMap == null && e.length() > 0 &&
-                (long)e.discAddress() * 256 + e.length() > buffer.capacity())
+                    (long) e.discAddress() * 256 + e.length() > buffer.capacity())
             {
                 int held = Math.max(0, buffer.capacity() - e.discAddress() * 256);
                 boolean remove = e.directory() || held == 0;
-                String description =
-                    remove ? "remove " + child
-                           : "truncate " + child + " from " + e.length() + " to " + held + " bytes";
+                String description = remove ?
+                        "remove " + child :
+                        "truncate " + child + " from " + e.length() + " to " + held + " bytes";
                 errors.add(new ValidationFinding(
-                    child,
-                    "Object extends past the end of the image",
-                    new org.rob_smallshire.oaknut.filesystem.Fix(
-                        description, () -> transaction(() -> {
+                        child,
+                        "Object extends past the end of the image",
+                        new org.rob_smallshire.oaknut.filesystem.Fix(
+                                description, () -> transaction(() -> {
                             Directory current = readDirectory(address);
                             ArrayList<DirectoryEntry> repaired = new ArrayList<>();
                             for (DirectoryEntry entry : current.entries())
@@ -869,8 +967,8 @@ public final class Adfs implements AutoCloseable
                                     repaired.add(entry.withAddress(entry.discAddress(), held));
                             }
                             writeObject(
-                                address,
-                                format.directoryFormat.serialize(current.withEntries(repaired)));
+                                    address,
+                                    format.directoryFormat.serialize(current.withEntries(repaired)));
                         }))));
                 continue;
             }
@@ -881,8 +979,7 @@ public final class Adfs implements AutoCloseable
                 try
                 {
                     readObject(e.discAddress(), e.length());
-                }
-                catch (AdfsException ex)
+                } catch (AdfsException ex)
                 {
                     errors.add(new ValidationFinding(child, ex.getMessage(), null));
                 }
@@ -890,6 +987,7 @@ public final class Adfs implements AutoCloseable
         }
         return count;
     }
+
     public ImmutableList<ValidationFinding> validate() throws AdfsException
     {
         requireOpen();
@@ -898,19 +996,22 @@ public final class Adfs implements AutoCloseable
             result.add(new ValidationFinding("$", message, null));
         walk(rootAddress, "$", new HashSet<>(), result, true);
         if (newMap == null && oldMap.totalSize() > buffer.capacity() &&
-            result.stream().anyMatch(f -> f.message().contains("past the end of the image")))
+                result.stream().anyMatch(f -> f.message().contains("past the end of the image")))
             result.add(new ValidationFinding(
-                "Disc size",
-                "The free-space map gives " + oldMap.totalSectors() +
-                    " sectors, but the image holds " + buffer.capacity() / 256,
-                new org.rob_smallshire.oaknut.filesystem.Fix(
-                    "set the disc size to " + buffer.capacity() / 256 + " sectors",
-                    () -> transaction(() -> oldMap.shrinkTo(buffer.capacity() / 256)))));
+                    "Disc size",
+                    "The free-space map gives " + oldMap.totalSectors() +
+                            " sectors, but the image holds " + buffer.capacity() / 256,
+                    new org.rob_smallshire.oaknut.filesystem.Fix(
+                            "set the disc size to " + buffer.capacity() / 256 + " sectors",
+                            () -> transaction(() -> oldMap.shrinkTo(buffer.capacity() / 256)))));
         return ImmutableList.copyOf(result);
     }
 
     public void exportAll(Path target) throws IOException
-    { exportTree(root(), target); }
+    {
+        exportTree(root(), target);
+    }
+
     private void exportTree(AdfsPath directory, Path target) throws IOException
     {
         Files.createDirectories(target);
@@ -934,28 +1035,16 @@ public final class Adfs implements AutoCloseable
         int count = copyTree(root(), replacement.root());
         transaction(() -> {
             new SectorsView(buffer).write(
-                0, java.util.Arrays.copyOf(replacement.toByteArray(), buffer.capacity()));
+                    0,
+                    java.util.Arrays.copyOf(replacement.toByteArray(), buffer.capacity()));
             loadMaps();
         });
         return count;
     }
-    private static int copyTree(AdfsPath source, AdfsPath target) throws AdfsException
+
+    @FunctionalInterface
+    interface Mutation
     {
-        int count = 0;
-        for (AdfsPath path : source.list())
-        {
-            AdfsPath dest = target.resolve(path.name());
-            if (path.isDirectory())
-            {
-                dest.mkdir();
-                dest.setTitle(path.title());
-                count += copyTree(path, dest);
-            }
-            else
-                dest.writeBytes(path.readBytes(), path.stat().metadata());
-            dest.setMetadata(path.stat().metadata());
-            count++;
-        }
-        return count;
+        void run() throws AdfsException;
     }
 }

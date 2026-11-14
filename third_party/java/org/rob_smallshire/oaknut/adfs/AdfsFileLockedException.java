@@ -4,5 +4,7 @@ package org.rob_smallshire.oaknut.adfs;
 public class AdfsFileLockedException extends AdfsException
 {
     public AdfsFileLockedException(String message)
-    { super(message); }
+    {
+        super(message);
+    }
 }

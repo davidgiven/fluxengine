@@ -4,5 +4,7 @@ package org.rob_smallshire.oaknut.adfs;
 public class AdfsReadOnlyException extends AdfsException
 {
     public AdfsReadOnlyException(String message)
-    { super(message); }
+    {
+        super(message);
+    }
 }

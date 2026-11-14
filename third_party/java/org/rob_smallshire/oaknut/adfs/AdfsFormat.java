@@ -22,6 +22,7 @@ public enum AdfsFormat
 
     public final int tracks, heads, sectorsPerTrack, sectorSize, zones;
     public final DirectoryFormat directoryFormat;
+
     AdfsFormat(int tracks, int heads, int spt, int sectorSize, int zones, DirectoryFormat directory)
     {
         this.tracks = tracks;
@@ -30,26 +31,6 @@ public enum AdfsFormat
         this.sectorSize = sectorSize;
         this.zones = zones;
         this.directoryFormat = directory;
-    }
-    public int size()
-    { return tracks * heads * sectorsPerTrack * sectorSize; }
-    public boolean newMap()
-    { return zones > 0; }
-    public boolean big()
-    { return directoryFormat == DirectoryFormat.BIG; }
-    public ImmutableList<SurfaceSpec> surfaces()
-    {
-        if (sectorSize == 1024)
-            return ImmutableList.of(new SurfaceSpec(1, size() / 256, 256, 0, size()));
-        ArrayList<SurfaceSpec> result = new ArrayList<>();
-        int track = sectorsPerTrack * sectorSize;
-        for (int side = 0; side < heads; side++)
-            result.add(new SurfaceSpec(tracks,
-                                       sectorsPerTrack,
-                                       sectorSize,
-                                       side * (this == L_SEQUENTIAL ? track * tracks : track),
-                                       track * (this == L_SEQUENTIAL ? 1 : heads)));
-        return ImmutableList.copyOf(result);
     }
 
     public static AdfsFormat forExtension(String extension) throws AdfsFormatException
@@ -61,5 +42,36 @@ public enum AdfsFormat
             case "adl", ".adl" -> L;
             default -> throw new AdfsFormatException("Ambiguous floppy extension: " + extension);
         };
+    }
+
+    public int size()
+    {
+        return tracks * heads * sectorsPerTrack * sectorSize;
+    }
+
+    public boolean newMap()
+    {
+        return zones > 0;
+    }
+
+    public boolean big()
+    {
+        return directoryFormat == DirectoryFormat.BIG;
+    }
+
+    public ImmutableList<SurfaceSpec> surfaces()
+    {
+        if (sectorSize == 1024)
+            return ImmutableList.of(new SurfaceSpec(1, size() / 256, 256, 0, size()));
+        ArrayList<SurfaceSpec> result = new ArrayList<>();
+        int track = sectorsPerTrack * sectorSize;
+        for (int side = 0; side < heads; side++)
+            result.add(new SurfaceSpec(
+                    tracks,
+                    sectorsPerTrack,
+                    sectorSize,
+                    side * (this == L_SEQUENTIAL ? track * tracks : track),
+                    track * (this == L_SEQUENTIAL ? 1 : heads)));
+        return ImmutableList.copyOf(result);
     }
 }

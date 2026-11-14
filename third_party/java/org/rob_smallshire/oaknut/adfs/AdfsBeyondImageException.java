@@ -4,5 +4,7 @@ package org.rob_smallshire.oaknut.adfs;
 public class AdfsBeyondImageException extends AdfsException
 {
     public AdfsBeyondImageException(String message)
-    { super(message); }
+    {
+        super(message);
+    }
 }

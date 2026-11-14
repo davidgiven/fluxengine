@@ -12,31 +12,57 @@ import org.rob_smallshire.oaknut.file.Access;
  * Old, New and Big directory codecs. Serialization is staged before touching an image. */
 public enum DirectoryFormat
 {
-    OLD(1280, 47),
-    NEW(2048, 77),
-    BIG(2048, Integer.MAX_VALUE);
+    OLD(1280, 47), NEW(2048, 77), BIG(2048, Integer.MAX_VALUE);
 
     private final int size;
     private final int maxEntries;
+
     DirectoryFormat(int size, int maxEntries)
     {
         this.size = size;
         this.maxEntries = maxEntries;
     }
-    public int size()
-    { return size; }
-    public int maxEntries()
-    { return maxEntries; }
 
     /* Acorn folds ASCII letters, leaving extended Latin-1 characters unchanged. */
     public static String nameKey(String name)
-    { return name.toUpperCase(java.util.Locale.ROOT); }
+    {
+        return name.toUpperCase(java.util.Locale.ROOT);
+    }
+
+    private static int wordAlign(int n)
+    {
+        return (n + 3) & ~3;
+    }
+
+    private static String text(SectorsView b, int offset, int n, boolean old)
+    {
+        return AcornEncoding.decode(b.read(offset, n), old);
+    }
+
+    private static void field(SectorsView b, int offset, int n, String text, boolean ascii)
+    {
+        byte[] encoded = AcornEncoding.encode(text, ascii);
+        byte[] padded = new byte[n];
+        Arrays.fill(padded, (byte) 13);
+        System.arraycopy(encoded, 0, padded, 0, Math.min(n, encoded.length));
+        b.write(offset, padded);
+    }
+
+    public int size()
+    {
+        return size;
+    }
+
+    public int maxEntries()
+    {
+        return maxEntries;
+    }
 
     public void validateName(String name)
     {
         AcornEncoding.encode(name, this != BIG);
         if (name.isEmpty() || name.length() > (this == BIG ? 255 : 10) ||
-            name.chars().anyMatch(c -> ".:\r".indexOf(c) >= 0))
+                name.chars().anyMatch(c -> ".:\r".indexOf(c) >= 0))
             throw new IllegalArgumentException("Invalid ADFS name: " + name);
     }
 
@@ -47,28 +73,14 @@ public enum DirectoryFormat
         AcornEncoding.checkTitle(title, 19, this == OLD);
     }
 
-    private static int wordAlign(int n)
-    { return (n + 3) & ~3; }
     public int requiredSize(Directory dir, int sectorSize)
     {
         if (this != BIG)
             return size;
         int names = dir.entries().stream().mapToInt(e -> e.name().length() + 1).sum();
         int needed = wordAlign(28 + dir.name().length() + 1) + dir.entries().size() * 28 +
-                     wordAlign(names) + 8;
+                wordAlign(names) + 8;
         return Math.max(2048, (needed + sectorSize - 1) / sectorSize * sectorSize);
-    }
-
-    private static String text(SectorsView b, int offset, int n, boolean old)
-    { return AcornEncoding.decode(b.read(offset, n), old); }
-
-    private static void field(SectorsView b, int offset, int n, String text, boolean ascii)
-    {
-        byte[] encoded = AcornEncoding.encode(text, ascii);
-        byte[] padded = new byte[n];
-        Arrays.fill(padded, (byte)13);
-        System.arraycopy(encoded, 0, padded, 0, Math.min(n, encoded.length));
-        b.write(offset, padded);
     }
 
     public Directory parse(SectorsView b, int address) throws AdfsDirectoryException
@@ -76,8 +88,7 @@ public enum DirectoryFormat
         try
         {
             return parseChecked(b, address);
-        }
-        catch (IndexOutOfBoundsException | IllegalArgumentException | ArithmeticException e)
+        } catch (IndexOutOfBoundsException | IllegalArgumentException | ArithmeticException e)
         {
             throw new AdfsDirectoryException("Directory extends beyond its allocated block");
         }
@@ -87,8 +98,9 @@ public enum DirectoryFormat
     {
         int sequence = b.get(0);
         String signature = new String(b.read(this == BIG ? 4 : 1, 4), StandardCharsets.US_ASCII);
-        if (!(this == BIG ? signature.equals("SBPr")
-                          : signature.equals("Hugo") || signature.equals("Nick")))
+        if (!(this == BIG ?
+                signature.equals("SBPr") :
+                signature.equals("Hugo") || signature.equals("Nick")))
             throw new AdfsDirectoryException("Invalid directory signature: " + signature);
         int actual = this == BIG ? Math.toIntExact(b.readLe(12, 4)) : size;
         if (actual > b.size() || actual < size)
@@ -121,52 +133,60 @@ public enum DirectoryFormat
             if (this == OLD)
             {
                 int[] flags = {Access.R,
-                               Access.W,
-                               Access.L,
-                               0,
-                               Access.E,
-                               Access.PR,
-                               Access.PW,
-                               Access.PE,
-                               Access.PL};
+                        Access.W,
+                        Access.L,
+                        0,
+                        Access.E,
+                        Access.PR,
+                        Access.PW,
+                        Access.PE,
+                        Access.PL};
                 for (int j = 0; j < flags.length; j++)
                     if ((b.get(o + j) & 128) != 0)
                         access |= flags[j];
                 directory = (b.get(o + 3) & 128) != 0;
                 name = text(b, o, 10, true);
-            }
-            else
+            } else
             {
-                int flags = (int)b.readLe(o + (this == BIG ? 16 : 25), this == BIG ? 4 : 1);
+                int flags = (int) b.readLe(o + (this == BIG ? 16 : 25), this == BIG ? 4 : 1);
                 access = (flags & 3) | ((flags & 4) << 1) | (flags & 48);
                 directory = (flags & 8) != 0;
                 int n = this == BIG ? Math.toIntExact(b.readLe(o + 20, 4)) : 10;
                 int ptr =
-                    this == BIG ? Math.addExact(heap, Math.toIntExact(b.readLe(o + 24, 4))) : o;
+                        this == BIG ? Math.addExact(heap, Math.toIntExact(b.readLe(o + 24, 4))) : o;
                 if (this == BIG && (n > 255 || ptr < heap || ptr + n > tail))
                     throw new AdfsDirectoryException("Invalid name heap pointer");
                 name = text(b, ptr, n, false);
             }
             int v = o + (this == BIG ? 0 : 10);
-            entries.add(new DirectoryEntry(name,
-                                           b.readLe(v, 4),
-                                           b.readLe(v + 4, 4),
-                                           Math.toIntExact(b.readLe(v + 8, 4)),
-                                           (int)b.readLe(v + 12, this == BIG ? 4 : 3),
-                                           this == OLD ? b.get(o + 25) : 0,
-                                           access,
-                                           directory));
+            entries.add(new DirectoryEntry(
+                    name,
+                    b.readLe(v, 4),
+                    b.readLe(v + 4, 4),
+                    Math.toIntExact(b.readLe(v + 8, 4)),
+                    (int) b.readLe(v + 12, this == BIG ? 4 : 3),
+                    this == OLD ? b.get(o + 25) : 0,
+                    access,
+                    directory));
         }
-        String name = this == BIG ? text(b, 28, nameLength, false)
-                                  : text(b, tail + (this == OLD ? 1 : 25), 10, this == OLD);
-        String title =
-            this == BIG
-                ? ""
-                : text(b, tail + (this == OLD ? 14 : 6), 19, this == OLD).replaceFirst(" +$", "");
-        int parent =
-            (int)b.readLe(this == BIG ? 24 : tail + (this == OLD ? 11 : 3), this == BIG ? 4 : 3);
+        String name = this == BIG ?
+                text(b, 28, nameLength, false) :
+                text(b, tail + (this == OLD ? 1 : 25), 10, this == OLD);
+        String title = this == BIG ?
+                "" :
+                text(b, tail + (this == OLD ? 14 : 6), 19, this == OLD).replaceFirst(" +$", "");
+        int parent = (int) b.readLe(
+                this == BIG ? 24 : tail + (this == OLD ? 11 : 3),
+                this == BIG ? 4 : 3);
         return new Directory(
-            name, title, parent, address, entries, sequence, signature, this == BIG ? actual : 0);
+                name,
+                title,
+                parent,
+                address,
+                entries,
+                sequence,
+                signature,
+                this == BIG ? actual : 0);
     }
 
     public byte[] serialize(Directory dir) throws AdfsDirectoryException
@@ -180,10 +200,9 @@ public enum DirectoryFormat
         SectorsView b = SectorsView.wrap(result);
         int sequence = dir.sequence() & 255;
         int tail = actual - (this == OLD ? 53 : this == NEW ? 41 : 8);
-        String signature = this == BIG                      ? "SBPr"
-                           : this == OLD                    ? "Hugo"
-                           : dir.signature().equals("Nick") ? "Nick"
-                                                            : "Hugo";
+        String signature = this == BIG ?
+                "SBPr" :
+                this == OLD ? "Hugo" : dir.signature().equals("Nick") ? "Nick" : "Hugo";
         b.put(0, sequence);
         b.write(this == BIG ? 4 : 1, signature.getBytes(StandardCharsets.US_ASCII));
         int start = this == BIG ? wordAlign(28 + dir.name().length() + 1) : 5;
@@ -198,23 +217,22 @@ public enum DirectoryFormat
             if (this == OLD)
             {
                 int[] flags = {Access.R,
-                               Access.W,
-                               Access.L,
-                               0,
-                               Access.E,
-                               Access.PR,
-                               Access.PW,
-                               Access.PE,
-                               Access.PL};
+                        Access.W,
+                        Access.L,
+                        0,
+                        Access.E,
+                        Access.PR,
+                        Access.PW,
+                        Access.PE,
+                        Access.PL};
                 for (int j = 0; j < flags.length; j++)
                     if ((e.access() & flags[j]) != 0 || (j == 3 && e.directory()))
                         b.put(o + j, b.get(o + j) | 128);
                 b.put(o + 25, e.sequence() & 255);
-            }
-            else
+            } else
             {
                 int flags = (e.access() & 3) | ((e.access() & Access.L) >> 1) | (e.access() & 48) |
-                            (e.directory() ? 8 : 0);
+                        (e.directory() ? 8 : 0);
                 b.writeLe(o + (this == BIG ? 16 : 25), flags, this == BIG ? 4 : 1);
             }
             int v = o + (this == BIG ? 0 : 10);
@@ -238,17 +256,15 @@ public enum DirectoryFormat
             b.writeLe(20, wordAlign(ptr), 4);
             b.writeLe(24, dir.parentAddress(), 4);
             field(b, 28, dir.name().length() + 1, dir.name(), false);
-        }
-        else
+        } else
         {
             field(b, tail + (this == OLD ? 1 : 25), 10, dir.name(), this == OLD);
             field(b, tail + (this == OLD ? 14 : 6), 19, dir.title(), this == OLD);
             b.writeLe(tail + (this == OLD ? 11 : 3), dir.parentAddress(), 3);
         }
         b.put(tail + (this == OLD ? 47 : this == NEW ? 35 : 4), sequence);
-        b.write(tail + (this == OLD   ? 48
-                        : this == NEW ? 36
-                                      : 0),
+        b.write(
+                tail + (this == OLD ? 48 : this == NEW ? 36 : 0),
                 (this == BIG ? "oven" : signature).getBytes(StandardCharsets.US_ASCII));
         if (this != OLD)
             b.put(actual - 1, checksum(b));
@@ -264,12 +280,12 @@ public enum DirectoryFormat
     /* FileCore rotates before XORing each complete word, then any final bytes. */
     public int checksum(SectorsView b)
     {
-        int actual = this == BIG ? (int)b.readLe(12, 4) : size;
+        int actual = this == BIG ? (int) b.readLe(12, 4) : size;
         int tail = actual - (this == OLD ? 53 : this == NEW ? 41 : 8);
         int end;
         if (this == BIG)
-            end = wordAlign(28 + (int)b.readLe(8, 4) + 1) + (int)b.readLe(16, 4) * 28 +
-                  (int)b.readLe(20, 4);
+            end = wordAlign(28 + (int) b.readLe(8, 4) + 1) + (int) b.readLe(16, 4) * 28 +
+                    (int) b.readLe(20, 4);
         else
         {
             end = 5;
@@ -281,7 +297,7 @@ public enum DirectoryFormat
         int value = 0, offset = 0;
         while (offset + 4 <= end)
         {
-            value = (int)b.readLe(offset, 4) ^ Integer.rotateRight(value, 13);
+            value = (int) b.readLe(offset, 4) ^ Integer.rotateRight(value, 13);
             offset += 4;
         }
         while (offset < end)
@@ -289,7 +305,7 @@ public enum DirectoryFormat
         offset = tail + (this == BIG ? 0 : 1);
         while (offset + 4 <= actual - 4)
         {
-            value = (int)b.readLe(offset, 4) ^ Integer.rotateRight(value, 13);
+            value = (int) b.readLe(offset, 4) ^ Integer.rotateRight(value, 13);
             offset += 4;
         }
         if (this == BIG)

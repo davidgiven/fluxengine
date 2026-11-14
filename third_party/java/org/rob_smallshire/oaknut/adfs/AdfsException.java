@@ -4,5 +4,7 @@ package org.rob_smallshire.oaknut.adfs;
 public class AdfsException extends java.io.IOException
 {
     public AdfsException(String message)
-    { super(message); }
+    {
+        super(message);
+    }
 }

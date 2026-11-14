@@ -8,8 +8,9 @@ public final class Access
 {
     public static final int R = 1, W = 2, E = 4, L = 8, PR = 16, PW = 32, PE = 64, PL = 128;
     public static final int SYSTEM = 256, HIDDEN = 512, ARCHIVE = 1024;
-    public static final int WR = R | W, LWR = L | WR;
-    private Access() {}
+    private Access()
+    {
+    }    public static final int WR = R | W, LWR = L | WR;
 
     public static int parse(String text)
     {
@@ -57,5 +58,9 @@ public final class Access
     }
 
     public static boolean isRunOnly(int bits)
-    { return (bits & (R | E)) == E; }
+    {
+        return (bits & (R | E)) == E;
+    }
+
+
 }

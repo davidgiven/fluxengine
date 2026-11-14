@@ -4,7 +4,12 @@ package org.rob_smallshire.oaknut.discimage;
 public record Surface(DiscImage image, int side)
 {
     public SurfaceSpec spec()
-    { return image.surfaces().get(side); }
+    {
+        return image.surfaces().get(side);
+    }
+
     public SectorsView sectorRange(int start, int count)
-    { return image.sectors(side, start, count); }
+    {
+        return image.sectors(side, start, count);
+    }
 }

@@ -4,5 +4,7 @@ package org.rob_smallshire.oaknut.adfs;
 public class AdfsClosedException extends AdfsException
 {
     public AdfsClosedException(String message)
-    { super(message); }
+    {
+        super(message);
+    }
 }

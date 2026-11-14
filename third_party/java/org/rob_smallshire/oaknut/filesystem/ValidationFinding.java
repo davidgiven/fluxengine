@@ -6,18 +6,27 @@ import java.io.IOException;
  * A validation diagnostic optionally carrying an explicit repair. */
 public record ValidationFinding(String path, String message, Repair repair)
 {
-    @FunctionalInterface
-    public interface Repair {
-        void apply() throws IOException;
+    @Override
+    public String toString()
+    {
+        return path + ": " + message;
     }
-    @Override public String toString()
-    { return path + ": " + message; }
+
     public boolean repairable()
-    { return repair != null; }
+    {
+        return repair != null;
+    }
+
     public void fix() throws IOException
     {
         if (repair == null)
             throw new UnsupportedOperationException("No repair for " + message);
         repair.apply();
+    }
+
+    @FunctionalInterface
+    public interface Repair
+    {
+        void apply() throws IOException;
     }
 }

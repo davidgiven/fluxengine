@@ -4,5 +4,7 @@ package org.rob_smallshire.oaknut.adfs;
 public class AdfsDirectoryNotEmptyException extends AdfsPathException
 {
     public AdfsDirectoryNotEmptyException(String message)
-    { super(message); }
+    {
+        super(message);
+    }
 }

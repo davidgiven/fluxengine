@@ -4,5 +4,7 @@ package org.rob_smallshire.oaknut.adfs;
 public class AdfsDiscFullException extends AdfsMapException
 {
     public AdfsDiscFullException(String message)
-    { super(message); }
+    {
+        super(message);
+    }
 }

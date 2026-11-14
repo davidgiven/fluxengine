@@ -4,5 +4,7 @@ package org.rob_smallshire.oaknut.adfs;
 public class AdfsFormatException extends AdfsException
 {
     public AdfsFormatException(String message)
-    { super(message); }
+    {
+        super(message);
+    }
 }

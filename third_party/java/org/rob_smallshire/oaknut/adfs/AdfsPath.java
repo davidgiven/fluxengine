@@ -20,17 +20,29 @@ public final class AdfsPath
 {
     private final Adfs adfs;
     private final ImmutableList<String> parts;
+
     AdfsPath(Adfs adfs, List<String> parts)
     {
         this.adfs = adfs;
         this.parts = ImmutableList.copyOf(parts);
     }
+
     public String name()
-    { return parts.isEmpty() ? "$" : parts.getLast(); }
+    {
+        return parts.isEmpty() ? "$" : parts.getLast();
+    }
+
     public ImmutableList<String> parts()
-    { return ImmutableList.<String>builder().add("$").addAll(parts).build(); }
+    {
+        return ImmutableList.<String>builder()
+                .add("$").addAll(parts).build();
+    }
+
     public AdfsPath parent()
-    { return parts.isEmpty() ? this : new AdfsPath(adfs, parts.subList(0, parts.size() - 1)); }
+    {
+        return parts.isEmpty() ? this : new AdfsPath(adfs, parts.subList(0, parts.size() - 1));
+    }
+
     public AdfsPath resolve(String path)
     {
         ArrayList<String> result = new ArrayList<>(parts);
@@ -42,57 +54,71 @@ public final class AdfsPath
             {
                 if (!result.isEmpty())
                     result.removeLast();
-            }
-            else if (part.equals("@") || part.isEmpty())
+            } else if (part.equals("@") || part.isEmpty())
                 continue;
             else
                 result.add(part);
         }
         return new AdfsPath(adfs, result);
     }
-    @Override public String toString()
-    { return parts.isEmpty() ? "$" : "$." + String.join(".", parts); }
-    @Override public boolean equals(Object other)
-    { return other instanceof AdfsPath p && adfs == p.adfs && parts.equals(p.parts); }
-    @Override public int hashCode()
-    { return Objects.hash(System.identityHashCode(adfs), parts); }
+
+    @Override
+    public String toString()
+    {
+        return parts.isEmpty() ? "$" : "$." + String.join(".", parts);
+    }
+
+    @Override
+    public boolean equals(Object other)
+    {
+        return other instanceof AdfsPath p && adfs == p.adfs && parts.equals(p.parts);
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return Objects.hash(System.identityHashCode(adfs), parts);
+    }
 
     public AdfsStat stat() throws AdfsException
-    { return AdfsStat.of(adfs.entry(parts)); }
+    {
+        return AdfsStat.of(adfs.entry(parts));
+    }
+
     public boolean exists() throws AdfsException
     {
         try
         {
             stat();
             return true;
-        }
-        catch (AdfsPathException e)
+        } catch (AdfsPathException e)
         {
             return false;
         }
     }
+
     public boolean isDirectory() throws AdfsException
     {
         try
         {
             return stat().directory();
-        }
-        catch (AdfsPathException e)
+        } catch (AdfsPathException e)
         {
             return false;
         }
     }
+
     public boolean isFile() throws AdfsException
     {
         try
         {
             return !stat().directory();
-        }
-        catch (AdfsPathException e)
+        } catch (AdfsPathException e)
         {
             return false;
         }
     }
+
     public ImmutableList<AdfsPath> list() throws AdfsException
     {
         ImmutableList.Builder<AdfsPath> result = ImmutableList.builder();
@@ -100,14 +126,16 @@ public final class AdfsPath
             result.add(resolve(entry.name()));
         return result.build();
     }
+
     public ImmutableList<AdfsPath> walk() throws AdfsException
     {
         ImmutableList.Builder<AdfsPath> result = ImmutableList.builder();
         walkInto(result, new java.util.HashSet<>());
         return result.build();
     }
+
     private void walkInto(ImmutableList.Builder<AdfsPath> result, java.util.Set<Integer> seen)
-        throws AdfsException
+            throws AdfsException
     {
         if (!seen.add(stat().discAddress()))
             throw new AdfsDirectoryException("Directory cycle");
@@ -118,6 +146,7 @@ public final class AdfsPath
                 child.walkInto(result, seen);
         }
     }
+
     public ImmutableList<AdfsPath> glob(String pattern) throws AdfsException
     {
         int dot = pattern.indexOf('.');
@@ -125,9 +154,9 @@ public final class AdfsPath
         String rest = dot < 0 ? null : pattern.substring(dot + 1);
         StringBuilder regex = new StringBuilder();
         for (char c : DirectoryFormat.nameKey(head).toCharArray())
-            regex.append(c == '*'   ? ".*"
-                         : c == '#' ? "."
-                                    : java.util.regex.Pattern.quote(String.valueOf(c)));
+            regex.append(c == '*' ?
+                    ".*" :
+                    c == '#' ? "." : java.util.regex.Pattern.quote(String.valueOf(c)));
         ImmutableList.Builder<AdfsPath> result = ImmutableList.builder();
         for (AdfsPath child : list())
             if (DirectoryFormat.nameKey(child.name()).matches(regex.toString()))
@@ -139,6 +168,7 @@ public final class AdfsPath
             }
         return result.build();
     }
+
     public byte[] readBytes() throws AdfsException
     {
         DirectoryEntry entry = adfs.entry(parts);
@@ -146,18 +176,37 @@ public final class AdfsPath
             throw new AdfsPathException("Cannot read a directory as a file");
         return adfs.readObject(entry.discAddress(), entry.length());
     }
+
     public void writeBytes(byte[] bytes) throws AdfsException
-    { writeBytes(bytes, new AcornMeta(0, 0, null)); }
+    {
+        writeBytes(bytes, new AcornMeta(0, 0, null));
+    }
+
     public void writeBytes(byte[] bytes, AcornMeta metadata) throws AdfsException
-    { adfs.writeFile(parts, bytes, metadata); }
+    {
+        adfs.writeFile(parts, bytes, metadata);
+    }
+
     public String readText() throws AdfsException
-    { return org.rob_smallshire.oaknut.file.TextIo.decode(readBytes(), true); }
+    {
+        return org.rob_smallshire.oaknut.file.TextIo.decode(readBytes(), true);
+    }
+
     public String readText(Charset charset) throws AdfsException
-    { return new String(readBytes(), charset); }
+    {
+        return new String(readBytes(), charset);
+    }
+
     public void writeText(String text) throws AdfsException
-    { writeBytes(org.rob_smallshire.oaknut.file.TextIo.encode(text, "\r")); }
+    {
+        writeBytes(org.rob_smallshire.oaknut.file.TextIo.encode(text, "\r"));
+    }
+
     public void touch() throws AdfsException
-    { touch(true); }
+    {
+        touch(true);
+    }
+
     public void touch(boolean existOk) throws AdfsException
     {
         if (exists())
@@ -166,12 +215,15 @@ public final class AdfsPath
                 throw new AdfsEntryExistsException("Entry exists");
             if (isDirectory())
                 throw new AdfsPathException("Cannot touch a directory");
-        }
-        else
+        } else
             writeBytes(new byte[0]);
     }
+
     public void mkdir() throws AdfsException
-    { mkdir(false, false); }
+    {
+        mkdir(false, false);
+    }
+
     public void mkdir(boolean parents, boolean existOk) throws AdfsException
     {
         if (exists())
@@ -184,10 +236,17 @@ public final class AdfsPath
             parent().mkdir(true, true);
         adfs.mkdir(parts);
     }
+
     public void unlink() throws AdfsException
-    { adfs.remove(parts, false); }
+    {
+        adfs.remove(parts, false);
+    }
+
     public void rmdir() throws AdfsException
-    { adfs.remove(parts, true); }
+    {
+        adfs.remove(parts, true);
+    }
+
     public AdfsPath rename(AdfsPath target) throws AdfsException
     {
         if (target.adfs != adfs)
@@ -195,8 +254,12 @@ public final class AdfsPath
         adfs.rename(parts, target.parts);
         return target;
     }
+
     public AdfsPath rename(String target) throws AdfsException
-    { return rename(adfs.path(target)); }
+    {
+        return rename(adfs.path(target));
+    }
+
     public AdfsPath duplicate(AdfsPath target) throws AdfsException
     {
         if (target.exists())
@@ -204,58 +267,107 @@ public final class AdfsPath
         target.writeBytes(readBytes(), stat().metadata());
         return target;
     }
+
     public void setMetadata(AcornMeta metadata) throws AdfsException
-    { adfs.setMetadata(parts, metadata); }
+    {
+        adfs.setMetadata(parts, metadata);
+    }
+
     public void chmod(int access) throws AdfsException
     {
         AcornMeta m = stat().metadata();
         setMetadata(new AcornMeta(m.loadAddress(), m.executionAddress(), access));
     }
+
     public void lock() throws AdfsException
-    { chmod(stat().access() | Access.L); }
+    {
+        chmod(stat().access() | Access.L);
+    }
+
     public void unlock() throws AdfsException
-    { chmod(stat().access() & ~Access.L); }
+    {
+        chmod(stat().access() & ~Access.L);
+    }
+
     public void setLoadAddress(long address) throws AdfsException
     {
         AcornMeta m = stat().metadata();
         setMetadata(new AcornMeta(address, m.executionAddress(), m.access()));
     }
+
     public void setExecutionAddress(long address) throws AdfsException
     {
         AcornMeta m = stat().metadata();
         setMetadata(new AcornMeta(m.loadAddress(), address, m.access()));
     }
+
     public Integer filetype() throws AdfsException
-    { return stat().metadata().filetype(); }
+    {
+        return stat().metadata().filetype();
+    }
+
     public void setFiletype(int type) throws AdfsException
-    { setMetadata(stat().metadata().withFiletype(type)); }
+    {
+        setMetadata(stat().metadata().withFiletype(type));
+    }
+
     public Instant datestamp() throws AdfsException
-    { return stat().metadata().datestamp(); }
+    {
+        return stat().metadata().datestamp();
+    }
+
     public void setDatestamp(Instant when) throws AdfsException
-    { setMetadata(stat().metadata().withDatestamp(when)); }
+    {
+        setMetadata(stat().metadata().withDatestamp(when));
+    }
+
     public String title() throws AdfsException
     {
         if (adfs.format().big())
             throw new UnsupportedOperationException("Big directories have no title");
         return adfs.directory(parts).title();
     }
+
     public void setTitle(String title) throws AdfsException
-    { adfs.setDirectoryTitle(parts, title); }
+    {
+        adfs.setDirectoryTitle(parts, title);
+    }
+
     public Path exportFile(Path path) throws IOException
-    { return exportFile(path, MetaFormat.INF_TRAD); }
+    {
+        return exportFile(path, MetaFormat.INF_TRAD);
+    }
+
     public Path exportFile(Path path, MetaFormat format) throws IOException
     {
         return HostBridge.exportFile(
-            path, name(), readBytes(), stat().metadata(), format, 0, adfs.usesTypedMetadata());
+                path,
+                name(),
+                readBytes(),
+                stat().metadata(),
+                format,
+                0,
+                adfs.usesTypedMetadata());
     }
+
     public Path exportFile(Path path, MetaFormat format, int owner, boolean typedMetadata)
-        throws IOException
+            throws IOException
     {
         return HostBridge.exportFile(
-            path, name(), readBytes(), stat().metadata(), format, owner, typedMetadata);
+                path,
+                name(),
+                readBytes(),
+                stat().metadata(),
+                format,
+                owner,
+                typedMetadata);
     }
+
     public void importFile(Path path) throws IOException
-    { importFile(path, HostBridge.DEFAULT_IMPORT_FORMATS); }
+    {
+        importFile(path, HostBridge.DEFAULT_IMPORT_FORMATS);
+    }
+
     public void importFile(Path path, List<MetaFormat> formats) throws IOException
     {
         HostBridge.Imported imported = HostBridge.importFile(path, formats);
