@@ -37,7 +37,7 @@ code in the boot loader, which ends Zone 4 with track 47 on head 0
 and track 39 on Head 1.
 
 FluxEngine can read and write both the single-sided and double-sided variants. 
-"""
+""",
     """
 ## References
 
@@ -67,7 +67,7 @@ layout {
             physical {
                 start_sector = 0
             }
-        }
+        },
         {
             side = 0
             track = 0
@@ -75,7 +75,7 @@ layout {
             physical {
                 count = 19
             }
-        }
+        },
         {
             side = 0
             track = 4
@@ -83,7 +83,7 @@ layout {
             physical {
                 count = 18
             }
-        }
+        },
         {
             side = 0
             track = 16
@@ -91,7 +91,7 @@ layout {
             physical {
                 count = 17
             }
-        }
+        },
         {
             side = 0
             track = 27
@@ -99,7 +99,7 @@ layout {
             physical {
                 count = 16
             }
-        }
+        },
         {
             side = 0
             track = 38
@@ -107,7 +107,7 @@ layout {
             physical {
                 count = 15
             }
-        }
+        },
         {
             side = 0
             track = 48
@@ -115,7 +115,7 @@ layout {
             physical {
                 count = 14
             }
-        }
+        },
         {
             side = 0
             track = 60
@@ -123,7 +123,7 @@ layout {
             physical {
                 count = 13
             }
-        }
+        },
         {
             side = 0
             track = 71
@@ -131,7 +131,7 @@ layout {
             physical {
                 count = 12
             }
-        }
+        },
         {
             side = 1
             track = 0
@@ -139,7 +139,7 @@ layout {
             physical {
                 count = 18
             }
-        }
+        },
         {
             side = 1
             track = 8
@@ -147,7 +147,7 @@ layout {
             physical {
                 count = 17
             }
-        }
+        },
         {
             side = 1
             track = 19
@@ -155,7 +155,7 @@ layout {
             physical {
                 count = 16
             }
-        }
+        },
         {
             side = 1
             track = 30
@@ -163,7 +163,7 @@ layout {
             physical {
                 count = 15
             }
-        }
+        },
         {
             side = 1
             track = 40
@@ -171,7 +171,7 @@ layout {
             physical {
                 count = 14
             }
-        }
+        },
         {
             side = 1
             track = 52
@@ -179,7 +179,7 @@ layout {
             physical {
                 count = 13
             }
-        }
+        },
         {
             side = 1
             track = 63
@@ -187,7 +187,7 @@ layout {
             physical {
                 count = 12
             }
-        }
+        },
         {
             side = 1
             track = 75
@@ -210,97 +210,97 @@ encoder {
                 post_header_gap_bits = 60
                 pre_data_sync_bits = 40
                 post_data_gap_bits = 300
-            }
+            },
             {
                 head = 0
                 min_track = 0
                 max_track = 3
                 rotational_period_ms = 237.9
-            }
+            },
             {
                 head = 0
                 min_track = 4
                 max_track = 15
                 rotational_period_ms = 224.5
-            }
+            },
             {
                 head = 0
                 min_track = 16
                 max_track = 26
                 rotational_period_ms = 212.2
-            }
+            },
             {
                 head = 0
                 min_track = 27
                 max_track = 37
                 rotational_period_ms = 199.9
-            }
+            },
             {
                 head = 0
                 min_track = 38
                 max_track = 47
                 rotational_period_ms = 187.6
-            }
+            },
             {
                 head = 0
                 min_track = 48
                 max_track = 59
                 rotational_period_ms = 175.3
-            }
+            },
             {
                 head = 0
                 min_track = 60
                 max_track = 70
                 rotational_period_ms = 163.0
-            }
+            },
             {
                 head = 0
                 min_track = 71
                 max_track = 79
                 rotational_period_ms = 149.6
-            }
+            },
             {
                 head = 1
                 min_track = 0
                 max_track = 7
                 rotational_period_ms = 224.5
-            }
+            },
             {
                 head = 1
                 min_track = 8
                 max_track = 18
                 rotational_period_ms = 212.2
-            }
+            },
             {
                 head = 1
                 min_track = 19
                 max_track = 29
                 rotational_period_ms = 199.9
-            }
+            },
             {
                 head = 1
                 min_track = 30
                 max_track = 39
                 rotational_period_ms = 187.6
-            }
+            },
             {
                 head = 1
                 min_track = 40
                 max_track = 51
                 rotational_period_ms = 175.3
-            }
+            },
             {
                 head = 1
                 min_track = 52
                 max_track = 62
                 rotational_period_ms = 163.0
-            }
+            },
             {
                 head = 1
                 min_track = 63
                 max_track = 74
                 rotational_period_ms = 149.6
-            }
+            },
             {
                 head = 1
                 min_track = 75
@@ -330,7 +330,7 @@ option_group = [
                         sides = 1
                     }
                 }
-            }
+            },
             {
                 name = "1224"
                 comment = "1224kB 80-track DSHD GCR"

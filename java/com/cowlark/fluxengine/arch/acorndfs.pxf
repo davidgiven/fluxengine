@@ -14,7 +14,7 @@ used as another volume.
 They come in two varieties, 40 track and 80 track. These should both work.
 Some rare disks are both at the same time. FluxEngine can read these but it
 requires a bit of fiddling as they have the same tracks on twice.
-"""
+""",
     """
 ## References
 
@@ -93,7 +93,7 @@ option_group = [
                         tracks = 40
                     }
                 }
-            }
+            },
             {
                 name = "200"
                 comment = "200kB 80-track SSSD"

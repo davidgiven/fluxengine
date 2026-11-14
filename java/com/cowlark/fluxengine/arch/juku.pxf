@@ -78,7 +78,7 @@ option_group = [
                 name = "800"
                 comment = "800kB 80-track 10-sector DSDD"
                 set_by_default = true
-            }
+            },
             {
                 name = "400"
                 comment = "400kB 80-track 10-sector SSDD"

@@ -51,7 +51,9 @@ genrule(
     name = "names",
     srcs = glob(["*.pxf"]),
     outs = ["formats/names.txt"],
-    cmd = "printf '%%s\\n' %s > $(location formats/names.txt)" % " ".join(FORMATS),
+    cmd = "$(location //java/com/cowlark/fluxengine/buildutils:lint_pxf) $(SRCS) && " +
+          "printf '%%s\\n' %s > $(location formats/names.txt)" % " ".join(FORMATS),
+    tools = ["//java/com/cowlark/fluxengine/buildutils:lint_pxf"],
 )
 
 filegroup(

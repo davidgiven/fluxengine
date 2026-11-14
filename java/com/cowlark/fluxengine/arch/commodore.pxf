@@ -44,7 +44,7 @@ quickly.)
 	of storage. This also uses IBM encoding.
 
 A CMD FD2000 disk (a popular third-party Commodore disk drive) 
-"""
+""",
     """
 ## References
 
@@ -85,7 +85,7 @@ option_group = [
                         layoutdata = [
                             {
                                 sector_size = 256
-                            }
+                            },
                             {
                                 track = 0
                                 up_to_track = 16
@@ -93,7 +93,7 @@ option_group = [
                                     start_sector = 0
                                     count = 21
                                 }
-                            }
+                            },
                             {
                                 track = 17
                                 up_to_track = 23
@@ -101,7 +101,7 @@ option_group = [
                                     start_sector = 0
                                     count = 19
                                 }
-                            }
+                            },
                             {
                                 track = 24
                                 up_to_track = 29
@@ -109,7 +109,7 @@ option_group = [
                                     start_sector = 0
                                     count = 18
                                 }
-                            }
+                            },
                             {
                                 track = 30
                                 up_to_track = 39
@@ -130,7 +130,7 @@ option_group = [
                         c64 {}
                     }
                 }
-            }
+            },
             {
                 name = "192"
                 comment = "192kB 1541, 40-track variant"
@@ -143,7 +143,7 @@ option_group = [
                         layoutdata = [
                             {
                                 sector_size = 256
-                            }
+                            },
                             {
                                 track = 0
                                 up_to_track = 16
@@ -151,7 +151,7 @@ option_group = [
                                     start_sector = 0
                                     count = 21
                                 }
-                            }
+                            },
                             {
                                 track = 17
                                 up_to_track = 23
@@ -159,7 +159,7 @@ option_group = [
                                     start_sector = 0
                                     count = 19
                                 }
-                            }
+                            },
                             {
                                 track = 24
                                 up_to_track = 29
@@ -167,7 +167,7 @@ option_group = [
                                     start_sector = 0
                                     count = 18
                                 }
-                            }
+                            },
                             {
                                 track = 30
                                 up_to_track = 39
@@ -188,7 +188,7 @@ option_group = [
                         c64 {}
                     }
                 }
-            }
+            },
             {
                 name = "800"
                 comment = "800kB 3.5\" 1581"
@@ -235,7 +235,7 @@ option_group = [
                         }
                     }
                 }
-            }
+            },
             {
                 name = "521"
                 comment = "521kB 5.25\" 8050"
@@ -248,7 +248,7 @@ option_group = [
                         layoutdata = [
                             {
                                 sector_size = 256
-                            }
+                            },
                             {
                                 track = 0
                                 up_to_track = 38
@@ -256,7 +256,7 @@ option_group = [
                                     start_sector = 0
                                     count = 29
                                 }
-                            }
+                            },
                             {
                                 track = 39
                                 up_to_track = 52
@@ -264,7 +264,7 @@ option_group = [
                                     start_sector = 0
                                     count = 27
                                 }
-                            }
+                            },
                             {
                                 track = 53
                                 up_to_track = 63
@@ -272,7 +272,7 @@ option_group = [
                                     start_sector = 0
                                     count = 25
                                 }
-                            }
+                            },
                             {
                                 track = 64
                                 up_to_track = 76
@@ -289,7 +289,7 @@ option_group = [
                         c64 {}
                     }
                 }
-            }
+            },
             {
                 name = "1042"
                 comment = "1042kB 5.25\" 8250"
@@ -302,7 +302,7 @@ option_group = [
                         layoutdata = [
                             {
                                 sector_size = 256
-                            }
+                            },
                             {
                                 track = 0
                                 up_to_track = 38
@@ -310,7 +310,7 @@ option_group = [
                                     start_sector = 0
                                     count = 29
                                 }
-                            }
+                            },
                             {
                                 track = 39
                                 up_to_track = 52
@@ -318,7 +318,7 @@ option_group = [
                                     start_sector = 0
                                     count = 27
                                 }
-                            }
+                            },
                             {
                                 track = 53
                                 up_to_track = 63
@@ -326,7 +326,7 @@ option_group = [
                                     start_sector = 0
                                     count = 25
                                 }
-                            }
+                            },
                             {
                                 track = 64
                                 up_to_track = 76
@@ -343,7 +343,7 @@ option_group = [
                         c64 {}
                     }
                 }
-            }
+            },
             {
                 name = "1620"
                 comment = "1620kB, CMD FD2000"

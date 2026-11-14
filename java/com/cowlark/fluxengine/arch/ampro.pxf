@@ -33,7 +33,7 @@ kaydiag.lbr
 kayinfo.lbr
 ...etc...
 ```
-"""
+""",
     """
 ## References
 
@@ -89,10 +89,11 @@ option_group = [
                         tracks = 40
                     }
                 }
-            }
+            },
             {
                 name = "800"
                 comment = "800kB 80-track DSDD"
+                set_by_default = true
 
                 config {
                     layout {

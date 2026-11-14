@@ -14,7 +14,7 @@ with a sector number of 66 on a disk, which can horribly confuse things. The
 Atari profiles below are configured to ignore these.
 
 Be aware that many PC drives (including mine) won't do the 82 track formats. 
-"""
+""",
     """
 ## References
 
@@ -86,7 +86,7 @@ option_group = [
                         ]
                     }
                 }
-            }
+            },
             {
                 name = "370"
                 comment = "370kB 3.5\" 82-track 9-sector SSDD"
@@ -106,7 +106,7 @@ option_group = [
                         ]
                     }
                 }
-            }
+            },
             {
                 name = "400"
                 comment = "400kB 3.5\" 80-track 10-sector SSDD"
@@ -126,7 +126,7 @@ option_group = [
                         ]
                     }
                 }
-            }
+            },
             {
                 name = "410"
                 comment = "410kB 3.5\" 82-track 10-sector SSDD"
@@ -146,7 +146,7 @@ option_group = [
                         ]
                     }
                 }
-            }
+            },
             {
                 name = "720"
                 comment = "720kB 3.5\" 80-track 9-sector DSDD"
@@ -167,7 +167,7 @@ option_group = [
                         ]
                     }
                 }
-            }
+            },
             {
                 name = "740"
                 comment = "740kB 3.5\" 82-track 9-sector DSDD"
@@ -187,7 +187,7 @@ option_group = [
                         ]
                     }
                 }
-            }
+            },
             {
                 name = "800"
                 comment = "800kB 3.5\" 80-track 10-sector DSDD"
@@ -207,7 +207,7 @@ option_group = [
                         ]
                     }
                 }
-            }
+            },
             {
                 name = "820"
                 comment = "820kB 3.5\" 82-track 10-sector DSDD"

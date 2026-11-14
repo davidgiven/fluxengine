@@ -56,7 +56,7 @@ option_group = [
                         }
                     }
                 }
-            }
+            },
             {
                 name = "200"
                 comment = "200kB 40-track 10-sector SSDD"
@@ -89,7 +89,7 @@ option_group = [
                         }
                     }
                 }
-            }
+            },
             {
                 name = "400"
                 comment = "400kB 40-track 10-sector DSDD"
@@ -123,7 +123,7 @@ option_group = [
                     }
 
                 }
-            }
+            },
             {
                 name = "800"
                 comment = "800kB 80-track 10-sector DSDD"

@@ -40,7 +40,7 @@ A track is:
 
 The checksum is just the unsigned integer sum of all the words in the sector.
 Words are all stored little-endian.
-"""
+""",
     """
 ## References
 
@@ -91,7 +91,7 @@ option_group = [
                         sides = 1
                     }
                 }
-            }
+            },
             {
                 name = "220ds"
                 comment = "220kB 5.25\" 40-track DSSD"
@@ -103,7 +103,7 @@ option_group = [
                         sides = 2
                     }
                 }
-            }
+            },
             {
                 name = "220ss"
                 comment = "220kB 5.25\" 80-track SSSD"
@@ -115,7 +115,7 @@ option_group = [
                         sides = 1
                     }
                 }
-            }
+            },
             {
                 name = "440"
                 comment = "440kB 5.25\" 80-track DSSD"

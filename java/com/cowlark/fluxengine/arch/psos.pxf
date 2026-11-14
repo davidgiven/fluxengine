@@ -47,10 +47,10 @@ layout {
             sector_size = 1024
             physical {
                 sector = [
-                    1
-                    2
-                    3
-                    4
+                    1,
+                    2,
+                    3,
+                    4,
                     5
                 ]
 

@@ -35,7 +35,7 @@ do anything about that.
 If you find one of these misaligned disks then *please* [get in
 touch](https://github.com/davidgiven/fluxengine/issues/new); I want to
 investigate.
-"""
+""",
     """
 Dealing with misaligned disks
 -----------------------------
@@ -173,7 +173,7 @@ option_group = [
                     }
 
                 }
-            }
+            },
             {
                 name = "240"
                 comment = "240kB 3.5\" 78-track SS GCR"
