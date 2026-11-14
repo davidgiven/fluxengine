@@ -21,6 +21,10 @@ they might require nudging as the side order can't be reliably autodetected.
 """
 ]
 
+filesystem {
+    type = ACORNADFS
+}
+
 image_writer {
     filename = "acornadfs.img"
     type = IMAGETYPE_IMG

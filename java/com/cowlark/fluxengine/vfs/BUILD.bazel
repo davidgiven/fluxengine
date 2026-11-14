@@ -33,6 +33,8 @@ java_library(
         "//third_party/java/com/github/adflib/adflib",
         "//third_party/java/org/elm_chan/ff",
         "//third_party/java/org/mars/hfsutils",
+        "//third_party/java/org/rob_smallshire/oaknut/adfs",
+        "//third_party/java/org/rob_smallshire/oaknut/discimage",
         "@maven//:com_google_guava_guava",
         "@maven//:org_apache_commons_commons_lang3",
         "@maven//:org_indunet_fastproto",

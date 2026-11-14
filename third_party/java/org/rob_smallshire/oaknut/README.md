@@ -80,8 +80,8 @@ enabled. Calling `toByteArray()` explicitly still reads the whole image.
 Storage is borrowed: closing an ADFS handle calls `Storage.flush()` but never
 closes the underlying device. Flush need not commit its owner's transaction;
 the FluxEngine adapter writes through to pending block changes and leaves
-commit/revert to the filesystem lifecycle. Its per-mount block cache is
-populated lazily and discarded on dismount.
+commit/revert to the filesystem lifecycle. It delegates reads and writes
+directly to `BlockDevice`, which supplies its own cache.
 
 `Storage` methods can throw `IOException`. Sector views preserve their existing
 unchecked buffer-style API by wrapping failures in `UncheckedIOException`;

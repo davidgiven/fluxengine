@@ -425,3 +425,23 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "AcornAdfsFilesystemTest",
+    srcs = ["AcornAdfsFilesystemTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/algorithms",
+        "//java/com/cowlark/fluxengine/config",
+        "//java/com/cowlark/fluxengine/config:config_java_proto",
+        "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/data",
+        "//java/com/cowlark/fluxengine/vfs",
+        "//java/com/cowlark/fluxengine/vfs:vfs_java_proto",
+        "//javatests/com/cowlark/fluxengine/testing",
+        "//third_party/java/org/rob_smallshire/oaknut/adfs",
+        "//third_party/java/org/rob_smallshire/oaknut/discimage",
+        "@maven//:com_google_guava_guava",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)

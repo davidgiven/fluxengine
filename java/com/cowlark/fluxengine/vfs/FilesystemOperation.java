@@ -18,6 +18,7 @@ public abstract class FilesystemOperation extends ReadWriteFluxOperation
         Filesystem filesystem = switch (fsConfig.getType())
         {
             case NOT_SET -> throw new ConfigException("no filesystem configured");
+            case ACORNADFS -> new AcornAdfsFilesystem(fsConfig.getAcornadfs(), blockDevice);
             case ACORNDFS -> new AcornDfsFilesystem(fsConfig.getAcorndfs(), blockDevice);
             case BROTHER120 -> new Brother120Filesystem(fsConfig.getBrother120(), blockDevice);
             case FATFS -> new FatFilesystem(fsConfig.getFatfs(), blockDevice);
