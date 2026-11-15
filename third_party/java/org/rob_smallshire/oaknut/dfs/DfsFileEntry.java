@@ -15,7 +15,10 @@ public record DfsFileEntry(String name, boolean locked, long loadAddress, long e
 
     public AcornMeta metadata()
     {
-        return new AcornMeta(loadAddress, executionAddress, locked ? Access.L | Access.R : Access.R | Access.W);
+        return new AcornMeta(
+                loadAddress,
+                executionAddress,
+                locked ? Access.L | Access.R : Access.R | Access.W);
     }
 
     public DfsFileEntry withName(String value)
@@ -25,8 +28,13 @@ public record DfsFileEntry(String name, boolean locked, long loadAddress, long e
 
     public DfsFileEntry withMetadata(AcornMeta value)
     {
-        return new DfsFileEntry(name, value.access() == null ? locked : (value.access() & Access.L) != 0,
-                value.loadAddress(), value.executionAddress(), length, startSector);
+        return new DfsFileEntry(
+                name,
+                value.access() == null ? locked : (value.access() & Access.L) != 0,
+                value.loadAddress(),
+                value.executionAddress(),
+                length,
+                startSector);
     }
 
     public DfsFileEntry withStartSector(int value)

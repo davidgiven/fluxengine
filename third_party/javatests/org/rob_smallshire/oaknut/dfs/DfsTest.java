@@ -50,7 +50,10 @@ public class DfsTest
                 assertEquals(format.tracks * 10, disc.info().totalSectors());
                 assertEquals(format.tracks * 10 - (format.watford ? 4 : 2), disc.freeSectors());
                 byte[] data = payload(5011);
-                disc.writeFile("a.Hello", data, new AcornMeta(0xffff1900L, 0x28023, Access.R | Access.W));
+                disc.writeFile(
+                        "a.Hello",
+                        data,
+                        new AcornMeta(0xffff1900L, 0x28023, Access.R | Access.W));
                 assertEquals("a.Hello", disc.stat("A.HELLO").name());
                 assertEquals(0xffff1900L, disc.stat("a.hello").loadAddress());
                 assertEquals(0x28023, disc.stat("a.hello").executionAddress());
@@ -79,7 +82,9 @@ public class DfsTest
     @Test
     public void writesReplaceAndRenamesRefuseCollisions() throws Exception
     {
-        for (DfsFormat format : List.of(DfsFormat.ACORN_DFS_40T_SINGLE_SIDED, DfsFormat.WATFORD_DFS_40T_SINGLE_SIDED))
+        for (DfsFormat format : List.of(
+                DfsFormat.ACORN_DFS_40T_SINGLE_SIDED,
+                DfsFormat.WATFORD_DFS_40T_SINGLE_SIDED))
             try (Dfs disc = Dfs.create(format))
             {
                 disc.writeFile("Hello", new byte[]{1});
@@ -88,7 +93,9 @@ public class DfsTest
                 assertArrayEquals(new byte[]{2, 3}, disc.readFile("HELLO"));
                 disc.writeFile("A.Other", new byte[]{4});
                 byte[] before = disc.toByteArray();
-                assertThrows(FileAlreadyExistsException.class, () -> disc.renameFile("hello", "a.other"));
+                assertThrows(
+                        FileAlreadyExistsException.class,
+                        () -> disc.renameFile("hello", "a.other"));
                 assertArrayEquals(before, disc.toByteArray());
                 disc.renameFile("hello", "B.New");
                 assertFalse(disc.exists("hello"));
@@ -107,11 +114,20 @@ public class DfsTest
         try (Dfs disc = Dfs.create(DfsFormat.ACORN_DFS_80T_SINGLE_SIDED))
         {
             disc.writeFile("DATA", new byte[]{7});
-            for (long address : new long[]{0, 0xffff, 0x10000, 0x20000, 0x2ffff, 0x30000, 0x3abcd, 0xffffffffL})
+            for (long address : new long[]{0,
+                    0xffff,
+                    0x10000,
+                    0x20000,
+                    0x2ffff,
+                    0x30000,
+                    0x3abcd,
+                    0xffffffffL})
             {
                 disc.setLoadAddress("DATA", address);
                 disc.setExecutionAddress("DATA", address);
-                assertEquals(Catalogue.expandHostAddress(address & 0x3ffff), disc.stat("DATA").loadAddress());
+                assertEquals(
+                        Catalogue.expandHostAddress(address & 0x3ffff),
+                        disc.stat("DATA").loadAddress());
                 assertEquals(disc.stat("DATA").loadAddress(), disc.stat("DATA").executionAddress());
             }
             disc.setLocked("DATA", true);
@@ -129,17 +145,34 @@ public class DfsTest
     @Test
     public void namesAreFlatCasePreservingAndBoundedByStorage() throws Exception
     {
-        for (DfsFormat format : List.of(DfsFormat.ACORN_DFS_40T_SINGLE_SIDED, DfsFormat.WATFORD_DFS_40T_SINGLE_SIDED))
+        for (DfsFormat format : List.of(
+                DfsFormat.ACORN_DFS_40T_SINGLE_SIDED,
+                DfsFormat.WATFORD_DFS_40T_SINGLE_SIDED))
             try (Dfs disc = Dfs.create(format))
             {
-                for (String name : List.of("GUARD#1", "GUARD#2", "SAVE*", "DATA!1", "A\u0001B", "a.Mixed"))
+                for (String name : List.of(
+                        "GUARD#1",
+                        "GUARD#2",
+                        "SAVE*",
+                        "DATA!1",
+                        "A\u0001B",
+                        "a.Mixed"))
                 {
                     disc.writeFile(name, new byte[]{1});
                     assertTrue(disc.exists(name));
                     assertEquals(Catalogue.filename(name, false), disc.stat(name).name());
                 }
-                for (String name : List.of("", "TOOLONGNAME", "A.B.C", "BAD:NAME", "A\u00ffB", "&.NEW"))
-                    assertThrows(name, IllegalArgumentException.class, () -> disc.writeFile(name, new byte[]{1}));
+                for (String name : List.of(
+                        "",
+                        "TOOLONGNAME",
+                        "A.B.C",
+                        "BAD:NAME",
+                        "A\u00ffB",
+                        "&.NEW"))
+                    assertThrows(
+                            name,
+                            IllegalArgumentException.class,
+                            () -> disc.writeFile(name, new byte[]{1}));
                 disc.touch("EMPTY", false);
                 assertArrayEquals(new byte[0], disc.readFile("EMPTY"));
                 disc.touch("EMPTY", true);
@@ -151,7 +184,9 @@ public class DfsTest
     @Test
     public void metadataValidationAndTitlePadding() throws Exception
     {
-        for (DfsFormat format : List.of(DfsFormat.ACORN_DFS_40T_SINGLE_SIDED, DfsFormat.WATFORD_DFS_40T_SINGLE_SIDED))
+        for (DfsFormat format : List.of(
+                DfsFormat.ACORN_DFS_40T_SINGLE_SIDED,
+                DfsFormat.WATFORD_DFS_40T_SINGLE_SIDED))
             try (Dfs disc = Dfs.create(format))
             {
                 disc.setTitle(format.watford ? "1234567890" : "123456789012");
@@ -163,7 +198,9 @@ public class DfsTest
                 assertEquals((cycle + 1) & 255, disc.info().cycleNumber());
                 assertEquals(2, disc.info().bootOption());
                 byte[] before = disc.toByteArray();
-                assertThrows(IllegalArgumentException.class, () -> disc.setTitle("TITLE MUCH TOO LONG"));
+                assertThrows(
+                        IllegalArgumentException.class,
+                        () -> disc.setTitle("TITLE MUCH TOO LONG"));
                 assertThrows(IllegalArgumentException.class, () -> disc.setTitle("bad\n"));
                 assertThrows(IllegalArgumentException.class, () -> disc.setBootOption(4));
                 assertArrayEquals(before, disc.toByteArray());
@@ -176,14 +213,18 @@ public class DfsTest
     @Test
     public void fullCatalogueCanOverwriteButNotAdd() throws Exception
     {
-        for (DfsFormat format : List.of(DfsFormat.ACORN_DFS_40T_SINGLE_SIDED, DfsFormat.WATFORD_DFS_40T_SINGLE_SIDED))
+        for (DfsFormat format : List.of(
+                DfsFormat.ACORN_DFS_40T_SINGLE_SIDED,
+                DfsFormat.WATFORD_DFS_40T_SINGLE_SIDED))
             try (Dfs disc = Dfs.create(format, "LongTitle!"))
             {
                 int max = format.watford ? 62 : 31;
                 for (int i = 0; i < max; i++)
                     disc.writeFile("F" + i, new byte[]{(byte) i});
                 assertEquals(max, disc.files().size());
-                assertThrows(DfsCatalogueFullException.class, () -> disc.writeFile("EXTRA", new byte[0]));
+                assertThrows(
+                        DfsCatalogueFullException.class,
+                        () -> disc.writeFile("EXTRA", new byte[0]));
                 disc.writeFile("f0", new byte[]{99});
                 assertEquals(max, disc.files().size());
                 assertArrayEquals(new byte[]{99}, disc.readFile("F0"));
@@ -217,11 +258,15 @@ public class DfsTest
             assertEquals(1, disc.freeMap().size());
             byte[] before = disc.toByteArray();
             assertThrows(NoSuchFileException.class, () -> disc.compact(List.of("MISSING")));
-            assertThrows(DfsDiscFullException.class, () -> disc.writeFile("FIRST", new byte[102400]));
+            assertThrows(
+                    DfsDiscFullException.class,
+                    () -> disc.writeFile("FIRST", new byte[102400]));
             assertArrayEquals(before, disc.toByteArray());
             disc.setTotalSectors(20);
             assertEquals(10, disc.freeSectors());
-            assertThrows(DfsDiscFullException.class, () -> disc.writeFile("BIG", new byte[21 * 256]));
+            assertThrows(
+                    DfsDiscFullException.class,
+                    () -> disc.writeFile("BIG", new byte[21 * 256]));
         }
     }
 
@@ -248,7 +293,9 @@ public class DfsTest
             disc.writeFile("LAST", payload(60 * 256));
             disc.deleteFile("MIDDLE");
             assertEquals(278, disc.freeSectors());
-            assertThrows(DfsDiscFullException.class, () -> disc.writeFile("BIG", new byte[230 * 256]));
+            assertThrows(
+                    DfsDiscFullException.class,
+                    () -> disc.writeFile("BIG", new byte[230 * 256]));
             disc.compact();
             disc.writeFile("BIG", new byte[230 * 256]);
             assertArrayEquals(payload(60 * 256), disc.readFile("LAST"));
@@ -274,7 +321,9 @@ public class DfsTest
             assertTrue(disc.isReadOnly());
             assertThrows(DfsReadOnlyException.class, () -> disc.writeFile("NEW", new byte[]{1}));
         }
-        assertThrows(DfsFormatException.class, () -> Dfs.fromBuffer(ByteBuffer.allocate(0), format));
+        assertThrows(
+                DfsFormatException.class,
+                () -> Dfs.fromBuffer(ByteBuffer.allocate(0), format));
     }
 
     @Test
@@ -282,7 +331,10 @@ public class DfsTest
     {
         try (Dfs disc = Dfs.create(DfsFormat.ACORN_DFS_80T_SINGLE_SIDED))
         {
-            disc.writeFile("A.File", payload(789), new AcornMeta(0xffff1900L, 0xffff8023L, Access.L));
+            disc.writeFile(
+                    "A.File",
+                    payload(789),
+                    new AcornMeta(0xffff1900L, 0xffff8023L, Access.L));
             Path host = temporary.getRoot().toPath().resolve("file");
             disc.exportFile("A.File", host);
             assertTrue(Files.exists(host.resolveSibling("file.inf")));

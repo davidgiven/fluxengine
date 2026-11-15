@@ -31,8 +31,13 @@ public final class Dfs implements AutoCloseable
     private final FileChannel ownedChannel;
     private boolean closed;
 
-    private Dfs(Storage storage, DfsFormat format, int side, boolean rollbackEnabled,
-            FileChannel channel, boolean recognise) throws IOException
+    private Dfs(
+            Storage storage,
+            DfsFormat format,
+            int side,
+            boolean rollbackEnabled,
+            FileChannel channel,
+            boolean recognise) throws IOException
     {
         if (side < 0 || side >= format.sides)
             throw new IllegalArgumentException("Invalid DFS side: " + side);
@@ -42,7 +47,8 @@ public final class Dfs implements AutoCloseable
         this.rollbackEnabled = rollbackEnabled;
         ownedChannel = channel;
         Surface surface = new DiscImage(storage, format.surfaces()).surface(side);
-        Catalogue catalogue = format.watford ? new WatfordDfsCatalogue(surface) : new AcornDfsCatalogue(surface);
+        Catalogue catalogue =
+                format.watford ? new WatfordDfsCatalogue(surface) : new AcornDfsCatalogue(surface);
         if (recognise)
         {
             Catalogue.Assessment assessment = catalogue.assess();
@@ -52,13 +58,17 @@ public final class Dfs implements AutoCloseable
         files = new CataloguedSurface(catalogue);
     }
 
-    public static Dfs fromStorage(Storage storage, DfsFormat format, int side, boolean rollbackEnabled)
-            throws IOException
+    public static Dfs fromStorage(
+            Storage storage,
+            DfsFormat format,
+            int side,
+            boolean rollbackEnabled) throws IOException
     {
         return new Dfs(storage, format, side, rollbackEnabled, null, true);
     }
 
-    public static Dfs fromStorage(Storage storage, DfsFormat format, boolean rollbackEnabled) throws IOException
+    public static Dfs fromStorage(Storage storage, DfsFormat format, boolean rollbackEnabled)
+            throws IOException
     {
         return fromStorage(storage, format, 0, rollbackEnabled);
     }
@@ -91,7 +101,8 @@ public final class Dfs implements AutoCloseable
         DiscImage image = new DiscImage(storage, format.surfaces());
         for (int side = 0; side < format.sides; side++)
         {
-            Catalogue catalogue = format.watford ? new WatfordDfsCatalogue(image.surface(side)) :
+            Catalogue catalogue = format.watford ?
+                    new WatfordDfsCatalogue(image.surface(side)) :
                     new AcornDfsCatalogue(image.surface(side));
             catalogue.initialise(format.tracks * 10, side == 0 ? title : "", bootOption);
         }
@@ -108,75 +119,11 @@ public final class Dfs implements AutoCloseable
         return create(format, "", 0);
     }
 
-    /* File storage performs positional reads, zero-filling only a truncated file's tail.
-     * Writes can extend the file. Borrowed devices instead enforce their own exact I/O rules. */
-    private static final class FileStorage implements Storage
+    public static Dfs fromFile(Path path, DfsFormat format, int side, boolean readOnly)
+            throws IOException
     {
-        private final FileChannel channel;
-        private final int size;
-        private final boolean readOnly;
-
-        FileStorage(FileChannel channel, int size, boolean readOnly)
-        {
-            this.channel = channel;
-            this.size = size;
-            this.readOnly = readOnly;
-        }
-
-        @Override
-        public int size()
-        {
-            return size;
-        }
-
-        @Override
-        public boolean isReadOnly()
-        {
-            return readOnly;
-        }
-
-        @Override
-        public void read(int offset, byte[] destination, int destinationOffset, int length) throws IOException
-        {
-            java.util.Objects.checkFromIndexSize(offset, length, size);
-            ByteBuffer target = ByteBuffer.wrap(destination, destinationOffset, length);
-            int position = offset;
-            while (target.hasRemaining())
-            {
-                int count = channel.read(target, position);
-                if (count < 0)
-                {
-                    while (target.hasRemaining())
-                        target.put((byte) 0);
-                    break;
-                }
-                position += count;
-            }
-        }
-
-        @Override
-        public void write(int offset, byte[] source, int sourceOffset, int length) throws IOException
-        {
-            java.util.Objects.checkFromIndexSize(offset, length, size);
-            if (readOnly)
-                throw new DfsReadOnlyException("Read-only image");
-            ByteBuffer bytes = ByteBuffer.wrap(source, sourceOffset, length);
-            int position = offset;
-            while (bytes.hasRemaining())
-                position += channel.write(bytes, position);
-        }
-
-        @Override
-        public void flush() throws IOException
-        {
-            if (!readOnly)
-                channel.force(true);
-        }
-    }
-
-    public static Dfs fromFile(Path path, DfsFormat format, int side, boolean readOnly) throws IOException
-    {
-        FileChannel channel = readOnly ? FileChannel.open(path, StandardOpenOption.READ) :
+        FileChannel channel = readOnly ?
+                FileChannel.open(path, StandardOpenOption.READ) :
                 FileChannel.open(path, StandardOpenOption.READ, StandardOpenOption.WRITE);
         try
         {
@@ -197,7 +144,9 @@ public final class Dfs implements AutoCloseable
         DfsFormat format = DfsFormat.detect(path.toString(), size);
         try (FileChannel channel = FileChannel.open(path, StandardOpenOption.READ))
         {
-            Surface surface = new DiscImage(new FileStorage(channel, format.size(), true), format.surfaces()).surface(0);
+            Surface surface = new DiscImage(
+                    new FileStorage(channel, format.size(), true),
+                    format.surfaces()).surface(0);
             if (new WatfordDfsCatalogue(surface).assess().matches())
                 format = format.withWatford(true);
         }
@@ -211,8 +160,10 @@ public final class Dfs implements AutoCloseable
 
     public static Dfs createFile(Path path, DfsFormat format, String title) throws IOException
     {
-        try (Dfs image = create(format, title);
-                FileChannel channel = FileChannel.open(path, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE))
+        try (Dfs image = create(format, title); FileChannel channel = FileChannel.open(
+                path,
+                StandardOpenOption.CREATE_NEW,
+                StandardOpenOption.WRITE))
         {
             ByteBuffer bytes = ByteBuffer.wrap(image.toByteArray());
             while (bytes.hasRemaining())
@@ -223,20 +174,34 @@ public final class Dfs implements AutoCloseable
 
     public static Dfs createFile(Path path, String title) throws IOException
     {
-        return createFile(path, DfsFormat.detect(path.toString(),
-                path.toString().toLowerCase(java.util.Locale.ROOT).endsWith(".dsd") ? 409600 : 204800), title);
+        return createFile(
+                path, DfsFormat.detect(
+                        path.toString(),
+                        path.toString().toLowerCase(java.util.Locale.ROOT).endsWith(".dsd") ?
+                                409600 :
+                                204800), title);
+    }
+
+    public static int expand(Path path, DfsFormat format) throws IOException
+    {
+        try (FileChannel channel = FileChannel.open(
+                path,
+                StandardOpenOption.READ,
+                StandardOpenOption.WRITE))
+        {
+            long size = channel.size();
+            if (size == 0 || size > format.size())
+                throw new DfsFormatException("Image cannot be expanded to selected format");
+            if (size < format.size())
+                channel.write(ByteBuffer.wrap(new byte[1]), format.size() - 1);
+            return (int) (format.size() - size);
+        }
     }
 
     private void requireOpen() throws DfsClosedException
     {
         if (closed)
             throw new DfsClosedException("DFS image is closed");
-    }
-
-    @FunctionalInterface
-    private interface Mutation<T>
-    {
-        T run() throws IOException;
     }
 
     /* External storage owners can disable snapshots and supply their own commit/revert.
@@ -302,17 +267,26 @@ public final class Dfs implements AutoCloseable
 
     public void setTitle(String value) throws IOException
     {
-        mutate(() -> { files.catalogue().setTitle(value); return null; });
+        mutate(() -> {
+            files.catalogue().setTitle(value);
+            return null;
+        });
     }
 
     public void setBootOption(int value) throws IOException
     {
-        mutate(() -> { files.catalogue().setBootOption(value); return null; });
+        mutate(() -> {
+            files.catalogue().setBootOption(value);
+            return null;
+        });
     }
 
     public void setTotalSectors(int value) throws IOException
     {
-        mutate(() -> { files.catalogue().setTotalSectors(value); return null; });
+        mutate(() -> {
+            files.catalogue().setTotalSectors(value);
+            return null;
+        });
     }
 
     public ImmutableList<DfsFileEntry> files() throws IOException
@@ -341,13 +315,20 @@ public final class Dfs implements AutoCloseable
 
     public void writeFile(String name, byte[] data, AcornMeta metadata) throws IOException
     {
-        mutate(() -> { files.writeFile(name, data, metadata); return null; });
+        mutate(() -> {
+            files.writeFile(name, data, metadata);
+            return null;
+        });
     }
 
     /* Verbatim names preserve unusual stored directory bytes when copying archival discs. */
-    public void writeFile(String name, byte[] data, AcornMeta metadata, boolean verbatimName) throws IOException
+    public void writeFile(String name, byte[] data, AcornMeta metadata, boolean verbatimName)
+            throws IOException
     {
-        mutate(() -> { files.writeFile(name, data, metadata, verbatimName); return null; });
+        mutate(() -> {
+            files.writeFile(name, data, metadata, verbatimName);
+            return null;
+        });
     }
 
     public void writeFile(String name, byte[] data) throws IOException
@@ -357,7 +338,10 @@ public final class Dfs implements AutoCloseable
 
     public void deleteFile(String name) throws IOException
     {
-        mutate(() -> { files.catalogue().delete(name); return null; });
+        mutate(() -> {
+            files.catalogue().delete(name);
+            return null;
+        });
     }
 
     public void touch(String name, boolean existOk) throws IOException
@@ -382,8 +366,14 @@ public final class Dfs implements AutoCloseable
      * rather than RISC OS file types. Only the canonical access lock bit is representable. */
     public Path exportFile(String name, Path target, MetaFormat format) throws IOException
     {
-        return HostBridge.exportFile(target, stat(name).name(), readFile(name), stat(name).metadata(),
-                format, 0, false);
+        return HostBridge.exportFile(
+                target,
+                stat(name).name(),
+                readFile(name),
+                stat(name).metadata(),
+                format,
+                0,
+                false);
     }
 
     public Path exportFile(String name, Path target) throws IOException
@@ -402,27 +392,20 @@ public final class Dfs implements AutoCloseable
         importFile(name, source, HostBridge.DEFAULT_IMPORT_FORMATS);
     }
 
-    public static int expand(Path path, DfsFormat format) throws IOException
-    {
-        try (FileChannel channel = FileChannel.open(path, StandardOpenOption.READ, StandardOpenOption.WRITE))
-        {
-            long size = channel.size();
-            if (size == 0 || size > format.size())
-                throw new DfsFormatException("Image cannot be expanded to selected format");
-            if (size < format.size())
-                channel.write(ByteBuffer.wrap(new byte[1]), format.size() - 1);
-            return (int) (format.size() - size);
-        }
-    }
-
     public void renameFile(String source, String destination) throws IOException
     {
-        mutate(() -> { files.catalogue().rename(source, destination); return null; });
+        mutate(() -> {
+            files.catalogue().rename(source, destination);
+            return null;
+        });
     }
 
     public void setMetadata(String name, AcornMeta metadata) throws IOException
     {
-        mutate(() -> { files.catalogue().setMetadata(name, metadata); return null; });
+        mutate(() -> {
+            files.catalogue().setMetadata(name, metadata);
+            return null;
+        });
     }
 
     public void setLoadAddress(String name, long address) throws IOException
@@ -440,8 +423,11 @@ public final class Dfs implements AutoCloseable
     public void setLocked(String name, boolean locked) throws IOException
     {
         AcornMeta previous = stat(name).metadata();
-        setMetadata(name, new AcornMeta(previous.loadAddress(), previous.executionAddress(),
-                locked ? Access.L | Access.R : Access.R | Access.W));
+        setMetadata(
+                name, new AcornMeta(
+                        previous.loadAddress(),
+                        previous.executionAddress(),
+                        locked ? Access.L | Access.R : Access.R | Access.W));
     }
 
     public String readText(String name) throws IOException
@@ -509,6 +495,80 @@ public final class Dfs implements AutoCloseable
             closed = true;
             if (ownedChannel != null)
                 ownedChannel.close();
+        }
+    }
+
+    @FunctionalInterface
+    private interface Mutation<T>
+    {
+        T run() throws IOException;
+    }
+
+    /* File storage performs positional reads, zero-filling only a truncated file's tail.
+     * Writes can extend the file. Borrowed devices instead enforce their own exact I/O rules. */
+    private static final class FileStorage implements Storage
+    {
+        private final FileChannel channel;
+        private final int size;
+        private final boolean readOnly;
+
+        FileStorage(FileChannel channel, int size, boolean readOnly)
+        {
+            this.channel = channel;
+            this.size = size;
+            this.readOnly = readOnly;
+        }
+
+        @Override
+        public int size()
+        {
+            return size;
+        }
+
+        @Override
+        public boolean isReadOnly()
+        {
+            return readOnly;
+        }
+
+        @Override
+        public void read(int offset, byte[] destination, int destinationOffset, int length)
+                throws IOException
+        {
+            java.util.Objects.checkFromIndexSize(offset, length, size);
+            ByteBuffer target = ByteBuffer.wrap(destination, destinationOffset, length);
+            int position = offset;
+            while (target.hasRemaining())
+            {
+                int count = channel.read(target, position);
+                if (count < 0)
+                {
+                    while (target.hasRemaining())
+                        target.put((byte) 0);
+                    break;
+                }
+                position += count;
+            }
+        }
+
+        @Override
+        public void write(int offset, byte[] source, int sourceOffset, int length)
+                throws IOException
+        {
+            java.util.Objects.checkFromIndexSize(offset, length, size);
+            if (readOnly)
+                throw new DfsReadOnlyException("Read-only image");
+            ByteBuffer bytes = ByteBuffer.wrap(source, sourceOffset, length);
+            int position = offset;
+            while (bytes.hasRemaining())
+                position += channel.write(bytes, position);
+        }
+
+        @Override
+        public void flush() throws IOException
+        {
+            if (!readOnly)
+                channel.force(true);
         }
     }
 }

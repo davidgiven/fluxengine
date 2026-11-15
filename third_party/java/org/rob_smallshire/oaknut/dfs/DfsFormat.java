@@ -30,20 +30,6 @@ public enum DfsFormat
         this.watford = watford;
     }
 
-    public int size()
-    {
-        return tracks * sides * 10 * 256;
-    }
-
-    public ImmutableList<SurfaceSpec> surfaces()
-    {
-        ImmutableList.Builder<SurfaceSpec> result = ImmutableList.builder();
-        for (int side = 0; side < sides; side++)
-            result.add(new SurfaceSpec(tracks, 10, 256,
-                    side * 2560 * (sequential ? tracks : 1), 2560 * (sequential ? 1 : sides)));
-        return result.build();
-    }
-
     /* An extension identifies the image layout; the catalogue distinguishes Acorn and Watford. */
     public static DfsFormat detect(String filename, int size) throws DfsFormatException
     {
@@ -54,6 +40,24 @@ public enum DfsFormat
         int tracks = size <= sides * 102400 ? 40 : 80;
         return valueOf("ACORN_DFS_" + tracks + "T_" +
                 (sides == 1 ? "SINGLE_SIDED" : "DOUBLE_SIDED_INTERLEAVED"));
+    }
+
+    public int size()
+    {
+        return tracks * sides * 10 * 256;
+    }
+
+    public ImmutableList<SurfaceSpec> surfaces()
+    {
+        ImmutableList.Builder<SurfaceSpec> result = ImmutableList.builder();
+        for (int side = 0; side < sides; side++)
+            result.add(new SurfaceSpec(
+                    tracks,
+                    10,
+                    256,
+                    side * 2560 * (sequential ? tracks : 1),
+                    2560 * (sequential ? 1 : sides)));
+        return result.build();
     }
 
     public DfsFormat withWatford(boolean value)

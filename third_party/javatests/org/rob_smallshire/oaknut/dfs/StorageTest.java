@@ -21,65 +21,6 @@ public class StorageTest
 {
     private static final DfsFormat FORMAT = DfsFormat.ACORN_DFS_80T_SINGLE_SIDED;
 
-    private static final class RecordingStorage implements Storage
-    {
-        byte[] bytes;
-        int reads, writes, readBytes, flushes;
-        boolean readOnly, failRead, failNextWrite;
-        int writesBeforeFailure = -1;
-
-        RecordingStorage() throws IOException
-        {
-            try (Dfs disc = Dfs.create(FORMAT))
-            {
-                bytes = disc.toByteArray();
-            }
-        }
-
-        @Override
-        public int size()
-        {
-            return bytes.length;
-        }
-
-        @Override
-        public boolean isReadOnly()
-        {
-            return readOnly;
-        }
-
-        @Override
-        public void read(int offset, byte[] destination, int destinationOffset, int length) throws IOException
-        {
-            if (failRead)
-                throw new IOException("read failed");
-            reads++;
-            readBytes += length;
-            System.arraycopy(bytes, offset, destination, destinationOffset, length);
-        }
-
-        @Override
-        public void write(int offset, byte[] source, int sourceOffset, int length) throws IOException
-        {
-            if (failNextWrite || writesBeforeFailure == 0)
-            {
-                failNextWrite = false;
-                writesBeforeFailure = -1;
-                throw new IOException("write failed");
-            }
-            if (writesBeforeFailure > 0)
-                writesBeforeFailure--;
-            writes++;
-            System.arraycopy(source, sourceOffset, bytes, offset, length);
-        }
-
-        @Override
-        public void flush()
-        {
-            flushes++;
-        }
-    }
-
     @Test
     public void mountsAndMutatesWithoutWholeImageReads() throws Exception
     {
@@ -113,8 +54,10 @@ public class StorageTest
             byte[] before = storage.bytes.clone();
             /* Write the new file bytes, then fail while replacing its catalogue entry. */
             storage.writesBeforeFailure = 1;
-            assertEquals("write failed", assertThrows(IOException.class,
-                    () -> disc.writeFile("DATA", new byte[]{4, 5})).getMessage());
+            assertEquals(
+                    "write failed", assertThrows(
+                            IOException.class,
+                            () -> disc.writeFile("DATA", new byte[]{4, 5})).getMessage());
             assertArrayEquals(before, storage.bytes);
             assertArrayEquals(new byte[]{1, 2, 3}, disc.readFile("DATA"));
         }
@@ -125,8 +68,10 @@ public class StorageTest
     {
         RecordingStorage storage = new RecordingStorage();
         storage.failRead = true;
-        assertEquals("read failed", assertThrows(IOException.class,
-                () -> Dfs.fromStorage(storage, FORMAT, false)).getMessage());
+        assertEquals(
+                "read failed", assertThrows(
+                        IOException.class,
+                        () -> Dfs.fromStorage(storage, FORMAT, false)).getMessage());
         storage.failRead = false;
         try (Dfs disc = Dfs.fromStorage(storage, FORMAT, false))
         {
@@ -164,6 +109,67 @@ public class StorageTest
             assertThrows(DfsFormatException.class, () -> disc.readFile("DATA"));
             assertFalse(disc.validate().isEmpty());
             assertEquals(0, disc.freeSectors());
+        }
+    }
+
+    private static final class RecordingStorage implements Storage
+    {
+        byte[] bytes;
+        int reads, writes, readBytes, flushes;
+        boolean readOnly, failRead, failNextWrite;
+        int writesBeforeFailure = -1;
+
+        RecordingStorage() throws IOException
+        {
+            try (Dfs disc = Dfs.create(FORMAT))
+            {
+                bytes = disc.toByteArray();
+            }
+        }
+
+        @Override
+        public int size()
+        {
+            return bytes.length;
+        }
+
+        @Override
+        public boolean isReadOnly()
+        {
+            return readOnly;
+        }
+
+        @Override
+        public void read(int offset, byte[] destination, int destinationOffset, int length)
+                throws IOException
+        {
+            if (failRead)
+                throw new IOException("read failed");
+            reads++;
+            readBytes += length;
+            System.arraycopy(bytes, offset, destination, destinationOffset, length);
+        }
+
+        @Override
+        public void write(int offset, byte[] source, int sourceOffset, int length)
+                throws IOException
+        {
+            if (failNextWrite || writesBeforeFailure == 0)
+            {
+                failNextWrite = false;
+                writesBeforeFailure = -1;
+                throw new IOException("write failed");
+            }
+            if (writesBeforeFailure > 0)
+                writesBeforeFailure--;
+            writes++;
+            System.arraycopy(source, sourceOffset, bytes, offset, length);
+        }
+
+        @Override
+        public void flush()
+        {
+            flushes++;
         }
     }
 }

@@ -24,15 +24,20 @@ public class CatalogueTest
 {
     private static Catalogue catalogue(byte[] bytes, boolean watford)
     {
-        DiscImage image = new DiscImage(ByteBuffer.wrap(bytes),
+        DiscImage image = new DiscImage(
+                ByteBuffer.wrap(bytes),
                 DfsFormat.ACORN_DFS_80T_SINGLE_SIDED.surfaces());
-        return watford ? new WatfordDfsCatalogue(image.surface(0)) : new AcornDfsCatalogue(image.surface(0));
+        return watford ?
+                new WatfordDfsCatalogue(image.surface(0)) :
+                new AcornDfsCatalogue(image.surface(0));
     }
 
     private static byte[] blank(boolean watford) throws Exception
     {
-        try (Dfs disc = Dfs.create(watford ? DfsFormat.WATFORD_DFS_80T_SINGLE_SIDED :
-                DfsFormat.ACORN_DFS_80T_SINGLE_SIDED, "ABCDEFGHIJ", 2))
+        try (Dfs disc = Dfs.create(
+                watford ?
+                        DfsFormat.WATFORD_DFS_80T_SINGLE_SIDED :
+                        DfsFormat.ACORN_DFS_80T_SINGLE_SIDED, "ABCDEFGHIJ", 2))
         {
             return disc.toByteArray();
         }
@@ -42,10 +47,20 @@ public class CatalogueTest
     public void entryCodecMatchesHandAssembledCatalogue() throws Exception
     {
         byte[] bytes = blank(false);
-        System.arraycopy(new byte[]{'H', 'e', 'l', 'l', 'o', ' ', ' ', (byte) ('A' | 128)}, 0, bytes, 8, 8);
+        System.arraycopy(
+                new byte[]{'H', 'e', 'l', 'l', 'o', ' ', ' ', (byte) ('A' | 128)},
+                0,
+                bytes,
+                8,
+                8);
         bytes[261] = 8;
         /* Load 0x31900, exec 0x28023, length 0x12345, sector 0x201. */
-        System.arraycopy(new byte[]{0, 0x19, 0x23, (byte) 0x80, 0x45, 0x23, (byte) 0x9e, 1}, 0, bytes, 264, 8);
+        System.arraycopy(
+                new byte[]{0, 0x19, 0x23, (byte) 0x80, 0x45, 0x23, (byte) 0x9e, 1},
+                0,
+                bytes,
+                264,
+                8);
         Catalogue catalogue = catalogue(bytes, false);
         DfsFileEntry entry = catalogue.stat("a.HELLO");
         assertEquals("A.Hello", entry.name());
@@ -64,7 +79,9 @@ public class CatalogueTest
     public void watfordMarkersTitlesAndIndependentSequenceNumbers() throws Exception
     {
         byte[] bytes = blank(true);
-        assertArrayEquals("ABCDEFGH".getBytes(java.nio.charset.StandardCharsets.US_ASCII), Arrays.copyOf(bytes, 8));
+        assertArrayEquals(
+                "ABCDEFGH".getBytes(java.nio.charset.StandardCharsets.US_ASCII),
+                Arrays.copyOf(bytes, 8));
         assertEquals('I', bytes[256]);
         assertEquals('J', bytes[257]);
         for (int i = 512; i < 520; i++)
@@ -188,14 +205,21 @@ public class CatalogueTest
         byte[] bytes = blank(false);
         Catalogue catalogue = catalogue(bytes, false);
         catalogue.replaceEntries(List.of(new DfsFileEntry("&.UTIL", false, 0, 0, 0, 2)));
-        try (Dfs disc = Dfs.fromBuffer(ByteBuffer.wrap(bytes), DfsFormat.ACORN_DFS_80T_SINGLE_SIDED))
+        try (Dfs disc = Dfs.fromBuffer(
+                ByteBuffer.wrap(bytes),
+                DfsFormat.ACORN_DFS_80T_SINGLE_SIDED))
         {
             assertTrue(disc.exists("&.UTIL"));
             assertArrayEquals(new byte[0], disc.readFile("&.UTIL"));
             disc.writeFile("&.COPY", new byte[]{1, 2}, new AcornMeta(0x1900, 0, null), true);
             assertArrayEquals(new byte[]{1, 2}, disc.readFile("&.COPY"));
-            assertThrows(IllegalArgumentException.class, () -> disc.writeFile("\u00e9.BAD",
-                    new byte[]{1}, new AcornMeta(0, 0, null), true));
+            assertThrows(
+                    IllegalArgumentException.class,
+                    () -> disc.writeFile(
+                            "\u00e9.BAD",
+                            new byte[]{1},
+                            new AcornMeta(0, 0, null),
+                            true));
             disc.renameFile("&.UTIL", "A.UTIL");
             assertFalse(disc.exists("&.UTIL"));
         }
@@ -206,7 +230,9 @@ public class CatalogueTest
     {
         assertEquals(DfsFormat.ACORN_DFS_40T_SINGLE_SIDED, DfsFormat.detect("disc.ssd", 100000));
         assertEquals(DfsFormat.ACORN_DFS_80T_SINGLE_SIDED, DfsFormat.detect("disc.SSD", 200000));
-        assertEquals(DfsFormat.ACORN_DFS_80T_DOUBLE_SIDED_INTERLEAVED, DfsFormat.detect("disc.dsd", 400000));
+        assertEquals(
+                DfsFormat.ACORN_DFS_80T_DOUBLE_SIDED_INTERLEAVED,
+                DfsFormat.detect("disc.dsd", 400000));
         assertThrows(DfsFormatException.class, () -> DfsFormat.detect("unknown.img", 100000));
         assertThrows(DfsFormatException.class, () -> DfsFormat.detect("large.ssd", 500000));
     }

@@ -31,6 +31,71 @@ public abstract class Catalogue
         this.watford = watford;
     }
 
+    static int unsigned(byte value)
+    {
+        return value & 255;
+    }
+
+    private static int word(byte[] bytes, int offset)
+    {
+        return unsigned(bytes[offset]) | unsigned(bytes[offset + 1]) << 8;
+    }
+
+    private static void word(byte[] bytes, int offset, long value)
+    {
+        bytes[offset] = (byte) value;
+        bytes[offset + 1] = (byte) (value >>> 8);
+    }
+
+    public static long expandHostAddress(long value)
+    {
+        return (value & 0x30000) == 0x30000 ? 0xffff0000L | (value & 0xffff) : value;
+    }
+
+    /* Bare names use $. Explicit directory characters remain part of the returned flat name.
+     * Reading existing catalogues permits non-command directory bytes such as '&'. */
+    public static String filename(String name, boolean verbatim)
+    {
+        String full = name.length() >= 2 && name.charAt(1) == '.' ? name : "$." + name;
+        char directory = full.charAt(0);
+        if (directory > 127 || directory == '.' || directory == ':' ||
+                (!verbatim && directory != '$' && (Character.toUpperCase(directory) < 'A' ||
+                        Character.toUpperCase(directory) > 'Z')))
+            throw new IllegalArgumentException("Invalid DFS directory character: " + directory);
+        String leaf = full.substring(2);
+        if (leaf.isEmpty() || leaf.length() > 7 || leaf.endsWith(" ") ||
+                leaf.chars().anyMatch(c -> c > 127 || c == '.' || c == ':'))
+            throw new IllegalArgumentException("Invalid DFS filename: " + name);
+        return full;
+    }
+
+    static String key(String name)
+    {
+        return filename(name, true).toUpperCase(Locale.ROOT);
+    }
+
+    private static String text(byte[] bytes, int start, int length, boolean spacesOnly)
+    {
+        String value = new String(bytes, start, length, StandardCharsets.ISO_8859_1);
+        int end = value.length();
+        while (end > 0 &&
+                (value.charAt(end - 1) == ' ' || (!spacesOnly && value.charAt(end - 1) == 0)))
+            end--;
+        return value.substring(0, end);
+    }
+
+    private static void checkSectors(int sectors)
+    {
+        if (sectors < 1 || sectors > 1023)
+            throw new IllegalArgumentException("DFS sector count outside 1..1023");
+    }
+
+    private static void checkBoot(int option)
+    {
+        if (option < 0 || option > 3)
+            throw new IllegalArgumentException("DFS boot option outside 0..3");
+    }
+
     public boolean watford()
     {
         return watford;
@@ -89,63 +154,11 @@ public abstract class Catalogue
         }
     }
 
-    static int unsigned(byte value)
-    {
-        return value & 255;
-    }
-
-    private static int word(byte[] bytes, int offset)
-    {
-        return unsigned(bytes[offset]) | unsigned(bytes[offset + 1]) << 8;
-    }
-
-    private static void word(byte[] bytes, int offset, long value)
-    {
-        bytes[offset] = (byte) value;
-        bytes[offset + 1] = (byte) (value >>> 8);
-    }
-
-    public static long expandHostAddress(long value)
-    {
-        return (value & 0x30000) == 0x30000 ? 0xffff0000L | (value & 0xffff) : value;
-    }
-
-    /* Bare names use $. Explicit directory characters remain part of the returned flat name.
-     * Reading existing catalogues permits non-command directory bytes such as '&'. */
-    public static String filename(String name, boolean verbatim)
-    {
-        String full = name.length() >= 2 && name.charAt(1) == '.' ? name : "$." + name;
-        char directory = full.charAt(0);
-        if (directory > 127 || directory == '.' || directory == ':' ||
-                (!verbatim && directory != '$' &&
-                        (Character.toUpperCase(directory) < 'A' || Character.toUpperCase(directory) > 'Z')))
-            throw new IllegalArgumentException("Invalid DFS directory character: " + directory);
-        String leaf = full.substring(2);
-        if (leaf.isEmpty() || leaf.length() > 7 || leaf.endsWith(" ") ||
-                leaf.chars().anyMatch(c -> c > 127 || c == '.' || c == ':'))
-            throw new IllegalArgumentException("Invalid DFS filename: " + name);
-        return full;
-    }
-
-    static String key(String name)
-    {
-        return filename(name, true).toUpperCase(Locale.ROOT);
-    }
-
     public void validateTitle(String title)
     {
         if (title.length() > (watford ? 10 : 12) ||
                 title.chars().anyMatch(c -> c > 127 || (c > 0 && c < 32)))
             throw new IllegalArgumentException("Invalid DFS title: " + title);
-    }
-
-    private static String text(byte[] bytes, int start, int length, boolean spacesOnly)
-    {
-        String value = new String(bytes, start, length, StandardCharsets.ISO_8859_1);
-        int end = value.length();
-        while (end > 0 && (value.charAt(end - 1) == ' ' || (!spacesOnly && value.charAt(end - 1) == 0)))
-            end--;
-        return value.substring(0, end);
     }
 
     private String title(byte[] bytes)
@@ -154,16 +167,6 @@ public abstract class Catalogue
         System.arraycopy(bytes, 0, title, 0, 8);
         System.arraycopy(bytes, 256, title, 8, title.length - 8);
         return text(title, 0, title.length, false);
-    }
-
-    /* Recognition accepts truncated captures and corroborates suspect Acorn metadata with
-     * actual file extents. Watford's extension bits for discs above 256K are unsupported. */
-    public record Assessment(boolean matches, ImmutableList<String> evidence, String reason)
-    {
-        static Assessment mismatch(String reason)
-        {
-            return new Assessment(false, ImmutableList.of(), reason);
-        }
     }
 
     public Assessment assess() throws IOException
@@ -180,8 +183,8 @@ public abstract class Catalogue
             for (int i = 0; i < 8; i++)
                 marker &= unsigned(extra[start + i]) == 0xaa;
             if (!watford && (marker ||
-                    (word(extra, 256) == 0 && word(extra, 258) == 0 &&
-                    (extra[261] & 7) == 0 && extra[262] == bytes[262] && extra[263] == bytes[263])))
+                    (word(extra, 256) == 0 && word(extra, 258) == 0 && (extra[261] & 7) == 0 &&
+                            extra[262] == bytes[262] && extra[263] == bytes[263])))
                 return Assessment.mismatch("Watford DFS second catalogue section");
         }
         if (watford && !marker)
@@ -216,13 +219,19 @@ public abstract class Catalogue
         {
             List<DfsFileEntry> files = entries(bytes);
             if (files.isEmpty())
-                return Assessment.mismatch("Suspect metadata and no files to corroborate catalogue");
+                return Assessment.mismatch("Suspect metadata and no files to corroborate " +
+                        "catalogue");
             for (DfsFileEntry file : files)
-                if (file.startSector() < 2 || file.startSector() + file.sectorsRequired() > heldSectors())
-                    return Assessment.mismatch("Suspect metadata and file outside image: " + file.name());
+                if (file.startSector() < 2 ||
+                        file.startSector() + file.sectorsRequired() > heldSectors())
+                    return Assessment.mismatch(
+                            "Suspect metadata and file outside image: " + file.name());
         }
-        return new Assessment(true, ImmutableList.of("Well-formed " + (watford ? "Watford" : "Acorn") +
-                " DFS catalogue"), null);
+        return new Assessment(
+                true,
+                ImmutableList.of(
+                        "Well-formed " + (watford ? "Watford" : "Acorn") + " DFS catalogue"),
+                null);
     }
 
     private int declaredSectors(byte[] bytes)
@@ -244,7 +253,9 @@ public abstract class Catalogue
         int extent = catalogueSectors();
         for (DfsFileEntry file : files)
             extent = Math.max(extent, file.startSector() + file.sectorsRequired());
-        return count < extent && count < heldSectors() ? "Files run past declared sector count: " + count : null;
+        return count < extent && count < heldSectors() ?
+                "Files run past declared sector count: " + count :
+                null;
     }
 
     private ImmutableList<DfsFileEntry> entries(byte[] bytes) throws DfsFormatException
@@ -261,7 +272,9 @@ public abstract class Catalogue
                 int flags = unsigned(bytes[offset + 7]);
                 int extra = unsigned(bytes[offset + 262]);
                 String name = (char) (flags & 127) + "." + text(bytes, offset, 7, true);
-                result.add(new DfsFileEntry(name, (flags & 128) != 0,
+                result.add(new DfsFileEntry(
+                        name,
+                        (flags & 128) != 0,
                         expandHostAddress(word(bytes, offset + 256) | (extra & 12) << 14),
                         expandHostAddress(word(bytes, offset + 258) | (extra & 192) << 10),
                         word(bytes, offset + 260) | (extra & 48) << 12,
@@ -280,8 +293,15 @@ public abstract class Catalogue
     {
         byte[] bytes = read(0, catalogueSectors());
         ImmutableList<DfsFileEntry> files = entries(bytes);
-        int total = !watford && countDefect(bytes, files) != null ? heldSectors() : declaredSectors(bytes);
-        return new DfsDiscInfo(title(bytes), unsigned(bytes[260]), files.size(), total, (bytes[262] >>> 4) & 3);
+        int total = !watford && countDefect(bytes, files) != null ?
+                heldSectors() :
+                declaredSectors(bytes);
+        return new DfsDiscInfo(
+                title(bytes),
+                unsigned(bytes[260]),
+                files.size(),
+                total,
+                (bytes[262] >>> 4) & 3);
     }
 
     public DfsFileEntry find(String name) throws IOException
@@ -318,18 +338,6 @@ public abstract class Catalogue
         write(0, bytes);
     }
 
-    private static void checkSectors(int sectors)
-    {
-        if (sectors < 1 || sectors > 1023)
-            throw new IllegalArgumentException("DFS sector count outside 1..1023");
-    }
-
-    private static void checkBoot(int option)
-    {
-        if (option < 0 || option > 3)
-            throw new IllegalArgumentException("DFS boot option outside 0..3");
-    }
-
     private void putTitle(byte[] bytes, String value)
     {
         byte[] padded = new byte[watford ? 10 : 12];
@@ -351,8 +359,9 @@ public abstract class Catalogue
         {
             if (!names.add(key(file.name())))
                 throw new FileAlreadyExistsException(file.name());
-            if (file.length() < 0 || file.length() > 0x3ffff || file.startSector() < catalogueSectors() ||
-                    file.startSector() > 1023 || file.loadAddress() < 0 || file.loadAddress() > 0xffffffffL ||
+            if (file.length() < 0 || file.length() > 0x3ffff ||
+                    file.startSector() < catalogueSectors() || file.startSector() > 1023 ||
+                    file.loadAddress() < 0 || file.loadAddress() > 0xffffffffL ||
                     file.executionAddress() < 0 || file.executionAddress() > 0xffffffffL)
                 throw new IllegalArgumentException("Invalid DFS entry: " + file.name());
         }
@@ -386,8 +395,7 @@ public abstract class Catalogue
                 word(bytes, offset + 258, file.executionAddress());
                 word(bytes, offset + 260, file.length());
                 bytes[offset + 262] = (byte) ((file.startSector() >>> 8) |
-                        ((file.loadAddress() >>> 16) & 3) << 2 |
-                        ((file.length() >>> 16) & 3) << 4 |
+                        ((file.loadAddress() >>> 16) & 3) << 2 | ((file.length() >>> 16) & 3) << 4 |
                         ((file.executionAddress() >>> 16) & 3) << 6);
                 bytes[offset + 263] = (byte) file.startSector();
             }
@@ -442,7 +450,8 @@ public abstract class Catalogue
         replaceEntries(files);
     }
 
-    public void setMetadata(String name, org.rob_smallshire.oaknut.file.AcornMeta metadata) throws IOException
+    public void setMetadata(String name, org.rob_smallshire.oaknut.file.AcornMeta metadata)
+            throws IOException
     {
         DfsFileEntry original = stat(name);
         ArrayList<DfsFileEntry> files = new ArrayList<>(files());
@@ -468,10 +477,17 @@ public abstract class Catalogue
         List<DfsFileEntry> files = entries(bytes);
         String defect = countDefect(bytes, files);
         if (defect != null)
-            findings.add(new ValidationFinding("", defect,
-                    new Fix("Set sector count to image size", () -> setTotalSectors(heldSectors()))));
+            findings.add(new ValidationFinding(
+                    "",
+                    defect,
+                    new Fix(
+                            "Set sector count to image size",
+                            () -> setTotalSectors(heldSectors()))));
         if (watford && (bytes[262] != bytes[774] || bytes[263] != bytes[775]))
-            findings.add(new ValidationFinding("", "Catalogue sections disagree on boot option or size", null));
+            findings.add(new ValidationFinding(
+                    "",
+                    "Catalogue sections disagree on boot option or size",
+                    null));
         Set<String> names = new HashSet<>();
         String[] used = new String[surface.spec().sectors()];
         Arrays.fill(used, 0, catalogueSectors(), "catalogue");
@@ -481,14 +497,30 @@ public abstract class Catalogue
                 findings.add(new ValidationFinding(file.name(), "Duplicate filename", null));
             int end = file.startSector() + file.sectorsRequired();
             if (file.startSector() < catalogueSectors() || end > heldSectors())
-                findings.add(new ValidationFinding(file.name(), "File extends outside data area", null));
+                findings.add(new ValidationFinding(
+                        file.name(),
+                        "File extends outside data area",
+                        null));
             for (int sector = file.startSector(); sector < Math.min(end, used.length); sector++)
             {
                 if (used[sector] != null)
-                    findings.add(new ValidationFinding(file.name(), "Sector shared with " + used[sector], null));
+                    findings.add(new ValidationFinding(
+                            file.name(),
+                            "Sector shared with " + used[sector],
+                            null));
                 used[sector] = file.name();
             }
         }
         return findings.build();
+    }
+
+    /* Recognition accepts truncated captures and corroborates suspect Acorn metadata with
+     * actual file extents. Watford's extension bits for discs above 256K are unsupported. */
+    public record Assessment(boolean matches, ImmutableList<String> evidence, String reason)
+    {
+        static Assessment mismatch(String reason)
+        {
+            return new Assessment(false, ImmutableList.of(), reason);
+        }
     }
 }

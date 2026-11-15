@@ -34,10 +34,6 @@ public final class CataloguedSurface
         return Math.min(catalogue.info().totalSectors(), catalogue.heldSectors());
     }
 
-    public record FreeRegion(int startSector, int sectors)
-    {
-    }
-
     public ImmutableList<FreeRegion> freeMap() throws IOException
     {
         return freeMap(catalogue.files());
@@ -48,7 +44,8 @@ public final class CataloguedSurface
         boolean[] used = new boolean[usableSectors()];
         Arrays.fill(used, 0, Math.min(catalogue.catalogueSectors(), used.length), true);
         for (DfsFileEntry file : files)
-            for (int i = file.startSector(); i < Math.min(used.length, file.startSector() + file.sectorsRequired()); i++)
+            for (int i = file.startSector();
+                 i < Math.min(used.length, file.startSector() + file.sectorsRequired()); i++)
                 used[i] = true;
         ImmutableList.Builder<FreeRegion> regions = ImmutableList.builder();
         int start = -1;
@@ -80,7 +77,9 @@ public final class CataloguedSurface
         DfsFileEntry file = catalogue.stat(name);
         if (file.length() == 0)
             return new byte[0];
-        return Arrays.copyOf(catalogue.read(file.startSector(), file.sectorsRequired()), file.length());
+        return Arrays.copyOf(
+                catalogue.read(file.startSector(), file.sectorsRequired()),
+                file.length());
     }
 
     /* Plan overwrite and allocation before changing the original entry. This also permits
@@ -90,7 +89,8 @@ public final class CataloguedSurface
         writeFile(name, data, metadata, false);
     }
 
-    public void writeFile(String name, byte[] data, AcornMeta metadata, boolean verbatimName) throws IOException
+    public void writeFile(String name, byte[] data, AcornMeta metadata, boolean verbatimName)
+            throws IOException
     {
         String full = Catalogue.filename(name, verbatimName);
         if (data.length > 0x3ffff)
@@ -112,10 +112,16 @@ public final class CataloguedSurface
                 break;
             }
         if (start == -1)
-            throw new DfsDiscFullException("Not enough contiguous free space: " + needed + " sectors");
+            throw new DfsDiscFullException(
+                    "Not enough contiguous free space: " + needed + " sectors");
         int access = metadata.access() == null ? 0 : metadata.access();
-        files.add(new DfsFileEntry(full, (access & org.rob_smallshire.oaknut.file.Access.L) != 0,
-                metadata.loadAddress(), metadata.executionAddress(), data.length, start));
+        files.add(new DfsFileEntry(
+                full,
+                (access & org.rob_smallshire.oaknut.file.Access.L) != 0,
+                metadata.loadAddress(),
+                metadata.executionAddress(),
+                data.length,
+                start));
         if (needed != 0)
             catalogue.write(start, Arrays.copyOf(data, needed * 256));
         catalogue.replaceEntries(files);
@@ -159,9 +165,14 @@ public final class CataloguedSurface
             throw new DfsDiscFullException("Compacted files exceed usable disc size");
         for (int i = 0; i < moved.size(); i++)
             if (moved.get(i).sectorsRequired() != 0)
-                catalogue.write(moved.get(i).startSector(),
+                catalogue.write(
+                        moved.get(i).startSector(),
                         Arrays.copyOf(contents.get(i), moved.get(i).sectorsRequired() * 256));
         catalogue.replaceEntries(moved);
         return moved.size();
+    }
+
+    public record FreeRegion(int startSector, int sectors)
+    {
     }
 }

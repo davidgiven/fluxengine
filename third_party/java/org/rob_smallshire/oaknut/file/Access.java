@@ -56,12 +56,12 @@ public final class Access
                 result.append(names[i]);
         }
         return result.toString();
-    }    public static final int WR = R | W, LWR = L | WR;
+    }
 
     public static boolean isRunOnly(int bits)
     {
         return (bits & (R | E)) == E;
-    }
+    }    public static final int WR = R | W, LWR = L | WR;
 
 
 
