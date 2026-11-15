@@ -33,6 +33,12 @@ public class AcornAdfsFilesystemTest extends GenericTreeFilesystemTest
     private DiskLayout layout;
     private Image image;
 
+    /* Keep the expected UI names independent of the configuration being tested. */
+    private static final ImmutableMap<AdfsFormat, String> FORMAT_OPTIONS = ImmutableMap.of(
+            AdfsFormat.S, "160", AdfsFormat.M, "320", AdfsFormat.L, "640",
+            AdfsFormat.D, "800-d", AdfsFormat.E, "800-e", AdfsFormat.E_PLUS, "800-e-plus",
+            AdfsFormat.F, "1600-f", AdfsFormat.F_PLUS, "1600-f-plus");
+
     @Before
     public void setup()
     {
@@ -156,7 +162,7 @@ public class AcornAdfsFilesystemTest extends GenericTreeFilesystemTest
             ConfigProto selected = new ConfigBuilder()
                     .loadConfigFile("acornadfs")
                     .applyOption(
-                            format.name().toLowerCase(java.util.Locale.ROOT).replace("_", "-"),
+                            FORMAT_OPTIONS.get(format),
                             "")
                     .build();
             BlockDevice device = new InMemoryBlockDevice(new DiskLayout(selected), new Image());
@@ -291,16 +297,14 @@ public class AcornAdfsFilesystemTest extends GenericTreeFilesystemTest
     @Test
     public void quickAndFullFormattingWorkAtEveryConfiguredCapacity() throws IOException
     {
-        for (String capacity : List.of("s", "m", "l", "d", "e", "e-plus", "f", "f-plus"))
+        for (AdfsFormat format : FORMAT_OPTIONS.keySet())
         {
             ConfigProto selected = new ConfigBuilder()
                     .loadConfigFile("acornadfs")
-                    .applyOption(capacity, "")
+                    .applyOption(FORMAT_OPTIONS.get(format), "")
                     .build();
             assertThat(selected.getFilesystem().getAcornadfs().getFlavour()).isEqualTo(
-                    AcornAdfsProto.Flavour.valueOf(capacity
-                            .toUpperCase(java.util.Locale.ROOT)
-                            .replace("-", "_")));
+                    AcornAdfsProto.Flavour.valueOf(format.name()));
             BlockDevice device = new InMemoryBlockDevice(new DiskLayout(selected), new Image());
             try (AcornAdfsFilesystem fs = new AcornAdfsFilesystem(
                     selected
@@ -331,7 +335,7 @@ public class AcornAdfsFilesystemTest extends GenericTreeFilesystemTest
             ConfigProto selected = new ConfigBuilder()
                     .loadConfigFile("acornadfs")
                     .applyOption(
-                            format.name().toLowerCase(java.util.Locale.ROOT).replace("_", "-"),
+                            FORMAT_OPTIONS.get(format),
                             "")
                     .build();
             BlockDevice device = new InMemoryBlockDevice(new DiskLayout(selected), new Image());

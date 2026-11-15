@@ -49,7 +49,7 @@ option_group = [
 
         option = [
             {
-                name = "s"
+                name = "160"
                 comment = "160kB 3.5\" or 5.25\" 40-track SSDD; S format"
 
                 config {
@@ -76,7 +76,7 @@ option_group = [
                 }
             },
             {
-                name = "m"
+                name = "320"
                 comment = "320kB 3.5\" or 5.25\" 80-track SSDD; M format"
 
                 config {
@@ -103,7 +103,7 @@ option_group = [
                 }
             },
             {
-                name = "l"
+                name = "640"
                 comment = "640kB 3.5\" or 5.25\" 80-track DSDD; L format"
 
                 config {
@@ -130,7 +130,7 @@ option_group = [
                 }
             },
             {
-                name = "d"
+                name = "800-d"
                 comment = "800kB 3.5\" 80-track DSDD; D format"
 
                 config {
@@ -157,7 +157,7 @@ option_group = [
                 }
             },
             {
-                name = "e"
+                name = "800-e"
                 comment = "800kB 3.5\" 80-track DSDD; E format"
 
                 config {
@@ -184,7 +184,7 @@ option_group = [
                 }
             },
             {
-                name = "e-plus"
+                name = "800-e-plus"
                 comment = "800kB 3.5\" 80-track DSDD; E+ format"
 
                 config {
@@ -211,7 +211,7 @@ option_group = [
                 }
             },
             {
-                name = "f"
+                name = "1600-f"
                 comment = "1600kB 3.5\" 80-track DSHD; F format"
                 set_by_default = true
 
@@ -239,7 +239,7 @@ option_group = [
                 }
             },
             {
-                name = "f-plus"
+                name = "1600-f-plus"
                 comment = "1600kB 3.5\" 80-track DSHD; F+ format"
 
                 config {
