@@ -502,8 +502,10 @@ public class ImageViewModel
         } else
             builder.loadConfigFile(selectedFormat.get());
 
+        /* Saved choices can outlive renamed or removed format options. */
         for (Pair<String, String> e : getOptionsForFormat(selectedFormat.get()).get())
-            builder.applyOption(e.first(), e.second());
+            if (builder.tryFindOption(e.first()) != null)
+                builder.applyOption(e.first(), e.second());
 
         return builder;
     }
@@ -512,8 +514,10 @@ public class ImageViewModel
     {
         ConfigBuilder builder = makeConfigBuilderWithFormat();
 
+        /* Apply the same filtering to saved device choices. */
         for (Pair<String, String> e : getOptionsForDevice().get())
-            builder.applyOption(e.first(), e.second());
+            if (builder.tryFindOption(e.first()) != null)
+                builder.applyOption(e.first(), e.second());
 
         String device = getSelectedDevice().get();
         if (device.equals(DEVICE_SERIALPORT))

@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
 import com.cowlark.fluxengine.core.FluxEngineException;
+import com.cowlark.fluxengine.config.ConfigBuilder;
 import com.cowlark.fluxengine.usb.UsbFinder;
 import com.google.common.collect.ImmutableList;
 import org.junit.After;
@@ -183,6 +184,18 @@ public class CustomFormatTest
         {
             Files.deleteIfExists(replacement);
         }
+    }
+
+    /* Built-in format preferences must survive option renames just like custom formats. */
+    @Test
+    public void ignoresRemovedSavedOptionsWhenBuildingConfig()
+    {
+        writer.setOptionsForFormat("acornadfs", Association.between(String.class, String.class)
+                .put("f", "").put("160", ""));
+        model.getSelectedFormat().set(From.VIEW, "acornadfs");
+        ConfigBuilder builder = model.makeConfigBuilderWithFormat();
+        builder.build();
+        assertThat(builder.get("layout.tracks")).isEqualTo("40");
     }
 
     @Test
