@@ -120,8 +120,7 @@ public class AcornAdfsFilesystemTest extends GenericTreeFilesystemTest
                 AdfsFormat.F, AdfsFormat.F_PLUS, AdfsFormat.L))
         {
             ConfigProto selected = new ConfigBuilder().loadConfigFile("acornadfs")
-                    .applyOption(format.size() == 819200 ? "800" :
-                            format.size() == 655360 ? "640" : "1600", "").build();
+                    .applyOption(format.name().toLowerCase(java.util.Locale.ROOT).replace("_", "-"), "").build();
             BlockDevice device = new InMemoryBlockDevice(new DiskLayout(selected), new Image());
             AcornAdfsProto options = AcornAdfsProto.newBuilder()
                     .setFlavour(AcornAdfsProto.Flavour.valueOf(format.name())).build();
@@ -250,12 +249,14 @@ public class AcornAdfsFilesystemTest extends GenericTreeFilesystemTest
     @Test
     public void quickAndFullFormattingWorkAtEveryConfiguredCapacity() throws IOException
     {
-        for (String capacity : List.of("160", "320", "640", "800", "1600"))
+        for (String capacity : List.of("s", "m", "l", "d", "e", "e-plus", "f", "f-plus"))
         {
             ConfigProto selected = new ConfigBuilder()
                     .loadConfigFile("acornadfs")
                     .applyOption(capacity, "")
                     .build();
+            assertThat(selected.getFilesystem().getAcornadfs().getFlavour()).isEqualTo(
+                    AcornAdfsProto.Flavour.valueOf(capacity.toUpperCase(java.util.Locale.ROOT).replace("-", "_")));
             BlockDevice device = new InMemoryBlockDevice(new DiskLayout(selected), new Image());
             try (AcornAdfsFilesystem fs = new AcornAdfsFilesystem(
                     selected
@@ -285,7 +286,7 @@ public class AcornAdfsFilesystemTest extends GenericTreeFilesystemTest
         {
             ConfigProto selected = new ConfigBuilder()
                     .loadConfigFile("acornadfs")
-                    .applyOption(format.size() == 819200 ? "800" : "1600", "")
+                    .applyOption(format.name().toLowerCase(java.util.Locale.ROOT).replace("_", "-"), "")
                     .build();
             BlockDevice device = new InMemoryBlockDevice(new DiskLayout(selected), new Image());
             try (Adfs blank = Adfs.create(format))

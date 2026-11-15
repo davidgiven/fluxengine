@@ -19,8 +19,8 @@ with alternating sides, with the blocks from track 0 side 0 then track 0 side
 1 then track 1 side 0 etc. Most Acorn emulators will use both formats, but
 they might require nudging as the side order can't be reliably autodetected.
 
-There is filesystem support. The exact filesystem type (ADFS had far too many)
-can be set, but the default option is to autodetect it.
+Filesystem support is available. Select the disk format to set both its geometry
+and filesystem type. The default is 1600kB ADFS F.
 """
 ]
 
@@ -49,10 +49,16 @@ option_group = [
 
         option = [
             {
-                name = "160"
+                name = "s"
                 comment = "160kB 3.5\" or 5.25\" 40-track SSDD; S format"
 
                 config {
+                    filesystem {
+                        acornadfs {
+                            flavour = S
+                        }
+                    }
+
                     layout {
                         format_type = FORMATTYPE_40TRACK
                         tracks = 40
@@ -70,10 +76,16 @@ option_group = [
                 }
             },
             {
-                name = "320"
+                name = "m"
                 comment = "320kB 3.5\" or 5.25\" 80-track SSDD; M format"
 
                 config {
+                    filesystem {
+                        acornadfs {
+                            flavour = M
+                        }
+                    }
+
                     layout {
                         format_type = FORMATTYPE_80TRACK
                         tracks = 80
@@ -91,10 +103,16 @@ option_group = [
                 }
             },
             {
-                name = "640"
+                name = "l"
                 comment = "640kB 3.5\" or 5.25\" 80-track DSDD; L format"
 
                 config {
+                    filesystem {
+                        acornadfs {
+                            flavour = L
+                        }
+                    }
+
                     layout {
                         format_type = FORMATTYPE_80TRACK
                         tracks = 80
@@ -112,10 +130,16 @@ option_group = [
                 }
             },
             {
-                name = "800"
-                comment = "800kB 3.5\" 80-track DSDD; D and E formats"
+                name = "d"
+                comment = "800kB 3.5\" 80-track DSDD; D format"
 
                 config {
+                    filesystem {
+                        acornadfs {
+                            flavour = D
+                        }
+                    }
+
                     layout {
                         format_type = FORMATTYPE_80TRACK
                         tracks = 80
@@ -133,11 +157,71 @@ option_group = [
                 }
             },
             {
-                name = "1600"
-                comment = "1600kB 3.5\" 80-track DSHD; F formats"
+                name = "e"
+                comment = "800kB 3.5\" 80-track DSDD; E format"
+
+                config {
+                    filesystem {
+                        acornadfs {
+                            flavour = E
+                        }
+                    }
+
+                    layout {
+                        format_type = FORMATTYPE_80TRACK
+                        tracks = 80
+                        sides = 2
+                        layoutdata = [
+                            {
+                                sector_size = 1024
+                                physical {
+                                    start_sector = 0
+                                    count = 5
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            {
+                name = "e-plus"
+                comment = "800kB 3.5\" 80-track DSDD; E+ format"
+
+                config {
+                    filesystem {
+                        acornadfs {
+                            flavour = E_PLUS
+                        }
+                    }
+
+                    layout {
+                        format_type = FORMATTYPE_80TRACK
+                        tracks = 80
+                        sides = 2
+                        layoutdata = [
+                            {
+                                sector_size = 1024
+                                physical {
+                                    start_sector = 0
+                                    count = 5
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            {
+                name = "f"
+                comment = "1600kB 3.5\" 80-track DSHD; F format"
                 set_by_default = true
 
                 config {
+                    filesystem {
+                        acornadfs {
+                            flavour = F
+                        }
+                    }
+
                     layout {
                         format_type = FORMATTYPE_80TRACK
                         tracks = 80
@@ -153,114 +237,10 @@ option_group = [
                         ]
                     }
                 }
-            }
-        ]
-
-    },
-    {
-        comment = "Filesystem"
-
-        option = [
-            {
-                name = "automatic"
-                comment = "automatic"
-                set_by_default = true
-
-                config {
-                    filesystem {
-                        acornadfs {
-                            flavour = GUESS
-                        }
-                    }
-                }
-            },
-            {
-                name = "s"
-                comment = "ADFS S"
-
-                config {
-                    filesystem {
-                        acornadfs {
-                            flavour = S
-                        }
-                    }
-                }
-            },
-            {
-                name = "m"
-                comment = "ADFS M"
-
-                config {
-                    filesystem {
-                        acornadfs {
-                            flavour = M
-                        }
-                    }
-                }
-            },
-            {
-                name = "l"
-                comment = "ADFS L"
-
-                config {
-                    filesystem {
-                        acornadfs {
-                            flavour = L
-                        }
-                    }
-                }
-            },
-            {
-                name = "d"
-                comment = "ADFS D"
-
-                config {
-                    filesystem {
-                        acornadfs {
-                            flavour = D
-                        }
-                    }
-                }
-            },
-            {
-                name = "e"
-                comment = "ADFS E"
-
-                config {
-                    filesystem {
-                        acornadfs {
-                            flavour = E
-                        }
-                    }
-                }
-            },
-            {
-                name = "e-plus"
-                comment = "ADFS E+"
-
-                config {
-                    filesystem {
-                        acornadfs {
-                            flavour = E_PLUS
-                        }
-                    }
-                }
-            },
-            {
-                name = "f"
-                comment = "ADFS F"
-
-                config {
-                    filesystem {
-                        acornadfs {
-                            flavour = F
-                        }
-                    }
-                }
             },
             {
                 name = "f-plus"
-                comment = "ADFS F+"
+                comment = "1600kB 3.5\" 80-track DSHD; F+ format"
 
                 config {
                     filesystem {
@@ -268,29 +248,20 @@ option_group = [
                             flavour = F_PLUS
                         }
                     }
-                }
-            },
-            {
-                name = "g"
-                comment = "ADFS G"
 
-                config {
-                    filesystem {
-                        acornadfs {
-                            flavour = G
-                        }
-                    }
-                }
-            },
-            {
-                name = "g-plus"
-                comment = "ADFS G+"
-
-                config {
-                    filesystem {
-                        acornadfs {
-                            flavour = G_PLUS
-                        }
+                    layout {
+                        format_type = FORMATTYPE_80TRACK
+                        tracks = 80
+                        sides = 2
+                        layoutdata = [
+                            {
+                                sector_size = 1024
+                                physical {
+                                    start_sector = 0
+                                    count = 10
+                                }
+                            }
+                        ]
                     }
                 }
             }
