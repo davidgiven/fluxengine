@@ -67,10 +67,6 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel
             .build();
 
     final ImageViewModel model;
-    private final Executor executor = task -> {
-        getFilesystem();
-        filesystemExecutor.execute(task);
-    };
     @Getter private final Var<Boolean> isMounted = Var.of(false);
     @Getter private final Var<Integer> bytesTotal = Var.of(0);
     @Getter private final Var<Integer> bytesUsed = Var.of(0);
@@ -79,6 +75,10 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel
     @Getter private final Var<Boolean> hasPendingChanges = Var.of(false);
     Supplier<Set<VfsPath>> expandedSupplier;
     private FilesystemExecutor filesystemExecutor = new FilesystemExecutor();
+    private final Executor executor = task -> {
+        getFilesystem();
+        filesystemExecutor.execute(task);
+    };
 
     public FilesystemTreeTableModel(ImageViewModel model)
     {

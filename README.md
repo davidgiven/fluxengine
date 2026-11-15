@@ -115,7 +115,7 @@ choices because they can store multiple types of file system.
 | Profile | Format | Read? | Write? | Filesystem? |
 |:--------|:-------|:-----:|:------:|:------------|
 | [`abc`](doc/disk-abc.md) | Ai Electronics ABC 24: CP/M; 158kB 35-track DSDD | 🦄 |  | CPMFS  |
-| [`acornadfs`](doc/disk-acornadfs.md) | Acorn ADFS: BBC Micro, Archimedes | 🦖 |  |  |
+| [`acornadfs`](doc/disk-acornadfs.md) | Acorn ADFS: BBC Micro, Archimedes | 🦖 |  | ACORNADFS  |
 | [`acorndfs`](doc/disk-acorndfs.md) | Acorn DFS: Acorn Atom, BBC Micro series | 🦄 |  | ACORNDFS  |
 | [`aeslanier`](doc/disk-aeslanier.md) | AES Lanier "No Problem": 616kB 5.25" 77-track SSDD hard sectored | 🦖 |  |  |
 | [`agat`](doc/disk-agat.md) | Agat: 840kB 5.25" 80-track DS | 🦖 | 🦖 |  |

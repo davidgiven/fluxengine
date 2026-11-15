@@ -56,7 +56,7 @@ public class AcornAdfsFilesystemTest extends GenericTreeFilesystemTest
         assertThat(initial.get(FilesystemAttributes.VOLUME_NAME.name())).isEqualTo("LABEL");
         assertThat(initial.get(FilesystemAttributes.BLOCK_SIZE.name())).isEqualTo("256");
         assertThat(initial.get(FilesystemAttributes.TOTAL_BLOCKS.name())).isEqualTo("6400");
-        impl.putFile(VfsPath.of("/data.bin"), new Bytes(5000));
+        impl.putFile(VfsPath.of("/data"), new Bytes(5000));
         assertThat(Integer.parseInt(impl
                 .getFilesystemMetadata()
                 .get(FilesystemAttributes.USED_BLOCKS.name()))).isGreaterThan(Integer.parseInt(
@@ -80,28 +80,49 @@ public class AcornAdfsFilesystemTest extends GenericTreeFilesystemTest
     }
 
     @Test
-    public void pathsAndDottedNamesUseLiteralComponents() throws IOException
+    public void pathsUseLiteralComponents() throws IOException
     {
         impl.create(true, "LABEL");
-        impl.createDirectory(VfsPath.of("/dir.one"));
-        impl.createDirectory(VfsPath.of("/dir.one/@"));
-        VfsPath path = VfsPath.of("/dir.one/@/file.txt");
+        impl.createDirectory(VfsPath.of("/dirone"));
+        impl.createDirectory(VfsPath.of("/dirone/@"));
+        VfsPath path = VfsPath.of("/dirone/@/file");
         impl.putFile(path, new Bytes("payload"));
         assertThat(impl.getFile(path)).isEqualTo(new Bytes("payload"));
-        assertThat(impl.list(VfsPath.of("/dir.one/@")).get("file.txt").path()).isEqualTo(path);
+        assertThat(impl.list(VfsPath.of("/dirone/@")).get("file").path()).isEqualTo(path);
         impl.flushChanges();
         createTestFilesystem();
         assertThat(impl.getDirent(path).path()).isEqualTo(path);
-        impl.moveFile(path, VfsPath.of("/dir.one/@/other.txt"));
-        assertThat(impl.getFile(VfsPath.of("/dir.one/@/other.txt"))).isEqualTo(new Bytes("payload"
+        impl.moveFile(path, VfsPath.of("/dirone/@/other"));
+        assertThat(impl.getFile(VfsPath.of("/dirone/@/other"))).isEqualTo(new Bytes("payload"
         ));
+    }
+
+    /* Reject invalid names before any file, directory, or rename changes are made. */
+    @Test
+    public void dottedNamesAreRejected() throws IOException
+    {
+        impl.create(true, "LABEL");
+        VfsPath source = VfsPath.of("/source");
+        impl.putFile(source, new Bytes("payload"));
+        for (String name : List.of("file.txt", "dir.one", ".hidden", "trailing."))
+        {
+            VfsPath destination = VfsPath.root().resolve(name);
+            assertThrows(InvalidPathException.class,
+                    () -> impl.putFile(destination, new Bytes("data")));
+            assertThrows(InvalidPathException.class,
+                    () -> impl.createDirectory(destination));
+            assertThrows(InvalidPathException.class,
+                    () -> impl.moveFile(source, destination));
+        }
+        assertThat(impl.getFile(source)).isEqualTo(new Bytes("payload"));
+        assertThat(impl.list(VfsPath.root()).keySet()).containsExactly("source");
     }
 
     @Test
     public void modeAndTimestampMetadataArePreserved() throws IOException
     {
         impl.create(true, "LABEL");
-        VfsPath path = VfsPath.of("/typed.bin");
+        VfsPath path = VfsPath.of("/typed");
         impl.putFile(path, new Bytes("data"));
         String time = Instant.parse("2024-02-03T12:34:56.780Z").toString();
         impl.putFileMetadata(
@@ -144,9 +165,9 @@ public class AcornAdfsFilesystemTest extends GenericTreeFilesystemTest
             {
                 fs.create(true, "QUICK");
                 fs.createDirectory(VfsPath.of("/dir"));
-                fs.putFile(VfsPath.of("/dir/file.txt"), new Bytes("data"));
+                fs.putFile(VfsPath.of("/dir/file"), new Bytes("data"));
                 fs.flushChanges();
-                assertThat(fs.getFile(VfsPath.of("/dir/file.txt"))).isEqualTo(new Bytes("data"));
+                assertThat(fs.getFile(VfsPath.of("/dir/file"))).isEqualTo(new Bytes("data"));
                 fs.create(false, "FULL");
                 assertThat(fs.list(VfsPath.root())).isEmpty();
                 assertThat(fs
@@ -178,15 +199,15 @@ public class AcornAdfsFilesystemTest extends GenericTreeFilesystemTest
                             .getFilesystem()
                             .getAcornadfs(), device))
             {
-                fs.createDirectory(VfsPath.of("/dir.one"));
-                fs.putFile(VfsPath.of("/dir.one/file.txt"), new Bytes("data"));
-                fs.moveFile(VfsPath.of("/dir.one/file.txt"), VfsPath.of("/dir.one/other.txt"));
-                assertThat(fs.getFile(VfsPath.of("/dir.one/other.txt"))).isEqualTo(new Bytes(
+                fs.createDirectory(VfsPath.of("/dirone"));
+                fs.putFile(VfsPath.of("/dirone/file"), new Bytes("data"));
+                fs.moveFile(VfsPath.of("/dirone/file"), VfsPath.of("/dirone/other"));
+                assertThat(fs.getFile(VfsPath.of("/dirone/other"))).isEqualTo(new Bytes(
                         "data"));
-                assertThat(fs.list(VfsPath.of("/dir.one")).get("other.txt").path()).isEqualTo(
-                        VfsPath.of("/dir.one/other.txt"));
-                fs.deleteFile(VfsPath.of("/dir.one/other.txt"));
-                fs.deleteFile(VfsPath.of("/dir.one"));
+                assertThat(fs.list(VfsPath.of("/dirone")).get("other").path()).isEqualTo(
+                        VfsPath.of("/dirone/other"));
+                fs.deleteFile(VfsPath.of("/dirone/other"));
+                fs.deleteFile(VfsPath.of("/dirone"));
                 assertThat(fs.list(VfsPath.root())).isEmpty();
             }
         }

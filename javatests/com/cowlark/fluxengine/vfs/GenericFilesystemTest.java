@@ -211,13 +211,13 @@ public abstract class GenericFilesystemTest
                 Capability.OP_GETDIRENT);
         impl.create(true, "LABEL");
         Bytes data = getTestFileData("content old");
-        impl.putFile(VfsPath.of("/old.txt"), data);
-        impl.moveFile(VfsPath.of("/old.txt"), VfsPath.of("/new.txt"));
-        assertThrows(NoSuchFileException.class, () -> impl.getFile(VfsPath.of("/old.txt")));
+        impl.putFile(VfsPath.of("/old"), data);
+        impl.moveFile(VfsPath.of("/old"), VfsPath.of("/new"));
+        assertThrows(NoSuchFileException.class, () -> impl.getFile(VfsPath.of("/old")));
 
-        assertThat(impl.getFile(VfsPath.of("/new.txt"))).isEqualTo(data);
+        assertThat(impl.getFile(VfsPath.of("/new"))).isEqualTo(data);
         assertThat(impl.list(VfsPath.of("/"))).hasSize(1);
-        assertThat(impl.getDirent(VfsPath.of("/new.txt")).fileType()).isEqualTo(IS_FILE);
+        assertThat(impl.getDirent(VfsPath.of("/new")).fileType()).isEqualTo(IS_FILE);
     }
 
     @Test
@@ -231,14 +231,14 @@ public abstract class GenericFilesystemTest
         impl.create(true, "LABEL");
         Bytes a = getTestFileData("AAA");
         Bytes b = getTestFileData("BBB");
-        impl.putFile(VfsPath.of("/a.txt"), a);
-        impl.putFile(VfsPath.of("/b.txt"), b);
+        impl.putFile(VfsPath.of("/a"), a);
+        impl.putFile(VfsPath.of("/b"), b);
         assertThrows(
                 FileAlreadyExistsException.class,
-                () -> impl.moveFile(VfsPath.of("/a.txt"), VfsPath.of("/b.txt")));
+                () -> impl.moveFile(VfsPath.of("/a"), VfsPath.of("/b")));
 
         /* Both files should still exist with original contents */
-        assertThat(impl.getFile(VfsPath.of("/a.txt"))).isEqualTo(a);
-        assertThat(impl.getFile(VfsPath.of("/b.txt"))).isEqualTo(b);
+        assertThat(impl.getFile(VfsPath.of("/a"))).isEqualTo(a);
+        assertThat(impl.getFile(VfsPath.of("/b"))).isEqualTo(b);
     }
 }

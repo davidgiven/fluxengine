@@ -146,6 +146,8 @@ public class AcornAdfsFilesystem extends Filesystem
     {
         if (path.isRoot())
             throw new InvalidPathException(path.toString(), "cannot replace the root directory");
+        if (path.getName().contains("."))
+            throw new InvalidPathException(path.toString(), "ADFS filenames cannot contain dots");
         adfs.format().directoryFormat.validateName(path.getName());
     }
 
