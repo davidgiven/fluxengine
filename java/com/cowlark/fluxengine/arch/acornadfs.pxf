@@ -153,5 +153,144 @@ option_group = [
             }
         ]
 
+    },
+    {
+        comment = "Filesystem"
+
+        option = [
+            {
+                name = "automatic"
+                comment = "automatic"
+                set_by_default = true
+
+                config {
+                    filesystem {
+                        acornadfs {
+                            flavour = GUESS
+                        }
+                    }
+                }
+            },
+            {
+                name = "s"
+                comment = "ADFS S"
+
+                config {
+                    filesystem {
+                        acornadfs {
+                            flavour = S
+                        }
+                    }
+                }
+            },
+            {
+                name = "m"
+                comment = "ADFS M"
+
+                config {
+                    filesystem {
+                        acornadfs {
+                            flavour = M
+                        }
+                    }
+                }
+            },
+            {
+                name = "l"
+                comment = "ADFS L"
+
+                config {
+                    filesystem {
+                        acornadfs {
+                            flavour = L
+                        }
+                    }
+                }
+            },
+            {
+                name = "d"
+                comment = "ADFS D"
+
+                config {
+                    filesystem {
+                        acornadfs {
+                            flavour = D
+                        }
+                    }
+                }
+            },
+            {
+                name = "e"
+                comment = "ADFS E"
+
+                config {
+                    filesystem {
+                        acornadfs {
+                            flavour = E
+                        }
+                    }
+                }
+            },
+            {
+                name = "e-plus"
+                comment = "ADFS E+"
+
+                config {
+                    filesystem {
+                        acornadfs {
+                            flavour = E_PLUS
+                        }
+                    }
+                }
+            },
+            {
+                name = "f"
+                comment = "ADFS F"
+
+                config {
+                    filesystem {
+                        acornadfs {
+                            flavour = F
+                        }
+                    }
+                }
+            },
+            {
+                name = "f-plus"
+                comment = "ADFS F+"
+
+                config {
+                    filesystem {
+                        acornadfs {
+                            flavour = F_PLUS
+                        }
+                    }
+                }
+            },
+            {
+                name = "g"
+                comment = "ADFS G"
+
+                config {
+                    filesystem {
+                        acornadfs {
+                            flavour = G
+                        }
+                    }
+                }
+            },
+            {
+                name = "g-plus"
+                comment = "ADFS G+"
+
+                config {
+                    filesystem {
+                        acornadfs {
+                            flavour = G_PLUS
+                        }
+                    }
+                }
+            }
+        ]
     }
 ]

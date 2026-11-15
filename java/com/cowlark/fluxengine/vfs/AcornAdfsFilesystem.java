@@ -44,6 +44,10 @@ public class AcornAdfsFilesystem extends Filesystem
             Capability.OP_PUTFSDATA,
             Capability.OP_PUTATTRS);
 
+    public static final String ACORNADFS_LOAD_ADDRESS = "acornadfs.load_address";
+    public static final String ACORNADFS_EXEC_ADDRESS = "acornadfs.exec_address";
+    public static final String ACORNADFS_FILETYPE = "acornadfs.filetype";
+
     private final AcornAdfsProto config;
     private final BlockDevice blockDevice;
     private Adfs adfs;
@@ -64,11 +68,11 @@ public class AcornAdfsFilesystem extends Filesystem
         attributes.put(FileAttributes.MODE.name(), mode);
 
         /* Preserve raw addresses even when they encode a RISC OS file type and timestamp. */
-        attributes.put("acornadfs.load_address", String.format("0x%x", stat.loadAddress()));
-        attributes.put("acornadfs.exec_address", String.format("0x%x", stat.executionAddress()));
+        attributes.put(ACORNADFS_LOAD_ADDRESS, String.format("0x%x", stat.loadAddress()));
+        attributes.put(ACORNADFS_EXEC_ADDRESS, String.format("0x%x", stat.executionAddress()));
         Integer filetype = stat.metadata().filetype();
         if (filetype != null)
-            attributes.put("acornadfs.filetype", String.format("0x%03x", filetype));
+            attributes.put(ACORNADFS_FILETYPE, String.format("0x%03x", filetype));
         Dirent.DirentBuilder builder = Dirent
                 .builder()
                 .setFilename(stat.name())
@@ -92,7 +96,9 @@ public class AcornAdfsFilesystem extends Filesystem
         if (adfs != null)
             return;
 
-        adfs = Adfs.fromStorage(new OaknutBlockDeviceStorage(blockDevice), false);
+        Storage storage = new OaknutBlockDeviceStorage(blockDevice);
+        AdfsFormat format = selectedFormat();
+        adfs = format == null ? Adfs.fromStorage(storage, false) : Adfs.fromStorage(storage, format, false);
     }
 
     /* The storage is borrowed; closing oaknut does not commit or close the block device. */
@@ -185,11 +191,27 @@ public class AcornAdfsFilesystem extends Filesystem
         }
     }
 
-    /* Capacity determines the default floppy shape; existing images retain their map format
-     * when opened. Ambiguous 800K blank disks are formatted as E rather than D. */
+    /* GUESS delegates detection to oaknut; explicit flavours use the matching library format. */
+    private AdfsFormat selectedFormat()
+    {
+        if (config.getFlavour() == AcornAdfsProto.Flavour.UNDEFINED)
+            throw new IllegalArgumentException("ADFS flavour is undefined");
+        return config.getFlavour() == AcornAdfsProto.Flavour.GUESS ?
+                null : AdfsFormat.valueOf(config.getFlavour().name());
+    }
+
+    /* Capacity determines the default floppy shape for GUESS. Ambiguous 800K blank disks
+     * are formatted as E rather than D. Explicit flavours must fit the device exactly. */
     private AdfsFormat creationFormat() throws IOException
     {
         int size = Math.multiplyExact(blockDevice.getBlockSize(), blockDevice.getBlockCount());
+        AdfsFormat selected = selectedFormat();
+        if (selected != null)
+        {
+            if (selected.size() != size)
+                throw new IOException("Selected ADFS flavour does not match device capacity");
+            return selected;
+        }
         return switch (size)
         {
             case 163840 -> AdfsFormat.S;
@@ -340,30 +362,35 @@ public class AcornAdfsFilesystem extends Filesystem
     @SneakyThrows(IOException.class)
     public void putFileMetadata(VfsPath path, ImmutableMap<String, String> metadata)
     {
-        if (!ImmutableSet
-                .of(FileAttributes.MODE.name(), FileAttributes.CTIME.name(),
-                        "acornadfs.load_address", "acornadfs.exec_address", "acornadfs.filetype")
-                .containsAll(metadata.keySet()))
+        if (!ImmutableSet.of(
+                FileAttributes.MODE.name(),
+                FileAttributes.CTIME.name(),
+                ACORNADFS_LOAD_ADDRESS,
+                ACORNADFS_EXEC_ADDRESS,
+                ACORNADFS_FILETYPE).containsAll(metadata.keySet()))
             throw new IllegalArgumentException("can't set this metadata key");
         /* File types occupy the load address, so callers must choose one representation. */
-        if (metadata.containsKey("acornadfs.filetype") &&
-                (metadata.containsKey("acornadfs.load_address") ||
-                        metadata.containsKey("acornadfs.exec_address")))
+        if (metadata.containsKey(ACORNADFS_FILETYPE) &&
+                (metadata.containsKey(ACORNADFS_LOAD_ADDRESS) ||
+                        metadata.containsKey(ACORNADFS_EXEC_ADDRESS)))
             throw new IllegalArgumentException("cannot set addresses and file type together");
         access(
                 path, () -> {
                     AdfsPath file = path(path);
                     AcornMeta previous = file.stat().metadata();
                     AcornMeta updated = new AcornMeta(
-                            metadata.containsKey("acornadfs.load_address") ?
-                                    Long.decode(metadata.get("acornadfs.load_address")) : previous.loadAddress(),
-                            metadata.containsKey("acornadfs.exec_address") ?
-                                    Long.decode(metadata.get("acornadfs.exec_address")) : previous.executionAddress(),
+                            metadata.containsKey(ACORNADFS_LOAD_ADDRESS) ?
+                                    Long.decode(metadata.get(ACORNADFS_LOAD_ADDRESS)) :
+                                    previous.loadAddress(),
+                            metadata.containsKey(ACORNADFS_EXEC_ADDRESS) ?
+                                    Long.decode(metadata.get(ACORNADFS_EXEC_ADDRESS)) :
+                                    previous.executionAddress(),
                             metadata.containsKey(FileAttributes.MODE.name()) ?
                                     Access.parse(metadata.get(FileAttributes.MODE.name())) :
                                     previous.access());
-                    if (metadata.containsKey("acornadfs.filetype"))
-                        updated = updated.withFiletype(Integer.decode(metadata.get("acornadfs.filetype")));
+                    if (metadata.containsKey(ACORNADFS_FILETYPE))
+                        updated =
+                                updated.withFiletype(Integer.decode(metadata.get(ACORNADFS_FILETYPE)));
                     if (metadata.containsKey(FileAttributes.CTIME.name()))
                         updated =
                                 updated.withDatestamp(Instant.parse(metadata.get(FileAttributes.CTIME.name())));

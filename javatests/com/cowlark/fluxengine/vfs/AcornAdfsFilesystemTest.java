@@ -111,6 +111,42 @@ public class AcornAdfsFilesystemTest extends GenericTreeFilesystemTest
         assertThat(impl.getFile(path)).isEqualTo(new Bytes("payload"));
     }
 
+    /* Explicit flavours select both formatting and mounting, including ambiguous capacities. */
+    @Test
+    public void configuredFlavours() throws IOException
+    {
+        assertThat(AcornAdfsProto.getDefaultInstance().getFlavour()).isEqualTo(AcornAdfsProto.Flavour.GUESS);
+        for (AdfsFormat format : List.of(AdfsFormat.D, AdfsFormat.E, AdfsFormat.E_PLUS,
+                AdfsFormat.F, AdfsFormat.F_PLUS, AdfsFormat.L))
+        {
+            ConfigProto selected = new ConfigBuilder().loadConfigFile("acornadfs")
+                    .applyOption(format.size() == 819200 ? "800" :
+                            format.size() == 655360 ? "640" : "1600", "").build();
+            BlockDevice device = new InMemoryBlockDevice(new DiskLayout(selected), new Image());
+            AcornAdfsProto options = AcornAdfsProto.newBuilder()
+                    .setFlavour(AcornAdfsProto.Flavour.valueOf(format.name())).build();
+            try (AcornAdfsFilesystem fs = new AcornAdfsFilesystem(options, device))
+            {
+                fs.create(true, "LABEL");
+                fs.putFile(VfsPath.of("/data"), new Bytes("payload"));
+                fs.flushChanges();
+                assertThat(fs.getFile(VfsPath.of("/data"))).isEqualTo(new Bytes("payload"));
+                try (Adfs disc = Adfs.fromStorage(
+                        new AcornAdfsFilesystem.OaknutBlockDeviceStorage(device), format, false))
+                {
+                    assertThat(disc.format()).isEqualTo(format);
+                    assertThat(disc.path(List.of("data")).readBytes()).isEqualTo(new Bytes("payload").toByteArray());
+                }
+            }
+        }
+        AcornAdfsProto wrongCapacity = AcornAdfsProto.newBuilder()
+                .setFlavour(AcornAdfsProto.Flavour.S).build();
+        try (AcornAdfsFilesystem fs = new AcornAdfsFilesystem(wrongCapacity, blockDevice))
+        {
+            assertThrows(IOException.class, () -> fs.create(true, "LABEL"));
+        }
+    }
+
     @Test
     public void filesystemMetadataTracksUsageAndPersistsTitle() throws IOException
     {
