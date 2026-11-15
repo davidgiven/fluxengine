@@ -19,10 +19,6 @@ import java.util.Map;
  */
 class FakeFilesystem extends Filesystem
 {
-    private final Map<VfsPath, Dirent> dirents = new HashMap<>();
-    private final Map<VfsPath, Map<String, Dirent>> children = new HashMap<>();
-    private boolean dirty = false;
-
     private static final ImmutableSet<Capability> CAPS = ImmutableSet.of(
             Capability.OP_LIST,
             Capability.OP_GETDIRENT,
@@ -32,18 +28,24 @@ class FakeFilesystem extends Filesystem
             Capability.OP_PUTFILE,
             Capability.OP_MOVE,
             Capability.OP_GETFSDATA);
+    private final Map<VfsPath, Dirent> dirents = new HashMap<>();
+    private final Map<VfsPath, Map<String, Dirent>> children = new HashMap<>();
+    private boolean dirty = false;
 
     FakeFilesystem()
     {
         super(CAPS);
         /* Root directory. */
-        Dirent root = Dirent.builder()
+        Dirent root = Dirent
+                .builder()
                 .setPath(VfsPath.of("/"))
                 .setFilename("/")
                 .setFileType(FileType.IS_DIR)
                 .setAttributes(ImmutableMap.of(
-                        FileAttributes.FILENAME.name(), "/",
-                        FileAttributes.FILE_TYPE.name(), "dir"))
+                        FileAttributes.FILENAME.name(),
+                        "/",
+                        FileAttributes.FILE_TYPE.name(),
+                        "dir"))
                 .build();
         dirents.put(VfsPath.of("/"), root);
         children.put(VfsPath.of("/"), new HashMap<>());
@@ -52,37 +54,46 @@ class FakeFilesystem extends Filesystem
     void addEmptyDir(VfsPath path)
     {
         String name = path.getName();
-        Dirent d = Dirent.builder()
+        Dirent d = Dirent
+                .builder()
                 .setPath(path)
                 .setFilename(name)
                 .setFileType(FileType.IS_DIR)
                 .setAttributes(ImmutableMap.of(
-                        FileAttributes.FILENAME.name(), name,
-                        FileAttributes.FILE_TYPE.name(), "dir"))
+                        FileAttributes.FILENAME.name(),
+                        name,
+                        FileAttributes.FILE_TYPE.name(),
+                        "dir"))
                 .build();
         dirents.put(path, d);
         children.put(path, new HashMap<>());
         VfsPath parent = path.getParent();
-        if (parent == null) parent = VfsPath.of("/");
+        if (parent == null)
+            parent = VfsPath.of("/");
         children.get(parent).put(name, d);
     }
 
     void addFile(VfsPath path)
     {
         String name = path.getName();
-        Dirent d = Dirent.builder()
+        Dirent d = Dirent
+                .builder()
                 .setPath(path)
                 .setFilename(name)
                 .setFileType(FileType.IS_FILE)
                 .setAttributes(ImmutableMap.of(
-                        FileAttributes.FILENAME.name(), name,
-                        FileAttributes.FILE_TYPE.name(), "file"))
+                        FileAttributes.FILENAME.name(),
+                        name,
+                        FileAttributes.FILE_TYPE.name(),
+                        "file"))
                 .build();
         dirents.put(path, d);
         VfsPath parent = path.getParent();
-        if (parent == null) parent = VfsPath.of("/");
+        if (parent == null)
+            parent = VfsPath.of("/");
         Map<String, Dirent> pChildren = children.get(parent);
-        if (pChildren == null) {
+        if (pChildren == null)
+        {
             pChildren = new HashMap<>();
             children.put(parent, pChildren);
         }
@@ -93,7 +104,8 @@ class FakeFilesystem extends Filesystem
     public ImmutableMap<String, Dirent> list(VfsPath path) throws IOException
     {
         Map<String, Dirent> m = children.get(path);
-        if (m == null) throw new IOException("not a directory: " + path);
+        if (m == null)
+            throw new IOException("not a directory: " + path);
         return ImmutableMap.copyOf(m);
     }
 
@@ -101,14 +113,16 @@ class FakeFilesystem extends Filesystem
     public Dirent getDirent(VfsPath path) throws IOException
     {
         Dirent d = dirents.get(path);
-        if (d == null) throw new IOException("not found: " + path);
+        if (d == null)
+            throw new IOException("not found: " + path);
         return d;
     }
 
     @Override
     public void createDirectory(VfsPath path) throws IOException
     {
-        if (dirents.containsKey(path)) throw new IOException("exists: " + path);
+        if (dirents.containsKey(path))
+            throw new IOException("exists: " + path);
         addEmptyDir(path);
         dirty = true;
     }
@@ -117,12 +131,15 @@ class FakeFilesystem extends Filesystem
     public void deleteFile(VfsPath path) throws IOException
     {
         Dirent d = dirents.remove(path);
-        if (d == null) throw new IOException("not found: " + path);
+        if (d == null)
+            throw new IOException("not found: " + path);
         /* Remove from parent. */
         VfsPath parent = path.getParent();
-        if (parent == null) parent = VfsPath.of("/");
+        if (parent == null)
+            parent = VfsPath.of("/");
         Map<String, Dirent> pChildren = children.get(parent);
-        if (pChildren != null) pChildren.remove(path.getName());
+        if (pChildren != null)
+            pChildren.remove(path.getName());
         /* If directory, remove its children map. */
         children.remove(path);
         dirty = true;
@@ -132,9 +149,12 @@ class FakeFilesystem extends Filesystem
     public ImmutableMap<String, String> getFilesystemMetadata() throws IOException
     {
         return ImmutableMap.of(
-                FilesystemAttributes.BLOCK_SIZE.name(), "512",
-                FilesystemAttributes.TOTAL_BLOCKS.name(), "100",
-                FilesystemAttributes.USED_BLOCKS.name(), dirty ? "10" : "5");
+                FilesystemAttributes.BLOCK_SIZE.name(),
+                "512",
+                FilesystemAttributes.TOTAL_BLOCKS.name(),
+                "100",
+                FilesystemAttributes.USED_BLOCKS.name(),
+                dirty ? "10" : "5");
     }
 
     @Override

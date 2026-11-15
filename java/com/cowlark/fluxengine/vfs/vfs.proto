@@ -11,10 +11,32 @@ message AcornDfsProto
   {
     UNDEFINED = 0;
     ACORN_DFS = 1;
+    WATCOM_DFS = 2;
   }
 
   optional Flavour flavour = 1
   [default = ACORN_DFS, (help) = "which flavour of DFS to implement"];
+}
+
+message AcornAdfsProto
+{
+  enum Flavour
+  {
+    UNDEFINED = 0;
+    S = 1;
+    M = 2;
+    L = 3;
+    D = 5;
+    E = 6;
+    E_PLUS = 7;
+    F = 8;
+    F_PLUS = 9;
+    G = 10;
+    G_PLUS = 11;
+  }
+
+  optional Flavour flavour = 1
+  [default = F, (help) = "ADFS floppy format"];
 }
 
 message Brother120FsProto {}
@@ -92,7 +114,7 @@ message LifProto
 
 message MicrodosProto {}
 
-// NEXT_TAG: 16
+/* NEXT_TAG: 16 */
 message ZDosProto
 {
   message Location
@@ -111,7 +133,7 @@ message RolandFsProto
   [(help) = "position of the directory", default = 39];
 }
 
-// NEXT_TAG: 18
+/* NEXT_TAG: 19 */
 message FilesystemProto
 {
   enum FilesystemType
@@ -132,6 +154,7 @@ message FilesystemProto
     MICRODOS = 13;
     ZDOS = 14;
     ROLAND = 15;
+    ACORNADFS = 16;
   }
 
   optional FilesystemType type = 10
@@ -152,4 +175,5 @@ message FilesystemProto
   optional MicrodosProto microdos = 15;
   optional ZDosProto zdos = 16;
   optional RolandFsProto roland = 17;
+  optional AcornAdfsProto acornadfs = 18;
 }

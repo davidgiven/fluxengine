@@ -28,7 +28,6 @@ import com.cowlark.fluxengine.data.Disk;
 import com.cowlark.fluxengine.data.Formats;
 import com.cowlark.fluxengine.data.Image;
 import com.cowlark.fluxengine.data.Track;
-import com.google.common.collect.ImmutableList;
 import com.cowlark.fluxengine.fluxsource.FluxSource;
 import com.cowlark.fluxengine.fluxsource.MemoryFluxSource;
 import com.cowlark.fluxengine.gui.DriveActivity.ActivityType;
@@ -39,6 +38,7 @@ import com.cowlark.fluxengine.vfs.BlockDevice;
 import com.cowlark.fluxengine.vfs.Filesystem;
 import com.cowlark.fluxengine.vfs.FilesystemOperation;
 import com.cowlark.fluxengine.vfs.InMemoryBlockDevice;
+import com.google.common.collect.ImmutableList;
 import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.subjects.PublishSubject;
 import io.reactivex.rxjava3.subjects.Subject;
@@ -66,20 +66,19 @@ import java.util.function.Supplier;
 public class ImageViewModel
 {
     static final String CUSTOM_FORMAT = "(custom format)";
-
-    /* The custom slot has a stable identity independent of the loaded file's metadata. */
-    @Getter private Var<String> customFormatFilename;
-    private volatile ConfigProto customFormat;
-
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(ImageViewModel.class);
-
     private static final String DEFAULT_ADVANCED_SETTINGS = """
             # Enter any additional preferences here. For example:
             # decoder.retries=0
             """;
-
     @Getter private final PreferencesReaderWriter preferencesReaderWriter;
-
+    @Getter private final Subject<ImmutableList<Track>> fluxViewRequests =
+            PublishSubject.<ImmutableList<Track>>create().toSerialized();
+    @Getter(lazy = true) private final FilesystemTreeTableModel filesystemTreeTableModel =
+            new FilesystemTreeTableModel(this);
+    /* The custom slot has a stable identity independent of the loaded file's metadata. */
+    @Getter private Var<String> customFormatFilename;
+    private volatile ConfigProto customFormat;
     @Getter private Var<String> statusMessage = Var.of("Ready");
     @Getter private Var<String> selectedFormat;
     @Getter private Var<String> selectedDevice;
@@ -87,31 +86,23 @@ public class ImageViewModel
     @Getter private Var<String> selectedSerialPort;
     @Getter private Var<String> advancedSettings;
     @Getter private Var<Integer> selectedDrive;
-
     @Getter private Vars<LogMessage> logQueue = Vars.of(LogMessage.class);
-    @Getter private final Subject<ImmutableList<Track>> fluxViewRequests =
-            PublishSubject.<ImmutableList<Track>>create().toSerialized();
     @Getter private Var<Disposable> currentDisposable = Var.ofNull(Disposable.class);
     @Getter private Var<Disk> disk = Var.of(new Disk());
     @Getter private Var<DriveActivity> driveActivity =
             Var.of(new DriveActivity(ActivityType.IDLE, 0, 0));
-
     @Getter private Val<Boolean> busy =
             currentDisposable.viewAs(Boolean.class, op -> op != null && !op.isDisposed());
-
     @Getter private Var<Association<String, CandidateDevice>> usbDevices =
             Var.of(Association.between(String.class, CandidateDevice.class));
-
-    @Getter(lazy = true) private final FilesystemTreeTableModel filesystemTreeTableModel =
-            new FilesystemTreeTableModel(this);
 
     ImageViewModel(PreferencesReaderWriter preferencesReaderWriter)
     {
         this.preferencesReaderWriter = preferencesReaderWriter;
 
         selectedFormat = makeStringPreference(FORMAT, "ibm");
-        customFormatFilename = makeStringPreference(
-                PreferencesReaderWriter.CUSTOM_FORMAT_FILENAME, "");
+        customFormatFilename =
+                makeStringPreference(PreferencesReaderWriter.CUSTOM_FORMAT_FILENAME, "");
         selectedDevice = makeStringPreference(DEVICE, DEVICE_FLUXFILE);
         selectedFluxFile = makeStringPreference(DEVICE_FLUXFILE, "");
         selectedSerialPort = makeStringPreference(DEVICE_SERIALPORT, "");
@@ -121,12 +112,21 @@ public class ImageViewModel
         refreshUsbDevices();
     }
 
+    private static void showFatalError(ErrorLogMessage m)
+    {
+        UI.message(String.format("Error: %s", m.message())).showAsError();
+    }
+
     /* Built-in formats and the custom slot share one selector, but not a global cache. */
     ImmutableList<String> getFormatNames()
     {
-        return ImmutableList.<String>builder()
-                .addAll(Formats.all().stream()
-                        .filter(name -> !Formats.get(name).getIsExtension()).toList())
+        return ImmutableList
+                .<String>builder()
+                .addAll(Formats
+                        .all()
+                        .stream()
+                        .filter(name -> !Formats.get(name).getIsExtension())
+                        .toList())
                 .add(CUSTOM_FORMAT)
                 .build();
     }
@@ -151,25 +151,31 @@ public class ImageViewModel
         } catch (IOException | FluxEngineException | InvalidPathException e)
         {
             throw new FluxEngineException(
-                    "cannot load custom format '" + filename + "': " + e.getMessage(), e);
+                    "cannot load custom format '" + filename + "': " + e.getMessage(),
+                    e);
         }
 
         /* Keep only choices still represented by the new format definition. */
-        Association<String, String> saved = preferencesReaderWriter.getOptionsForFormat(CUSTOM_FORMAT);
+        Association<String, String> saved =
+                preferencesReaderWriter.getOptionsForFormat(CUSTOM_FORMAT);
         Association<String, String> compatible = Association.between(String.class, String.class);
         for (Pair<String, String> choice : saved)
         {
-            boolean valid = config.getOptionList().stream()
-                    .anyMatch(option -> option.getName().equals(choice.first()) && choice.second().isEmpty());
+            boolean valid = config
+                    .getOptionList()
+                    .stream()
+                    .anyMatch(option -> option.getName().equals(choice.first()) &&
+                            choice.second().isEmpty());
             for (OptionGroupProto group : config.getOptionGroupList())
             {
                 for (OptionProto option : group.getOptionList())
                 {
                     if (group.getName().isEmpty())
-                        valid |= option.getName().equals(choice.first()) && choice.second().isEmpty();
+                        valid |= option.getName().equals(choice.first()) &&
+                                choice.second().isEmpty();
                     else
-                        valid |= group.getName().equals(choice.first())
-                                && option.getName().equals(choice.second());
+                        valid |= group.getName().equals(choice.first()) &&
+                                option.getName().equals(choice.second());
                 }
             }
             if (valid)
@@ -180,7 +186,8 @@ public class ImageViewModel
         preferencesReaderWriter.setOptionsForFormat(CUSTOM_FORMAT, compatible);
         customFormat = config;
         preferencesReaderWriter.setStringPreference(
-                PreferencesReaderWriter.CUSTOM_FORMAT_FILENAME, filename);
+                PreferencesReaderWriter.CUSTOM_FORMAT_FILENAME,
+                filename);
         if (customFormatFilename.get().equals(filename))
             customFormatFilename.fireChange(From.VIEW_MODEL);
         else
@@ -191,11 +198,6 @@ public class ImageViewModel
     public void openFluxView(ImmutableList<Track> tracks)
     {
         fluxViewRequests.onNext(tracks);
-    }
-
-    private static void showFatalError(ErrorLogMessage m)
-    {
-        UI.message(String.format("Error: %s", m.message())).showAsError();
     }
 
     private Var<String> makeStringPreference(String preferenceName, String defaultValue)
@@ -405,10 +407,7 @@ public class ImageViewModel
                 });
     }
 
-    void startFilesystemOperation(
-            FilesystemExecutor executor,
-            Image image,
-            Runnable onExit)
+    void startFilesystemOperation(FilesystemExecutor executor, Image image, Runnable onExit)
     {
         performOperation(
                 this::makeConfigBuilder, new FilesystemOperation()
@@ -417,8 +416,9 @@ public class ImageViewModel
                     public void run(Filesystem filesystem) throws IOException
                     {
                         logger.atInfo().log("starting filesystem thread");
-                        executor.run(filesystem, error ->
-                                UiUtils.reportError("Filesystem error").apply(error));
+                        executor.run(
+                                filesystem,
+                                error -> UiUtils.reportError("Filesystem error").apply(error));
                     }
 
                     @Override
@@ -499,12 +499,13 @@ public class ImageViewModel
             if (customFormat == null)
                 throw new FluxEngineException("Select a custom format file first");
             builder.mergeConfig(customFormat);
-        }
-        else
+        } else
             builder.loadConfigFile(selectedFormat.get());
 
+        /* Saved choices can outlive renamed or removed format options. */
         for (Pair<String, String> e : getOptionsForFormat(selectedFormat.get()).get())
-            builder.applyOption(e.first(), e.second());
+            if (builder.tryFindOption(e.first()) != null)
+                builder.applyOption(e.first(), e.second());
 
         return builder;
     }
@@ -513,8 +514,10 @@ public class ImageViewModel
     {
         ConfigBuilder builder = makeConfigBuilderWithFormat();
 
+        /* Apply the same filtering to saved device choices. */
         for (Pair<String, String> e : getOptionsForDevice().get())
-            builder.applyOption(e.first(), e.second());
+            if (builder.tryFindOption(e.first()) != null)
+                builder.applyOption(e.first(), e.second());
 
         String device = getSelectedDevice().get();
         if (device.equals(DEVICE_SERIALPORT))

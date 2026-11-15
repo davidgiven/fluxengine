@@ -1,0 +1,14 @@
+load("@rules_java//java:defs.bzl", "java_library")
+
+package(default_visibility = ["//visibility:public"])
+
+java_library(
+    name = "adfs",
+    srcs = glob(["*.java"]),
+    deps = [
+        "//third_party/java/org/rob_smallshire/oaknut/discimage",
+        "//third_party/java/org/rob_smallshire/oaknut/file",
+        "//third_party/java/org/rob_smallshire/oaknut/filesystem",
+        "@maven//:com_google_guava_guava",
+    ],
+)

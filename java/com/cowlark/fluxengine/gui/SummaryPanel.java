@@ -321,6 +321,10 @@ public class SummaryPanel extends JPanel
         String label;
     }
 
+    record ButtonAndSpan(JComponent button, int span)
+    {
+    }
+
     /* A single cell of the summary grid. */
     private class SummaryButton extends JButton
     {
@@ -395,9 +399,5 @@ public class SummaryPanel extends JPanel
                 }
             }
         }
-    }
-
-    record ButtonAndSpan(JComponent button, int span)
-    {
     }
 }

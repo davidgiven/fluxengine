@@ -8,22 +8,22 @@ import com.cowlark.fluxengine.data.Fluxmap;
 import com.cowlark.fluxengine.data.Record;
 import com.cowlark.fluxengine.data.Sector;
 import com.cowlark.fluxengine.data.Track;
+import com.formdev.flatlaf.FlatDarkLaf;
+import com.formdev.flatlaf.FlatLightLaf;
 import com.google.common.collect.ImmutableList;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import javax.swing.JComponent;
 import javax.imageio.ImageIO;
+import javax.swing.JComponent;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
-import javax.swing.JViewport;
-import javax.swing.JScrollPane;
 import javax.swing.JScrollBar;
+import javax.swing.JScrollPane;
+import javax.swing.JViewport;
+import javax.swing.LookAndFeel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
-import javax.swing.LookAndFeel;
-import com.formdev.flatlaf.FlatDarkLaf;
-import com.formdev.flatlaf.FlatLightLaf;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Graphics2D;
@@ -37,7 +37,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-@RunWith(JUnit4.class) public class FluxViewerPanelTest
+@RunWith(JUnit4.class)
+public class FluxViewerPanelTest
 {
     /* Use a simple timed pulse stream with one index and a sector/record over its middle. */
     private static Track track(boolean pulses)
@@ -53,14 +54,10 @@ import java.io.IOException;
                 track.fluxmap.appendIndex();
         }
         Record record = new Record();
-        record.startTimeNs
-        = track.fluxmap.durationNs() / 4;
-        record.endTimeNs
-        = track.fluxmap.durationNs() * 3 / 4;
-        record.clockNs
-        = 2000;
-        record.rawData
-        = Bytes.of(0x12, 0x34);
+        record.startTimeNs = track.fluxmap.durationNs() / 4;
+        record.endTimeNs = track.fluxmap.durationNs() * 3 / 4;
+        record.clockNs = 2000;
+        record.rawData = Bytes.of(0x12, 0x34);
         track.records.add(record);
         Sector sector = new Sector(new CylinderHeadSector(1, 0, 3));
         sector.status = Sector.Status.OK;
@@ -104,8 +101,7 @@ import java.io.IOException;
         try
         {
             viewport.paint(graphics);
-        }
-        finally
+        } finally
         {
             graphics.dispose();
         }
@@ -121,14 +117,14 @@ import java.io.IOException;
         try
         {
             ImageIO.write(image, "png", new File(output, name + ".png"));
-        }
-        catch (IOException exception)
+        } catch (IOException exception)
         {
             throw new AssertionError(exception);
         }
     }
 
-    @Test public void fitZoomAnchorsAndClamps() throws Exception
+    @Test
+    public void fitZoomAnchorsAndClamps() throws Exception
     {
         SwingUtilities.invokeAndWait(() -> {
             FluxViewerPanel panel = new FluxViewerPanel(null, ImmutableList.of(track(true)));
@@ -160,7 +156,8 @@ import java.io.IOException;
         });
     }
 
-    @Test public void drawsLayersAndTargetsMenusInContentCoordinates() throws Exception
+    @Test
+    public void drawsLayersAndTargetsMenusInContentCoordinates() throws Exception
     {
         SwingUtilities.invokeAndWait(() -> {
             Track first = track(true);
@@ -180,76 +177,112 @@ import java.io.IOException;
             }
 
             /* Sample block interiors away from text, outlines, and the index marker. */
-            assertThat(image.getRGB(80, 10) & 0xffffff).isEqualTo(UiUtils.DATA_OK_COLOUR.darker().getRGB() & 0xffffff);
+            assertThat(image.getRGB(80, 10) & 0xffffff).isEqualTo(
+                    UiUtils.DATA_OK_COLOUR.darker().getRGB() & 0xffffff);
             assertThat(image.getRGB(260, 10)).isEqualTo(UiUtils.DATA_BAD_COLOUR.darker().getRGB());
-            assertThat(image.getRGB(200, 5) & 0xffffff).isEqualTo(UiUtils.DATA_BAD_COLOUR.getRGB() & 0xffffff);
+            assertThat(image.getRGB(200, 5) & 0xffffff).isEqualTo(
+                    UiUtils.DATA_BAD_COLOUR.getRGB() & 0xffffff);
             assertThat(image.getRGB(80, 50)).isEqualTo(UiUtils.HEADER_COLOUR.darker().getRGB());
             assertThat(image.getRGB(260, 50)).isEqualTo(UiUtils.DATA_BAD_COLOUR.darker().getRGB());
             JPopupMenu menu = panel.contextMenuAt(new Point(80, 10));
             assertThat(menu.getComponentCount()).isEqualTo(3);
-            assertThat(((JMenuItem) menu.getComponent(0)).getText())
-                .isEqualTo("Show sector summary");
+            assertThat(((JMenuItem) menu.getComponent(0)).getText()).isEqualTo("Show sector " +
+                    "summary");
             assertThat(panel.contextMenuAt(new Point(80, 50)).getComponentCount()).isEqualTo(1);
             assertThat(panel.contextMenuAt(new Point(80, 110))).isNull();
 
             /* Reports include both captures even when their statuses differ. */
-            assertThat(panel.sectorSummary(first.allSectors.getFirst()))
-                .contains("Number of times seen: 2");
+            assertThat(panel.sectorSummary(first.allSectors.getFirst())).contains(
+                    "Number of times seen: 2");
             assertThat(panel.sectorSummary(first.allSectors.getFirst())).contains("bad checksum");
             assertThat(panel.sectorData(first.allSectors.getFirst(), false)).contains("ab cd");
             assertThat(panel.sectorData(first.allSectors.getFirst(), true)).contains("12 34");
-            assertThat(FluxViewerPanel.recordData(first.records.getFirst()))
-                .contains("Data CRC16:");
+            assertThat(FluxViewerPanel.recordData(first.records.getFirst())).contains("Data " +
+                    "CRC16:");
             panel.dispose();
         });
     }
 
-    @Test public void wheelHoverDragAndRenderingAtEveryDetailLevel() throws Exception
+    @Test
+    public void wheelHoverDragAndRenderingAtEveryDetailLevel() throws Exception
     {
         SwingUtilities.invokeAndWait(() -> {
             FluxViewerPanel panel = new FluxViewerPanel(null, ImmutableList.of(track(true)));
             JViewport viewport = viewport(panel);
             JComponent canvas = (JComponent) viewport.getView();
             BufferedImage normal = paint(viewport);
-            assertThat(normal.getRGB(120, 170) & 0xffffff).isEqualTo(UiUtils.HEADER_COLOUR.getRGB() & 0xffffff);
-            canvas.dispatchEvent(
-                new MouseEvent(canvas, MouseEvent.MOUSE_MOVED, 0, 0, 120, 10, 0, false));
+            assertThat(normal.getRGB(120, 170) & 0xffffff).isEqualTo(
+                    UiUtils.HEADER_COLOUR.getRGB() & 0xffffff);
+            canvas.dispatchEvent(new MouseEvent(
+                    canvas,
+                    MouseEvent.MOUSE_MOVED,
+                    0,
+                    0,
+                    120,
+                    10,
+                    0,
+                    false));
             BufferedImage hovered = paint(viewport);
             assertThat(hovered.getRGB(120, 10)).isNotEqualTo(normal.getRGB(120, 10));
-            canvas.dispatchEvent(
-                new MouseEvent(canvas, MouseEvent.MOUSE_EXITED, 0, 0, 120, 10, 0, false));
+            canvas.dispatchEvent(new MouseEvent(
+                    canvas,
+                    MouseEvent.MOUSE_EXITED,
+                    0,
+                    0,
+                    120,
+                    10,
+                    0,
+                    false));
             assertThat(paint(viewport).getRGB(120, 10)).isEqualTo(normal.getRGB(120, 10));
 
             /* A wheel event must zoom and be consumed instead of scrolling the outer panel. */
-            MouseWheelEvent wheel = new MouseWheelEvent(canvas,
-                MouseEvent.MOUSE_WHEEL,
-                0,
-                0,
-                200,
-                100,
-                0,
-                false,
-                MouseWheelEvent.WHEEL_UNIT_SCROLL,
-                3,
-                -1);
+            MouseWheelEvent wheel = new MouseWheelEvent(
+                    canvas,
+                    MouseEvent.MOUSE_WHEEL,
+                    0,
+                    0,
+                    200,
+                    100,
+                    0,
+                    false,
+                    MouseWheelEvent.WHEEL_UNIT_SCROLL,
+                    3,
+                    -1);
             canvas.dispatchEvent(wheel);
             assertThat(wheel.isConsumed()).isTrue();
             assertThat(canvas.getWidth()).isEqualTo(472);
             canvas.dispatchEvent(new MouseEvent(
-                canvas, MouseEvent.MOUSE_PRESSED, 0, 0, 240, 100, 1, false, MouseEvent.BUTTON1));
-            canvas.dispatchEvent(new MouseEvent(canvas,
-                MouseEvent.MOUSE_DRAGGED,
-                0,
-                MouseEvent.BUTTON1_DOWN_MASK,
-                220,
-                130,
-                0,
-                false,
-                MouseEvent.NOBUTTON));
+                    canvas,
+                    MouseEvent.MOUSE_PRESSED,
+                    0,
+                    0,
+                    240,
+                    100,
+                    1,
+                    false,
+                    MouseEvent.BUTTON1));
+            canvas.dispatchEvent(new MouseEvent(
+                    canvas,
+                    MouseEvent.MOUSE_DRAGGED,
+                    0,
+                    MouseEvent.BUTTON1_DOWN_MASK,
+                    220,
+                    130,
+                    0,
+                    false,
+                    MouseEvent.NOBUTTON));
             assertThat(viewport.getViewPosition().x).isEqualTo(56);
             assertThat(viewport.getViewPosition().y).isEqualTo(0);
             canvas.dispatchEvent(new MouseEvent(
-                canvas, MouseEvent.MOUSE_RELEASED, 0, 0, 240, 100, 1, false, MouseEvent.BUTTON1));
+                    canvas,
+                    MouseEvent.MOUSE_RELEASED,
+                    0,
+                    0,
+                    240,
+                    100,
+                    1,
+                    false,
+                    MouseEvent.BUTTON1));
 
             /* Exercise density, individual pulses, bytes, and raw bits, including record EOF. */
             for (int i = 0; i < 42; i++)
@@ -280,28 +313,28 @@ import java.io.IOException;
                     SwingUtilities.updateComponentTreeUI(panel);
                     JViewport viewport = viewport(panel);
                     BufferedImage image = paint(viewport);
-                    assertThat(image.getRGB(10, 100))
-                            .isEqualTo(UIManager.getColor("Panel.background").getRGB());
-                    assertThat(image.getRGB(120, 10))
-                            .isEqualTo(UiUtils.DATA_OK_COLOUR.darker().getRGB());
+                    assertThat(image.getRGB(10, 100)).isEqualTo(UIManager
+                            .getColor("Panel.background")
+                            .getRGB());
+                    assertThat(image.getRGB(120, 10)).isEqualTo(UiUtils.DATA_OK_COLOUR
+                            .darker()
+                            .getRGB());
                     /* Semantic record fills remain consistent under both themes. */
-                    assertThat(image.getRGB(120, 50))
-                            .isEqualTo(UiUtils.HEADER_COLOUR.darker().getRGB());
+                    assertThat(image.getRGB(120, 50)).isEqualTo(UiUtils.HEADER_COLOUR
+                            .darker()
+                            .getRGB());
                     snapshot(theme instanceof FlatDarkLaf ? "dark-theme" : "light-theme", image);
                 }
                 panel.dispose();
-            }
-            catch (Exception exception)
+            } catch (Exception exception)
             {
                 throw new AssertionError(exception);
-            }
-            finally
+            } finally
             {
                 try
                 {
                     UIManager.setLookAndFeel(original);
-                }
-                catch (Exception exception)
+                } catch (Exception exception)
                 {
                     throw new AssertionError(exception);
                 }
@@ -334,19 +367,49 @@ import java.io.IOException;
                 bar.setValue(0);
                 panel.processInteractionFrame();
                 JComponent canvas = (JComponent) viewport.getView();
-                MouseEvent press = new MouseEvent(canvas, MouseEvent.MOUSE_PRESSED, 0, 0,
-                        200, 100, 0, 0, 1, false, MouseEvent.BUTTON1);
+                MouseEvent press = new MouseEvent(
+                        canvas,
+                        MouseEvent.MOUSE_PRESSED,
+                        0,
+                        0,
+                        200,
+                        100,
+                        0,
+                        0,
+                        1,
+                        false,
+                        MouseEvent.BUTTON1);
                 for (MouseListener listener : canvas.getMouseListeners())
                     listener.mousePressed(press);
                 for (int x : new int[]{180, 160})
                 {
-                    MouseEvent drag = new MouseEvent(canvas, MouseEvent.MOUSE_DRAGGED, 0,
-                            MouseEvent.BUTTON1_DOWN_MASK, x, 100, 0, 0, 0, false, MouseEvent.NOBUTTON);
+                    MouseEvent drag = new MouseEvent(
+                            canvas,
+                            MouseEvent.MOUSE_DRAGGED,
+                            0,
+                            MouseEvent.BUTTON1_DOWN_MASK,
+                            x,
+                            100,
+                            0,
+                            0,
+                            0,
+                            false,
+                            MouseEvent.NOBUTTON);
                     for (MouseMotionListener listener : canvas.getMouseMotionListeners())
                         listener.mouseDragged(drag);
                 }
-                MouseEvent release = new MouseEvent(canvas, MouseEvent.MOUSE_RELEASED, 0, 0,
-                        160, 100, 0, 0, 1, false, MouseEvent.BUTTON1);
+                MouseEvent release = new MouseEvent(
+                        canvas,
+                        MouseEvent.MOUSE_RELEASED,
+                        0,
+                        0,
+                        160,
+                        100,
+                        0,
+                        0,
+                        1,
+                        false,
+                        MouseEvent.BUTTON1);
                 for (MouseListener listener : canvas.getMouseListeners())
                     listener.mouseReleased(release);
                 assertThat(viewport.getViewPosition().x).isEqualTo(0);
@@ -358,8 +421,7 @@ import java.io.IOException;
                 panel.zoom(-1, 200);
                 assertThat(canvas.getWidth()).isGreaterThan(width);
                 assertThat(viewport.getViewPosition().x).isGreaterThan(40);
-            }
-            finally
+            } finally
             {
                 panel.removeNotify();
                 panel.dispose();
@@ -367,15 +429,17 @@ import java.io.IOException;
         });
     }
 
-    @Test public void absentZeroDurationAndPulseFreeInputsAreSafe() throws Exception
+    @Test
+    public void absentZeroDurationAndPulseFreeInputsAreSafe() throws Exception
     {
         SwingUtilities.invokeAndWait(() -> {
             Track absent = new Track();
             Track empty = new Track();
             empty.fluxmap = new Fluxmap();
-            for (ImmutableList<Track> tracks : ImmutableList.of(ImmutableList.<Track>of(),
-                     ImmutableList.of(absent, empty),
-                     ImmutableList.of(track(false))))
+            for (ImmutableList<Track> tracks : ImmutableList.of(
+                    ImmutableList.<Track>of(),
+                    ImmutableList.of(absent, empty),
+                    ImmutableList.of(track(false))))
             {
                 FluxViewerPanel panel = new FluxViewerPanel(null, tracks);
                 JViewport viewport = viewport(panel);

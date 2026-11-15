@@ -52,10 +52,9 @@ public class ApplicationFrame extends JFrame
     private final SummaryPanel summaryPanel;
     private final FilesystemPanel filesystemPanel;
     private final JTabbedPane centreTabs;
-    private Disposable fluxViewSubscription;
-
     private final ImageViewModel model;
     private final Var<Workflow> currentWorkflow;
+    private Disposable fluxViewSubscription;
 
     ApplicationFrame(ImageViewModel model, PreferencesReaderWriter preferences)
     {
@@ -154,29 +153,6 @@ public class ApplicationFrame extends JFrame
                 .add(outerSplit);
     }
 
-    /* Activate the flux tab for each request while this frame is attached. */
-    @Override
-    public void addNotify()
-    {
-        super.addNotify();
-        fluxViewSubscription = model
-                .getFluxViewRequests()
-                .observeOn(UiUtils.EDT)
-                .subscribe(tracks -> centreTabs.setSelectedComponent(fluxPanel));
-    }
-
-    /* Stop listening when the window is disposed, allowing it to be collected. */
-    @Override
-    public void removeNotify()
-    {
-        if (fluxViewSubscription != null)
-        {
-            fluxViewSubscription.dispose();
-            fluxViewSubscription = null;
-        }
-        super.removeNotify();
-    }
-
     private static @NonNull ViewSupplier<Workflow> createControlPanelCard(
             ImageViewModel model)
     {
@@ -239,6 +215,29 @@ public class ApplicationFrame extends JFrame
                             .isEnabledIf(notBusy)
                             .onClick(model::onSaveDiskImage));
         };
+    }
+
+    /* Activate the flux tab for each request while this frame is attached. */
+    @Override
+    public void addNotify()
+    {
+        super.addNotify();
+        fluxViewSubscription = model
+                .getFluxViewRequests()
+                .observeOn(UiUtils.EDT)
+                .subscribe(tracks -> centreTabs.setSelectedComponent(fluxPanel));
+    }
+
+    /* Stop listening when the window is disposed, allowing it to be collected. */
+    @Override
+    public void removeNotify()
+    {
+        if (fluxViewSubscription != null)
+        {
+            fluxViewSubscription.dispose();
+            fluxViewSubscription = null;
+        }
+        super.removeNotify();
     }
 
     enum Workflow

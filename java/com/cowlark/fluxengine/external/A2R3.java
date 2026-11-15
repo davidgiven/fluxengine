@@ -40,8 +40,7 @@ public final class A2R3
     public static final int CAPTURE_MARK = 0x43;
     public static final int TRACK_MARK = 0x54;
     public static final int END_MARK = 0x58;
-    public static final byte[] FILEHEADER =
-            {'A', '2', 'R', '3', (byte) 0xff, 0x0a, 0x0d, 0x0a};
+    public static final byte[] FILEHEADER = {'A', '2', 'R', '3', (byte) 0xff, 0x0a, 0x0d, 0x0a};
 
     private A2R3()
     {
@@ -62,47 +61,46 @@ public final class A2R3
     /* The creator is exactly 32 UTF-8 bytes, padded with spaces by the writer. */
     public static class Info
     {
-        @Expect(offset = 0, bytes = {INFO_CHUNK_VERSION}) transient int _expects;
-        @StringType(offset = 1, length = 32, charset = "UTF-8")
-        public String creator = "                                ";
+        @StringType(offset = 1, length = 32, charset = "UTF-8") public String creator =
+                "                                ";
         @UInt8Type(offset = 33) public int driveType;
         @UInt8Type(offset = 34) public int writeProtected;
         @UInt8Type(offset = 35) public int synchronizedCapture;
         @UInt8Type(offset = 36) public int hardSectorCount;
+        @Expect(offset = 0, bytes = {INFO_CHUNK_VERSION}) transient int _expects;
     }
 
     /* The entries start at offset 16 in the chunk body. Reserved bytes must be zero. */
     public static class RawCaptureHeader
     {
-        @Expect(offset = 0, bytes = {RWCP_CHUNK_VERSION}) transient int _expects;
-        @UInt32Type(offset = 1, byteOrder = ByteOrder.LITTLE)
-        public long resolution = DEFAULT_PS_PER_TICK;
+        @UInt32Type(offset = 1, byteOrder = ByteOrder.LITTLE) public long resolution =
+                DEFAULT_PS_PER_TICK;
         @BinaryType(offset = 5, length = 11) public byte[] reserved = new byte[11];
+        @Expect(offset = 0, bytes = {RWCP_CHUNK_VERSION}) transient int _expects;
     }
 
     public static class SolvedHeader
     {
-        @Expect(offset = 0, bytes = {SLVD_CHUNK_VERSION}) transient int _expects;
-        @UInt32Type(offset = 1, byteOrder = ByteOrder.LITTLE)
-        public long resolution = DEFAULT_PS_PER_TICK;
+        @UInt32Type(offset = 1, byteOrder = ByteOrder.LITTLE) public long resolution =
+                DEFAULT_PS_PER_TICK;
         @BinaryType(offset = 5, length = 11) public byte[] reserved = new byte[11];
+        @Expect(offset = 0, bytes = {SLVD_CHUNK_VERSION}) transient int _expects;
     }
 
     /* Index signals are absolute tick offsets. Location is a quarter track for drive type 1,
      * or (cylinder << 1) + side for all other drive types. Counts and sizes must match arrays. */
     public static class Capture
     {
-        @Expect(offset = 0, bytes = {CAPTURE_MARK}) transient int _expects;
         @UInt8Type(offset = 1) public int captureType;
         @UInt16Type(offset = 2, byteOrder = ByteOrder.LITTLE) public int location;
         @UInt8Type(offset = 4) public int indexSignalCount;
         @UInt32ArrayType(offset = 5, lengthRef = "$indexSignalCount", byteOrder = ByteOrder.LITTLE)
         public long[] indexSignals = new long[0];
+        @Expect(offset = 0, bytes = {CAPTURE_MARK}) transient int _expects;
     }
 
     public static class Track
     {
-        @Expect(offset = 0, bytes = {TRACK_MARK}) transient int _expects;
         @UInt16Type(offset = 1, byteOrder = ByteOrder.LITTLE) public int location;
         @UInt8Type(offset = 3) public int mirrorDistanceOutward;
         @UInt8Type(offset = 4) public int mirrorDistanceInward;
@@ -110,6 +108,7 @@ public final class A2R3
         @UInt8Type(offset = 11) public int indexSignalCount;
         @UInt32ArrayType(offset = 12, lengthRef = "$indexSignalCount", byteOrder = ByteOrder.LITTLE)
         public long[] indexSignals = new long[0];
+        @Expect(offset = 0, bytes = {TRACK_MARK}) transient int _expects;
     }
 
     /* Follows the variable index array in either Capture or Track. FastProto lengthRef
@@ -128,8 +127,8 @@ public final class A2R3
     /* Includes the META chunk header so the UTF-8 byte length is available to FastProto. */
     public static class Metadata
     {
-        @Expect(offset = 0, bytes = {'M', 'E', 'T', 'A'}) transient int _expects;
         @UInt32Type(offset = 4, byteOrder = ByteOrder.LITTLE) public long size;
         @StringType(offset = 8, lengthRef = "$size", charset = "UTF-8") public String text = "";
+        @Expect(offset = 0, bytes = {'M', 'E', 'T', 'A'}) transient int _expects;
     }
 }

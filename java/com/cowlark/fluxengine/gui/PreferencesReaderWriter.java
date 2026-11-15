@@ -2,11 +2,11 @@ package com.cowlark.fluxengine.gui;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 
-import com.google.common.base.Splitter;
 import com.google.common.base.Enums;
+import com.google.common.base.Splitter;
 import sprouts.Association;
-import sprouts.Pair;
 import sprouts.From;
+import sprouts.Pair;
 import sprouts.Var;
 import sprouts.Viewable;
 import javax.swing.JFileChooser;
@@ -90,21 +90,27 @@ public class PreferencesReaderWriter
         if (!isNullOrEmpty(currentDirectory))
             chooser.setCurrentDirectory(new File(currentDirectory));
         /* Remember navigation even if the user subsequently cancels the dialog. */
-        chooser.addPropertyChangeListener(JFileChooser.DIRECTORY_CHANGED_PROPERTY, change -> {
-            File directory = (File) change.getNewValue();
-            if (directory != null)
-                setStringPreference(CURRENT_DIRECTORY, directory.getAbsolutePath());
-        });
+        chooser.addPropertyChangeListener(
+                JFileChooser.DIRECTORY_CHANGED_PROPERTY, change -> {
+                    File directory = (File) change.getNewValue();
+                    if (directory != null)
+                        setStringPreference(CURRENT_DIRECTORY, directory.getAbsolutePath());
+                });
         return chooser;
     }
 
     <E extends Enum<E>> Var<E> makeEnumPreference(String name, E defaultValue)
     {
-        E initial = Enums.getIfPresent(defaultValue.getDeclaringClass(),
-                getStringPreference(name, defaultValue.name())).or(defaultValue);
+        E initial = Enums
+                .getIfPresent(defaultValue.getDeclaringClass(),
+                        getStringPreference(name, defaultValue.name()))
+                .or(defaultValue);
         Var<E> value = Var.of(initial);
-        Viewable.cast(value).onChange(From.VIEW, change ->
-                setStringPreference(name, change.currentValue().orElseThrowUnchecked().name()));
+        Viewable.cast(value).onChange(
+                From.VIEW,
+                change -> setStringPreference(
+                        name,
+                        change.currentValue().orElseThrowUnchecked().name()));
         return value;
     }
 

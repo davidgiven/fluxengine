@@ -108,5 +108,36 @@ option_group = [
             }
         ]
 
+    },
+    {
+        comment = "Filesystem"
+
+        option = [
+            {
+                name = "acorn"
+                comment = "Acorn DFS"
+                set_by_default = true
+
+                config {
+                    filesystem {
+                        acorndfs {
+                            flavour = ACORN_DFS
+                        }
+                    }
+                }
+            },
+            {
+                name = "watford"
+                comment = "Watford DFS"
+
+                config {
+                    filesystem {
+                        acorndfs {
+                            flavour = WATCOM_DFS
+                        }
+                    }
+                }
+            }
+        ]
     }
 ]

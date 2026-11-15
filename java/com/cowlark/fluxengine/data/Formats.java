@@ -4,6 +4,8 @@ import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.core.FluxEngineException;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.TextFormat;
+import org.protowire.pxf.Pxf;
+import org.protowire.pxf.PxfException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -11,8 +13,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import org.protowire.pxf.Pxf;
-import org.protowire.pxf.PxfException;
 
 /**
  * The built-in format configurations, loaded on demand from the classpath
@@ -95,9 +95,8 @@ public final class Formats
             {
                 pxfException.addSuppressed(textprotoException);
                 throw new FluxEngineException(
-                        "invalid format data: PXF: " + pxfException
-                                + "; textproto: " + textprotoException,
-                        pxfException);
+                        "invalid format data: PXF: " + pxfException + "; textproto: " +
+                                textprotoException, pxfException);
             }
         }
     }

@@ -1,0 +1,32 @@
+package org.rob_smallshire.oaknut.adfs;
+
+import org.rob_smallshire.oaknut.file.Access;
+import org.rob_smallshire.oaknut.file.AcornMeta;
+
+/* Copyright (c) 2026 Robert Smallshire. MIT license; see ../LICENSE. */
+public record AdfsStat(String name, int length, long loadAddress, long executionAddress,
+                       int discAddress, int sequence, int access, boolean directory)
+{
+    static AdfsStat of(DirectoryEntry e)
+    {
+        return new AdfsStat(
+                e.name(),
+                e.length(),
+                e.loadAddress(),
+                e.executionAddress(),
+                e.discAddress(),
+                e.sequence(),
+                e.access(),
+                e.directory());
+    }
+
+    public boolean locked()
+    {
+        return (access & Access.L) != 0;
+    }
+
+    public AcornMeta metadata()
+    {
+        return new AcornMeta(loadAddress, executionAddress, access);
+    }
+}

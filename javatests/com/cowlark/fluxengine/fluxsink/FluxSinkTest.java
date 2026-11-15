@@ -10,12 +10,12 @@ import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.core.FluxEngineException;
 import com.cowlark.fluxengine.data.Fluxmap;
 import com.cowlark.fluxengine.external.Scp;
-import com.cowlark.fluxengine.fluxsource.A2RFluxSource;
 import com.cowlark.fluxengine.fluxsource.A2R3FluxSource;
+import com.cowlark.fluxengine.fluxsource.A2RFluxSource;
 import com.cowlark.fluxengine.fluxsource.A2rFluxSourceProto;
+import com.cowlark.fluxengine.fluxsource.FluxReadParameters;
 import com.cowlark.fluxengine.fluxsource.FluxSource;
 import com.cowlark.fluxengine.fluxsource.FluxSourceIterator;
-import com.cowlark.fluxengine.fluxsource.FluxReadParameters;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -148,6 +148,7 @@ public class FluxSinkTest
         assertThat(factory.getPath()).isEqualTo("test.a2r");
         assertThat(factory.isHardware()).isFalse();
     }
+
     @Test
     public void a2r3CaptureTypeBoundary() throws Exception
     {
@@ -155,7 +156,7 @@ public class FluxSinkTest
         Path path = Files.createTempFile("flux", ".a2r");
         try
         {
-            for (int duration : new int[] {5_999_999, 6_000_000, 6_000_001})
+            for (int duration : new int[]{5_999_999, 6_000_000, 6_000_001})
             {
                 Fluxmap map = new Fluxmap();
                 map.appendInterval(duration).appendPulse();
@@ -199,11 +200,13 @@ public class FluxSinkTest
             }
 
             /* Read the completed file through version dispatch and compare both captures. */
-            FluxSource source = A2RFluxSource.create(A2rFluxSourceProto.newBuilder()
-                    .setFilename(path.toString()).build());
+            FluxSource source = A2RFluxSource.create(A2rFluxSourceProto
+                    .newBuilder()
+                    .setFilename(path.toString())
+                    .build());
             assertThat(source).isInstanceOf(A2R3FluxSource.class);
-            FluxSourceIterator iterator = source.readFlux(FluxReadParameters.builder()
-                    .setCylinder(0).setHead(0).build());
+            FluxSourceIterator iterator =
+                    source.readFlux(FluxReadParameters.builder().setCylinder(0).setHead(0).build());
             for (int i = 0; i < 2; i++)
             {
                 Fluxmap decoded = iterator.next();

@@ -5,7 +5,6 @@ import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.usb.UsbFactory;
 import com.cowlark.fluxengine.usb.VoltageMeasurements;
 import com.cowlark.fluxengine.usb.Voltages;
-import com.cowlark.fluxengine.wiring.FluxEngine;
 import com.google.common.collect.ImmutableList;
 
 /**

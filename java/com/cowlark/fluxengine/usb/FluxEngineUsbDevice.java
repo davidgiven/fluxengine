@@ -153,6 +153,21 @@ class FluxEngineUsbDevice extends UsbDevice
         }
     }
 
+    private static double getCurrentTime()
+    {
+        return System.nanoTime() / 1e9;
+    }
+
+    private static Voltages toVoltages(
+            FluxEngine.Voltages raw)
+    {
+        return Voltages
+                .builder()
+                .setLogic0Mv(raw.getLogic0Mv())
+                .setLogic1Mv(raw.getLogic1Mv())
+                .build();
+    }
+
     /* Throws FluxEngineException with a formatted message if rc is not
      * SUCCESS. The message is prefixed with context and suffixed with the
      * libusb error name and string. */
@@ -190,11 +205,6 @@ class FluxEngineUsbDevice extends UsbDevice
         {
             LibUsb.close(handle);
         }
-    }
-
-    private static double getCurrentTime()
-    {
-        return System.nanoTime() / 1e9;
     }
 
     private void usbCmdSend(byte[] data)
@@ -526,16 +536,6 @@ class FluxEngineUsbDevice extends UsbDevice
                 .build());
 
         awaitReply(F_FRAME_ERASE_REPLY);
-    }
-
-    private static Voltages toVoltages(
-            FluxEngine.Voltages raw)
-    {
-        return Voltages
-                .builder()
-                .setLogic0Mv(raw.getLogic0Mv())
-                .setLogic1Mv(raw.getLogic1Mv())
-                .build();
     }
 
     @Override

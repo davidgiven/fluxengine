@@ -1,0 +1,159 @@
+package org.rob_smallshire.oaknut.discimage;
+
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThrows;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
+import java.nio.ByteBuffer;
+import java.util.List;
+
+/* Copyright (c) 2026 Robert Smallshire. MIT license; see the oaknut LICENSE.
+ * Ported sector-view, surface and unified-disc invariants. */
+@RunWith(JUnit4.class)
+public class DiscImageTest
+{
+    @Test
+    public void storageViewsDoNotReadUntilAccessed() throws Exception
+    {
+        byte[] backing = new byte[32];
+        int[] reads = {0};
+        Storage storage = new Storage()
+        {
+            @Override
+            public int size()
+            {
+                return backing.length;
+            }
+
+            @Override
+            public void read(int offset, byte[] destination, int start, int length)
+            {
+                reads[0]++;
+                System.arraycopy(backing, offset, destination, start, length);
+            }
+
+            @Override
+            public void write(int offset, byte[] source, int start, int length)
+            {
+                System.arraycopy(source, start, backing, offset, length);
+            }
+        };
+        DiscImage image = new DiscImage(
+                storage,
+                List.of(new SurfaceSpec(2, 2, 4, 0, 16), new SurfaceSpec(2, 2, 4, 8, 16)));
+        SectorsView view = new UnifiedDisc(image).bytes(14, 4).slice(1, 2);
+        assertEquals(0, reads[0]);
+        view.write(0, new byte[]{11, 12});
+        assertEquals(0, reads[0]);
+        assertEquals(11, backing[23]);
+        assertEquals(12, backing[8]);
+        assertArrayEquals(new byte[]{11, 12}, view.toByteArray());
+        assertEquals(2, reads[0]);
+    }
+
+    @Test
+    public void storageViewReportsFailuresWithoutChangingTheCause()
+    {
+        java.io.IOException cause = new java.io.IOException("read failure");
+        Storage storage = new Storage()
+        {
+            @Override
+            public int size()
+            {
+                return 16;
+            }
+
+            @Override
+            public void read(int offset, byte[] destination, int start, int length)
+                    throws java.io.IOException
+            {
+                throw cause;
+            }
+
+            @Override
+            public void write(int offset, byte[] source, int start, int length)
+                    throws java.io.IOException
+            {
+                throw cause;
+            }
+        };
+        SectorsView view = new SectorsView(storage, 0, storage.size());
+        assertSame(
+                cause,
+                assertThrows(java.io.UncheckedIOException.class, () -> view.get(0)).getCause());
+        assertSame(
+                cause,
+                assertThrows(java.io.UncheckedIOException.class, () -> view.put(0, 1)).getCause());
+    }
+
+    @Test
+    public void fragmentedViewsWriteThroughAcrossBoundaries()
+    {
+        byte[] bytes = {0, 1, 2, 3, 4, 5, 6, 7};
+        ByteBuffer original = ByteBuffer.wrap(bytes);
+        SectorsView view = new SectorsView(List.of(
+                original.slice(6, 2),
+                original.slice(0, 2),
+                original.slice(3, 2)));
+        assertArrayEquals(new byte[]{6, 7, 0, 1, 3, 4}, view.toByteArray());
+        view.slice(1, 4).write(0, new byte[]{10, 11, 12, 13});
+        assertArrayEquals(new byte[]{11, 12, 2, 13, 4, 5, 6, 10}, bytes);
+        view.writeLe(0, 0xfedcba98L, 4);
+        assertEquals(0xfedcba98L, view.readLe(0, 4));
+        assertEquals(0, original.position());
+        assertThrows(IndexOutOfBoundsException.class, () -> view.slice(5, 2));
+        assertThrows(IndexOutOfBoundsException.class, () -> view.get(6));
+        assertThrows(IllegalArgumentException.class, () -> view.put(0, 256));
+    }
+
+    @Test
+    public void readOnlyWriteDoesNotPartiallyModifyEarlierBuffers()
+    {
+        byte[] first = {1, 2};
+        SectorsView mixed = new SectorsView(List.of(
+                ByteBuffer.wrap(first),
+                ByteBuffer.allocate(2).asReadOnlyBuffer()));
+        assertThrows(java.nio.ReadOnlyBufferException.class, () -> mixed.write(0, new byte[4]));
+        assertArrayEquals(new byte[]{1, 2}, first);
+    }
+
+    @Test
+    public void unifiedSectorOrderDiffersFromInterleavedPhysicalOrder()
+    {
+        ByteBuffer buffer = ByteBuffer.allocate(32);
+        SurfaceSpec first = new SurfaceSpec(2, 2, 4, 0, 16);
+        SurfaceSpec second = new SurfaceSpec(2, 2, 4, 8, 16);
+        DiscImage image = new DiscImage(buffer, List.of(first, second));
+        UnifiedDisc unified = new UnifiedDisc(image);
+        for (int sector = 0; sector < 8; sector++)
+            unified.sectorRange(sector, 1).write(0, new byte[]{(byte) sector, 0, 0, 0});
+        assertEquals(0, buffer.get(0));
+        assertEquals(1, buffer.get(4));
+        assertEquals(4, buffer.get(8));
+        assertEquals(5, buffer.get(12));
+        assertEquals(2, buffer.get(16));
+        assertEquals(3, buffer.get(20));
+        assertEquals(6, buffer.get(24));
+        assertEquals(7, buffer.get(28));
+        unified.bytes(15, 2).write(0, new byte[]{99, 98});
+        assertEquals(99, buffer.get(23));
+        assertEquals(98, buffer.get(8));
+        assertThrows(IndexOutOfBoundsException.class, () -> unified.sectorRange(7, 2));
+    }
+
+    @Test
+    public void truncatedAndInvalidSurfacesAreRejected()
+    {
+        assertThrows(IllegalArgumentException.class, () -> new SurfaceSpec(0, 2, 4, 0, 8));
+        assertThrows(IllegalArgumentException.class, () -> new SurfaceSpec(2, 2, 4, 0, 4));
+        DiscImage shortImage =
+                new DiscImage(ByteBuffer.allocate(8), List.of(new SurfaceSpec(2, 2, 4, 0, 8)));
+        assertThrows(
+                IndexOutOfBoundsException.class,
+                () -> shortImage.surface(0).sectorRange(2, 1));
+    }
+}

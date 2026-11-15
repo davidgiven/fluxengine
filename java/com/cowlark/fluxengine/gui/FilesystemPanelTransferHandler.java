@@ -77,88 +77,6 @@ class FilesystemPanelTransferHandler extends TransferHandler
         return paths.build();
     }
 
-    private class ExportedFiles implements Transferable
-    {
-        private final ImmutableList<VfsPath> paths;
-        private CompletableFuture<ImmutableList<File>> extracted;
-
-        ExportedFiles(ImmutableList<VfsPath> paths)
-        {
-            this.paths = paths;
-        }
-
-        private synchronized CompletableFuture<ImmutableList<File>> extract()
-        {
-            if (extracted != null)
-                return extracted;
-            extracted = CompletableFuture.supplyAsync(UiUtils.wrapIOException(() -> {
-                Filesystem fs = filesystemPanel.treeTableModel.getFilesystem();
-                /* Keep the files until application exit because native drop targets may
-                 * copy them later. */
-                Path directory = Files.createTempDirectory("fluxengine-export-");
-                directory.toFile().deleteOnExit();
-                ImmutableList.Builder<File> files = ImmutableList.builder();
-                for (VfsPath path : paths)
-                {
-                    String name = path.getName();
-                    Path output = directory.resolve(name).normalize();
-                    if (!directory.equals(output.getParent()))
-                        throw new IOException("Invalid export filename: " + name);
-                    output.toFile().deleteOnExit();
-                    Bytes bytes = fs.getFile(path);
-                    bytes.writeToFile(output);
-                    files.add(output.toFile());
-                }
-                return files.build();
-            }), filesystemPanel.treeTableModel.getExecutor());
-            return extracted;
-        }
-
-        @Override
-        public DataFlavor[] getTransferDataFlavors()
-        {
-            return new DataFlavor[]{DataFlavor.javaFileListFlavor};
-        }
-
-        @Override
-        public boolean isDataFlavorSupported(DataFlavor flavor)
-        {
-            return DataFlavor.javaFileListFlavor.equals(flavor);
-        }
-
-        @Override
-        public Object getTransferData(DataFlavor flavor)
-                throws UnsupportedFlavorException, IOException
-        {
-            if (!isDataFlavorSupported(flavor))
-                throw new UnsupportedFlavorException(flavor);
-
-            /* Start reading only when the destination requests the dropped files. Cache
-             * the result because native targets may request the data more than once. */
-            CompletableFuture<ImmutableList<File>> result = extract();
-            if (SwingUtilities.isEventDispatchThread() && !result.isDone())
-            {
-                /* Keep Swing responsive while a drop or clipboard consumer waits on
-                 * the EDT. */
-                SecondaryLoop loop =
-                        Toolkit.getDefaultToolkit().getSystemEventQueue().createSecondaryLoop();
-                result.whenCompleteAsync((files, error) -> loop.exit(), UiUtils.EDT_EXECUTOR);
-
-                /* The executor can run inline if extraction finished before registration. */
-                if (!result.isDone())
-                    loop.enter();
-            }
-            try
-            {
-                return result.join();
-            } catch (CompletionException e)
-            {
-                logger.warn("Cannot extract dragged files", e.getCause());
-                throw new IOException("Cannot extract files", e.getCause());
-            }
-        }
-    }
-
     @Override
     public int getSourceActions(JComponent component)
     {
@@ -225,6 +143,89 @@ class FilesystemPanelTransferHandler extends TransferHandler
         {
             logger.warn("Cannot import dropped files", e);
             return false;
+        }
+    }
+
+    private class ExportedFiles implements Transferable
+    {
+        private final ImmutableList<VfsPath> paths;
+        private CompletableFuture<ImmutableList<File>> extracted;
+
+        ExportedFiles(ImmutableList<VfsPath> paths)
+        {
+            this.paths = paths;
+        }
+
+        private synchronized CompletableFuture<ImmutableList<File>> extract()
+        {
+            if (extracted != null)
+                return extracted;
+            extracted = CompletableFuture.supplyAsync(
+                    UiUtils.wrapIOException(() -> {
+                        Filesystem fs = filesystemPanel.treeTableModel.getFilesystem();
+                        /* Keep the files until application exit because native drop targets may
+                         * copy them later. */
+                        Path directory = Files.createTempDirectory("fluxengine-export-");
+                        directory.toFile().deleteOnExit();
+                        ImmutableList.Builder<File> files = ImmutableList.builder();
+                        for (VfsPath path : paths)
+                        {
+                            String name = path.getName();
+                            Path output = directory.resolve(name).normalize();
+                            if (!directory.equals(output.getParent()))
+                                throw new IOException("Invalid export filename: " + name);
+                            output.toFile().deleteOnExit();
+                            Bytes bytes = fs.getFile(path);
+                            bytes.writeToFile(output);
+                            files.add(output.toFile());
+                        }
+                        return files.build();
+                    }), filesystemPanel.treeTableModel.getExecutor());
+            return extracted;
+        }
+
+        @Override
+        public DataFlavor[] getTransferDataFlavors()
+        {
+            return new DataFlavor[]{DataFlavor.javaFileListFlavor};
+        }
+
+        @Override
+        public boolean isDataFlavorSupported(DataFlavor flavor)
+        {
+            return DataFlavor.javaFileListFlavor.equals(flavor);
+        }
+
+        @Override
+        public Object getTransferData(DataFlavor flavor)
+                throws UnsupportedFlavorException, IOException
+        {
+            if (!isDataFlavorSupported(flavor))
+                throw new UnsupportedFlavorException(flavor);
+
+            /* Start reading only when the destination requests the dropped files. Cache
+             * the result because native targets may request the data more than once. */
+            CompletableFuture<ImmutableList<File>> result = extract();
+            if (SwingUtilities.isEventDispatchThread() && !result.isDone())
+            {
+                /* Keep Swing responsive while a drop or clipboard consumer waits on
+                 * the EDT. */
+                SecondaryLoop loop =
+                        Toolkit.getDefaultToolkit().getSystemEventQueue().createSecondaryLoop();
+                result.whenCompleteAsync((files, error) -> loop.exit(), UiUtils.EDT_EXECUTOR);
+
+                /* The executor can run inline if extraction finished before registration. */
+                if (!result.isDone())
+                    loop.enter();
+            }
+            try
+            {
+                return result.join();
+            } catch (CompletionException e)
+            {
+                logger.warn("Cannot extract dragged files", e.getCause());
+                throw new IOException("Cannot extract files", e.getCause());
+            }
         }
     }
 }

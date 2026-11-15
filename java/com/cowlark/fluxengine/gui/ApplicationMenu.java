@@ -52,8 +52,7 @@ public class ApplicationMenu
                                 "Delete",
                                 "delete",
                                 new DeleteAction(),
-                                shortcut(KeyEvent.VK_DELETE))))
-                .get(UI.MenuBar.class);
+                                shortcut(KeyEvent.VK_DELETE)))).get(UI.MenuBar.class);
 
     }
 

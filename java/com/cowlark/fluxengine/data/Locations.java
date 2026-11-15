@@ -3,7 +3,6 @@ package com.cowlark.fluxengine.data;
 import com.cowlark.fluxengine.core.FluxEngineException;
 import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 

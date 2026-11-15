@@ -18,8 +18,15 @@ then all the way up side 1. However, FluxEngine uses traditional disk images
 with alternating sides, with the blocks from track 0 side 0 then track 0 side
 1 then track 1 side 0 etc. Most Acorn emulators will use both formats, but
 they might require nudging as the side order can't be reliably autodetected.
+
+Filesystem support is available. Select the disk format to set both its geometry
+and filesystem type. The default is 1600kB ADFS F.
 """
 ]
+
+filesystem {
+    type = ACORNADFS
+}
 
 image_writer {
     filename = "acornadfs.img"
@@ -46,6 +53,12 @@ option_group = [
                 comment = "160kB 3.5\" or 5.25\" 40-track SSDD; S format"
 
                 config {
+                    filesystem {
+                        acornadfs {
+                            flavour = S
+                        }
+                    }
+
                     layout {
                         format_type = FORMATTYPE_40TRACK
                         tracks = 40
@@ -67,6 +80,12 @@ option_group = [
                 comment = "320kB 3.5\" or 5.25\" 80-track SSDD; M format"
 
                 config {
+                    filesystem {
+                        acornadfs {
+                            flavour = M
+                        }
+                    }
+
                     layout {
                         format_type = FORMATTYPE_80TRACK
                         tracks = 80
@@ -88,6 +107,12 @@ option_group = [
                 comment = "640kB 3.5\" or 5.25\" 80-track DSDD; L format"
 
                 config {
+                    filesystem {
+                        acornadfs {
+                            flavour = L
+                        }
+                    }
+
                     layout {
                         format_type = FORMATTYPE_80TRACK
                         tracks = 80
@@ -105,10 +130,16 @@ option_group = [
                 }
             },
             {
-                name = "800"
-                comment = "800kB 3.5\" 80-track DSDD; D and E formats"
+                name = "800-d"
+                comment = "800kB 3.5\" 80-track DSDD; D format"
 
                 config {
+                    filesystem {
+                        acornadfs {
+                            flavour = D
+                        }
+                    }
+
                     layout {
                         format_type = FORMATTYPE_80TRACK
                         tracks = 80
@@ -126,11 +157,98 @@ option_group = [
                 }
             },
             {
-                name = "1600"
-                comment = "1600kB 3.5\" 80-track DSHD; F formats"
+                name = "800-e"
+                comment = "800kB 3.5\" 80-track DSDD; E format"
+
+                config {
+                    filesystem {
+                        acornadfs {
+                            flavour = E
+                        }
+                    }
+
+                    layout {
+                        format_type = FORMATTYPE_80TRACK
+                        tracks = 80
+                        sides = 2
+                        layoutdata = [
+                            {
+                                sector_size = 1024
+                                physical {
+                                    start_sector = 0
+                                    count = 5
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            {
+                name = "800-e-plus"
+                comment = "800kB 3.5\" 80-track DSDD; E+ format"
+
+                config {
+                    filesystem {
+                        acornadfs {
+                            flavour = E_PLUS
+                        }
+                    }
+
+                    layout {
+                        format_type = FORMATTYPE_80TRACK
+                        tracks = 80
+                        sides = 2
+                        layoutdata = [
+                            {
+                                sector_size = 1024
+                                physical {
+                                    start_sector = 0
+                                    count = 5
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            {
+                name = "1600-f"
+                comment = "1600kB 3.5\" 80-track DSHD; F format"
                 set_by_default = true
 
                 config {
+                    filesystem {
+                        acornadfs {
+                            flavour = F
+                        }
+                    }
+
+                    layout {
+                        format_type = FORMATTYPE_80TRACK
+                        tracks = 80
+                        sides = 2
+                        layoutdata = [
+                            {
+                                sector_size = 1024
+                                physical {
+                                    start_sector = 0
+                                    count = 10
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            {
+                name = "1600-f-plus"
+                comment = "1600kB 3.5\" 80-track DSHD; F+ format"
+
+                config {
+                    filesystem {
+                        acornadfs {
+                            flavour = F_PLUS
+                        }
+                    }
+
                     layout {
                         format_type = FORMATTYPE_80TRACK
                         tracks = 80
@@ -148,6 +266,5 @@ option_group = [
                 }
             }
         ]
-
     }
 ]

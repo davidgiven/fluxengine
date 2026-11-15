@@ -46,13 +46,13 @@ import javax.swing.Scrollable;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import java.io.File;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
@@ -79,16 +79,21 @@ public class ConfigurationPanel extends JPanel implements Scrollable
     {
         this.model = model;
 
-        Viewable.cast(model.getSelectedFormat()).onChange(
-                From.ALL, it -> EDT_EXECUTOR.execute(this::rebuildUi));
-        Viewable.cast(model.getSelectedDevice()).onChange(
-                From.ALL, it -> EDT_EXECUTOR.execute(this::rebuildUi));
-        Viewable.cast(model.getSelectedFluxFile()).onChange(
-                From.ALL, it -> EDT_EXECUTOR.execute(this::rebuildUi));
-        Viewable.cast(model.getUsbDevices()).onChange(
-                From.ALL, it -> EDT_EXECUTOR.execute(this::rebuildUi));
-        Viewable.cast(model.getCustomFormatFilename()).onChange(
-                From.ALL, it -> EDT_EXECUTOR.execute(this::rebuildUi));
+        Viewable
+                .cast(model.getSelectedFormat())
+                .onChange(From.ALL, it -> EDT_EXECUTOR.execute(this::rebuildUi));
+        Viewable
+                .cast(model.getSelectedDevice())
+                .onChange(From.ALL, it -> EDT_EXECUTOR.execute(this::rebuildUi));
+        Viewable
+                .cast(model.getSelectedFluxFile())
+                .onChange(From.ALL, it -> EDT_EXECUTOR.execute(this::rebuildUi));
+        Viewable
+                .cast(model.getUsbDevices())
+                .onChange(From.ALL, it -> EDT_EXECUTOR.execute(this::rebuildUi));
+        Viewable
+                .cast(model.getCustomFormatFilename())
+                .onChange(From.ALL, it -> EDT_EXECUTOR.execute(this::rebuildUi));
         rebuildUi();
     }
 
@@ -163,12 +168,6 @@ public class ConfigurationPanel extends JPanel implements Scrollable
         return yesno ? "Yes" : "No";
     }
 
-    private String formatRenderer(String format)
-    {
-        return format.equals(ImageViewModel.CUSTOM_FORMAT)
-                ? ImageViewModel.CUSTOM_FORMAT : model.getFormatConfig(format).getShortname();
-    }
-
     private static String optionRenderer(@Nullable OptionProto option)
     {
         return Optional
@@ -192,6 +191,13 @@ public class ConfigurationPanel extends JPanel implements Scrollable
         if (comment.equals("$formats"))
             return "Variant:";
         return String.format("<html>%s:</html>", StringUtils.capitalize(comment));
+    }
+
+    private String formatRenderer(String format)
+    {
+        return format.equals(ImageViewModel.CUSTOM_FORMAT) ?
+                ImageViewModel.CUSTOM_FORMAT :
+                model.getFormatConfig(format).getShortname();
     }
 
     @Override
@@ -337,7 +343,8 @@ public class ConfigurationPanel extends JPanel implements Scrollable
             String filename = model.getCustomFormatFilename().get();
             panel = panel
                     .add(LABEL_FORMAT, label("Path:"))
-                    .add(SETTING_FORMAT + ", wmin 0, wrap",
+                    .add(
+                            SETTING_FORMAT + ", wmin 0, wrap",
                             UI.textField(filename).isEditableIf(false).peek(field -> {
                                 /* A fixed column count keeps long paths out of layout sizing.
                                  * Pin the caret to the end to show the filename when clipped. */
@@ -347,14 +354,24 @@ public class ConfigurationPanel extends JPanel implements Scrollable
                                 field.setToolTipText(filename);
                                 field.setCaretPosition(field.getDocument().getLength());
                             }))
-                    .add(SETTING_FORMAT + ", skip 1, wrap",
-                            panel("fillx, insets 0", "[0:pref:, grow, fill, sg buttons][0:pref:, grow, fill, sg buttons]")
-                                    .add("wmin 0", button("Select file").onClick(it ->
-                                            EDT_EXECUTOR.execute(this::onSelectCustomFormat)))
-                                    .add("wmin 0",
-                                            button("Reload file").isEnabledIf(!filename.isEmpty())
-                                                    .onClick(it -> EDT_EXECUTOR.execute(() ->
-                                                            loadCustomFormat(model.getCustomFormatFilename().get())))));
+                    .add(
+                            SETTING_FORMAT + ", skip 1, wrap",
+                            panel(
+                                    "fillx, insets 0",
+                                    "[0:pref:, grow, fill, sg buttons][0:pref:, grow, fill, sg " +
+                                            "buttons]")
+                                    .add(
+                                            "wmin 0",
+                                            button("Select file").onClick(it -> EDT_EXECUTOR.execute(
+                                                    this::onSelectCustomFormat)))
+                                    .add(
+                                            "wmin 0",
+                                            button("Reload file")
+                                                    .isEnabledIf(!filename.isEmpty())
+                                                    .onClick(it -> EDT_EXECUTOR.execute(() -> loadCustomFormat(
+                                                            model
+                                                                    .getCustomFormatFilename()
+                                                                    .get())))));
         }
         panel = emitOptions(
                 panel,

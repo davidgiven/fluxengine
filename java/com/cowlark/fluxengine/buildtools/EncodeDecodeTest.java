@@ -44,22 +44,16 @@ public class EncodeDecodeTest
 
         run(
                 new WriteCommand(),
-                ImmutableList
-                        .<String>builder()
+                ImmutableList.<String>builder()
                         .add("-c", format, "-i", srcFile.toString(), "-d", fluxFile.toString())
                         .add("--drive.rotational_period_ms=200")
-                        .add("--no-verify")
-                        .addAll(flags)
-                        .build());
+                        .add("--no-verify").addAll(flags).build());
 
         run(
                 new ReadCommand(),
-                ImmutableList
-                        .<String>builder()
+                ImmutableList.<String>builder()
                         .add("-c", format, "-s", fluxFile.toString(), "-o", destFile.toString())
-                        .add("--drive.rotational_period_ms=200")
-                        .addAll(flags)
-                        .build());
+                        .add("--drive.rotational_period_ms=200").addAll(flags).build());
 
         long destSize = Files.size(destFile);
         if (destSize == 0)

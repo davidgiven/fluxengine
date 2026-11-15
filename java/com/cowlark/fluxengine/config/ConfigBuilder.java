@@ -63,13 +63,21 @@ public class ConfigBuilder
         return ss.toString();
     }
 
+    private static FluxFormat findFluxFormat(String filename)
+    {
+        for (FluxFormat format : FluxFormats.formats)
+        {
+            if (format.matcher().matcher(filename).matches())
+                return format;
+        }
+        throw new ConfigException("unrecognised flux filename '" + filename + "'");
+    }
+
     public ConfigBuilder fromFlags(ImmutableList<String> args, FlagGroup... group)
     {
-        ImmutableList<FlagGroup> allGroups = ImmutableList
-                .<FlagGroup>builder()
+        ImmutableList<FlagGroup> allGroups = ImmutableList.<FlagGroup>builder()
                 .add(group)
-                .add(new ConfigFlagGroup(this))
-                .build();
+                .add(new ConfigFlagGroup(this)).build();
         Flags.parse(args, allGroups);
 
         return this;
@@ -102,7 +110,8 @@ public class ConfigBuilder
             proto.mergeFrom(Formats.parse(contents));
         } catch (FluxEngineException e)
         {
-            throw new ConfigException("couldn't load external config '" + name + "': " + e.getMessage());
+            throw new ConfigException(
+                    "couldn't load external config '" + name + "': " + e.getMessage());
         }
 
         return this;
@@ -113,17 +122,6 @@ public class ConfigBuilder
         proto.mergeFrom(other);
         return this;
     }
-
-    private static FluxFormat findFluxFormat(String filename)
-    {
-        for (FluxFormat format : FluxFormats.formats)
-        {
-            if (format.matcher().matcher(filename).matches())
-                return format;
-        }
-        throw new ConfigException("unrecognised flux filename '" + filename + "'");
-    }
-
 
     @SneakyThrows
     public ConfigBuilder withFluxSource(String filename)

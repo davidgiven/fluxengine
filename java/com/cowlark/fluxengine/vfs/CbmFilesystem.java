@@ -91,7 +91,9 @@ public class CbmFilesystem extends Filesystem
         builder.put(
                 FilesystemAttributes.TOTAL_BLOCKS.name(),
                 Integer.toString(blockDevice.getBlockCount()));
-        builder.put(FilesystemAttributes.BLOCK_SIZE.name(), Integer.toString(blockDevice.getBlockSize()));
+        builder.put(
+                FilesystemAttributes.BLOCK_SIZE.name(),
+                Integer.toString(blockDevice.getBlockSize()));
         builder.put("cbmfs.dos_type", Integer.toString(dir.dosVersion));
         builder.put("cbmfs.bam_size", Integer.toString(dir.bamSize));
         return builder.build();

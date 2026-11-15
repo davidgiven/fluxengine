@@ -3,10 +3,10 @@ package com.cowlark.fluxengine.vfs;
 import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.core.Logger;
-import org.apache.commons.lang3.function.FailableConsumer;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import lombok.Builder;
+import org.apache.commons.lang3.function.FailableConsumer;
 import org.slf4j.LoggerFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -38,7 +38,9 @@ public abstract class Filesystem implements AutoCloseable
         this.capabilities = capabilities;
     }
 
-    public static void doWithFilesystem(ConfigProto config, FailableConsumer<Filesystem, IOException> callback)
+    public static void doWithFilesystem(
+            ConfigProto config,
+            FailableConsumer<Filesystem, IOException> callback)
     {
         FilesystemOperation op = new FilesystemOperation()
         {

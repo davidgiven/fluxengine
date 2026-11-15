@@ -53,14 +53,13 @@ import java.util.TreeSet;
 
 public class FluxViewerPanel extends JInternalFrame
 {
+    public static final int FONT_SIZE_PTS = 7;
     private static final int HEIGHT_PTS = 100;
     private static final int BORDER = 4;
     private static final int CONTENT_PADDING = 5 * BORDER;
     private static final int MAX_WIDTH = Integer.MAX_VALUE - 1024;
     private static final double RENDER_LIMIT = 3000.0;
     private static final DecoderProto DECODER = DecoderProto.getDefaultInstance();
-    public static final int FONT_SIZE_PTS = 7;
-
     private final ImmutableList<Track> tracks;
     private final ImmutableList<Capture> captures;
     private final TreeSet<Double> boundaries = new TreeSet<>();
@@ -255,6 +254,96 @@ public class FluxViewerPanel extends JInternalFrame
         setVisible(true);
     }
 
+    /* Records inherit an error colour when they belong to a sector with a bad status. */
+    private static Color recordColour(Track track, Record record)
+    {
+        for (Sector sector : track.allSectors)
+        {
+            if (sector.status != Sector.Status.OK && sector.records.contains(record))
+                return UiUtils.DATA_BAD_COLOUR.darker();
+        }
+        return UiUtils.HEADER_COLOUR.darker();
+    }
+
+    /* Java draws text at a baseline; wxWidgets' text coordinates refer to the top edge. */
+    private static void text(Graphics2D graphics, String text, int x, int top)
+    {
+        graphics.drawString(text, x, top + graphics.getFontMetrics().getAscent());
+    }
+
+    private static String milliseconds(double time)
+    {
+        return String.format(Locale.ROOT, "%.3fms", time / 1e6);
+    }
+
+    private static String sectorMetadata(Sector sector)
+    {
+        return String.format(
+                Locale.ROOT,
+                """
+                        Sector status:     %s
+                        Physical location: %s
+                        Clock:             %.2fus / %s
+                        Bytecode position: %d
+                        Data CRC16:        %04x
+                        """,
+                Sector.statusToString(sector.status),
+                sector.physicalLocation == null ? "unknown" : sector.physicalLocation,
+                sector.clockNs / 1000,
+                sector.clockNs > 0 ?
+                        String.format(Locale.ROOT, "%.0fkHz", 1e6 / sector.clockNs) :
+                        "unknown",
+                sector.position,
+                Crc.crc16(Crc.CCITT_POLY, sector.data));
+    }
+
+    static String recordData(Record record)
+    {
+        return String.format(
+                Locale.ROOT,
+                """
+                        Bytecode position: %d
+                        Start:             %.2fms
+                        End:               %.2fms
+                        Data CRC16:        %04x
+                        
+                        %s""",
+                record.position,
+                record.startTimeNs / 1e6,
+                record.endTimeNs / 1e6,
+                Crc.crc16(Crc.CCITT_POLY, record.rawData),
+                hexDump(record.rawData));
+    }
+
+    private static String hexDump(Bytes bytes)
+    {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        try (PrintStream stream = new PrintStream(output, false, StandardCharsets.UTF_8))
+        {
+            Utils.hexdump(stream, bytes);
+        }
+        return output.toString(StandardCharsets.UTF_8);
+    }
+
+    private static String getTitle(ImmutableList<Track> tracks)
+    {
+        Track track = Iterables.getFirst(tracks, null);
+        if (track != null)
+        {
+            if (track.ptl != null)
+                return String.format(
+                        "Physical track c%dh%d",
+                        track.ptl.physicalCylinder,
+                        track.ptl.physicalHead);
+            else if (track.ltl != null)
+                return String.format(
+                        "Logical track c%dh%d",
+                        track.ltl.logicalCylinder,
+                        track.ltl.logicalHead);
+        }
+        return "Test track";
+    }
+
     /* Keep the look and feel's title bar, but leave positioning to the row layout. */
     @Override
     public void updateUI()
@@ -335,8 +424,7 @@ public class FluxViewerPanel extends JInternalFrame
             /* Apply wheel zoom and restore the anchor within the available scroll range. */
             updateScale(Math.min(fitScale(), nanosecondsPerPixel * Math.pow(1.2, rotation)));
             setScrollX(Math.round(CONTENT_PADDING + time / nanosecondsPerPixel - anchorX));
-        }
-        finally
+        } finally
         {
             viewport.immediate = false;
         }
@@ -479,7 +567,8 @@ public class FluxViewerPanel extends JInternalFrame
                         sector.logicalLocation + " " + Sector.statusToString(sector.status));
             }
 
-            /* Show record extents, decoded bytes, and raw bits at their respective detail levels. */
+            /* Show record extents, decoded bytes, and raw bits at their respective detail levels
+            . */
             for (Record record : capture.track.records)
             {
                 Rectangle rect = block(capture, record.startTimeNs, record.endTimeNs, 1);
@@ -564,17 +653,6 @@ public class FluxViewerPanel extends JInternalFrame
                     rightEdge - BORDER - graphics.getFontMetrics().stringWidth(label),
                     top);
         }
-    }
-
-    /* Records inherit an error colour when they belong to a sector with a bad status. */
-    private static Color recordColour(Track track, Record record)
-    {
-        for (Sector sector : track.allSectors)
-        {
-            if (sector.status != Sector.Status.OK && sector.records.contains(record))
-                return UiUtils.DATA_BAD_COLOUR.darker();
-        }
-        return UiUtils.HEADER_COLOUR.darker();
     }
 
     /* Clip text to its block while keeping hover shading and caller graphics state isolated. */
@@ -731,7 +809,10 @@ public class FluxViewerPanel extends JInternalFrame
             {
                 int index = x - pixel(capture.offset);
                 double density = index < capture.density.length ? capture.density[index] : 0;
-                graphics.setColor(UiUtils.blend(canvas.getBackground(), UiUtils.HEADER_COLOUR, density));
+                graphics.setColor(UiUtils.blend(
+                        canvas.getBackground(),
+                        UiUtils.HEADER_COLOUR,
+                        density));
                 graphics.fillRect(x, centre(4) - half, 1, blockHeight());
             }
         } else
@@ -782,17 +863,6 @@ public class FluxViewerPanel extends JInternalFrame
                 label,
                 lx + (rx - lx) / 2 - graphics.getFontMetrics().stringWidth(label) / 2,
                 y);
-    }
-
-    /* Java draws text at a baseline; wxWidgets' text coordinates refer to the top edge. */
-    private static void text(Graphics2D graphics, String text, int x, int top)
-    {
-        graphics.drawString(text, x, top + graphics.getFontMetrics().getAscent());
-    }
-
-    private static String milliseconds(double time)
-    {
-        return String.format(Locale.ROOT, "%.3fms", time / 1e6);
     }
 
     /* Popup hit testing runs on the mouse event, never during painting. */
@@ -901,55 +971,6 @@ public class FluxViewerPanel extends JInternalFrame
         return result.toString();
     }
 
-    private static String sectorMetadata(Sector sector)
-    {
-        return String.format(
-                Locale.ROOT,
-                """
-                        Sector status:     %s
-                        Physical location: %s
-                        Clock:             %.2fus / %s
-                        Bytecode position: %d
-                        Data CRC16:        %04x
-                        """,
-                Sector.statusToString(sector.status),
-                sector.physicalLocation == null ? "unknown" : sector.physicalLocation,
-                sector.clockNs / 1000,
-                sector.clockNs > 0 ?
-                        String.format(Locale.ROOT, "%.0fkHz", 1e6 / sector.clockNs) :
-                        "unknown",
-                sector.position,
-                Crc.crc16(Crc.CCITT_POLY, sector.data));
-    }
-
-    static String recordData(Record record)
-    {
-        return String.format(
-                Locale.ROOT,
-                """
-                        Bytecode position: %d
-                        Start:             %.2fms
-                        End:               %.2fms
-                        Data CRC16:        %04x
-                        
-                        %s""",
-                record.position,
-                record.startTimeNs / 1e6,
-                record.endTimeNs / 1e6,
-                Crc.crc16(Crc.CCITT_POLY, record.rawData),
-                hexDump(record.rawData));
-    }
-
-    private static String hexDump(Bytes bytes)
-    {
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
-        try (PrintStream stream = new PrintStream(output, false, StandardCharsets.UTF_8))
-        {
-            Utils.hexdump(stream, bytes);
-        }
-        return output.toString(StandardCharsets.UTF_8);
-    }
-
     /* Cache coarse-scale pulse counts outside painting, normalized across captures. */
     private final class Capture
     {
@@ -998,8 +1019,7 @@ public class FluxViewerPanel extends JInternalFrame
             {
                 pendingPosition = null;
                 super.setViewPosition(position);
-            }
-            else
+            } else
             {
                 pendingPosition = new Point(position);
                 interactionDirty = true;
@@ -1079,24 +1099,5 @@ public class FluxViewerPanel extends JInternalFrame
         {
             return Math.max(1, visible.width - UiUtils.pointsToPixels(16));
         }
-    }
-
-    private static String getTitle(ImmutableList<Track> tracks)
-    {
-        Track track = Iterables.getFirst(tracks, null);
-        if (track != null)
-        {
-            if (track.ptl != null)
-                return String.format(
-                        "Physical track c%dh%d",
-                        track.ptl.physicalCylinder,
-                        track.ptl.physicalHead);
-            else if (track.ltl != null)
-                return String.format(
-                        "Logical track c%dh%d",
-                        track.ltl.logicalCylinder,
-                        track.ltl.logicalHead);
-        }
-        return "Test track";
     }
 }

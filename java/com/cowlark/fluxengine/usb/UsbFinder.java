@@ -53,8 +53,8 @@ public class UsbFinder
                 if (r != LibUsb.SUCCESS)
                     continue;
 
-                int id = ((descriptor.idVendor() & 0xffff) << 16)
-                        | (descriptor.idProduct() & 0xffff);
+                int id = ((descriptor.idVendor() & 0xffff) << 16) |
+                        (descriptor.idProduct() & 0xffff);
                 if (!VALID_DEVICES.contains(id))
                     continue;
 
@@ -90,8 +90,8 @@ public class UsbFinder
     {
         ImmutableList<CandidateDevice> candidates = findUsbDevices();
         if (candidates.isEmpty())
-            throw new ConfigException("no devices found (is one plugged in? Do you have the "
-                    + "appropriate permissions?");
+            throw new ConfigException("no devices found (is one plugged in? Do you have the " +
+                    "appropriate permissions?");
 
         String wantedSerial = config.getUsb().getSerial();
         if (!Strings.isNullOrEmpty(wantedSerial))
@@ -114,8 +114,8 @@ public class UsbFinder
             return Iterables.getOnlyElement(candidates);
 
         throw new ConfigException(
-                "more than one device detected; you'll need to explicitly specify the serial "
-                        + "number of the device you want");
+                "more than one device detected; you'll need to explicitly specify the serial " +
+                        "number of the device you want");
     }
 
     /* Opens the USB device indicated by the candidate's location. The caller
@@ -147,15 +147,14 @@ public class UsbFinder
                 int openRc = LibUsb.open(device, handle);
                 if (openRc != LibUsb.SUCCESS)
                     throw new com.cowlark.fluxengine.core.FluxEngineException(
-                            "FluxEngine: USB open failed: " + LibUsb.errorName(openRc) + " "
-                                    + LibUsb.strError(openRc));
+                            "FluxEngine: USB open failed: " + LibUsb.errorName(openRc) + " " +
+                                    LibUsb.strError(openRc));
                 return;
             }
-            throw new com.cowlark.fluxengine.core.FluxEngineException(
-                    String.format(
-                            "USB device at bus %d address %d not found (was it unplugged?)",
-                            candidate.busNumber,
-                            candidate.deviceAddress));
+            throw new com.cowlark.fluxengine.core.FluxEngineException(String.format(
+                    "USB device at bus %d address %d not found (was it unplugged?)",
+                    candidate.busNumber,
+                    candidate.deviceAddress));
         } finally
         {
             LibUsb.freeDeviceList(list, true);
@@ -183,8 +182,8 @@ public class UsbFinder
             if (port.getVendorID() == vendorId && port.getProductID() == productId)
             {
                 String portSerial = port.getSerialNumber();
-                if (serial == null || serial.isEmpty() || portSerial == null
-                        || serial.equals(portSerial))
+                if (serial == null || serial.isEmpty() || portSerial == null ||
+                        serial.equals(portSerial))
                 {
                     return port.getSystemPortName();
                 }

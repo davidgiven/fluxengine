@@ -4,21 +4,21 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.cowlark.fluxengine.gui.ApplicationFrame.Workflow;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.mockito.MockedConstruction;
 import org.mockito.Mockito;
-import javax.swing.JFileChooser;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.io.File;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import sprouts.Association;
 import sprouts.From;
 import sprouts.Var;
-import com.cowlark.fluxengine.gui.ApplicationFrame.Workflow;
+import javax.swing.JFileChooser;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.io.File;
 import java.util.prefs.Preferences;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -41,7 +41,8 @@ public class PreferencesReaderWriterTest
         File directory = new File("saved-directory").getAbsoluteFile();
         when(preferences.get("current_directory", "")).thenReturn(directory.getPath());
         writer = new PreferencesReaderWriter(preferences);
-        try (MockedConstruction<JFileChooser> choosers = Mockito.mockConstruction(JFileChooser.class))
+        try (MockedConstruction<JFileChooser> choosers =
+                Mockito.mockConstruction(JFileChooser.class))
         {
             JFileChooser chooser = writer.createFileChooser();
             verify(chooser).setCurrentDirectory(directory);
@@ -54,15 +55,22 @@ public class PreferencesReaderWriterTest
         File directory = new File("last-directory").getAbsoluteFile();
         when(preferences.get("current_directory", "")).thenReturn("");
         writer = new PreferencesReaderWriter(preferences);
-        try (MockedConstruction<JFileChooser> choosers = Mockito.mockConstruction(JFileChooser.class))
+        try (MockedConstruction<JFileChooser> choosers =
+                Mockito.mockConstruction(JFileChooser.class))
         {
             JFileChooser chooser = writer.createFileChooser();
             ArgumentCaptor<PropertyChangeListener> listener =
                     ArgumentCaptor.forClass(PropertyChangeListener.class);
             verify(chooser).addPropertyChangeListener(
-                    Mockito.eq(JFileChooser.DIRECTORY_CHANGED_PROPERTY), listener.capture());
-            listener.getValue().propertyChange(new PropertyChangeEvent(
-                    chooser, JFileChooser.DIRECTORY_CHANGED_PROPERTY, null, directory));
+                    Mockito.eq(JFileChooser.DIRECTORY_CHANGED_PROPERTY),
+                    listener.capture());
+            listener
+                    .getValue()
+                    .propertyChange(new PropertyChangeEvent(
+                            chooser,
+                            JFileChooser.DIRECTORY_CHANGED_PROPERTY,
+                            null,
+                            directory));
             when(chooser.showOpenDialog(null)).thenReturn(JFileChooser.CANCEL_OPTION);
             assertThat(chooser.showOpenDialog(null)).isEqualTo(JFileChooser.CANCEL_OPTION);
             verify(preferences).put("current_directory", directory.getPath());
@@ -78,7 +86,8 @@ public class PreferencesReaderWriterTest
     {
         when(preferences.get("current_directory", "")).thenReturn("");
         writer = new PreferencesReaderWriter(preferences);
-        try (MockedConstruction<JFileChooser> choosers = Mockito.mockConstruction(JFileChooser.class))
+        try (MockedConstruction<JFileChooser> choosers =
+                Mockito.mockConstruction(JFileChooser.class))
         {
             JFileChooser chooser = writer.createFileChooser();
             verify(chooser, Mockito.never()).setCurrentDirectory(Mockito.any());
@@ -91,8 +100,8 @@ public class PreferencesReaderWriterTest
         when(preferences.get("workflow", "DISK_READING")).thenReturn("IMAGE_PROCESSING");
         writer = new PreferencesReaderWriter(preferences);
 
-        assertThat(writer.makeEnumPreference("workflow", Workflow.DISK_READING).get())
-                .isEqualTo(Workflow.IMAGE_PROCESSING);
+        assertThat(writer.makeEnumPreference("workflow", Workflow.DISK_READING).get()).isEqualTo(
+                Workflow.IMAGE_PROCESSING);
     }
 
     @Test
@@ -101,8 +110,8 @@ public class PreferencesReaderWriterTest
         when(preferences.get("workflow", "DISK_READING")).thenReturn("DISK_READING");
         writer = new PreferencesReaderWriter(preferences);
 
-        assertThat(writer.makeEnumPreference("workflow", Workflow.DISK_READING).get())
-                .isEqualTo(Workflow.DISK_READING);
+        assertThat(writer.makeEnumPreference("workflow", Workflow.DISK_READING).get()).isEqualTo(
+                Workflow.DISK_READING);
     }
 
     @Test
@@ -111,8 +120,8 @@ public class PreferencesReaderWriterTest
         when(preferences.get("workflow", "DISK_READING")).thenReturn("OLD_WORKFLOW");
         writer = new PreferencesReaderWriter(preferences);
 
-        assertThat(writer.makeEnumPreference("workflow", Workflow.DISK_READING).get())
-                .isEqualTo(Workflow.DISK_READING);
+        assertThat(writer.makeEnumPreference("workflow", Workflow.DISK_READING).get()).isEqualTo(
+                Workflow.DISK_READING);
     }
 
     @Test

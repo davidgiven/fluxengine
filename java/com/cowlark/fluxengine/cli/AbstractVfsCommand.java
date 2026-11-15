@@ -7,7 +7,6 @@ import com.cowlark.fluxengine.core.flags.BoolFlag;
 import com.cowlark.fluxengine.core.flags.FlagGroup;
 import com.cowlark.fluxengine.core.flags.StringFlag;
 import com.cowlark.fluxengine.core.flags.ValueFlag;
-import org.apache.commons.lang3.function.Consumers;
 
 public abstract class AbstractVfsCommand implements Command
 {
@@ -34,6 +33,10 @@ public abstract class AbstractVfsCommand implements Command
             .setDefaultValue(false)
             .build();
 
+    private static void log(LogMessage message)
+    {
+    }
+
     protected void applyVfsFlags(ConfigBuilder builder)
     {
         if (imageFlag.isSet())
@@ -52,9 +55,5 @@ public abstract class AbstractVfsCommand implements Command
             Logger.setLogger(AbstractVfsCommand::log);
             System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "ERROR");
         }
-    }
-
-    private static void log(LogMessage message)
-    {
     }
 }

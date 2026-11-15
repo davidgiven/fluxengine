@@ -52,20 +52,16 @@ public class FileViewerDialogue extends JDialog
         codeArea.setCodeCharactersCase(CodeCharactersCase.LOWER);
         codeArea.setEditMode(EditMode.READ_ONLY);
 
-        UI
-                .of((JPanel) getContentPane())
-                .withLayout("fill, wrap 1, insets 12, gap 8")
+        UI.of((JPanel) getContentPane()).withLayout("fill, wrap 1, insets 12, gap 8")
                 .add(
                         "grow, push, wmin 0, hmin 300",
                         tabbedPane()
-                                .add(tab("Text").add(scrollPane()
-                                        .withPrefSize(600, 400)
+                                .add(tab("Text").add(scrollPane().withPrefSize(600, 400)
                                         .add(textArea(text).isEditableIf(false).peek(ta -> {
                                             ta.setLineWrap(true);
                                             ta.setWrapStyleWord(true);
                                         }))))
-                                .add(tab("Hex").add(scrollPane()
-                                        .withPrefSize(600, 400)
+                                .add(tab("Hex").add(scrollPane().withPrefSize(600, 400)
                                         .add(of(codeArea)))))
                 .add("align right", button("Close").onClick(it -> dispose()));
 

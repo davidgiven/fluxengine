@@ -14,7 +14,8 @@ public interface LogMessage
         @Override
         public void render(LogRenderer r)
         {
-            r.newline().add(message).newline();
+            r.newline()
+                    .add(message).newline();
         }
     }
 
@@ -23,7 +24,9 @@ public interface LogMessage
         @Override
         public void render(LogRenderer r)
         {
-            r.newline().add("Error:").add(message).newline();
+            r.newline()
+                    .add("Error:")
+                    .add(message).newline();
         }
     }
 
@@ -32,7 +35,8 @@ public interface LogMessage
         @Override
         public void render(LogRenderer r)
         {
-            r.newline().add("Stop!").newline();
+            r.newline()
+                    .add("Stop!").newline();
         }
     }
 }

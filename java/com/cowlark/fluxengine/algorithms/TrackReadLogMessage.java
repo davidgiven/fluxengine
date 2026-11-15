@@ -32,21 +32,20 @@ public record TrackReadLogMessage(List<Track> tracks, List<Sector> sectors) impl
         if (!rawSectors.isEmpty())
             clock /= rawSectors.size();
 
-        r
-                .comma()
+        r.comma()
                 .add(String.format(
                         "%d raw records, %d raw sectors",
                         rawRecords.size(),
                         rawSectors.size()));
         if (clock != 0)
-            r
-                    .comma()
+            r.comma()
                     .add(String.format(
                             "%.2fus clock (%.0fkHz)",
                             clock / 1000.0,
                             1000000.0 / clock));
 
-        r.newline().add("sectors:");
+        r.newline()
+                .add("sectors:");
 
         for (Sector sector : rawSectors)
             r.add(String.format(
@@ -60,6 +59,7 @@ public record TrackReadLogMessage(List<Track> tracks, List<Sector> sectors) impl
         for (Sector sector : sectors)
             size += sector.data.size();
 
-        r.newline().add(String.format("%d bytes decoded\n", size));
+        r.newline()
+                .add(String.format("%d bytes decoded\n", size));
     }
 }

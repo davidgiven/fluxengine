@@ -23,10 +23,8 @@ public class Main
     {
         Logger.setLogger(LogRenderer.create(System.out)::add);
 
-        if (args.length != 0
-                && (args[0].equals("--version")
-                        || args[0].equals("-V")
-                        || args[0].equals("version")))
+        if (args.length != 0 &&
+                (args[0].equals("--version") || args[0].equals("-V") || args[0].equals("version")))
         {
             System.out.println(Version.get());
             return;

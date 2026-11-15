@@ -17,22 +17,31 @@ then all the way up side 1. However, FluxEngine uses traditional disk images
 with alternating sides, with the blocks from track 0 side 0 then track 0 side
 1 then track 1 side 0 etc. Most Acorn emulators will use both formats, but
 they might require nudging as the side order can't be reliably autodetected.
+
+Filesystem support is available. Select the disk format to set both its geometry
+and filesystem type. The default is 1600kB ADFS F.
 ## Options
 
   - Format variants:
-      - `160`: 160kB 3.5" or 5.25" 40-track SSDD; S format
-      - `320`: 320kB 3.5" or 5.25" 80-track SSDD; M format
-      - `640`: 640kB 3.5" or 5.25" 80-track DSDD; L format
-      - `800`: 800kB 3.5" 80-track DSDD; D and E formats
-      - `1600`: 1600kB 3.5" 80-track DSHD; F formats
+      - `s`: 160kB 3.5" or 5.25" 40-track SSDD; S format
+      - `m`: 320kB 3.5" or 5.25" 80-track SSDD; M format
+      - `l`: 640kB 3.5" or 5.25" 80-track DSDD; L format
+      - `d`: 800kB 3.5" 80-track DSDD; D format
+      - `e`: 800kB 3.5" 80-track DSDD; E format
+      - `e-plus`: 800kB 3.5" 80-track DSDD; E+ format
+      - `f`: 1600kB 3.5" 80-track DSHD; F format
+      - `f-plus`: 1600kB 3.5" 80-track DSHD; F+ format
 
 ## Examples
 
 To read:
 
-  - `fluxengine read -c acornadfs --160 -s drive:0 -o acornadfs.img`
-  - `fluxengine read -c acornadfs --320 -s drive:0 -o acornadfs.img`
-  - `fluxengine read -c acornadfs --640 -s drive:0 -o acornadfs.img`
-  - `fluxengine read -c acornadfs --800 -s drive:0 -o acornadfs.img`
-  - `fluxengine read -c acornadfs --1600 -s drive:0 -o acornadfs.img`
+  - `fluxengine read -c acornadfs --s -s drive:0 -o acornadfs.img`
+  - `fluxengine read -c acornadfs --m -s drive:0 -o acornadfs.img`
+  - `fluxengine read -c acornadfs --l -s drive:0 -o acornadfs.img`
+  - `fluxengine read -c acornadfs --d -s drive:0 -o acornadfs.img`
+  - `fluxengine read -c acornadfs --e -s drive:0 -o acornadfs.img`
+  - `fluxengine read -c acornadfs --e-plus -s drive:0 -o acornadfs.img`
+  - `fluxengine read -c acornadfs --f -s drive:0 -o acornadfs.img`
+  - `fluxengine read -c acornadfs --f-plus -s drive:0 -o acornadfs.img`
 

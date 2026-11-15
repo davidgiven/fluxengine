@@ -31,12 +31,10 @@ public class FileInfoDialogue extends JDialog
 
         Var<TableData> tableData = Var.of(createTableData(data));
 
-        UI
-                .of((JPanel) getContentPane())
-                .withLayout("fill, wrap 1, insets 12, gap 8")
-                .add("grow, push, wmin 0",
-                        scrollPane()
-                                .withPrefSize(420, 260)
+        UI.of((JPanel) getContentPane()).withLayout("fill, wrap 1, insets 12, gap 8")
+                .add(
+                        "grow, push, wmin 0",
+                        scrollPane().withPrefSize(420, 260)
                                 .add(UI.table(tableData).withPrefSize(400, 200)))
                 .add("align right", button("Close").onClick(it -> dispose()));
 

@@ -141,7 +141,9 @@ public class AmigaFilesystem extends Filesystem
                 .<String, String>builder()
                 .put(FilesystemAttributes.VOLUME_NAME.name(), volName)
                 .put(FilesystemAttributes.TOTAL_BLOCKS.name(), Integer.toString(totalBlocks))
-                .put(FilesystemAttributes.USED_BLOCKS.name(), Integer.toString(totalBlocks - freeBlocks))
+                .put(
+                        FilesystemAttributes.USED_BLOCKS.name(),
+                        Integer.toString(totalBlocks - freeBlocks))
                 .put(FilesystemAttributes.BLOCK_SIZE.name(), Integer.toString(volume.blockSize))
                 .build();
     }

@@ -115,7 +115,7 @@ choices because they can store multiple types of file system.
 | Profile | Format | Read? | Write? | Filesystem? |
 |:--------|:-------|:-----:|:------:|:------------|
 | [`abc`](doc/disk-abc.md) | Ai Electronics ABC 24: CP/M; 158kB 35-track DSDD | 🦄 |  | CPMFS  |
-| [`acornadfs`](doc/disk-acornadfs.md) | Acorn ADFS: BBC Micro, Archimedes | 🦖 |  |  |
+| [`acornadfs`](doc/disk-acornadfs.md) | Acorn ADFS: BBC Micro, Archimedes | 🦖 |  | ACORNADFS  |
 | [`acorndfs`](doc/disk-acorndfs.md) | Acorn DFS: Acorn Atom, BBC Micro series | 🦄 |  | ACORNDFS  |
 | [`aeslanier`](doc/disk-aeslanier.md) | AES Lanier "No Problem": 616kB 5.25" 77-track SSDD hard sectored | 🦖 |  |  |
 | [`agat`](doc/disk-agat.md) | Agat: 840kB 5.25" 80-track DS | 🦖 | 🦖 |  |
@@ -225,34 +225,26 @@ There may or may not be anything interesting there.
 License
 -------
 
-Everything here _except the contents of the `dep` directory_ is © 2022 The
+Everything here _except the third-party code noted below_ is © 2022 The
 FluxEngine Authors (mostly me, David Given; see the VCS history for the other
 people) and is licensed under the GPL 2.0-only open source license (not any
 later version). Please see [COPYING](COPYING.md) for the full text.
 
-As an exception, `dep/emu` contains parts of the OpenBSD C library
-code, maintained by Todd Miller and William A. Rowe (and probably others). It is licensed
-under the terms of the 3-clause BSD license. Please see the contents of the
-directory for the full text. It's been lightly modified by me.
+As an exception, `third_party/java/com/github/adflib/adflib` contains the
+adflib library, written by Laurent Clevy et al, taken from
+https://github.com/lclevy/ADFlib. It is GPL 2.0 licensed. Please see the contents of the directory for the full text.
 
-As an exception, `dep/agg` contains parts of the Anti-Grain Antialiasing
-library, written by Maxim Semanarev (and others). It is licensed under the
-terms of the 3-clause BSD license. Please see the contents of the directory for
-the full text. It's been lightly modified by me.
-
-As an exception, `dep/adflib` contains the adflib library, written by Laurent
-Clevy et al, taken from https://github.com/lclevy/ADFlib. It is GPL 2.0
-licensed. Please see the contents of the directory for the full text.
-
-As an exception, `dep/hfsutils` contains a partial copy of the hfsutils
-package, written by Robert Leslie et al, taken from
+As an exception, `third_party/java/org/mars/hfsutils` contains a partial copy
+of the hfsutils package, written by Robert Leslie et al, taken from
 https://www.mars.org/home/rob/proj/hfs. It is GPL 2.0 licensed. Please see the
 contents of the directory for the full text.
 
-As an exception, `dep/alphanum` contains a copy of the alphanum package,
-written by Dave Koelle, taken from
-https://web.archive.org/web/20210207124255/davekoelle.com/alphanum.html. It is
-MIT licensed. Please see the source for the full text.
+As an exception, `third_party/java/org/rob_smallshire/oaknut` contains a Java
+port of oaknut's ADFS and DFS floppy-disc libraries and supporting utilities, written by
+Robert Smallshire, taken from https://github.com/rob-smallshire/oaknut. It is
+MIT licensed, copyright © 2026 Robert Smallshire. Please see
+[the oaknut license](third_party/java/org/rob_smallshire/oaknut/LICENSE) for the
+full text.
 
 __Important:__ The aggregate license for FluxEngine source or binary packages is
 GPL 2.0.

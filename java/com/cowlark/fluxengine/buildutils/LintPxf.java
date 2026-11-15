@@ -5,11 +5,11 @@ import com.cowlark.fluxengine.config.OptionGroupProto;
 import com.cowlark.fluxengine.config.OptionProto;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
+import org.protowire.pxf.Pxf;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
-import org.protowire.pxf.Pxf;
 
 /* Build-time validation of option defaults in PXF configurations. */
 public final class LintPxf
@@ -50,8 +50,11 @@ public final class LintPxf
                 hasDefault |= option.getSetByDefault();
             if (!hasDefault)
             {
-                System.err.printf("%s: option group '%s' (%s) has no set_by_default = true%n",
-                        location, group.getName(), group.getComment());
+                System.err.printf(
+                        "%s: option group '%s' (%s) has no set_by_default = true%n",
+                        location,
+                        group.getName(),
+                        group.getComment());
                 valid = false;
             }
         }
@@ -67,9 +70,9 @@ public final class LintPxf
             {
                 List<?> children = (List<?>) entry.getValue();
                 for (int index = 0; index < children.size(); index++)
-                    valid &= check((Message) children.get(index), childLocation + "[" + index + "]");
-            }
-            else
+                    valid &=
+                            check((Message) children.get(index), childLocation + "[" + index + "]");
+            } else
                 valid &= check((Message) entry.getValue(), childLocation);
         }
         return valid;

@@ -1,30 +1,45 @@
 package com.cowlark.fluxengine.vfs;
 
-import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_GETDIRENT;
-import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_GETFILE;
-import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_GETFSDATA;
-import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_LIST;
-import static com.cowlark.fluxengine.vfs.Filesystem.FileType.IS_FILE;
-
-import com.cowlark.fluxengine.core.ByteWriter;
 import com.cowlark.fluxengine.core.Bytes;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import org.apache.commons.lang3.StringUtils;
+import lombok.SneakyThrows;
+import org.rob_smallshire.oaknut.dfs.Dfs;
+import org.rob_smallshire.oaknut.dfs.DfsDiscInfo;
+import org.rob_smallshire.oaknut.dfs.DfsFileEntry;
+import org.rob_smallshire.oaknut.dfs.DfsFileLockedException;
+import org.rob_smallshire.oaknut.dfs.DfsFormat;
+import org.rob_smallshire.oaknut.dfs.DfsReadOnlyException;
+import org.rob_smallshire.oaknut.file.Access;
+import org.rob_smallshire.oaknut.file.AcornMeta;
 import java.io.IOException;
-import java.nio.file.FileSystemException;
+import java.nio.file.AccessDeniedException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.InvalidPathException;
 import java.nio.file.NoSuchFileException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class AcornDfsFilesystem extends Filesystem
 {
-    private static final ImmutableSet<Capability> CAPABILITIES =
-            ImmutableSet.of(OP_GETFSDATA, OP_LIST, OP_GETFILE, OP_GETDIRENT);
+    public static final String ACORNDFS_LOAD_ADDRESS = "acorndfs.load_address";
+    public static final String ACORNDFS_EXEC_ADDRESS = "acorndfs.exec_address";
+
+    /* DFS volumes have one flat catalogue. Directory letters belong to filenames. */
+    private static final ImmutableSet<Capability> CAPABILITIES = ImmutableSet.of(
+            Capability.OP_CREATE,
+            Capability.OP_CHECK,
+            Capability.OP_LIST,
+            Capability.OP_GETFILE,
+            Capability.OP_PUTFILE,
+            Capability.OP_GETDIRENT,
+            Capability.OP_DELETE,
+            Capability.OP_MOVE,
+            Capability.OP_GETFSDATA,
+            Capability.OP_PUTFSDATA,
+            Capability.OP_PUTATTRS);
 
     private final AcornDfsProto config;
     private final BlockDevice blockDevice;
+    private Dfs dfs;
 
     public AcornDfsFilesystem(AcornDfsProto config, BlockDevice blockDevice)
     {
@@ -33,23 +48,165 @@ public class AcornDfsFilesystem extends Filesystem
         this.blockDevice = blockDevice;
     }
 
+    /* All VFS file paths contain one component. Oaknut accepts both bare names and A.NAME;
+     * a stored $.NAME is exposed as NAME, while other prefixes are retained literally. */
+    private static String name(VfsPath path)
+    {
+        if (path.segments().size() != 1)
+            throw new InvalidPathException(
+                    path.toString(),
+                    "DFS filenames must have one path component");
+        return path.getName();
+    }
+
+    private static Dirent makeDirent(DfsFileEntry entry)
+    {
+        String filename = entry.name().startsWith("$.") ? entry.name().substring(2) : entry.name();
+        String mode = Access.format(entry.metadata().access());
+        return Dirent
+                .builder()
+                .setFilename(filename)
+                .setPath(VfsPath.root().resolve(filename))
+                .setFileType(FileType.IS_FILE)
+                .setLength(entry.length())
+                .setMode(mode)
+                .setAttributes(ImmutableMap
+                        .<String, String>builder()
+                        .put(FileAttributes.FILENAME.name(), filename)
+                        .put(FileAttributes.FILE_TYPE.name(), "file")
+                        .put(FileAttributes.LENGTH.name(), Integer.toString(entry.length()))
+                        .put(FileAttributes.MODE.name(), mode)
+                        .put(ACORNDFS_LOAD_ADDRESS, String.format("0x%x", entry.loadAddress()))
+                        .put(ACORNDFS_EXEC_ADDRESS, String.format("0x%x", entry.executionAddress()))
+                        .build())
+                .build();
+    }
+
+    /* BlockDevice already supplies logical sector order and selects the DFS volume's side. */
+    private DfsFormat format() throws IOException
+    {
+        boolean watford = switch (config.getFlavour())
+        {
+            case ACORN_DFS -> false;
+            case WATCOM_DFS -> true;
+            default -> throw new IllegalArgumentException("DFS flavour is undefined");
+        };
+        if (blockDevice.getBlockSize() != 256)
+            throw new IOException("DFS requires 256-byte sectors");
+        DfsFormat format = switch (blockDevice.getBlockCount())
+        {
+            case 400 -> DfsFormat.ACORN_DFS_40T_SINGLE_SIDED;
+            case 800 -> DfsFormat.ACORN_DFS_80T_SINGLE_SIDED;
+            default -> throw new IOException("Unsupported DFS volume capacity");
+        };
+        return format.withWatford(watford);
+    }
+
+    /* Share ADFS's write-through adapter. Oaknut snapshots are disabled because BlockDevice
+     * owns caching and rollback; mounting reads the catalogue rather than the whole volume. */
+    private void mount() throws IOException
+    {
+        if (dfs == null)
+            dfs = Dfs.fromStorage(new OaknutBlockDeviceStorage(blockDevice), format(), false);
+    }
+
+    private void dismount() throws IOException
+    {
+        if (dfs == null)
+            return;
+        try
+        {
+            dfs.close();
+        } finally
+        {
+            dfs = null;
+        }
+    }
+
+    private <T> T access(VfsPath path, IoOperation<T> operation) throws IOException
+    {
+        try
+        {
+            mount();
+            return operation.run();
+        } catch (DfsFileLockedException | DfsReadOnlyException e)
+        {
+            throw new AccessDeniedException(path.toString(), null, e.getMessage());
+        } catch (FileAlreadyExistsException e)
+        {
+            throw new FileAlreadyExistsException(path.toString(), null, e.getMessage());
+        } catch (NoSuchFileException e)
+        {
+            throw new NoSuchFileException(path.toString(), null, e.getMessage());
+        } catch (IllegalArgumentException e)
+        {
+            throw new InvalidPathException(path.toString(), e.getMessage());
+        }
+    }
+
+    /* Formatting does not mount or read unformatted sectors. Quick format replaces the
+     * catalogue and clears stale Watford markers; full format initializes the entire volume. */
     @Override
+    public void create(boolean quick, String volumeName) throws IOException
+    {
+        try (Dfs blank = Dfs.create(format(), volumeName))
+        {
+            Bytes image = new Bytes(blank.toByteArray());
+            dismount();
+            blockDevice.putBytes(0, quick ? image.slice(0, 1024) : image);
+        } catch (IllegalArgumentException e)
+        {
+            throw new InvalidPathException(volumeName, e.getMessage());
+        }
+    }
+
+    @Override
+    @SneakyThrows(IOException.class)
     public void check()
     {
+        for (int i = 0; i < blockDevice.getBlockCount(); i++)
+        {
+            Bytes block = blockDevice.getBlock(i);
+            if (block == null || block.size() != blockDevice.getBlockSize())
+                throw new IOException("Missing or short block: " + i);
+        }
+    }
+
+    @Override
+    public boolean isReadOnly()
+    {
+        return false;
     }
 
     @Override
     public ImmutableMap<String, String> getFilesystemMetadata() throws IOException
     {
-        AcornDfsDirectory dir = new AcornDfsDirectory();
-        ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
-        builder.put(FilesystemAttributes.VOLUME_NAME.name(), dir.volumeName);
-        builder.put(
-                FilesystemAttributes.TOTAL_BLOCKS.name(),
-                Integer.toString(blockDevice.getBlockCount()));
-        builder.put(FilesystemAttributes.USED_BLOCKS.name(), Integer.toString(dir.usedSectors));
-        builder.put(FilesystemAttributes.BLOCK_SIZE.name(), "256");
-        return builder.build();
+        return access(
+                VfsPath.root(), () -> {
+                    DfsDiscInfo info = dfs.info();
+                    int total = Math.min(info.totalSectors(), blockDevice.getBlockCount());
+                    return ImmutableMap.of(
+                            FilesystemAttributes.VOLUME_NAME.name(),
+                            info.title(),
+                            FilesystemAttributes.TOTAL_BLOCKS.name(),
+                            Integer.toString(total),
+                            FilesystemAttributes.USED_BLOCKS.name(),
+                            Integer.toString(total - dfs.freeSectors()),
+                            FilesystemAttributes.BLOCK_SIZE.name(),
+                            "256");
+                });
+    }
+
+    @Override
+    public void putFilesystemMetadata(ImmutableMap<String, String> metadata) throws IOException
+    {
+        if (!metadata.keySet().equals(ImmutableSet.of(FilesystemAttributes.VOLUME_NAME.name())))
+            throw new IllegalArgumentException("can't set this metadata key");
+        access(
+                VfsPath.root(), () -> {
+                    dfs.setTitle(metadata.get(FilesystemAttributes.VOLUME_NAME.name()));
+                    return null;
+                });
     }
 
     @Override
@@ -57,49 +214,92 @@ public class AcornDfsFilesystem extends Filesystem
     {
         if (!path.isRoot())
             throw new NoSuchFileException(path.toString());
-
-        AcornDfsDirectory dir = new AcornDfsDirectory();
-        ImmutableMap.Builder<String, Dirent> builder = ImmutableMap.builder();
-        for (DirEntry de : dir.dirents)
-            builder.put(de.filename, de.dirent);
-        return builder.build();
+        return access(
+                path, () -> {
+                    ImmutableMap.Builder<String, Dirent> entries = ImmutableMap.builder();
+                    for (DfsFileEntry entry : dfs.files())
+                    {
+                        Dirent dirent = makeDirent(entry);
+                        entries.put(dirent.filename(), dirent);
+                    }
+                    return entries.build();
+                });
     }
 
     @Override
     public Bytes getFile(VfsPath path) throws IOException
     {
-        AcornDfsDirectory dir = new AcornDfsDirectory();
-        DirEntry de = dir.findFile(path);
+        return access(path, () -> new Bytes(dfs.readFile(name(path))));
+    }
 
-        int sectors = (de.length + 255) / 256;
-        Bytes data = new Bytes();
-        ByteWriter bw = new ByteWriter(data);
-        for (int i = 0; i < sectors; i++)
-        {
-            Bytes sector = blockDevice.getBlock(de.startSector + i);
-            bw.write(sector);
-        }
-        if (data.size() > de.length)
-            data.resize(de.length);
-        return data;
+    @Override
+    public void putFile(VfsPath path, Bytes bytes) throws IOException
+    {
+        access(
+                path, () -> {
+                    String filename = name(path);
+                    AcornMeta metadata = dfs.exists(filename) ?
+                            dfs.stat(filename).metadata() :
+                            new AcornMeta(0, 0, null);
+                    dfs.writeFile(filename, bytes.toByteArray(), metadata);
+                    return null;
+                });
     }
 
     @Override
     public Dirent getDirent(VfsPath path) throws IOException
     {
-        if (path.isRoot())
-            return ROOT_DIRENT;
-
-        AcornDfsDirectory dir = new AcornDfsDirectory();
-        return dir.findFile(path).dirent;
+        return access(path, () -> path.isRoot() ? ROOT_DIRENT : makeDirent(dfs.stat(name(path))));
     }
 
     @Override
-    public void close() throws Exception
+    @SneakyThrows(IOException.class)
+    public void putFileMetadata(VfsPath path, ImmutableMap<String, String> metadata)
     {
-        flushChanges();
+        if (!ImmutableSet
+                .of(FileAttributes.MODE.name(), ACORNDFS_LOAD_ADDRESS, ACORNDFS_EXEC_ADDRESS)
+                .containsAll(metadata.keySet()))
+            throw new IllegalArgumentException("can't set this metadata key");
+        access(
+                path, () -> {
+                    String filename = name(path);
+                    AcornMeta previous = dfs.stat(filename).metadata();
+                    dfs.setMetadata(
+                            filename, new AcornMeta(
+                                    metadata.containsKey(ACORNDFS_LOAD_ADDRESS) ?
+                                            Long.decode(metadata.get(ACORNDFS_LOAD_ADDRESS)) :
+                                            previous.loadAddress(),
+                                    metadata.containsKey(ACORNDFS_EXEC_ADDRESS) ?
+                                            Long.decode(metadata.get(ACORNDFS_EXEC_ADDRESS)) :
+                                            previous.executionAddress(),
+                                    metadata.containsKey(FileAttributes.MODE.name()) ?
+                                            Access.parse(metadata.get(FileAttributes.MODE.name())) :
+                                            previous.access()));
+                    return null;
+                });
     }
 
+    @Override
+    public void deleteFile(VfsPath path) throws IOException
+    {
+        access(
+                path, () -> {
+                    dfs.deleteFile(name(path));
+                    return null;
+                });
+    }
+
+    @Override
+    public void moveFile(VfsPath source, VfsPath destination) throws IOException
+    {
+        access(
+                source, () -> {
+                    dfs.renameFile(name(source), name(destination));
+                    return null;
+                });
+    }
+
+    /* Commit/revert invalidates the mounted handle, matching ADFS and the other adapters. */
     @Override
     public boolean needsFlushing()
     {
@@ -110,132 +310,31 @@ public class AcornDfsFilesystem extends Filesystem
     public void flushChanges() throws IOException
     {
         blockDevice.commit();
+        dismount();
     }
 
     @Override
     public void discardChanges() throws IOException
     {
-        blockDevice.revert();
+        try
+        {
+            dismount();
+        } finally
+        {
+            blockDevice.revert();
+        }
     }
 
-    private static class DirEntry
+    @Override
+    public void close() throws IOException
     {
-        String filename;
-        int inode;
-        int startSector;
-        int loadAddress;
-        int execAddress;
-        int length;
-        int sectorCount;
-        boolean locked;
-        String mode;
-        Dirent dirent;
+        flushChanges();
     }
 
-    private class AcornDfsDirectory
+    /* Translate oaknut failures into the exceptions expected by VFS clients. */
+    @FunctionalInterface
+    private interface IoOperation<T>
     {
-        String volumeName;
-        int usedSectors = 0;
-        List<DirEntry> dirents = new ArrayList<>();
-
-        AcornDfsDirectory() throws IOException
-        {
-            Bytes sector0 = blockDevice.getBlock(0);
-            Bytes sector1 = blockDevice.getBlock(1);
-
-            if ((sector1.getByte(5) & 7) != 0)
-                throw new FileSystemException("Invalid filesystem");
-
-            int fileCount = (sector1.getByte(5) & 0xff) / 8;
-
-            for (int i = 0; i < fileCount; i++)
-            {
-                Bytes bytes0 = sector0.slice(i * 8 + 8, 8);
-                Bytes bytes1 = sector1.slice(i * 8 + 8, 8);
-                DirEntry de = createDirent(i, bytes0, bytes1);
-                usedSectors += de.sectorCount;
-                dirents.add(de);
-            }
-
-            StringBuilder ss = new StringBuilder();
-            for (int i = 0; i < 8; i++)
-                ss.append((char) (sector0.getByte(i) & 0x7f));
-            for (int i = 0; i < 4; i++)
-                ss.append((char) (sector1.getByte(i) & 0x7f));
-            volumeName = StringUtils.stripEnd(ss.toString(), null);
-        }
-
-        DirEntry findFile(VfsPath path) throws IOException
-        {
-            if (path.segments().size() != 1)
-                throw new InvalidPathException(path.toString(), "Bad path");
-
-            String wanted = path.segments().get(0);
-            for (DirEntry dirent : dirents)
-            {
-                if (dirent.filename.equals(wanted))
-                    return dirent;
-            }
-
-            throw new NoSuchFileException(path.toString());
-        }
-
-        private DirEntry createDirent(int inode, Bytes bytes0, Bytes bytes1)
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.append((char) (bytes0.getByte(7) & 0x7f));
-            sb.append('.');
-            for (int j = 0; j < 7; j++)
-                sb.append((char) (bytes0.getByte(j) & 0x7f));
-            String filename = sb.toString();
-            int spaceIdx = filename.indexOf(' ');
-            if (spaceIdx != -1)
-                filename = filename.substring(0, spaceIdx);
-
-            int startSector = ((bytes1.getByte(6) & 0x03) << 8) | (bytes1.getByte(7) & 0xff);
-            int loadAddress = ((bytes1.getByte(6) & 0x0c) << 14) | (bytes1.getByte(1) << 8) |
-                    bytes1.getByte(0);
-            int execAddress = ((bytes1.getByte(6) & 0xc0) << 10) | (bytes1.getByte(3) << 8) |
-                    bytes1.getByte(2);
-            boolean locked = (bytes0.getByte(7) & 0x80) != 0;
-            int length = ((bytes1.getByte(6) & 0x30) << 12) | (bytes1.getByte(5) << 8) |
-                    bytes1.getByte(4);
-            int sectorCount = (length + 255) / 256;
-            String mode = locked ? "L" : "";
-
-            ImmutableMap.Builder<String, String> attrs = ImmutableMap.builder();
-            attrs.put(FileAttributes.FILENAME.name(), filename);
-            attrs.put(FileAttributes.LENGTH.name(), Integer.toString(length));
-            attrs.put(FileAttributes.FILE_TYPE.name(), "file");
-            attrs.put(FileAttributes.MODE.name(), mode);
-            attrs.put("acorndfs.inode", Integer.toString(inode));
-            attrs.put("acorndfs.start_sector", Integer.toString(startSector));
-            attrs.put("acorndfs.load_address", String.format("0x%x", loadAddress));
-            attrs.put("acorndfs.exec_address", String.format("0x%x", execAddress));
-            attrs.put("acorndfs.locked", locked ? "1" : "0");
-
-            Dirent dirent = Dirent
-                    .builder()
-                    .setPath(VfsPath.of("/").resolve(filename))
-                    .setFilename(filename)
-                    .setLength(length)
-                    .setMode(mode)
-                    .setFileType(IS_FILE)
-                    .setAttributes(attrs.build())
-                    .build();
-
-            DirEntry de = new DirEntry();
-            de.filename = filename;
-            de.inode = inode;
-            de.startSector = startSector;
-            de.loadAddress = loadAddress;
-            de.execAddress = execAddress;
-            de.length = length;
-            de.sectorCount = sectorCount;
-            de.locked = locked;
-            de.mode = mode;
-            de.dirent = dirent;
-            return de;
-        }
+        T run() throws IOException;
     }
 }

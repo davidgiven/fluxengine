@@ -1,21 +1,21 @@
 package com.cowlark.fluxengine.gui;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
-import static org.junit.Assert.assertThrows;
 
 import com.cowlark.fluxengine.core.Bytes;
+import com.cowlark.fluxengine.core.EmergencyStopException;
 import com.cowlark.fluxengine.data.Disk;
 import com.cowlark.fluxengine.data.Image;
 import com.cowlark.fluxengine.gui.FilesystemTreeTableModel.DirNode;
 import com.cowlark.fluxengine.gui.FilesystemTreeTableModel.LoadState;
 import com.cowlark.fluxengine.vfs.Filesystem;
 import com.cowlark.fluxengine.vfs.VfsPath;
-import org.junit.Before;
 import org.junit.After;
-import com.cowlark.fluxengine.core.EmergencyStopException;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,15 +24,15 @@ import org.mockito.junit.MockitoJUnitRunner;
 import sprouts.Var;
 import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
+import javax.swing.tree.TreePath;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
-import java.util.List;
-import javax.swing.tree.TreePath;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -43,8 +43,8 @@ import java.util.concurrent.atomic.AtomicReference;
 @RunWith(MockitoJUnitRunner.class)
 public class FilesystemPanelHeadlessTest
 {
+    private final AtomicReference<Exception> filesystemError = new AtomicReference<>();
     @Mock ImageViewModel mockModel;
-
     private FakeFilesystem fakeFs;
     private FilesystemTreeTableModel model;
     private FilesystemPanel panel;
@@ -52,7 +52,6 @@ public class FilesystemPanelHeadlessTest
     private FilesystemExecutor capturedExecutor;
     private Thread filesystemThread;
     private Runnable onFilesystemExit;
-    private final AtomicReference<Exception> filesystemError = new AtomicReference<>();
 
     @BeforeClass
     public static void headless()
@@ -141,8 +140,8 @@ public class FilesystemPanelHeadlessTest
         CompletableFuture<Thread> worker = new CompletableFuture<>();
         model.getExecutor().execute(() -> worker.complete(Thread.currentThread()));
         Thread filesystemThread = worker.get(5, TimeUnit.SECONDS);
-        CompletableFuture<Filesystem> result =
-                CompletableFuture.supplyAsync(() -> {
+        CompletableFuture<Filesystem> result = CompletableFuture.supplyAsync(
+                () -> {
                     assertThat(Thread.currentThread()).isSameInstanceAs(filesystemThread);
                     return model.getFilesystem();
                 }, model.getExecutor());
@@ -156,7 +155,9 @@ public class FilesystemPanelHeadlessTest
         model.getExecutor().execute(() -> {
             throw new UncheckedIOException(failure);
         });
-        CompletableFuture.runAsync(() -> {}, model.getExecutor()).get(5, TimeUnit.SECONDS);
+        CompletableFuture.runAsync(
+                () -> {
+                }, model.getExecutor()).get(5, TimeUnit.SECONDS);
         assertThat(filesystemError.get()).isSameInstanceAs(failure);
     }
 
@@ -171,7 +172,9 @@ public class FilesystemPanelHeadlessTest
         SwingUtilities.invokeAndWait(onFilesystemExit);
         assertThrows(IllegalStateException.class, model::getFilesystem);
         assertThrows(IllegalStateException.class, model::getExecutor);
-        assertThrows(IllegalStateException.class, () -> executor.execute(() -> {}));
+        assertThrows(
+                IllegalStateException.class, () -> executor.execute(() -> {
+                }));
     }
 
     @Test
@@ -199,8 +202,10 @@ public class FilesystemPanelHeadlessTest
         /* Populate a real file entry and supply its contents through the filesystem worker. */
         VfsPath filePath = VfsPath.of("/extract.txt");
         fakeFs.addFile(filePath);
-        org.mockito.Mockito.doReturn(new Bytes("extracted contents"))
-                .when(fakeFs).getFile(filePath);
+        org.mockito.Mockito
+                .doReturn(new Bytes("extracted contents"))
+                .when(fakeFs)
+                .getFile(filePath);
         SwingUtilities.invokeAndWait(() -> model.resyncPaths(Set.of(VfsPath.root())));
         awaitIdle();
         awaitLoaded(VfsPath.root());
@@ -214,15 +219,17 @@ public class FilesystemPanelHeadlessTest
                 FilesystemTreeTableModel.FsNode child =
                         (FilesystemTreeTableModel.FsNode) root.getChildAt(i);
                 if (filePath.equals(child.vfsPath()))
-                    panel.getTreeTable().getTreeSelectionModel().setSelectionPath(
-                            model.buildTreePath(child));
+                    panel
+                            .getTreeTable()
+                            .getTreeSelectionModel()
+                            .setSelectionPath(model.buildTreePath(child));
             }
             TransferHandler handler = panel.getTreeTable().getTransferHandler();
-            assertThat(handler.getSourceActions(panel.getTreeTable()))
-                    .isEqualTo(TransferHandler.COPY);
+            assertThat(handler.getSourceActions(panel.getTreeTable())).isEqualTo(TransferHandler.COPY);
             handler.exportToClipboard(panel.getTreeTable(), clipboard, TransferHandler.COPY);
-            assertThat(clipboard.getContents(null).isDataFlavorSupported(
-                    DataFlavor.javaFileListFlavor)).isTrue();
+            assertThat(clipboard
+                    .getContents(null)
+                    .isDataFlavorSupported(DataFlavor.javaFileListFlavor)).isTrue();
             panel.getTreeTable().getTreeSelectionModel().clearSelection();
         });
         org.mockito.Mockito.verify(fakeFs, org.mockito.Mockito.never()).getFile(filePath);
@@ -246,10 +253,14 @@ public class FilesystemPanelHeadlessTest
 
         /* Directory selections must never initiate extraction. */
         SwingUtilities.invokeAndWait(() -> {
-            panel.getTreeTable().getTreeSelectionModel().setSelectionPath(
-                    model.buildTreePath(model.findNode(VfsPath.of("/empty"))));
-            assertThat(panel.getTreeTable().getTransferHandler().getSourceActions(panel.getTreeTable()))
-                    .isEqualTo(TransferHandler.NONE);
+            panel
+                    .getTreeTable()
+                    .getTreeSelectionModel()
+                    .setSelectionPath(model.buildTreePath(model.findNode(VfsPath.of("/empty"))));
+            assertThat(panel
+                    .getTreeTable()
+                    .getTransferHandler()
+                    .getSourceActions(panel.getTreeTable())).isEqualTo(TransferHandler.NONE);
         });
         Files.delete(exported.toPath());
         Files.delete(exported.toPath().getParent());
@@ -263,19 +274,23 @@ public class FilesystemPanelHeadlessTest
         SwingUtilities.invokeAndWait(() -> model.resyncPaths(Set.of(VfsPath.root())));
         awaitIdle();
         awaitLoaded(VfsPath.root());
-        SwingUtilities.invokeAndWait(() -> model.requestPopulate(model.findNode(VfsPath.of("/empty"))));
+        SwingUtilities.invokeAndWait(() -> model.requestPopulate(model.findNode(VfsPath.of(
+                "/empty"))));
         awaitIdle();
         awaitLoaded(VfsPath.of("/empty"));
 
         SwingUtilities.invokeAndWait(() -> {
-            panel.getTreeTable().getTreeSelectionModel().setSelectionPaths(new TreePath[] {
-                    model.buildTreePath(model.findNode(VfsPath.root())).pathByAddingChild(
+            panel
+                    .getTreeTable()
+                    .getTreeSelectionModel()
+                    .setSelectionPaths(new TreePath[]{model.buildTreePath(model.findNode(VfsPath.root())).pathByAddingChild(
                             findFile(model.findNode(VfsPath.root()), "same.txt")),
-                    model.buildTreePath(model.findNode(VfsPath.of("/empty"))).pathByAddingChild(
-                            findFile(model.findNode(VfsPath.of("/empty")), "same.txt"))
-            });
-            assertThat(panel.getTreeTable().getTransferHandler().getSourceActions(panel.getTreeTable()))
-                    .isEqualTo(TransferHandler.NONE);
+                            model.buildTreePath(model.findNode(VfsPath.of("/empty"))).pathByAddingChild(
+                                    findFile(model.findNode(VfsPath.of("/empty")), "same.txt"))});
+            assertThat(panel
+                    .getTreeTable()
+                    .getTransferHandler()
+                    .getSourceActions(panel.getTreeTable())).isEqualTo(TransferHandler.NONE);
         });
     }
 
@@ -311,7 +326,9 @@ public class FilesystemPanelHeadlessTest
                 hasLoading.set(hasLoadingNode((DirNode) model.getRoot()));
             });
             loading = hasLoading.get();
-            CompletableFuture.runAsync(() -> {}, capturedExecutor).get(5, TimeUnit.SECONDS);
+            CompletableFuture.runAsync(
+                    () -> {
+                    }, capturedExecutor).get(5, TimeUnit.SECONDS);
 
             /* The EDT queue must also be empty; invokeAndWait already drains it. */
             if (!loading)
@@ -439,8 +456,11 @@ public class FilesystemPanelHeadlessTest
     @Test
     public void failedDirectoryListingCanBeRetried() throws Exception
     {
-        org.mockito.Mockito.doThrow(new IOException("directory read failed"))
-                .doCallRealMethod().when(fakeFs).list(VfsPath.root());
+        org.mockito.Mockito
+                .doThrow(new IOException("directory read failed"))
+                .doCallRealMethod()
+                .when(fakeFs)
+                .list(VfsPath.root());
         SwingUtilities.invokeAndWait(() -> model.resyncNode(VfsPath.root()));
         awaitIdle();
         SwingUtilities.invokeAndWait(() -> {
@@ -450,8 +470,7 @@ public class FilesystemPanelHeadlessTest
         });
         awaitIdle();
         awaitLoaded(VfsPath.root());
-        SwingUtilities.invokeAndWait(() ->
-                assertThat(model.findNode(VfsPath.of("/empty"))).isNotNull());
+        SwingUtilities.invokeAndWait(() -> assertThat(model.findNode(VfsPath.of("/empty"))).isNotNull());
     }
 
     @Test
