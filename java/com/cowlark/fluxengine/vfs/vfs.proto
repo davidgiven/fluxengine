@@ -26,8 +26,6 @@ message AcornAdfsProto
     S = 1;
     M = 2;
     L = 3;
-    reserved 4;
-    reserved "L_SEQUENTIAL";
     D = 5;
     E = 6;
     E_PLUS = 7;
@@ -35,11 +33,10 @@ message AcornAdfsProto
     F_PLUS = 9;
     G = 10;
     G_PLUS = 11;
-    GUESS = 12;
   }
 
   optional Flavour flavour = 1
-  [default = GUESS, (help) = "ADFS floppy format; GUESS detects existing disks and selects by capacity for new disks"];
+  [default = F, (help) = "ADFS floppy format"];
 }
 
 message Brother120FsProto {}

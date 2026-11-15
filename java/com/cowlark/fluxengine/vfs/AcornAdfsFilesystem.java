@@ -192,38 +192,22 @@ public class AcornAdfsFilesystem extends Filesystem
         }
     }
 
-    /* GUESS delegates detection to oaknut; explicit flavours use the matching library format. */
+    /* The configured flavour selects the matching library format for mounting and creation. */
     private AdfsFormat selectedFormat()
     {
         if (config.getFlavour() == AcornAdfsProto.Flavour.UNDEFINED)
             throw new IllegalArgumentException("ADFS flavour is undefined");
-        return config.getFlavour() == AcornAdfsProto.Flavour.GUESS ?
-                null :
-                AdfsFormat.valueOf(config.getFlavour().name());
+        return AdfsFormat.valueOf(config.getFlavour().name());
     }
 
-    /* Capacity determines the default floppy shape for GUESS. Ambiguous 800K blank disks
-     * are formatted as E rather than D. Explicit flavours must fit the device exactly. */
+    /* Explicit flavours must fit the device exactly. */
     private AdfsFormat creationFormat() throws IOException
     {
         int size = Math.multiplyExact(blockDevice.getBlockSize(), blockDevice.getBlockCount());
         AdfsFormat selected = selectedFormat();
-        if (selected != null)
-        {
-            if (selected.size() != size)
-                throw new IOException("Selected ADFS flavour does not match device capacity");
-            return selected;
-        }
-        return switch (size)
-        {
-            case 163840 -> AdfsFormat.S;
-            case 327680 -> AdfsFormat.M;
-            case 655360 -> AdfsFormat.L;
-            case 819200 -> AdfsFormat.E;
-            case 1638400 -> AdfsFormat.F;
-            case 3276800 -> AdfsFormat.G;
-            default -> throw new IOException("Unsupported ADFS floppy capacity: " + size);
-        };
+        if (selected.size() != size)
+            throw new IOException("Selected ADFS flavour does not match device capacity");
+        return selected;
     }
 
     /* Whole-block metadata writes allow quick formatting without reading unformatted sectors. */

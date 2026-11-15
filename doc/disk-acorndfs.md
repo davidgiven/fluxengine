@@ -18,6 +18,9 @@ requires a bit of fiddling as they have the same tracks on twice.
   - Format variants:
       - `100`: 100kB 40-track SSSD
       - `200`: 200kB 80-track SSSD
+  - Filesystem:
+      - `acorn`: Acorn DFS
+      - `watford`: Watford DFS
 
 ## Examples
 

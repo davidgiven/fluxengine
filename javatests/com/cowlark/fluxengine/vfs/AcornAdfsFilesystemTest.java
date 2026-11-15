@@ -144,7 +144,7 @@ public class AcornAdfsFilesystemTest extends GenericTreeFilesystemTest
     {
         assertThat(AcornAdfsProto
                 .getDefaultInstance()
-                .getFlavour()).isEqualTo(AcornAdfsProto.Flavour.GUESS);
+                .getFlavour()).isEqualTo(AcornAdfsProto.Flavour.F);
         for (AdfsFormat format : List.of(
                 AdfsFormat.D,
                 AdfsFormat.E,
