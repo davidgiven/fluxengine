@@ -68,7 +68,7 @@ public class ApplicationFrame extends JFrame
         visualiserPanel = new VisualiserPanel(model);
         configurationPanel = new ConfigurationPanel(model);
         filesystemPanel = new FilesystemPanel(model);
-        formatEditorPanel = new FormatEditorPanel();
+        formatEditorPanel = new FormatEditorPanel(model);
 
         URL iconUrl = ApplicationFrame.class.getResource("/icon.png");
         if (iconUrl != null)

@@ -78,6 +78,7 @@ public class ImageViewModel
             new FilesystemTreeTableModel(this);
     /* The custom slot has a stable identity independent of the loaded file's metadata. */
     @Getter private Var<String> customFormatFilename;
+    @Getter private Var<String> customFormatText;
     private volatile ConfigProto customFormat;
     @Getter private Var<String> statusMessage = Var.of("Ready");
     @Getter private Var<String> selectedFormat;
@@ -103,6 +104,7 @@ public class ImageViewModel
         selectedFormat = makeStringPreference(FORMAT, "ibm");
         customFormatFilename =
                 makeStringPreference(PreferencesReaderWriter.CUSTOM_FORMAT_FILENAME, "");
+        customFormatText = makeStringPreference(PreferencesReaderWriter.CUSTOM_FORMAT_TEXT, "");
         selectedDevice = makeStringPreference(DEVICE, DEVICE_FLUXFILE);
         selectedFluxFile = makeStringPreference(DEVICE_FLUXFILE, "");
         selectedSerialPort = makeStringPreference(DEVICE_SERIALPORT, "");
