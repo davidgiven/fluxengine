@@ -87,19 +87,27 @@ public class AmigaFilesystemTest extends GenericTreeFilesystemTest
     public void putFilesystemMetadata() throws IOException
     {
         impl.create(true, "LABEL");
-        impl.putFilesystemMetadata(ImmutableMap.of(FilesystemAttributes.VOLUME_NAME.name(), "NEWLABEL"));
-        assertThat(impl.getFilesystemMetadata().get(FilesystemAttributes.VOLUME_NAME.name())).isEqualTo(
-                "NEWLABEL");
+        impl.putFilesystemMetadata(ImmutableMap.of(
+                FilesystemAttributes.VOLUME_NAME.name(),
+                "NEWLABEL"));
+        assertThat(impl
+                .getFilesystemMetadata()
+                .get(FilesystemAttributes.VOLUME_NAME.name())).isEqualTo("NEWLABEL");
     }
 
     @Test
     public void putFilesystemMetadata_replacesLabel() throws IOException
     {
         impl.create(true, "LABEL");
-        impl.putFilesystemMetadata(ImmutableMap.of(FilesystemAttributes.VOLUME_NAME.name(), "OTHER"));
-        impl.putFilesystemMetadata(ImmutableMap.of(FilesystemAttributes.VOLUME_NAME.name(), "FINAL"));
-        assertThat(impl.getFilesystemMetadata().get(FilesystemAttributes.VOLUME_NAME.name())).isEqualTo(
-                "FINAL");
+        impl.putFilesystemMetadata(ImmutableMap.of(
+                FilesystemAttributes.VOLUME_NAME.name(),
+                "OTHER"));
+        impl.putFilesystemMetadata(ImmutableMap.of(
+                FilesystemAttributes.VOLUME_NAME.name(),
+                "FINAL"));
+        assertThat(impl
+                .getFilesystemMetadata()
+                .get(FilesystemAttributes.VOLUME_NAME.name())).isEqualTo("FINAL");
     }
 
     @Test
@@ -139,12 +147,15 @@ public class AmigaFilesystemTest extends GenericTreeFilesystemTest
     public void putFilesystemMetadata_persistsAfterFlush() throws IOException
     {
         impl.create(true, "LABEL");
-        impl.putFilesystemMetadata(ImmutableMap.of(FilesystemAttributes.VOLUME_NAME.name(), "PERSIST"));
+        impl.putFilesystemMetadata(ImmutableMap.of(
+                FilesystemAttributes.VOLUME_NAME.name(),
+                "PERSIST"));
         impl.flushChanges();
 
         AmigaFilesystem impl2 =
                 new AmigaFilesystem(configProto.getFilesystem().getAmigaffs(), blockDevice);
-        assertThat(impl2.getFilesystemMetadata().get(FilesystemAttributes.VOLUME_NAME.name())).isEqualTo(
-                "PERSIST");
+        assertThat(impl2
+                .getFilesystemMetadata()
+                .get(FilesystemAttributes.VOLUME_NAME.name())).isEqualTo("PERSIST");
     }
 }

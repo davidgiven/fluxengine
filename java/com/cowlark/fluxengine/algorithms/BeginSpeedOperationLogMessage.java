@@ -12,6 +12,7 @@ public record BeginSpeedOperationLogMessage() implements LogMessage
     @Override
     public void render(LogRenderer r)
     {
-        r.newline().add("Measuring rotational speed...").newline();
+        r.newline()
+                .add("Measuring rotational speed...").newline();
     }
 }

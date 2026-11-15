@@ -1,19 +1,15 @@
 package com.cowlark.fluxengine.fluxsource;
 
-import static com.cowlark.fluxengine.external.DriveType.DRIVETYPE_40TRACK;
 import static com.cowlark.fluxengine.external.DriveType.DRIVETYPE_80TRACK;
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.assertThrows;
 import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
+import static org.junit.Assert.assertThrows;
 
-import com.cowlark.fluxengine.config.ConfigBuilder;
 import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.config.DriveProto;
 import com.cowlark.fluxengine.core.ByteWriter;
 import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.core.FluxEngineException;
-import com.cowlark.fluxengine.external.DriveType;
-import com.google.common.truth.extensions.proto.ProtoTruth;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -116,18 +112,25 @@ public class A2RFluxSourceTest
                                 .build())
                         .build());
     }
+
     @Test
     public void rejectsUnsupportedMagic() throws IOException
     {
         Path path = Files.createTempFile("flux", ".a2r");
         try
         {
-            for (byte[] magic : new byte[][] {
-                    {'A', '2', 'R', '3'}, {'N', 'O', 'P', 'E'}, {'A', '2'}, {}})
+            for (byte[] magic : new byte[][]{{'A', '2', 'R', '3'},
+                    {'N', 'O', 'P', 'E'},
+                    {'A', '2'},
+                    {}})
             {
                 Files.write(path, magic);
-                assertThrows(FluxEngineException.class, () -> A2RFluxSource.create(
-                        A2rFluxSourceProto.newBuilder().setFilename(path.toString()).build()));
+                assertThrows(
+                        FluxEngineException.class,
+                        () -> A2RFluxSource.create(A2rFluxSourceProto
+                                .newBuilder()
+                                .setFilename(path.toString())
+                                .build()));
             }
         } finally
         {

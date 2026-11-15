@@ -21,19 +21,13 @@ import java.util.regex.Pattern;
 
 public class FluxFormats
 {
-    private FluxFormats()
-    {
-    }
-
     private static BiConsumer<String, ConfigProto.Builder> UNSUPPORTED_SINK = (filename, proto) -> {
         throw new ConfigException("this flux format can't be used as a sink");
     };
-
     private static BiConsumer<String, ConfigProto.Builder> UNSUPPORTED_SOURCE =
             (filename, proto) -> {
                 throw new ConfigException("this flux format can't be used as a source");
             };
-
     public static ImmutableList<FluxFormat> formats = ImmutableList.of(
             FluxFormat
                     .builder()
@@ -163,6 +157,10 @@ public class FluxFormats
                         proto.getFluxSinkBuilder().getAuBuilder().setDirectory(filename);
                     })
                     .build());
+
+    private FluxFormats()
+    {
+    }
 
     @Builder(setterPrefix = "set")
     public record FluxFormat(Pattern matcher, BiConsumer<String, ConfigProto.Builder> sourceBuilder,

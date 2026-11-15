@@ -61,6 +61,14 @@ public final class AdfsPath
         return new AdfsPath(adfs, result);
     }
 
+    /* Append literal names without parsing dotted paths or resolving special tokens. */
+    public AdfsPath resolve(List<String> components)
+    {
+        return new AdfsPath(
+                adfs,
+                ImmutableList.<String>builder().addAll(parts).addAll(components).build());
+    }
+
     @Override
     public String toString()
     {
@@ -122,7 +130,7 @@ public final class AdfsPath
     {
         ImmutableList.Builder<AdfsPath> result = ImmutableList.builder();
         for (DirectoryEntry entry : adfs.directory(parts).entries())
-            result.add(resolve(entry.name()));
+            result.add(resolve(List.of(entry.name())));
         return result.build();
     }
 

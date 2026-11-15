@@ -59,7 +59,9 @@ public class Smaky6Filesystem extends Filesystem
                 FilesystemAttributes.TOTAL_BLOCKS.name(),
                 Integer.toString(blockDevice.getBlockCount()));
         builder.put(FilesystemAttributes.USED_BLOCKS.name(), Integer.toString(usedBlocks));
-        builder.put(FilesystemAttributes.BLOCK_SIZE.name(), Integer.toString(getLogicalSectorSize()));
+        builder.put(
+                FilesystemAttributes.BLOCK_SIZE.name(),
+                Integer.toString(getLogicalSectorSize()));
         return builder.build();
     }
 

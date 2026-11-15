@@ -23,12 +23,17 @@ public class TextViewerDialogue extends JDialog
         /* Preserve report alignment and let long metadata and dumps scroll in either direction. */
         JTextArea area = new JTextArea(text);
         area.setEditable(false);
-        area.setFont(new Font(Font.MONOSPACED, Font.PLAIN, UIScale.scale(UiUtils.pointsToPixels(10))));
+        area.setFont(new Font(
+                Font.MONOSPACED,
+                Font.PLAIN,
+                UIScale.scale(UiUtils.pointsToPixels(10))));
         area.setCaretPosition(0);
-        of((JPanel) getContentPane())
-            .withLayout("fill, wrap 1, insets 12, gap 8")
-            .add("grow, push", scrollPane().withPrefSize(600, 400).add(of(area)))
-            .add("align right", button("Close").onClick(event -> dispose()));
+        of((JPanel) getContentPane()).withLayout("fill, wrap 1, insets 12, gap 8")
+                .add(
+                        "grow, push",
+                        scrollPane().withPrefSize(600, 400)
+                                .add(of(area)))
+                .add("align right", button("Close").onClick(event -> dispose()));
 
         /* Keep reports independent of the originating viewer's lifetime. */
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);

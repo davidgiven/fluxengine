@@ -35,8 +35,10 @@ public class ConfigBuilderTest
         Path file = Files.createTempFile("config", ".pxf");
         try
         {
-            Files.writeString(file,
-                    "shortname = \"myconfig\"\ntracks = \"c=0:2\"\ndocumentation = [\"first\" \"second\"]\n");
+            Files.writeString(
+                    file,
+                    "shortname = \"myconfig\"\ntracks = \"c=0:2\"\ndocumentation = [\"first\" " +
+                            "\"second\"]\n");
             ConfigProto proto = builder().loadConfigFile(file.toString()).build();
 
             assertThat(proto.getShortname()).isEqualTo("myconfig");

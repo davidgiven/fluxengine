@@ -47,9 +47,7 @@ public interface Command
             .put("test", () -> new CommandGroup(TESTABLES, "Various testing commands."))
             .put(
                     "fluxfile",
-                    () -> new CommandGroup(
-                            FLUXFILEABLES,
-                            "Flux file manipulation operations."))
+                    () -> new CommandGroup(FLUXFILEABLES, "Flux file manipulation operations."))
             .put(
                     "vfs",
                     () -> new CommandGroup(VFSABLES, "File system manipulation commands."))

@@ -39,6 +39,30 @@ public class CustomFormatTest
     private Path file;
     private EventProcessor previousEventProcessor;
 
+    private static JButton button(java.awt.Container panel, String text)
+    {
+        for (Component component : panel.getComponents())
+        {
+            if (component instanceof JButton button && button.getText().equals(text))
+                return button;
+            if (component instanceof java.awt.Container container)
+            {
+                JButton found = button(container, text);
+                if (found != null)
+                    return found;
+            }
+        }
+        return null;
+    }
+
+    private static boolean hasLabel(ConfigurationPanel panel, String text)
+    {
+        for (Component component : panel.getComponents())
+            if (component instanceof JLabel label && label.getText().contains(text))
+                return true;
+        return false;
+    }
+
     @Before
     public void setUp() throws Exception
     {
@@ -48,8 +72,11 @@ public class CustomFormatTest
         SwingTree.get().setEventProcessor(EventProcessor.COUPLED);
         Map<String, String> savedPreferences = new HashMap<>();
         preferences = Mockito.mock(Preferences.class);
-        Mockito.when(preferences.get(Mockito.anyString(), Mockito.anyString())).thenAnswer(
-                call -> savedPreferences.getOrDefault(call.getArgument(0), call.getArgument(1)));
+        Mockito
+                .when(preferences.get(Mockito.anyString(), Mockito.anyString()))
+                .thenAnswer(call -> savedPreferences.getOrDefault(
+                        call.getArgument(0),
+                        call.getArgument(1)));
         Mockito.doAnswer(call -> {
             savedPreferences.put(call.getArgument(0), call.getArgument(1));
             return null;
@@ -101,16 +128,20 @@ public class CustomFormatTest
         Files.writeString(file, "comment = \"first\"\n");
         load();
         AtomicInteger notifications = new AtomicInteger();
-        Viewable.cast(model.getCustomFormatFilename()).onChange(From.ALL, change -> {
-            assertThat(model.getFormatConfig(ImageViewModel.CUSTOM_FORMAT).getComment()).isNotEmpty();
-            notifications.incrementAndGet();
-        });
+        Viewable.cast(model.getCustomFormatFilename()).onChange(
+                From.ALL, change -> {
+                    assertThat(model
+                            .getFormatConfig(ImageViewModel.CUSTOM_FORMAT)
+                            .getComment()).isNotEmpty();
+                    notifications.incrementAndGet();
+                });
         Files.writeString(file, "comment = \"second\"\n");
         load();
         load();
 
         assertThat(notifications.get()).isEqualTo(2);
-        assertThat(model.getFormatConfig(ImageViewModel.CUSTOM_FORMAT).getComment()).isEqualTo("second");
+        assertThat(model.getFormatConfig(ImageViewModel.CUSTOM_FORMAT).getComment()).isEqualTo(
+                "second");
     }
 
     @Test
@@ -120,9 +151,12 @@ public class CustomFormatTest
         load();
         Files.writeString(file, "invalid [");
         assertThrows(FluxEngineException.class, () -> model.onCustomFormatChanged(file.toString()));
-        assertThrows(FluxEngineException.class, () -> model.onCustomFormatChanged(file + ".missing"));
+        assertThrows(
+                FluxEngineException.class,
+                () -> model.onCustomFormatChanged(file + ".missing"));
 
-        assertThat(model.getFormatConfig(ImageViewModel.CUSTOM_FORMAT).getComment()).isEqualTo("working");
+        assertThat(model.getFormatConfig(ImageViewModel.CUSTOM_FORMAT).getComment()).isEqualTo(
+                "working");
         assertThat(model.getCustomFormatFilename().get()).isEqualTo(file.toString());
     }
 
@@ -136,10 +170,15 @@ public class CustomFormatTest
         {
             Files.writeString(replacement, "shortname = \"second\"\n");
             SwingUtilities.invokeAndWait(() -> model.onCustomFormatChanged(replacement.toString()));
-            assertThat(model.getFormatConfig(ImageViewModel.CUSTOM_FORMAT).getShortname()).isEqualTo("second");
+            assertThat(model
+                    .getFormatConfig(ImageViewModel.CUSTOM_FORMAT)
+                    .getShortname()).isEqualTo("second");
             assertThat(model.getCustomFormatFilename().get()).isEqualTo(replacement.toString());
-            assertThat(model.getFormatNames().stream().filter(ImageViewModel.CUSTOM_FORMAT::equals).count())
-                    .isEqualTo(1);
+            assertThat(model
+                    .getFormatNames()
+                    .stream()
+                    .filter(ImageViewModel.CUSTOM_FORMAT::equals)
+                    .count()).isEqualTo(1);
         } finally
         {
             Files.deleteIfExists(replacement);
@@ -149,22 +188,30 @@ public class CustomFormatTest
     @Test
     public void keepsCompatibleChoicesAndDropsRemovedOptions() throws Exception
     {
-        Files.writeString(file, """
-                option = [{ name = "keep" }]
-                option_group = [{ name = "density" option = [{ name = "dd" }] }]
-                """);
-        writer.setOptionsForFormat(ImageViewModel.CUSTOM_FORMAT,
-                Association.between(String.class, String.class)
-                        .put("keep", "").put("removed", "").put("density", "hd"));
+        Files.writeString(
+                file, """
+                        option = [{ name = "keep" }]
+                        option_group = [{ name = "density" option = [{ name = "dd" }] }]
+                        """);
+        writer.setOptionsForFormat(
+                ImageViewModel.CUSTOM_FORMAT,
+                Association
+                        .between(String.class, String.class)
+                        .put("keep", "")
+                        .put("removed", "")
+                        .put("density", "hd"));
         load();
-        assertThat(writer.getOptionsForFormat(ImageViewModel.CUSTOM_FORMAT).toMap())
-                .containsExactly("keep", "");
+        assertThat(writer
+                .getOptionsForFormat(ImageViewModel.CUSTOM_FORMAT)
+                .toMap()).containsExactly("keep", "");
 
-        writer.setOptionsForFormat(ImageViewModel.CUSTOM_FORMAT,
+        writer.setOptionsForFormat(
+                ImageViewModel.CUSTOM_FORMAT,
                 Association.between(String.class, String.class).put("density", "dd"));
         load();
-        assertThat(writer.getOptionsForFormat(ImageViewModel.CUSTOM_FORMAT).toMap())
-                .containsExactly("density", "dd");
+        assertThat(writer
+                .getOptionsForFormat(ImageViewModel.CUSTOM_FORMAT)
+                .toMap()).containsExactly("density", "dd");
     }
 
     @Test
@@ -200,7 +247,9 @@ public class CustomFormatTest
             assertThat(hasLabel(panel, "First choice")).isTrue();
             try
             {
-                Files.writeString(file, "option = [{ name = \"test\" comment = \"Second choice\" }]\n");
+                Files.writeString(
+                        file,
+                        "option = [{ name = \"test\" comment = \"Second choice\" }]\n");
             } catch (java.io.IOException e)
             {
                 throw new AssertionError(e);
@@ -222,53 +271,41 @@ public class CustomFormatTest
             ConfigurationPanel panel = new ConfigurationPanel(model);
             try (org.mockito.MockedConstruction<JFileChooser> choosers = Mockito.mockConstruction(
                     JFileChooser.class, (chooser, context) -> {
-                        Mockito.when(chooser.showOpenDialog(panel)).thenReturn(JFileChooser.APPROVE_OPTION);
+                        Mockito
+                                .when(chooser.showOpenDialog(panel))
+                                .thenReturn(JFileChooser.APPROVE_OPTION);
                         Mockito.when(chooser.getSelectedFile()).thenReturn(file.toFile());
                     }))
             {
                 button(panel, "Select file").doClick();
-                assertThat(model.getFormatConfig(ImageViewModel.CUSTOM_FORMAT).getComment()).isEqualTo("chosen");
+                assertThat(model
+                        .getFormatConfig(ImageViewModel.CUSTOM_FORMAT)
+                        .getComment()).isEqualTo("chosen");
                 JFileChooser chooser = choosers.constructed().getFirst();
-                Mockito.verify(chooser).setFileFilter(Mockito.any(javax.swing.filechooser.FileNameExtensionFilter.class));
+                Mockito
+                        .verify(chooser)
+                        .setFileFilter(Mockito.any(javax.swing.filechooser.FileNameExtensionFilter.class));
             }
 
             /* Canceling leaves the working configuration, filename, and notifications alone. */
             AtomicInteger notifications = new AtomicInteger();
-            Viewable.cast(model.getCustomFormatFilename()).onChange(From.ALL, change -> notifications.incrementAndGet());
+            Viewable
+                    .cast(model.getCustomFormatFilename())
+                    .onChange(From.ALL, change -> notifications.incrementAndGet());
             try (org.mockito.MockedConstruction<JFileChooser> choosers = Mockito.mockConstruction(
-                    JFileChooser.class, (chooser, context) -> Mockito.when(chooser.showOpenDialog(panel))
+                    JFileChooser.class,
+                    (chooser, context) -> Mockito
+                            .when(chooser.showOpenDialog(panel))
                             .thenReturn(JFileChooser.CANCEL_OPTION)))
             {
                 button(panel, "Select file").doClick();
                 Mockito.verify(choosers.constructed().getFirst()).setSelectedFile(file.toFile());
                 assertThat(notifications.get()).isEqualTo(0);
                 assertThat(model.getCustomFormatFilename().get()).isEqualTo(file.toString());
-                assertThat(model.getFormatConfig(ImageViewModel.CUSTOM_FORMAT).getComment()).isEqualTo("chosen");
+                assertThat(model
+                        .getFormatConfig(ImageViewModel.CUSTOM_FORMAT)
+                        .getComment()).isEqualTo("chosen");
             }
         });
-    }
-
-    private static JButton button(java.awt.Container panel, String text)
-    {
-        for (Component component : panel.getComponents())
-        {
-            if (component instanceof JButton button && button.getText().equals(text))
-                return button;
-            if (component instanceof java.awt.Container container)
-            {
-                JButton found = button(container, text);
-                if (found != null)
-                    return found;
-            }
-        }
-        return null;
-    }
-
-    private static boolean hasLabel(ConfigurationPanel panel, String text)
-    {
-        for (Component component : panel.getComponents())
-            if (component instanceof JLabel label && label.getText().contains(text))
-                return true;
-        return false;
     }
 }

@@ -2,8 +2,8 @@ package com.cowlark.fluxengine.gui;
 
 import static com.cowlark.fluxengine.gui.UiUtils.EDT_EXECUTOR;
 import static com.cowlark.fluxengine.vfs.Filesystem.FileType.IS_DIR;
-import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 
 import com.cowlark.fluxengine.data.Image;
 import com.cowlark.fluxengine.vfs.FileAttributes;
@@ -31,8 +31,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Executor;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -67,128 +67,18 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel
             .build();
 
     final ImageViewModel model;
-    private FilesystemExecutor filesystemExecutor = new FilesystemExecutor();
     private final Executor executor = task -> {
         getFilesystem();
         filesystemExecutor.execute(task);
     };
-    Supplier<Set<VfsPath>> expandedSupplier;
-
     @Getter private final Var<Boolean> isMounted = Var.of(false);
     @Getter private final Var<Integer> bytesTotal = Var.of(0);
     @Getter private final Var<Integer> bytesUsed = Var.of(0);
     @Getter private final Var<ValueSet<Capability>> capabilities =
             Var.of(ValueSet.of(Capability.class));
     @Getter private final Var<Boolean> hasPendingChanges = Var.of(false);
-
-    enum LoadState
-    {
-        NOT_LOADED, LOADING, LOADED
-    }
-
-    class PlaceholderNode extends AbstractMutableTreeTableNode
-    {
-        @Override
-        public Object getValueAt(int i)
-        {
-            return "Loading...";
-        }
-
-        @Override
-        public int getColumnCount()
-        {
-            return 1;
-        }
-    }
-
-    enum Column
-    {
-        FILENAME("Filename", Dirent::filename),
-        FILETYPE("Type", Column::convertFiletype),
-        LENGTH("Length", de -> FileUtils.byteCountToDisplaySize(de.length())),
-        MODE("Mode", Dirent::mode);
-
-        @Getter private final String humanName;
-        private final Function<Dirent, String> converter;
-
-        Column(String humanName, Function<Dirent, String> converter)
-        {
-            this.humanName = humanName;
-            this.converter = converter;
-        }
-
-        private static String convertFiletype(Dirent de)
-        {
-            return switch (de.fileType())
-            {
-                case IS_DIR -> "directory";
-                case IS_FILE -> "file";
-            };
-        }
-    }
-
-    abstract class FsNode extends AbstractMutableTreeTableNode
-    {
-        @Getter private Dirent dirent;
-
-        FsNode(Dirent dirent)
-        {
-            this.dirent = dirent;
-        }
-
-        void setDirent(Dirent dirent)
-        {
-            this.dirent = dirent;
-        }
-
-        VfsPath vfsPath()
-        {
-            return dirent.path();
-        }
-
-        @Override
-        public Object getValueAt(int i)
-        {
-            return Column.values()[i].converter.apply(getDirent());
-        }
-
-        @Override
-        public int getColumnCount()
-        {
-            return Column.values().length;
-        }
-    }
-
-    class FileNode extends FsNode
-    {
-        public FileNode(Dirent dirent)
-        {
-            super(dirent);
-        }
-    }
-
-    class DirNode extends FileNode
-    {
-        @Getter private LoadState loadState = LoadState.NOT_LOADED;
-
-        public DirNode(Dirent de)
-        {
-            super(de);
-        }
-
-        void setLoadState(LoadState loadState)
-        {
-            this.loadState = loadState;
-        }
-
-        @Override
-        public boolean isLeaf()
-        {
-            if (loadState != LoadState.LOADED)
-                return false;
-            return super.isLeaf();
-        }
-    }
+    Supplier<Set<VfsPath>> expandedSupplier;
+    private FilesystemExecutor filesystemExecutor = new FilesystemExecutor();
 
     public FilesystemTreeTableModel(ImageViewModel model)
     {
@@ -306,16 +196,22 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel
         /* Capture immutable copy for the FS callback (still on EDT) */
         Set<VfsPath> captured = new HashSet<>(snapshot);
         CompletableFuture<Void> discarded = new CompletableFuture<>();
-        discarded.whenCompleteAsync((unused, error) -> {
-            /* Refresh after both successful and failed discards, matching the previous finally
-             * block. Register before submission to preserve ordering with later FS barriers. */
-            resyncPaths(captured);
-            mutated();
-        }, EDT_EXECUTOR).exceptionallyAsync(UiUtils.reportError("Cannot discard changes"), EDT_EXECUTOR);
-        discarded.completeAsync(UiUtils.wrapIOException(() -> {
-            filesystemExecutor.getFilesystem().discardChanges();
-            return null;
-        }), filesystemExecutor);
+        discarded
+                .whenCompleteAsync(
+                        (unused, error) -> {
+                            /* Refresh after both successful and failed discards, matching the
+                            previous finally
+                             * block. Register before submission to preserve ordering with later
+                             FS barriers. */
+                            resyncPaths(captured);
+                            mutated();
+                        }, EDT_EXECUTOR)
+                .exceptionallyAsync(UiUtils.reportError("Cannot discard changes"), EDT_EXECUTOR);
+        discarded.completeAsync(
+                UiUtils.wrapIOException(() -> {
+                    filesystemExecutor.getFilesystem().discardChanges();
+                    return null;
+                }), filesystemExecutor);
     }
 
     public void unmount()
@@ -376,10 +272,6 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel
         loadDirectory(dir, path);
     }
 
-    /* -------------------------------------------------------------------------
-     * Internal: loading
-     * ------------------------------------------------------------------------- */
-
     void ensureLoaded(DirNode dir)
     {
         assert SwingUtilities.isEventDispatchThread();
@@ -400,13 +292,21 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel
         /* Attach the EDT callbacks before submitting the read so listing results are queued
          * ahead of later filesystem barriers, even if the read completes immediately. */
         CompletableFuture<ImmutableList<Dirent>> entries = new CompletableFuture<>();
-        entries.thenAcceptAsync(result -> applyListResult(dir, result, null), EDT_EXECUTOR)
-                .exceptionallyAsync(error -> {
-                    applyListResult(dir, null, error);
-                    return null;
-                }, EDT_EXECUTOR);
-        entries.completeAsync(UiUtils.wrapIOException(() -> filesystemExecutor.getFilesystem()
-                .list(path).values().stream().sorted().collect(toImmutableList())), filesystemExecutor);
+        entries
+                .thenAcceptAsync(result -> applyListResult(dir, result, null), EDT_EXECUTOR)
+                .exceptionallyAsync(
+                        error -> {
+                            applyListResult(dir, null, error);
+                            return null;
+                        }, EDT_EXECUTOR);
+        entries.completeAsync(
+                UiUtils.wrapIOException(() -> filesystemExecutor
+                        .getFilesystem()
+                        .list(path)
+                        .values()
+                        .stream()
+                        .sorted()
+                        .collect(toImmutableList())), filesystemExecutor);
     }
 
     /**
@@ -537,10 +437,6 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel
         }
     }
 
-    /* -------------------------------------------------------------------------
-     * Lookup helpers (no nodeMap)
-     * ------------------------------------------------------------------------- */
-
     /**
      * Finds the {@code DirNode} for {@code path} by walking from the root via
      * {@code VfsPath.segments()}. Returns {@code null} if any ancestor is not
@@ -593,6 +489,10 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel
         return cur;
     }
 
+    /* -------------------------------------------------------------------------
+     * Internal: loading
+     * ------------------------------------------------------------------------- */
+
     /**
      * Builds a {@code TreePath} for {@code node} by walking to the root.
      * Must be called on the EDT.
@@ -607,6 +507,119 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel
             cur = cur.getParent();
         }
         return new TreePath(chain.toArray());
+    }
+
+    enum LoadState
+    {
+        NOT_LOADED, LOADING, LOADED
+    }
+
+    enum Column
+    {
+        FILENAME("Filename", Dirent::filename),
+        FILETYPE("Type", Column::convertFiletype),
+        LENGTH("Length", de -> FileUtils.byteCountToDisplaySize(de.length())),
+        MODE("Mode", Dirent::mode);
+
+        @Getter private final String humanName;
+        private final Function<Dirent, String> converter;
+
+        Column(String humanName, Function<Dirent, String> converter)
+        {
+            this.humanName = humanName;
+            this.converter = converter;
+        }
+
+        private static String convertFiletype(Dirent de)
+        {
+            return switch (de.fileType())
+            {
+                case IS_DIR -> "directory";
+                case IS_FILE -> "file";
+            };
+        }
+    }
+
+    class PlaceholderNode extends AbstractMutableTreeTableNode
+    {
+        @Override
+        public Object getValueAt(int i)
+        {
+            return "Loading...";
+        }
+
+        @Override
+        public int getColumnCount()
+        {
+            return 1;
+        }
+    }
+
+    abstract class FsNode extends AbstractMutableTreeTableNode
+    {
+        @Getter private Dirent dirent;
+
+        FsNode(Dirent dirent)
+        {
+            this.dirent = dirent;
+        }
+
+        void setDirent(Dirent dirent)
+        {
+            this.dirent = dirent;
+        }
+
+        VfsPath vfsPath()
+        {
+            return dirent.path();
+        }
+
+        @Override
+        public Object getValueAt(int i)
+        {
+            return Column.values()[i].converter.apply(getDirent());
+        }
+
+        @Override
+        public int getColumnCount()
+        {
+            return Column.values().length;
+        }
+    }
+
+    /* -------------------------------------------------------------------------
+     * Lookup helpers (no nodeMap)
+     * ------------------------------------------------------------------------- */
+
+    class FileNode extends FsNode
+    {
+        public FileNode(Dirent dirent)
+        {
+            super(dirent);
+        }
+    }
+
+    class DirNode extends FileNode
+    {
+        @Getter private LoadState loadState = LoadState.NOT_LOADED;
+
+        public DirNode(Dirent de)
+        {
+            super(de);
+        }
+
+        void setLoadState(LoadState loadState)
+        {
+            this.loadState = loadState;
+        }
+
+        @Override
+        public boolean isLeaf()
+        {
+            if (loadState != LoadState.LOADED)
+                return false;
+            return super.isLeaf();
+        }
     }
 
 }

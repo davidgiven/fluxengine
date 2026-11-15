@@ -26,10 +26,10 @@ public final class A2RFluxSource
                     "cannot open input file '" + config.getFilename() + "': " + e.getMessage());
         }
 
-        if (Arrays.equals(magic, new byte[] {'A', '2', 'R', '2'}))
+        if (Arrays.equals(magic, new byte[]{'A', '2', 'R', '2'}))
             return new A2R2FluxSource(config);
 
-        if (Arrays.equals(magic, new byte[] {'A', '2', 'R', '3'}))
+        if (Arrays.equals(magic, new byte[]{'A', '2', 'R', '3'}))
             return new A2R3FluxSource(config);
 
         throw new FluxEngineException("unsupported A2R version");

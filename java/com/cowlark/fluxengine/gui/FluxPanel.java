@@ -29,15 +29,18 @@ public class FluxPanel extends JPanel
 
         /* Stack fixed-height viewers in rows, retaining the centre-window panels' padding. */
         of(viewerRows).withLayout("fillx, wrap 1, insets 3, gapy 2pt, aligny top")
-                .add("growx, pushx", label("To add flux views, select a track below")
-                        .withHorizontalAlignment(HorizontalAlignment.CENTER));
+                .add(
+                        "growx, pushx",
+                        label("To add flux views, select a track below").withHorizontalAlignment(
+                                HorizontalAlignment.CENTER));
 
         /* Scroll overflowing rows vertically while fitting them to the viewport width. */
         JScrollPane scrollPane = new JScrollPane(
                 viewerRows,
                 JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        of(this).withLayout("fill, insets 0").add("grow, push", of(scrollPane));
+        of(this).withLayout("fill, insets 0")
+                .add("grow, push", of(scrollPane));
     }
 
     /* Listen while attached, delivering viewer requests on the Swing event thread. */
@@ -45,9 +48,8 @@ public class FluxPanel extends JPanel
     public void addNotify()
     {
         super.addNotify();
-        fluxViewSubscription = model.getFluxViewRequests()
-                .observeOn(UiUtils.EDT)
-                .subscribe(this::openFluxView);
+        fluxViewSubscription =
+                model.getFluxViewRequests().observeOn(UiUtils.EDT).subscribe(this::openFluxView);
     }
 
     /* Release the model's reference to this panel when it leaves the component hierarchy. */
@@ -100,7 +102,10 @@ public class FluxPanel extends JPanel
         }
 
         @Override
-        public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction)
+        public int getScrollableBlockIncrement(
+                Rectangle visibleRect,
+                int orientation,
+                int direction)
         {
             return Math.max(1, visibleRect.height - UiUtils.pointsToPixels(16));
         }

@@ -41,10 +41,10 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -225,13 +225,17 @@ public class UiUtils
     public static Function<Throwable, Void> reportError(String title)
     {
         return message -> {
-            while (message instanceof CompletionException || message instanceof UncheckedIOException)
+            while (message instanceof CompletionException ||
+                    message instanceof UncheckedIOException)
                 message = message.getCause();
             if (!(message instanceof CancellationException))
             {
                 String text = message.getMessage();
                 EDT_EXECUTOR.execute(() -> JOptionPane.showMessageDialog(
-                        null, text, title, JOptionPane.ERROR_MESSAGE));
+                        null,
+                        text,
+                        title,
+                        JOptionPane.ERROR_MESSAGE));
             }
             return null;
         };
@@ -272,7 +276,8 @@ public class UiUtils
             }
         }
 
-        result.thenAcceptAsync(data -> data.writeToFile(file.toPath()), EDT_EXECUTOR)
+        result
+                .thenAcceptAsync(data -> data.writeToFile(file.toPath()), EDT_EXECUTOR)
                 .exceptionallyAsync(reportError("Could not save file"), EDT_EXECUTOR);
 
         return result;

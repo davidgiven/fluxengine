@@ -41,7 +41,8 @@ public class LoggerTest
     @Test
     public void defaultLoggerRendersToStdout()
     {
-        Logger.setLogger(message -> LogRenderer.create(System.out).add(message));
+        Logger.setLogger(message -> LogRenderer.create(System.out)
+                .add(message));
 
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         PrintStream stream = new PrintStream(buffer);

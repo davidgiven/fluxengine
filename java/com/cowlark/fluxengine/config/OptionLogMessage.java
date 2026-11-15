@@ -9,9 +9,11 @@ public record OptionLogMessage(String message, OptionProto option) implements Lo
     @Override
     public void render(LogRenderer r)
     {
-        r.newline().add("OPTION:");
+        r.newline()
+                .add("OPTION:");
         if (!Strings.isNullOrEmpty(message))
             r.add(message + ":");
-        r.add(option.getComment()).newline();
+        r
+                .add(option.getComment()).newline();
     }
 }

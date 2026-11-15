@@ -14,6 +14,7 @@ public final class SectorsView
 {
     private final List<Span> spans;
     private final int length;
+
     private SectorsView(List<Span> spans, int length)
     {
         this.spans = List.copyOf(spans);

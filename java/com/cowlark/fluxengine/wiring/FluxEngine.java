@@ -125,8 +125,8 @@ public final class FluxEngine
     @AllArgsConstructor
     public static class ErrorFrame
     {
-        @Expect(offset = 0, bytes = {(byte) F_FRAME_ERROR, 3}) transient int _expects;
         @UInt8Type(offset = 2) public int error;
+        @Expect(offset = 0, bytes = {(byte) F_FRAME_ERROR, 3}) transient int _expects;
     }
 
     @Data
@@ -135,8 +135,8 @@ public final class FluxEngine
     @AllArgsConstructor
     public static class DebugFrame
     {
-        @Expect(offset = 0, bytes = {(byte) F_FRAME_DEBUG, 62}) transient int _expects;
         @BinaryType(offset = 2, length = 60) public byte[] payload;
+        @Expect(offset = 0, bytes = {(byte) F_FRAME_DEBUG, 62}) transient int _expects;
     }
 
     @Data
@@ -154,8 +154,8 @@ public final class FluxEngine
     @AllArgsConstructor
     public static class VersionReplyFrame
     {
-        @Expect(offset = 0, bytes = {(byte) F_FRAME_GET_VERSION_REPLY, 3}) transient int _expects;
         @UInt8Type(offset = 2) public int version;
+        @Expect(offset = 0, bytes = {(byte) F_FRAME_GET_VERSION_REPLY, 3}) transient int _expects;
     }
 
     @Data
@@ -164,8 +164,8 @@ public final class FluxEngine
     @AllArgsConstructor
     public static class SeekFrame
     {
-        @Expect(offset = 0, bytes = {(byte) F_FRAME_SEEK_CMD, 3}) transient int _expects;
         @UInt8Type(offset = 2) public int track;
+        @Expect(offset = 0, bytes = {(byte) F_FRAME_SEEK_CMD, 3}) transient int _expects;
     }
 
     @Data
@@ -174,8 +174,8 @@ public final class FluxEngine
     @AllArgsConstructor
     public static class MeasureSpeedFrame
     {
-        @Expect(offset = 0, bytes = {(byte) F_FRAME_MEASURE_SPEED_CMD, 3}) transient int _expects;
         @UInt8Type(offset = 2) public int hardSectorCount;
+        @Expect(offset = 0, bytes = {(byte) F_FRAME_MEASURE_SPEED_CMD, 3}) transient int _expects;
     }
 
     @Data
@@ -184,8 +184,8 @@ public final class FluxEngine
     @AllArgsConstructor
     public static class MeasureSpeedReplyFrame
     {
-        @Expect(offset = 0, bytes = {(byte) F_FRAME_MEASURE_SPEED_REPLY, 4}) transient int _expects;
         @UInt16Type(offset = 2) public int periodMs;
+        @Expect(offset = 0, bytes = {(byte) F_FRAME_MEASURE_SPEED_REPLY, 4}) transient int _expects;
     }
 
     @Data
@@ -194,11 +194,11 @@ public final class FluxEngine
     @AllArgsConstructor
     public static class ReadFrame
     {
-        @Expect(offset = 0, bytes = {(byte) F_FRAME_READ_CMD, 7}) transient int _expects;
         @UInt8Type(offset = 2) public int side;
         @UInt8Type(offset = 3) public int synced;
         @UInt16Type(offset = 4) public int milliseconds;
         @UInt8Type(offset = 6) public int hardsecThresholdMs;
+        @Expect(offset = 0, bytes = {(byte) F_FRAME_READ_CMD, 7}) transient int _expects;
     }
 
     @Data
@@ -207,13 +207,13 @@ public final class FluxEngine
     @AllArgsConstructor
     public static class WriteFrame
     {
-        @Expect(offset = 0, bytes = {(byte) F_FRAME_WRITE_CMD, 12}) transient int _expects;
         @UInt8Type(offset = 2) public int side;
         @UInt32Type(offset = 4) public long bytesToWrite;
         @UInt8Type(offset = 8) public int hardsecThresholdMs;
         @UInt8Type(offset = 9) public int _pad1;
         @UInt8Type(offset = 10) public int _pad2;
         @UInt8Type(offset = 11) public int _pad3;
+        @Expect(offset = 0, bytes = {(byte) F_FRAME_WRITE_CMD, 12}) transient int _expects;
     }
 
     @Data
@@ -222,9 +222,9 @@ public final class FluxEngine
     @AllArgsConstructor
     public static class EraseFrame
     {
-        @Expect(offset = 0, bytes = {(byte) F_FRAME_ERASE_CMD, 4}) transient int _expects;
         @UInt8Type(offset = 2) public int side;
         @UInt8Type(offset = 3) public int hardsecThresholdMs;
+        @Expect(offset = 0, bytes = {(byte) F_FRAME_ERASE_CMD, 4}) transient int _expects;
     }
 
     @Data
@@ -233,10 +233,10 @@ public final class FluxEngine
     @AllArgsConstructor
     public static class SetDriveFrame
     {
-        @Expect(offset = 0, bytes = {(byte) F_FRAME_SET_DRIVE_CMD, 5}) transient int _expects;
         @UInt8Type(offset = 2) public int drive;
         @UInt8Type(offset = 3) public int highDensity;
         @UInt8Type(offset = 4) public int indexMode;
+        @Expect(offset = 0, bytes = {(byte) F_FRAME_SET_DRIVE_CMD, 5}) transient int _expects;
     }
 
     @Data
@@ -255,9 +255,9 @@ public final class FluxEngine
     @AllArgsConstructor
     public static class VoltagesReplyFrame
     {
+        @StructArrayType(offset = 2, length = 10, element = Voltages.class) public List<Voltages>
+                voltages;
         @Expect(offset = 0, bytes = {(byte) F_FRAME_MEASURE_VOLTAGES_REPLY, 42}) transient int
                 _expects;
-        @StructArrayType(offset = 2, length = 10, element = Voltages.class)
-        public List<Voltages> voltages;
     }
 }

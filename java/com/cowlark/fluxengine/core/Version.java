@@ -27,10 +27,7 @@ public final class Version
         if (v != null && !v.isEmpty() && !v.startsWith("$("))
             return v;
 
-        String[] paths = {
-            "/version.properties",
-            "/com/cowlark/fluxengine/core/version.properties"
-        };
+        String[] paths = {"/version.properties", "/com/cowlark/fluxengine/core/version.properties"};
         for (String path : paths)
         {
             try (InputStream is = Version.class.getResourceAsStream(path))

@@ -183,8 +183,12 @@ public class RolandFilesystem extends Filesystem
         BlockUsage blockUsage = countBlocks(dir);
         ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
         builder.put(FilesystemAttributes.VOLUME_NAME.name(), "");
-        builder.put(FilesystemAttributes.TOTAL_BLOCKS.name(), Integer.toString(blockUsage.totalBlocks));
-        builder.put(FilesystemAttributes.USED_BLOCKS.name(), Integer.toString(blockUsage.usedBlocks));
+        builder.put(
+                FilesystemAttributes.TOTAL_BLOCKS.name(),
+                Integer.toString(blockUsage.totalBlocks));
+        builder.put(
+                FilesystemAttributes.USED_BLOCKS.name(),
+                Integer.toString(blockUsage.usedBlocks));
         builder.put(FilesystemAttributes.BLOCK_SIZE.name(), Integer.toString(BLOCK_SIZE));
         return builder.build();
     }

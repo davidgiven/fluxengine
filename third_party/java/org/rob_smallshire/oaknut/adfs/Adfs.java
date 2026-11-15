@@ -338,7 +338,7 @@ public final class Adfs implements AutoCloseable
         int count = 0;
         for (AdfsPath path : source.list())
         {
-            AdfsPath dest = target.resolve(path.name());
+            AdfsPath dest = target.resolve(List.of(path.name()));
             if (path.isDirectory())
             {
                 dest.mkdir();
@@ -396,6 +396,13 @@ public final class Adfs implements AutoCloseable
     public AdfsPath path(String path)
     {
         return root().resolve(path);
+    }
+
+    /* Components are literal names relative to the root; no Acorn separators or special
+     * directory tokens are interpreted. This supports callers with their own path syntax. */
+    public AdfsPath path(List<String> components)
+    {
+        return new AdfsPath(this, components);
     }
 
     public boolean closed()

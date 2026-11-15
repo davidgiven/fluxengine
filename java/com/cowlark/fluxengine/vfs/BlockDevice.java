@@ -133,9 +133,10 @@ public abstract class BlockDevice implements AutoCloseable
 
             if ((blockOffset != 0) || (blockLen != blockSize))
             {
-                /* Partial block; do a read-then-modify */
+                /* Partial block; detach the view before writing so the committed block remains
+                 * available for rollback. */
 
-                Bytes block = getBlock(blockNumber);
+                Bytes block = getBlock(blockNumber).slice(0, blockSize);
                 block.writer().seek(blockOffset).write(br.read(blockLen));
                 putBlock(blockNumber, block);
             } else

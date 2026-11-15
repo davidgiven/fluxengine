@@ -62,7 +62,8 @@ public class Fl2FluxSink extends FluxSink
     @Override
     public void addFlux(int track, int head, Fluxmap fluxmap)
     {
-        data.computeIfAbsent(Pair.of(track, head), k -> new ArrayList<>()).add(fluxmap.rawBytes());
+        data.computeIfAbsent(Pair.of(track, head), k -> new ArrayList<>())
+                .add(fluxmap.rawBytes());
     }
 
     @Override

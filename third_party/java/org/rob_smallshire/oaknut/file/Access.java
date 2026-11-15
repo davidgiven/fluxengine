@@ -41,7 +41,7 @@ public final class Access
                     default -> throw new IllegalArgumentException("Invalid access: " + text);
                 };
         return bits;
-    }    public static final int WR = R | W, LWR = L | WR;
+    }
 
     public static String format(int bits)
     {
@@ -56,7 +56,7 @@ public final class Access
                 result.append(names[i]);
         }
         return result.toString();
-    }
+    }    public static final int WR = R | W, LWR = L | WR;
 
     public static boolean isRunOnly(int bits)
     {

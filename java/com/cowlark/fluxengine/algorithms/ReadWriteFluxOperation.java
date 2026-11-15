@@ -96,7 +96,8 @@ public abstract class ReadWriteFluxOperation extends FluxOperation<ReadWriteFlux
     {
         Map<CylinderHeadSector, List<Sector>> sectors = new LinkedHashMap<>();
         for (Sector sector : trackSectors)
-            sectors.computeIfAbsent(sector.logicalLocation, k -> new ArrayList<>()).add(sector);
+            sectors.computeIfAbsent(sector.logicalLocation, k -> new ArrayList<>())
+                    .add(sector);
 
         List<Sector> sectorSet = new ArrayList<>();
         for (Map.Entry<CylinderHeadSector, List<Sector>> entry : sectors.entrySet())

@@ -10,12 +10,12 @@ import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.core.FluxEngineException;
 import com.cowlark.fluxengine.data.Fluxmap;
 import com.cowlark.fluxengine.external.A2R3;
+import org.indunet.fastproto.FastProto;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import org.indunet.fastproto.FastProto;
 
 /* Writes raw captures as A2R3, using the default 62.5 ns timing resolution. */
 public class A2R3FluxSink extends FluxSink
@@ -39,6 +39,21 @@ public class A2R3FluxSink extends FluxSink
         return Math.round(ticks * NS_PER_TICK * 1000.0 / A2R3.DEFAULT_PS_PER_TICK);
     }
 
+    private static void require(boolean condition, String message)
+    {
+        if (!condition)
+            throw new FluxEngineException("cannot write A2R3: " + message);
+    }
+
+    private static void writeChunk(ByteWriter writer, int id, byte[] data)
+    {
+        A2R3.ChunkHeader header = new A2R3.ChunkHeader();
+        header.id = Integer.toUnsignedLong(id);
+        header.size = data.length;
+        writer.write(FastProto.encode(header));
+        writer.write(data);
+    }
+
     @Override
     public void addFlux(int cylinder, int head, Fluxmap fluxmap)
     {
@@ -49,8 +64,9 @@ public class A2R3FluxSink extends FluxSink
         boolean apple2 = config.getDrive().getDriveType() ==
                 com.cowlark.fluxengine.external.DriveType.DRIVETYPE_APPLE2;
         long location = apple2 ? cylinder : (long) cylinder * 2 + head;
-        require(cylinder >= 0 && head >= 0 && head <= 1 && (!apple2 || head == 0)
-                && location <= 0xffff, "capture location is out of range");
+        require(
+                cylinder >= 0 && head >= 0 && head <= 1 && (!apple2 || head == 0) &&
+                        location <= 0xffff, "capture location is out of range");
 
         /* Quantize absolute event times to avoid accumulating rounding errors between pulses. */
         Bytes data = new Bytes();
@@ -108,8 +124,7 @@ public class A2R3FluxSink extends FluxSink
         /* A full revolution spans one index interval, or a full set of hard sector intervals. */
         int sectors = Math.max(1, config.getDrive().getHardSectorCount());
         if (indexes.size() > sectors)
-            return (indexes.get(sectors) - indexes.get(0)) *
-                    (A2R3.DEFAULT_PS_PER_TICK / 1000.0);
+            return (indexes.get(sectors) - indexes.get(0)) * (A2R3.DEFAULT_PS_PER_TICK / 1000.0);
 
         /* An explicitly synchronized capture begins at an omitted index signal. */
         if (config.getDrive().getSyncWithIndex() && indexes.size() >= sectors)
@@ -121,21 +136,6 @@ public class A2R3FluxSink extends FluxSink
         if (configuredNs > 0)
             return configuredNs;
         return indexes.isEmpty() ? durationNs : 200_000_000;
-    }
-
-    private static void require(boolean condition, String message)
-    {
-        if (!condition)
-            throw new FluxEngineException("cannot write A2R3: " + message);
-    }
-
-    private static void writeChunk(ByteWriter writer, int id, byte[] data)
-    {
-        A2R3.ChunkHeader header = new A2R3.ChunkHeader();
-        header.id = Integer.toUnsignedLong(id);
-        header.size = data.length;
-        writer.write(FastProto.encode(header));
-        writer.write(data);
     }
 
     @Override
@@ -153,7 +153,8 @@ public class A2R3FluxSink extends FluxSink
         info.writeProtected = 1;
         info.synchronizedCapture = config.getDrive().getSyncWithIndex() ? 1 : 0;
         info.hardSectorCount = config.getDrive().getHardSectorCount();
-        require(info.hardSectorCount >= 0 && info.hardSectorCount <= 255,
+        require(
+                info.hardSectorCount >= 0 && info.hardSectorCount <= 255,
                 "hard sector count is out of range");
 
         /* Terminate a copy of the captures so closing does not modify the buffered entries. */
@@ -168,7 +169,9 @@ public class A2R3FluxSink extends FluxSink
         writeChunk(writer, A2R3.CHUNK_RWCP, raw.toByteArray());
 
         /* Keep the imaging timestamp as UTF-8 metadata following the raw captures. */
-        writeChunk(writer, A2R3.CHUNK_META,
+        writeChunk(
+                writer,
+                A2R3.CHUNK_META,
                 ("image_date\t" + Instant.now() + "\n").getBytes(StandardCharsets.UTF_8));
         file.writeToFile(Path.of(filename));
     }

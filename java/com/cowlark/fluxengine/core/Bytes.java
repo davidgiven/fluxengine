@@ -87,6 +87,18 @@ public final class Bytes implements List<Byte>
         return b;
     }
 
+    public static Bytes readFromFile(Path path)
+    {
+        try
+        {
+            byte[] data = Files.readAllBytes(path);
+            return new Bytes(data);
+        } catch (IOException e)
+        {
+            throw new FluxEngineException("cannot write to file " + path + ": " + e.getMessage());
+        }
+    }
+
     public int size()
     {
         return high - low;
@@ -147,18 +159,6 @@ public final class Bytes implements List<Byte>
         try
         {
             Files.write(path, toByteArray());
-        } catch (IOException e)
-        {
-            throw new FluxEngineException("cannot write to file " + path + ": " + e.getMessage());
-        }
-    }
-
-    public static Bytes readFromFile(Path path)
-    {
-        try
-        {
-            byte[] data = Files.readAllBytes(path);
-            return new Bytes(data);
         } catch (IOException e)
         {
             throw new FluxEngineException("cannot write to file " + path + ": " + e.getMessage());

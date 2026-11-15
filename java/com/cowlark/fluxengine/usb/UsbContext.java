@@ -23,8 +23,7 @@ final class UsbContext
             throw new FluxEngineException("Failed to initialize libusb");
 
         CONTEXT = ctx;
-        Runtime.getRuntime().addShutdownHook(new Thread(() ->
-        {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             logger.atDebug().log("exiting libusb Context");
             LibUsb.exit(CONTEXT);
         }));

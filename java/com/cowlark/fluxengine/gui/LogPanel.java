@@ -30,7 +30,8 @@ public class LogPanel extends JPanel
         textArea.setEditable(false);
         textArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 16));
 
-        of(this).withLayout("fill, insets 5").add("grow, push", scrollPane().add(of(textArea)));
+        of(this).withLayout("fill, insets 5")
+                .add("grow, push", scrollPane().add(of(textArea)));
 
         printingLogRenderer = new PrintingLogRenderer(getPrintStream());
 

@@ -57,11 +57,12 @@ public enum DirectoryFormat
         return maxEntries;
     }
 
+    /* Dots are representable in a name when addressed through the component-list API. */
     public void validateName(String name)
     {
         AcornEncoding.encode(name, this != BIG);
         if (name.isEmpty() || name.length() > (this == BIG ? 255 : 10) ||
-                name.chars().anyMatch(c -> ".:\r".indexOf(c) >= 0))
+                name.chars().anyMatch(c -> ":\r".indexOf(c) >= 0))
             throw new IllegalArgumentException("Invalid ADFS name: " + name);
     }
 

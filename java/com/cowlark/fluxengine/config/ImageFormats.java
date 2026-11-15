@@ -18,15 +18,6 @@ import com.google.common.collect.ImmutableList;
 
 public class ImageFormats
 {
-    public enum Mode
-    {
-        MODE_RO, MODE_RW;
-    }
-
-    public record ImageFormat(String extension, ImageReaderWriterType type, Mode mode)
-    {
-    }
-
     public static ImmutableList<ImageFormat> imageFormats = ImmutableList.of(
             new ImageFormat(".adf", IMAGETYPE_IMG, MODE_RW),
             new ImageFormat(".d64", IMAGETYPE_D64, MODE_RW),
@@ -48,6 +39,15 @@ public class ImageFormats
             new ImageFormat(".xdf", IMAGETYPE_IMG, MODE_RW));
 
     private ImageFormats()
+    {
+    }
+
+    public enum Mode
+    {
+        MODE_RO, MODE_RW;
+    }
+
+    public record ImageFormat(String extension, ImageReaderWriterType type, Mode mode)
     {
     }
 }

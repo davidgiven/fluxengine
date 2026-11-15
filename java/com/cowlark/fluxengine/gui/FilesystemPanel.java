@@ -70,11 +70,6 @@ public class FilesystemPanel extends JPanel
     final Val<Boolean> canDoMultiFileOperation;
     final Set<VfsPath> everExpanded = new HashSet<>();
 
-    JXTreeTable getTreeTable()
-    {
-        return treeTable;
-    }
-
     public FilesystemPanel(ImageViewModel model)
     {
         this.model = model;
@@ -273,6 +268,51 @@ public class FilesystemPanel extends JPanel
                                 ));
     }
 
+    /* A valid selection has unique filenames and no selected path that is an ancestor of
+     * another selected path. Selections spanning unrelated folders are otherwise allowed. */
+    private static boolean isValidSelection(Tuple<TreePath> paths)
+    {
+        Set<String> filenames = new HashSet<>();
+        for (TreePath path : paths)
+        {
+            if (!(path.getLastPathComponent() instanceof FileNode file) ||
+                    !filenames.add(file.getDirent().filename()))
+                return false;
+        }
+        for (int i = 0; i < paths.size(); i++)
+        {
+            for (int j = i + 1; j < paths.size(); j++)
+            {
+                if (paths.get(i).isDescendant(paths.get(j)) ||
+                        paths.get(j).isDescendant(paths.get(i)))
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private static Val<Boolean> and(Val<Boolean> v1, Val<Boolean> v2)
+    {
+        return Viewable.of(v1, v2, (b1, b2) -> b1 && b2);
+    }
+
+    private static Val<Boolean> or(Val<Boolean> v1, Val<Boolean> v2)
+    {
+        return Viewable.of(v1, v2, (b1, b2) -> b1 || b2);
+    }
+
+    private static Val<Boolean> not(Val<Boolean> v1)
+    {
+        return v1.viewAs(Boolean.class, b -> !b);
+    }
+
+    JXTreeTable getTreeTable()
+    {
+        return treeTable;
+    }
+
     private Val<Boolean> ifCapability(Val<Boolean> base, Capability cap)
     {
         return Viewable.of(
@@ -292,11 +332,17 @@ public class FilesystemPanel extends JPanel
             {
                 VfsPath vfsPath = node.getDirent().path();
                 String filename = node.getDirent().filename();
-                UiUtils.promptAndSave(this, model.getPreferencesReaderWriter(), "Save file", filename).completeAsync(
-                        wrapIOException(() -> {
-                            Filesystem fs = treeTableModel.getFilesystem();
-                            return fs.getFile(vfsPath);
-                        }), treeTableModel.getExecutor());
+                UiUtils
+                        .promptAndSave(
+                                this,
+                                model.getPreferencesReaderWriter(),
+                                "Save file",
+                                filename)
+                        .completeAsync(
+                                wrapIOException(() -> {
+                                    Filesystem fs = treeTableModel.getFilesystem();
+                                    return fs.getFile(vfsPath);
+                                }), treeTableModel.getExecutor());
                 return;
             }
         }
@@ -305,11 +351,17 @@ public class FilesystemPanel extends JPanel
         ImmutableList<VfsPath> snapshot = stream(paths)
                 .map(p -> ((FileNode) p.getLastPathComponent()).getDirent().path())
                 .collect(toImmutableList());
-        UiUtils.promptAndSave(this, model.getPreferencesReaderWriter(), "Save multiple files", "files.zip").completeAsync(
-                wrapIOException(() -> {
-                    Filesystem fs = treeTableModel.getFilesystem();
-                    return fs.getFiles(fs, snapshot);
-                }), treeTableModel.getExecutor());
+        UiUtils
+                .promptAndSave(
+                        this,
+                        model.getPreferencesReaderWriter(),
+                        "Save multiple files",
+                        "files.zip")
+                .completeAsync(
+                        wrapIOException(() -> {
+                            Filesystem fs = treeTableModel.getFilesystem();
+                            return fs.getFiles(fs, snapshot);
+                        }), treeTableModel.getExecutor());
     }
 
     private void viewFile(
@@ -545,31 +597,6 @@ public class FilesystemPanel extends JPanel
                 .exceptionallyAsync(reportError("Cannot rename file"), EDT_EXECUTOR);
     }
 
-    /* A valid selection has unique filenames and no selected path that is an ancestor of
-     * another selected path. Selections spanning unrelated folders are otherwise allowed. */
-    private static boolean isValidSelection(Tuple<TreePath> paths)
-    {
-        Set<String> filenames = new HashSet<>();
-        for (TreePath path : paths)
-        {
-            if (!(path.getLastPathComponent() instanceof FileNode file) ||
-                    !filenames.add(file.getDirent().filename()))
-                return false;
-        }
-        for (int i = 0; i < paths.size(); i++)
-        {
-            for (int j = i + 1; j < paths.size(); j++)
-            {
-                if (paths.get(i).isDescendant(paths.get(j)) ||
-                        paths.get(j).isDescendant(paths.get(i)))
-                {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
     private void onMount(ComponentDelegate<JButton, ActionEvent> delegate)
     {
         treeTableModel.mount();
@@ -586,21 +613,6 @@ public class FilesystemPanel extends JPanel
                     treeTable.expandPath(rootPath);
             }
         });
-    }
-
-    private static Val<Boolean> and(Val<Boolean> v1, Val<Boolean> v2)
-    {
-        return Viewable.of(v1, v2, (b1, b2) -> b1 && b2);
-    }
-
-    private static Val<Boolean> or(Val<Boolean> v1, Val<Boolean> v2)
-    {
-        return Viewable.of(v1, v2, (b1, b2) -> b1 || b2);
-    }
-
-    private static Val<Boolean> not(Val<Boolean> v1)
-    {
-        return v1.viewAs(Boolean.class, b -> !b);
     }
 
 }

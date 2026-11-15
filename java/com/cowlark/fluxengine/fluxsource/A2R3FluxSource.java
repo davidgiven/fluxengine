@@ -82,6 +82,20 @@ public class A2R3FluxSource extends FluxSource
                 .build();
     }
 
+    private static byte[] take(ByteBuffer buffer, int size)
+    {
+        require(size >= 0 && size <= buffer.remaining(), "truncated structure");
+        byte[] bytes = new byte[size];
+        buffer.get(bytes);
+        return bytes;
+    }
+
+    private static void require(boolean condition, String message)
+    {
+        if (!condition)
+            throw new FluxEngineException("invalid A2R3: " + message);
+    }
+
     private void readCaptures(ByteBuffer body, A2R3.Info info)
     {
         /* Resolution belongs to the RWCP chunk and can differ between chunks. */
@@ -126,27 +140,12 @@ public class A2R3FluxSource extends FluxSource
             CylinderHead location = info.driveType == A2R3.DRIVE_525_SS_40_QUARTER_STEP ?
                     new CylinderHead(capture.location, 0) :
                     new CylinderHead(capture.location >> 1, capture.location & 1);
-            tracks
-                    .computeIfAbsent(location, key -> new ArrayList<>())
+            tracks.computeIfAbsent(location, key -> new ArrayList<>())
                     .add(new Capture(capture, flux.data, header.resolution));
         }
 
         /* Reaching the chunk boundary without an end marker indicates incomplete data. */
         throw new FluxEngineException("invalid A2R3: missing capture terminator");
-    }
-
-    private static byte[] take(ByteBuffer buffer, int size)
-    {
-        require(size >= 0 && size <= buffer.remaining(), "truncated structure");
-        byte[] bytes = new byte[size];
-        buffer.get(bytes);
-        return bytes;
-    }
-
-    private static void require(boolean condition, String message)
-    {
-        if (!condition)
-            throw new FluxEngineException("invalid A2R3: " + message);
     }
 
     @Override
