@@ -197,9 +197,7 @@ public class AcornAdfsFilesystemLifecycleTest
     public void storageWritesThroughAndBlockDeviceCanRevert() throws IOException
     {
         byte[] original = device.image.clone();
-        try (Adfs image = Adfs.fromStorage(
-                new AcornAdfsFilesystem.OaknutBlockDeviceStorage(device),
-                false))
+        try (Adfs image = Adfs.fromStorage(new OaknutBlockDeviceStorage(device), false))
         {
             image.path("$.New").writeBytes(new byte[]{1, 2, 3});
             assertThat(device.dirty).isTrue();
@@ -210,9 +208,7 @@ public class AcornAdfsFilesystemLifecycleTest
         assertThat(device.commits).isEqualTo(0);
         device.revert();
         assertThat(device.image).isEqualTo(original);
-        try (Adfs image = Adfs.fromStorage(
-                new AcornAdfsFilesystem.OaknutBlockDeviceStorage(device),
-                false))
+        try (Adfs image = Adfs.fromStorage(new OaknutBlockDeviceStorage(device), false))
         {
             assertThat(image.path("$.New").exists()).isFalse();
         }
@@ -221,8 +217,7 @@ public class AcornAdfsFilesystemLifecycleTest
     @Test
     public void adapterReadsAndWritesAcrossBlockBoundaries() throws IOException
     {
-        AcornAdfsFilesystem.OaknutBlockDeviceStorage storage =
-                new AcornAdfsFilesystem.OaknutBlockDeviceStorage(device);
+        OaknutBlockDeviceStorage storage = new OaknutBlockDeviceStorage(device);
         int offset = device.getBlockSize() - 2;
         byte[] original = device.image.clone();
         byte[] changed = {9, 8, 7, 6};
@@ -239,8 +234,7 @@ public class AcornAdfsFilesystemLifecycleTest
     @Test
     public void fullBlockWriteDoesNotReadAndFailedWritesDoNotRetainData() throws IOException
     {
-        AcornAdfsFilesystem.OaknutBlockDeviceStorage storage =
-                new AcornAdfsFilesystem.OaknutBlockDeviceStorage(device);
+        OaknutBlockDeviceStorage storage = new OaknutBlockDeviceStorage(device);
         byte[] block = new byte[device.getBlockSize()];
         storage.write(0, block, 0, block.length);
         assertThat(device.reads).isEqualTo(0);
@@ -258,8 +252,7 @@ public class AcornAdfsFilesystemLifecycleTest
     @Test
     public void adapterAlwaysObservesCurrentBlockDeviceData() throws IOException
     {
-        AcornAdfsFilesystem.OaknutBlockDeviceStorage storage =
-                new AcornAdfsFilesystem.OaknutBlockDeviceStorage(device);
+        OaknutBlockDeviceStorage storage = new OaknutBlockDeviceStorage(device);
         byte[] first = new byte[1];
         storage.read(0, first, 0, 1);
         device.image[0] = (byte) (first[0] ^ 255);

@@ -25,10 +25,13 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.InvalidPathException;
 import java.nio.file.NoSuchFileException;
 import java.time.Instant;
-import java.util.Objects;
 
 public class AcornAdfsFilesystem extends Filesystem
 {
+    public static final String ACORNADFS_LOAD_ADDRESS = "acornadfs.load_address";
+    public static final String ACORNADFS_EXEC_ADDRESS = "acornadfs.exec_address";
+    public static final String ACORNADFS_FILETYPE = "acornadfs.filetype";
+
     /* All paths at the VFS boundary use slash-separated components. */
     private static final ImmutableSet<Capability> CAPABILITIES = ImmutableSet.of(
             Capability.OP_CREATE,
@@ -43,10 +46,6 @@ public class AcornAdfsFilesystem extends Filesystem
             Capability.OP_GETFSDATA,
             Capability.OP_PUTFSDATA,
             Capability.OP_PUTATTRS);
-
-    public static final String ACORNADFS_LOAD_ADDRESS = "acornadfs.load_address";
-    public static final String ACORNADFS_EXEC_ADDRESS = "acornadfs.exec_address";
-    public static final String ACORNADFS_FILETYPE = "acornadfs.filetype";
 
     private final AcornAdfsProto config;
     private final BlockDevice blockDevice;
@@ -98,7 +97,9 @@ public class AcornAdfsFilesystem extends Filesystem
 
         Storage storage = new OaknutBlockDeviceStorage(blockDevice);
         AdfsFormat format = selectedFormat();
-        adfs = format == null ? Adfs.fromStorage(storage, false) : Adfs.fromStorage(storage, format, false);
+        adfs = format == null ?
+                Adfs.fromStorage(storage, false) :
+                Adfs.fromStorage(storage, format, false);
     }
 
     /* The storage is borrowed; closing oaknut does not commit or close the block device. */
@@ -197,7 +198,8 @@ public class AcornAdfsFilesystem extends Filesystem
         if (config.getFlavour() == AcornAdfsProto.Flavour.UNDEFINED)
             throw new IllegalArgumentException("ADFS flavour is undefined");
         return config.getFlavour() == AcornAdfsProto.Flavour.GUESS ?
-                null : AdfsFormat.valueOf(config.getFlavour().name());
+                null :
+                AdfsFormat.valueOf(config.getFlavour().name());
     }
 
     /* Capacity determines the default floppy shape for GUESS. Ambiguous 800K blank disks
@@ -455,42 +457,4 @@ public class AcornAdfsFilesystem extends Filesystem
         T run() throws IOException;
     }
 
-    /* Delegate byte ranges directly to BlockDevice, which owns caching and pending changes.
-     * Committing and reverting remain the filesystem adapter's responsibility. */
-    static final class OaknutBlockDeviceStorage implements Storage
-    {
-        private final BlockDevice device;
-        private final int size;
-
-        OaknutBlockDeviceStorage(BlockDevice device)
-        {
-            this.device = device;
-            size = Math.multiplyExact(device.getBlockSize(), device.getBlockCount());
-        }
-
-        @Override
-        public int size()
-        {
-            return size;
-        }
-
-        @Override
-        public void read(int offset, byte[] destination, int destinationOffset, int length)
-                throws IOException
-        {
-            Objects.checkFromIndexSize(offset, length, size);
-            Objects.checkFromIndexSize(destinationOffset, length, destination.length);
-            byte[] bytes = device.getBytes(offset, length).toByteArray();
-            System.arraycopy(bytes, 0, destination, destinationOffset, length);
-        }
-
-        @Override
-        public void write(int offset, byte[] source, int sourceOffset, int length)
-                throws IOException
-        {
-            Objects.checkFromIndexSize(offset, length, size);
-            Objects.checkFromIndexSize(sourceOffset, length, source.length);
-            device.putBytes(offset, new Bytes(source).slice(sourceOffset, length));
-        }
-    }
 }

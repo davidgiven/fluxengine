@@ -11,6 +11,7 @@ message AcornDfsProto
   {
     UNDEFINED = 0;
     ACORN_DFS = 1;
+    WATCOM_DFS = 2;
   }
 
   optional Flavour flavour = 1

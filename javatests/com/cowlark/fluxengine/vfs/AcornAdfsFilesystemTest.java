@@ -54,7 +54,8 @@ public class AcornAdfsFilesystemTest extends GenericTreeFilesystemTest
     public void acornMetadataAttributes() throws IOException
     {
         AcornMeta untyped = new AcornMeta(0x12345678L, 0x8023, null);
-        AcornMeta typed = new AcornMeta(0, 0, null).withFiletype(0xabc)
+        AcornMeta typed = new AcornMeta(0, 0, null)
+                .withFiletype(0xabc)
                 .withDatestamp(Instant.parse("2024-02-03T12:34:56.780Z"));
         try (Adfs disc = Adfs.create(AdfsFormat.F))
         {
@@ -65,11 +66,14 @@ public class AcornAdfsFilesystemTest extends GenericTreeFilesystemTest
         for (String name : List.of("untyped", "typed"))
         {
             AcornMeta expected = name.equals("typed") ? typed : untyped;
-            ImmutableMap<String, String> attributes = impl.getDirent(VfsPath.root().resolve(name)).attributes();
-            assertThat(attributes.get("acornadfs.load_address"))
-                    .isEqualTo(String.format("0x%x", expected.loadAddress()));
-            assertThat(attributes.get("acornadfs.exec_address"))
-                    .isEqualTo(String.format("0x%x", expected.executionAddress()));
+            ImmutableMap<String, String> attributes =
+                    impl.getDirent(VfsPath.root().resolve(name)).attributes();
+            assertThat(attributes.get("acornadfs.load_address")).isEqualTo(String.format(
+                    "0x%x",
+                    expected.loadAddress()));
+            assertThat(attributes.get("acornadfs.exec_address")).isEqualTo(String.format(
+                    "0x%x",
+                    expected.executionAddress()));
             if (name.equals("typed"))
                 assertThat(attributes.get("acornadfs.filetype")).isEqualTo("0xabc");
             else
@@ -85,29 +89,52 @@ public class AcornAdfsFilesystemTest extends GenericTreeFilesystemTest
         impl.create(true, "LABEL");
         VfsPath path = VfsPath.of("/data");
         impl.putFile(path, new Bytes("payload"));
-        impl.putFileMetadata(path, ImmutableMap.of(
-                "acornadfs.load_address", "0xffffffff", "acornadfs.exec_address", "0xffffffff"));
-        assertThat(impl.getDirent(path).attributes().get("acornadfs.load_address")).isEqualTo("0xffffffff");
+        impl.putFileMetadata(
+                path,
+                ImmutableMap.of(
+                        "acornadfs.load_address",
+                        "0xffffffff",
+                        "acornadfs.exec_address",
+                        "0xffffffff"));
+        assertThat(impl.getDirent(path).attributes().get("acornadfs.load_address")).isEqualTo(
+                "0xffffffff");
         impl.putFileMetadata(path, ImmutableMap.of("acornadfs.load_address", "0x12345678"));
         impl.putFileMetadata(path, ImmutableMap.of("acornadfs.exec_address", "32768"));
-        assertThat(impl.getDirent(path).attributes().get("acornadfs.load_address")).isEqualTo("0x12345678");
-        assertThat(impl.getDirent(path).attributes().get("acornadfs.exec_address")).isEqualTo("0x8000");
+        assertThat(impl.getDirent(path).attributes().get("acornadfs.load_address")).isEqualTo(
+                "0x12345678");
+        assertThat(impl.getDirent(path).attributes().get("acornadfs.exec_address")).isEqualTo(
+                "0x8000");
         String timestamp = "2024-02-03T12:34:56.780Z";
-        impl.putFileMetadata(path, ImmutableMap.of(
-                "acornadfs.filetype", "0xabc", FileAttributes.CTIME.name(), timestamp));
+        impl.putFileMetadata(
+                path,
+                ImmutableMap.of(
+                        "acornadfs.filetype",
+                        "0xabc",
+                        FileAttributes.CTIME.name(),
+                        timestamp));
         impl.putFileMetadata(path, ImmutableMap.of("acornadfs.filetype", "0x123"));
         ImmutableMap<String, String> before = impl.getDirent(path).attributes();
         for (String address : List.of("acornadfs.load_address", "acornadfs.exec_address"))
-            assertThrows(IllegalArgumentException.class, () -> impl.putFileMetadata(path,
-                    ImmutableMap.of(address, "0", "acornadfs.filetype", "0xfff")));
-        assertThrows(IllegalArgumentException.class, () -> impl.putFileMetadata(path,
-                ImmutableMap.of("acornadfs.load_address", "0", "acornadfs.exec_address", "0",
-                        "acornadfs.filetype", "0xfff")));
+            assertThrows(
+                    IllegalArgumentException.class,
+                    () -> impl.putFileMetadata(
+                            path,
+                            ImmutableMap.of(address, "0", "acornadfs.filetype", "0xfff")));
+        assertThrows(
+                IllegalArgumentException.class, () -> impl.putFileMetadata(
+                        path, ImmutableMap.of(
+                                "acornadfs.load_address",
+                                "0",
+                                "acornadfs.exec_address",
+                                "0",
+                                "acornadfs.filetype",
+                                "0xfff")));
         assertThat(impl.getDirent(path).attributes()).isEqualTo(before);
         impl.flushChanges();
         createTestFilesystem();
         assertThat(impl.getDirent(path).attributes().get("acornadfs.filetype")).isEqualTo("0x123");
-        assertThat(impl.getDirent(path).attributes().get(FileAttributes.CTIME.name())).isEqualTo(timestamp);
+        assertThat(impl.getDirent(path).attributes().get(FileAttributes.CTIME.name())).isEqualTo(
+                timestamp);
         assertThat(impl.getFile(path)).isEqualTo(new Bytes("payload"));
     }
 
@@ -115,15 +142,28 @@ public class AcornAdfsFilesystemTest extends GenericTreeFilesystemTest
     @Test
     public void configuredFlavours() throws IOException
     {
-        assertThat(AcornAdfsProto.getDefaultInstance().getFlavour()).isEqualTo(AcornAdfsProto.Flavour.GUESS);
-        for (AdfsFormat format : List.of(AdfsFormat.D, AdfsFormat.E, AdfsFormat.E_PLUS,
-                AdfsFormat.F, AdfsFormat.F_PLUS, AdfsFormat.L))
+        assertThat(AcornAdfsProto
+                .getDefaultInstance()
+                .getFlavour()).isEqualTo(AcornAdfsProto.Flavour.GUESS);
+        for (AdfsFormat format : List.of(
+                AdfsFormat.D,
+                AdfsFormat.E,
+                AdfsFormat.E_PLUS,
+                AdfsFormat.F,
+                AdfsFormat.F_PLUS,
+                AdfsFormat.L))
         {
-            ConfigProto selected = new ConfigBuilder().loadConfigFile("acornadfs")
-                    .applyOption(format.name().toLowerCase(java.util.Locale.ROOT).replace("_", "-"), "").build();
+            ConfigProto selected = new ConfigBuilder()
+                    .loadConfigFile("acornadfs")
+                    .applyOption(
+                            format.name().toLowerCase(java.util.Locale.ROOT).replace("_", "-"),
+                            "")
+                    .build();
             BlockDevice device = new InMemoryBlockDevice(new DiskLayout(selected), new Image());
-            AcornAdfsProto options = AcornAdfsProto.newBuilder()
-                    .setFlavour(AcornAdfsProto.Flavour.valueOf(format.name())).build();
+            AcornAdfsProto options = AcornAdfsProto
+                    .newBuilder()
+                    .setFlavour(AcornAdfsProto.Flavour.valueOf(format.name()))
+                    .build();
             try (AcornAdfsFilesystem fs = new AcornAdfsFilesystem(options, device))
             {
                 fs.create(true, "LABEL");
@@ -131,15 +171,19 @@ public class AcornAdfsFilesystemTest extends GenericTreeFilesystemTest
                 fs.flushChanges();
                 assertThat(fs.getFile(VfsPath.of("/data"))).isEqualTo(new Bytes("payload"));
                 try (Adfs disc = Adfs.fromStorage(
-                        new AcornAdfsFilesystem.OaknutBlockDeviceStorage(device), format, false))
+                        new OaknutBlockDeviceStorage(device),
+                        format,
+                        false))
                 {
                     assertThat(disc.format()).isEqualTo(format);
-                    assertThat(disc.path(List.of("data")).readBytes()).isEqualTo(new Bytes("payload").toByteArray());
+                    assertThat(disc
+                            .path(List.of("data"))
+                            .readBytes()).isEqualTo(new Bytes("payload").toByteArray());
                 }
             }
         }
-        AcornAdfsProto wrongCapacity = AcornAdfsProto.newBuilder()
-                .setFlavour(AcornAdfsProto.Flavour.S).build();
+        AcornAdfsProto wrongCapacity =
+                AcornAdfsProto.newBuilder().setFlavour(AcornAdfsProto.Flavour.S).build();
         try (AcornAdfsFilesystem fs = new AcornAdfsFilesystem(wrongCapacity, blockDevice))
         {
             assertThrows(IOException.class, () -> fs.create(true, "LABEL"));
@@ -191,8 +235,7 @@ public class AcornAdfsFilesystemTest extends GenericTreeFilesystemTest
         createTestFilesystem();
         assertThat(impl.getDirent(path).path()).isEqualTo(path);
         impl.moveFile(path, VfsPath.of("/dirone/@/other"));
-        assertThat(impl.getFile(VfsPath.of("/dirone/@/other"))).isEqualTo(new Bytes("payload"
-        ));
+        assertThat(impl.getFile(VfsPath.of("/dirone/@/other"))).isEqualTo(new Bytes("payload"));
     }
 
     /* Reject invalid names before any file, directory, or rename changes are made. */
@@ -205,12 +248,11 @@ public class AcornAdfsFilesystemTest extends GenericTreeFilesystemTest
         for (String name : List.of("file.txt", "dir.one", ".hidden", "trailing."))
         {
             VfsPath destination = VfsPath.root().resolve(name);
-            assertThrows(InvalidPathException.class,
+            assertThrows(
+                    InvalidPathException.class,
                     () -> impl.putFile(destination, new Bytes("data")));
-            assertThrows(InvalidPathException.class,
-                    () -> impl.createDirectory(destination));
-            assertThrows(InvalidPathException.class,
-                    () -> impl.moveFile(source, destination));
+            assertThrows(InvalidPathException.class, () -> impl.createDirectory(destination));
+            assertThrows(InvalidPathException.class, () -> impl.moveFile(source, destination));
         }
         assertThat(impl.getFile(source)).isEqualTo(new Bytes("payload"));
         assertThat(impl.list(VfsPath.root()).keySet()).containsExactly("source");
@@ -256,7 +298,9 @@ public class AcornAdfsFilesystemTest extends GenericTreeFilesystemTest
                     .applyOption(capacity, "")
                     .build();
             assertThat(selected.getFilesystem().getAcornadfs().getFlavour()).isEqualTo(
-                    AcornAdfsProto.Flavour.valueOf(capacity.toUpperCase(java.util.Locale.ROOT).replace("-", "_")));
+                    AcornAdfsProto.Flavour.valueOf(capacity
+                            .toUpperCase(java.util.Locale.ROOT)
+                            .replace("-", "_")));
             BlockDevice device = new InMemoryBlockDevice(new DiskLayout(selected), new Image());
             try (AcornAdfsFilesystem fs = new AcornAdfsFilesystem(
                     selected
@@ -286,7 +330,9 @@ public class AcornAdfsFilesystemTest extends GenericTreeFilesystemTest
         {
             ConfigProto selected = new ConfigBuilder()
                     .loadConfigFile("acornadfs")
-                    .applyOption(format.name().toLowerCase(java.util.Locale.ROOT).replace("_", "-"), "")
+                    .applyOption(
+                            format.name().toLowerCase(java.util.Locale.ROOT).replace("_", "-"),
+                            "")
                     .build();
             BlockDevice device = new InMemoryBlockDevice(new DiskLayout(selected), new Image());
             try (Adfs blank = Adfs.create(format))
@@ -302,10 +348,9 @@ public class AcornAdfsFilesystemTest extends GenericTreeFilesystemTest
                 fs.createDirectory(VfsPath.of("/dirone"));
                 fs.putFile(VfsPath.of("/dirone/file"), new Bytes("data"));
                 fs.moveFile(VfsPath.of("/dirone/file"), VfsPath.of("/dirone/other"));
-                assertThat(fs.getFile(VfsPath.of("/dirone/other"))).isEqualTo(new Bytes(
-                        "data"));
-                assertThat(fs.list(VfsPath.of("/dirone")).get("other").path()).isEqualTo(
-                        VfsPath.of("/dirone/other"));
+                assertThat(fs.getFile(VfsPath.of("/dirone/other"))).isEqualTo(new Bytes("data"));
+                assertThat(fs.list(VfsPath.of("/dirone")).get("other").path()).isEqualTo(VfsPath.of(
+                        "/dirone/other"));
                 fs.deleteFile(VfsPath.of("/dirone/other"));
                 fs.deleteFile(VfsPath.of("/dirone"));
                 assertThat(fs.list(VfsPath.root())).isEmpty();

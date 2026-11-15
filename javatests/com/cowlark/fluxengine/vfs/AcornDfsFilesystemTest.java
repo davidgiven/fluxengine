@@ -9,6 +9,7 @@ import com.cowlark.fluxengine.core.Bytes;
 import com.cowlark.fluxengine.data.DiskLayout;
 import com.cowlark.fluxengine.data.Image;
 import com.cowlark.fluxengine.testing.TestHelpers;
+import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -19,7 +20,6 @@ import org.rob_smallshire.oaknut.dfs.Dfs;
 import org.rob_smallshire.oaknut.dfs.DfsFormat;
 import org.rob_smallshire.oaknut.file.Access;
 import org.rob_smallshire.oaknut.file.AcornMeta;
-import com.google.common.collect.ImmutableMap;
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.InvalidPathException;
@@ -53,6 +53,52 @@ public class AcornDfsFilesystemTest extends GenericFilesystemTest
         blockDevice = new InMemoryBlockDevice(diskLayout, image);
         impl = new AcornDfsFilesystem(configProto.getFilesystem().getAcorndfs(), blockDevice);
     }
+
+    /* The selected catalogue determines both formatting and how many files can be stored. */
+    @Test
+    public void watcomFlavourUsesWatfordCatalogues() throws IOException
+    {
+        AcornDfsProto options = AcornDfsProto.newBuilder()
+                .setFlavour(AcornDfsProto.Flavour.WATCOM_DFS).build();
+        for (String capacity : List.of("100", "200"))
+        {
+            ConfigProto selected = new ConfigBuilder().loadConfigFile("acorndfs")
+                    .applyOption(capacity, "").build();
+            BlockDevice device = new InMemoryBlockDevice(new DiskLayout(selected), new Image());
+            try (AcornDfsFilesystem fs = new AcornDfsFilesystem(options, device))
+            {
+                for (boolean quick : List.of(true, false))
+                {
+                    fs.create(quick, "WATFORD");
+                    assertThat(fs.getFilesystemMetadata().get(FilesystemAttributes.USED_BLOCKS.name()))
+                            .isEqualTo("4");
+                    for (int file = 0; file < 62; file++)
+                        fs.putFile(VfsPath.root().resolve("F" + file), new Bytes("data" + file));
+                    assertThat(fs.list(VfsPath.root())).hasSize(62);
+                    assertThrows(IOException.class,
+                            () -> fs.putFile(VfsPath.of("/EXTRA"), new Bytes("overflow")));
+                    fs.flushChanges();
+                    assertThat(fs.getFile(VfsPath.of("/F61"))).isEqualTo(new Bytes("data61"));
+                    fs.deleteFile(VfsPath.of("/F61"));
+                    fs.discardChanges();
+                    assertThat(fs.getFile(VfsPath.of("/F61"))).isEqualTo(new Bytes("data61"));
+                }
+            }
+            DfsFormat format = capacity.equals("100") ? DfsFormat.WATFORD_DFS_40T_SINGLE_SIDED :
+                    DfsFormat.WATFORD_DFS_80T_SINGLE_SIDED;
+            try (Dfs disc = Dfs.fromStorage(new OaknutBlockDeviceStorage(device), format, false))
+            {
+                assertThat(disc.files()).hasSize(62);
+                assertThat(disc.title()).isEqualTo("WATFORD");
+            }
+            try (AcornDfsFilesystem acorn = new AcornDfsFilesystem(
+                    AcornDfsProto.getDefaultInstance(), device))
+            {
+                assertThrows(IOException.class, () -> acorn.list(VfsPath.root()));
+            }
+        }
+    }
+
     /* DFS's directory byte is part of a flat filename; only the default prefix is hidden. */
     @Test
     public void namesAreFlatAndDefaultDirectoryIsStripped() throws IOException
@@ -68,9 +114,15 @@ public class AcornDfsFilesystemTest extends GenericFilesystemTest
         assertThat(impl.getDirent(VfsPath.of("/A.HELLO")).filename()).isEqualTo("a.Hello");
         assertThrows(NoSuchFileException.class, () -> impl.list(VfsPath.of("/A")));
         assertThrows(InvalidPathException.class, () -> impl.getFile(VfsPath.of("/A/Hello")));
-        assertThrows(InvalidPathException.class, () -> impl.putFile(VfsPath.of("/A/Hello"), new Bytes()));
-        assertThrows(InvalidPathException.class, () -> impl.moveFile(VfsPath.of("/Hello"), VfsPath.of("/A/Hello")));
-        assertThrows(InvalidPathException.class, () -> impl.putFile(VfsPath.of("/file.txt"), new Bytes()));
+        assertThrows(
+                InvalidPathException.class,
+                () -> impl.putFile(VfsPath.of("/A/Hello"), new Bytes()));
+        assertThrows(
+                InvalidPathException.class,
+                () -> impl.moveFile(VfsPath.of("/Hello"), VfsPath.of("/A/Hello")));
+        assertThrows(
+                InvalidPathException.class,
+                () -> impl.putFile(VfsPath.of("/file.txt"), new Bytes()));
         impl.moveFile(VfsPath.of("/Hello"), VfsPath.of("/B.New"));
         assertThat(impl.getFile(VfsPath.of("/B.New"))).isEqualTo(new Bytes("default"));
         impl.moveFile(VfsPath.of("/B.New"), VfsPath.of("/$.Root"));
@@ -84,33 +136,49 @@ public class AcornDfsFilesystemTest extends GenericFilesystemTest
         VfsPath path = VfsPath.of("/DATA");
         impl.create(true, "LABEL");
         impl.putFile(path, new Bytes("payload"));
-        impl.putFileMetadata(path, ImmutableMap.of(
-                AcornDfsFilesystem.ACORNDFS_LOAD_ADDRESS, "0xffff1900",
-                AcornDfsFilesystem.ACORNDFS_EXEC_ADDRESS, "0x28023",
-                FileAttributes.MODE.name(), "L"));
+        impl.putFileMetadata(
+                path, ImmutableMap.of(
+                        AcornDfsFilesystem.ACORNDFS_LOAD_ADDRESS,
+                        "0xffff1900",
+                        AcornDfsFilesystem.ACORNDFS_EXEC_ADDRESS,
+                        "0x28023",
+                        FileAttributes.MODE.name(),
+                        "L"));
         ImmutableMap<String, String> attributes = impl.getDirent(path).attributes();
-        assertThat(attributes.get(AcornDfsFilesystem.ACORNDFS_LOAD_ADDRESS)).isEqualTo("0xffff1900");
+        assertThat(attributes.get(AcornDfsFilesystem.ACORNDFS_LOAD_ADDRESS)).isEqualTo(
+                "0xffff1900");
         assertThat(attributes.get(AcornDfsFilesystem.ACORNDFS_EXEC_ADDRESS)).isEqualTo("0x28023");
         assertThat(attributes.get(FileAttributes.MODE.name())).isEqualTo("LR/");
         assertThat(attributes).doesNotContainKey("acorndfs.filetype");
         assertThat(attributes).doesNotContainKey(FileAttributes.CTIME.name());
         assertThat(impl.list(VfsPath.root()).get("DATA").attributes()).isEqualTo(attributes);
         assertThrows(AccessDeniedException.class, () -> impl.deleteFile(path));
-        assertThrows(AccessDeniedException.class, () -> impl.putFile(path, new Bytes("replacement")));
-        assertThrows(IllegalArgumentException.class, () -> impl.putFileMetadata(path,
-                ImmutableMap.of("acorndfs.filetype", "0xabc")));
+        assertThrows(
+                AccessDeniedException.class,
+                () -> impl.putFile(path, new Bytes("replacement")));
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> impl.putFileMetadata(path, ImmutableMap.of("acorndfs.filetype", "0xabc")));
         impl.putFileMetadata(path, ImmutableMap.of(FileAttributes.MODE.name(), "WR"));
         impl.putFile(path, new Bytes("replacement"));
-        impl.putFileMetadata(path, ImmutableMap.of(AcornDfsFilesystem.ACORNDFS_EXEC_ADDRESS, "0xffff8023"));
+        impl.putFileMetadata(
+                path,
+                ImmutableMap.of(AcornDfsFilesystem.ACORNDFS_EXEC_ADDRESS, "0xffff8023"));
         impl.flushChanges();
         createTestFilesystem();
         assertThat(impl.getFile(path)).isEqualTo(new Bytes("replacement"));
-        assertThat(impl.getDirent(path).attributes().get(AcornDfsFilesystem.ACORNDFS_LOAD_ADDRESS))
-                .isEqualTo("0xffff1900");
-        assertThat(impl.getDirent(path).attributes().get(AcornDfsFilesystem.ACORNDFS_EXEC_ADDRESS))
-                .isEqualTo("0xffff8023");
+        assertThat(impl
+                .getDirent(path)
+                .attributes()
+                .get(AcornDfsFilesystem.ACORNDFS_LOAD_ADDRESS)).isEqualTo("0xffff1900");
+        assertThat(impl
+                .getDirent(path)
+                .attributes()
+                .get(AcornDfsFilesystem.ACORNDFS_EXEC_ADDRESS)).isEqualTo("0xffff8023");
         assertThat(impl.getDirent(path).attributes()).doesNotContainKey("acorndfs.filetype");
-        assertThat(impl.getDirent(path).attributes()).doesNotContainKey(FileAttributes.CTIME.name());
+        assertThat(impl
+                .getDirent(path)
+                .attributes()).doesNotContainKey(FileAttributes.CTIME.name());
     }
 
     @Test
@@ -118,23 +186,43 @@ public class AcornDfsFilesystemTest extends GenericFilesystemTest
     {
         for (String capacity : List.of("100", "200"))
         {
-            ConfigProto selected = new ConfigBuilder().loadConfigFile("acorndfs").applyOption(capacity, "").build();
+            ConfigProto selected = new ConfigBuilder()
+                    .loadConfigFile("acorndfs")
+                    .applyOption(capacity, "")
+                    .build();
             BlockDevice device = new InMemoryBlockDevice(new DiskLayout(selected), new Image());
-            try (AcornDfsFilesystem fs = new AcornDfsFilesystem(selected.getFilesystem().getAcorndfs(), device))
+            try (AcornDfsFilesystem fs = new AcornDfsFilesystem(
+                    selected
+                            .getFilesystem()
+                            .getAcorndfs(), device))
             {
                 fs.create(true, "LABEL");
-                assertThat(fs.getFilesystemMetadata().get(FilesystemAttributes.VOLUME_NAME.name())).isEqualTo("LABEL");
-                assertThat(fs.getFilesystemMetadata().get(FilesystemAttributes.TOTAL_BLOCKS.name()))
-                        .isEqualTo(capacity.equals("100") ? "400" : "800");
-                assertThat(fs.getFilesystemMetadata().get(FilesystemAttributes.USED_BLOCKS.name())).isEqualTo("2");
+                assertThat(fs
+                        .getFilesystemMetadata()
+                        .get(FilesystemAttributes.VOLUME_NAME.name())).isEqualTo("LABEL");
+                assertThat(fs
+                        .getFilesystemMetadata()
+                        .get(FilesystemAttributes.TOTAL_BLOCKS.name())).isEqualTo(capacity.equals(
+                        "100") ? "400" : "800");
+                assertThat(fs
+                        .getFilesystemMetadata()
+                        .get(FilesystemAttributes.USED_BLOCKS.name())).isEqualTo("2");
                 fs.putFile(VfsPath.of("/DATA"), new Bytes(257));
-                assertThat(fs.getFilesystemMetadata().get(FilesystemAttributes.USED_BLOCKS.name())).isEqualTo("4");
-                fs.putFilesystemMetadata(ImmutableMap.of(FilesystemAttributes.VOLUME_NAME.name(), "NEW LABEL"));
+                assertThat(fs
+                        .getFilesystemMetadata()
+                        .get(FilesystemAttributes.USED_BLOCKS.name())).isEqualTo("4");
+                fs.putFilesystemMetadata(ImmutableMap.of(
+                        FilesystemAttributes.VOLUME_NAME.name(),
+                        "NEW LABEL"));
                 fs.flushChanges();
-                assertThat(fs.getFilesystemMetadata().get(FilesystemAttributes.VOLUME_NAME.name())).isEqualTo("NEW LABEL");
+                assertThat(fs
+                        .getFilesystemMetadata()
+                        .get(FilesystemAttributes.VOLUME_NAME.name())).isEqualTo("NEW LABEL");
                 fs.create(false, "FULL");
                 assertThat(fs.list(VfsPath.root())).isEmpty();
-                assertThat(fs.getFilesystemMetadata().get(FilesystemAttributes.VOLUME_NAME.name())).isEqualTo("FULL");
+                assertThat(fs
+                        .getFilesystemMetadata()
+                        .get(FilesystemAttributes.VOLUME_NAME.name())).isEqualTo("FULL");
                 assertThat(fs.isReadOnly()).isFalse();
                 fs.check();
             }
@@ -147,18 +235,29 @@ public class AcornDfsFilesystemTest extends GenericFilesystemTest
         VfsPath path = VfsPath.of("/A.DATA");
         impl.create(true, "LABEL");
         impl.putFile(path, new Bytes("committed"));
-        impl.putFileMetadata(path, ImmutableMap.of(AcornDfsFilesystem.ACORNDFS_LOAD_ADDRESS, "0x1900"));
+        impl.putFileMetadata(
+                path,
+                ImmutableMap.of(AcornDfsFilesystem.ACORNDFS_LOAD_ADDRESS, "0x1900"));
         impl.flushChanges();
         assertThat(impl.needsFlushing()).isFalse();
         impl.putFile(path, new Bytes("pending"));
-        impl.putFileMetadata(path, ImmutableMap.of(AcornDfsFilesystem.ACORNDFS_LOAD_ADDRESS, "0x2000"));
-        impl.putFilesystemMetadata(ImmutableMap.of(FilesystemAttributes.VOLUME_NAME.name(), "PENDING"));
+        impl.putFileMetadata(
+                path,
+                ImmutableMap.of(AcornDfsFilesystem.ACORNDFS_LOAD_ADDRESS, "0x2000"));
+        impl.putFilesystemMetadata(ImmutableMap.of(
+                FilesystemAttributes.VOLUME_NAME.name(),
+                "PENDING"));
         assertThat(impl.needsFlushing()).isTrue();
         impl.discardChanges();
         assertThat(impl.needsFlushing()).isFalse();
         assertThat(impl.getFile(path)).isEqualTo(new Bytes("committed"));
-        assertThat(impl.getDirent(path).attributes().get(AcornDfsFilesystem.ACORNDFS_LOAD_ADDRESS)).isEqualTo("0x1900");
-        assertThat(impl.getFilesystemMetadata().get(FilesystemAttributes.VOLUME_NAME.name())).isEqualTo("LABEL");
+        assertThat(impl
+                .getDirent(path)
+                .attributes()
+                .get(AcornDfsFilesystem.ACORNDFS_LOAD_ADDRESS)).isEqualTo("0x1900");
+        assertThat(impl
+                .getFilesystemMetadata()
+                .get(FilesystemAttributes.VOLUME_NAME.name())).isEqualTo("LABEL");
         impl.deleteFile(path);
         impl.discardChanges();
         assertThat(impl.getFile(path)).isEqualTo(new Bytes("committed"));
@@ -175,10 +274,14 @@ public class AcornDfsFilesystemTest extends GenericFilesystemTest
         }
         assertThat(impl.list(VfsPath.root()).keySet()).containsExactly("PLAIN", "B.LETTER");
         assertThat(impl.getFile(VfsPath.of("/PLAIN"))).isEqualTo(new Bytes(new byte[]{1}));
-        assertThat(impl.getDirent(VfsPath.of("/PLAIN")).attributes().get(AcornDfsFilesystem.ACORNDFS_LOAD_ADDRESS))
-                .isEqualTo("0xffff1900");
+        assertThat(impl
+                .getDirent(VfsPath.of("/PLAIN"))
+                .attributes()
+                .get(AcornDfsFilesystem.ACORNDFS_LOAD_ADDRESS)).isEqualTo("0xffff1900");
         for (String invalid : List.of("/TOOLONGNAME", "/A.BAD.NAME", "/BAD:NAME"))
-            assertThrows(InvalidPathException.class, () -> impl.putFile(VfsPath.of(invalid), new Bytes()));
+            assertThrows(
+                    InvalidPathException.class,
+                    () -> impl.putFile(VfsPath.of(invalid), new Bytes()));
     }
 
     @Test
@@ -189,7 +292,10 @@ public class AcornDfsFilesystemTest extends GenericFilesystemTest
         byte[] stale = new byte[1024];
         java.util.Arrays.fill(stale, (byte) 0xaa);
         device.putBytes(0, new Bytes(stale));
-        try (AcornDfsFilesystem fs = new AcornDfsFilesystem(configProto.getFilesystem().getAcorndfs(), device))
+        try (AcornDfsFilesystem fs = new AcornDfsFilesystem(
+                configProto
+                        .getFilesystem()
+                        .getAcorndfs(), device))
         {
             assertThat(device.reads).isEqualTo(0);
             fs.create(true, "LABEL");
@@ -199,8 +305,9 @@ public class AcornDfsFilesystemTest extends GenericFilesystemTest
             assertThat(device.reads).isLessThan(device.getBlockCount());
             assertThat(fs.getFile(VfsPath.of("/DATA"))).isEqualTo(new Bytes("payload"));
             device.failReads = true;
-            assertThat(assertThrows(IOException.class, () -> fs.getFile(VfsPath.of("/DATA"))).getMessage())
-                    .isEqualTo("read failed");
+            assertThat(assertThrows(
+                    IOException.class,
+                    () -> fs.getFile(VfsPath.of("/DATA"))).getMessage()).isEqualTo("read failed");
         }
     }
 
