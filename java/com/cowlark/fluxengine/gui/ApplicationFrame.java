@@ -51,6 +51,7 @@ public class ApplicationFrame extends JFrame
     private final FluxPanel fluxPanel;
     private final SummaryPanel summaryPanel;
     private final FilesystemPanel filesystemPanel;
+    private final FormatEditorPanel formatEditorPanel;
     private final JTabbedPane centreTabs;
     private final ImageViewModel model;
     private final Var<Workflow> currentWorkflow;
@@ -67,6 +68,7 @@ public class ApplicationFrame extends JFrame
         visualiserPanel = new VisualiserPanel(model);
         configurationPanel = new ConfigurationPanel(model);
         filesystemPanel = new FilesystemPanel(model);
+        formatEditorPanel = new FormatEditorPanel();
 
         URL iconUrl = ApplicationFrame.class.getResource("/icon.png");
         if (iconUrl != null)
@@ -82,8 +84,8 @@ public class ApplicationFrame extends JFrame
                         .withVerticalScrollBarPolicy(UI.Active.ALWAYS)
                         .add(of(configurationPanel))));
 
-        /* Retain the centre tabs so flux-view requests can select their destination. */
         centreTabs = tabbedPane().withMinSize(100, 0)
+                .add(tab("Format").add(of(formatEditorPanel)))
                 .add(tab("Image").add(of(imagePanel)))
                 .add(tab("Log").add(of(logPanel)))
                 .add(tab("Flux").add(of(fluxPanel)))
