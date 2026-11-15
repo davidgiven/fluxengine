@@ -142,6 +142,25 @@ public class ImageViewModel
         return config != null ? config : ConfigProto.getDefaultInstance();
     }
 
+    /* Copy the original source so comments and formatting survive editing. */
+    public void onCopyFromCurrentFormat()
+    {
+        String text;
+        try
+        {
+            if (selectedFormat.get().equals(CUSTOM_FORMAT))
+                text = Files.readString(Path.of(customFormatFilename.get()));
+            else
+                text = Formats.loadText(selectedFormat.get());
+        } catch (IOException | InvalidPathException e)
+        {
+            throw new FluxEngineException("cannot read format source: " + e, e);
+        }
+
+        /* Update the editor only after the source has been read successfully. */
+        customFormatText.set(From.VIEW, text);
+    }
+
     /* Parse before publishing changes; explicit notifications also support same-path reloads.
      * GUI callers invoke this method on the EDT. */
     public void onCustomFormatChanged(String filename)

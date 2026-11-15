@@ -7,6 +7,7 @@ import com.google.protobuf.TextFormat;
 import org.protowire.pxf.Pxf;
 import org.protowire.pxf.PxfException;
 import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -37,7 +38,27 @@ public final class Formats
         ConfigProto config = cache.get(name);
         if (config == null)
         {
-            config = load(name);
+            String text;
+            try
+            {
+                text = loadText(name);
+            } catch (FileNotFoundException e)
+            {
+                return null;
+            } catch (IOException e)
+            {
+                throw new FluxEngineException("cannot read format resource " + name + ": " + e, e);
+            }
+
+            /* Include the resource name when reporting malformed built-in configurations. */
+            try
+            {
+                config = parse(text.getBytes(StandardCharsets.UTF_8));
+            } catch (FluxEngineException e)
+            {
+                throw new FluxEngineException("invalid format data in /" + RESOURCE_DIR + "/" +
+                        name + RESOURCE_SUFFIX + ": " + e, e);
+            }
             if (config != null)
                 cache.putIfAbsent(name, config);
         }
@@ -50,28 +71,17 @@ public final class Formats
         return ImmutableList.copyOf(scanNames());
     }
 
-    private static ConfigProto load(String name)
+    /* Returns the original source, preserving comments and formatting. Missing resources
+     * raise FileNotFoundException. */
+    public static String loadText(String name) throws IOException
     {
         /* Read the source configuration from the classpath. */
         String resource = "/" + RESOURCE_DIR + "/" + name + RESOURCE_SUFFIX;
-        byte[] data;
         try (InputStream stream = Formats.class.getResourceAsStream(resource))
         {
             if (stream == null)
-                return null;
-            data = stream.readAllBytes();
-        } catch (IOException e)
-        {
-            throw new FluxEngineException("cannot read format resource " + resource + ": " + e);
-        }
-
-        /* Include the resource name when reporting malformed built-in configurations. */
-        try
-        {
-            return parse(data);
-        } catch (FluxEngineException e)
-        {
-            throw new FluxEngineException("invalid format data in " + resource + ": " + e, e);
+                throw new FileNotFoundException(resource);
+            return new String(stream.readAllBytes(), StandardCharsets.UTF_8);
         }
     }
 

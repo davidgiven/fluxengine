@@ -4,6 +4,8 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 
 import com.google.common.base.Enums;
 import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableSet;
+import net.harawata.appdirs.AppDirsFactory;
 import sprouts.Association;
 import sprouts.From;
 import sprouts.Pair;
@@ -11,9 +13,14 @@ import sprouts.Var;
 import sprouts.Viewable;
 import javax.swing.JFileChooser;
 import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
@@ -33,11 +40,23 @@ public class PreferencesReaderWriter
     static final String DEVICE_FLUXFILE = "fluxfile";
     static final String DEVICE_SERIALPORT = "serialport";
 
+    /* Large text values live in configuration files instead of the size-limited store. */
+    private static final ImmutableSet<String> FILE_PREFERENCES = ImmutableSet.of(CUSTOM_FORMAT_TEXT);
+
     private final Preferences preferences;
+    private final Path configDirectory;
 
     PreferencesReaderWriter(Preferences preferences)
     {
+        this(preferences, Path.of(AppDirsFactory.getInstance()
+                .getUserConfigDir("FluxEngine", null, "Cowlark")));
+    }
+
+    /* Allow callers to select an isolated configuration directory for tests. */
+    PreferencesReaderWriter(Preferences preferences, Path configDirectory)
+    {
         this.preferences = preferences;
+        this.configDirectory = configDirectory;
     }
 
     private static String encode(String value)
@@ -117,11 +136,40 @@ public class PreferencesReaderWriter
 
     String getStringPreference(String name, String defaultValue)
     {
+        /* Missing files have the same default-value semantics as ordinary preferences. */
+        if (FILE_PREFERENCES.contains(name))
+        {
+            Path file = configDirectory.resolve(name + ".dat");
+            try
+            {
+                return Files.readString(file, StandardCharsets.UTF_8);
+            } catch (NoSuchFileException e)
+            {
+                return defaultValue;
+            } catch (IOException e)
+            {
+                throw new UncheckedIOException("Cannot read preference file " + file, e);
+            }
+        }
         return preferences.get(name, defaultValue);
     }
 
     void setStringPreference(String name, String value)
     {
+        /* Create the application configuration directory only when a file is saved. */
+        if (FILE_PREFERENCES.contains(name))
+        {
+            Path file = configDirectory.resolve(name + ".dat");
+            try
+            {
+                Files.createDirectories(configDirectory);
+                Files.writeString(file, value, StandardCharsets.UTF_8);
+            } catch (IOException e)
+            {
+                throw new UncheckedIOException("Cannot write preference file " + file, e);
+            }
+            return;
+        }
         preferences.put(name, value);
     }
 

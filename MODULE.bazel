@@ -39,6 +39,7 @@ maven.install(
         "org.protowire:protowire-pxf:2.0.1",
         "net.java.dev.jna:jna:5.19.1",
         "net.java.dev.jna:jna-platform:5.19.1",
+        "net.harawata:appdirs:1.5.0",
         "com.google.truth.extensions:truth-proto-extension:1.4.5",
         "org.swinglabs.swingx:swingx-all:1.6.5-1",
         "commons-io:commons-io:2.22.0",

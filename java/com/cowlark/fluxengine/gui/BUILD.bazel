@@ -12,6 +12,7 @@ java_library(
         "@maven//:org_slf4j_slf4j_simple",
     ],
     deps = [
+        "@maven//:net_harawata_appdirs",
         "//java/com/cowlark/fluxengine/algorithms",
         "//java/com/cowlark/fluxengine/config",
         "//java/com/cowlark/fluxengine/config:config_java_proto",
