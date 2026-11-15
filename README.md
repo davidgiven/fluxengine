@@ -240,7 +240,7 @@ https://www.mars.org/home/rob/proj/hfs. It is GPL 2.0 licensed. Please see the
 contents of the directory for the full text.
 
 As an exception, `third_party/java/org/rob_smallshire/oaknut` contains a Java
-port of oaknut's ADFS floppy-disc library and supporting utilities, written by
+port of oaknut's ADFS and DFS floppy-disc libraries and supporting utilities, written by
 Robert Smallshire, taken from https://github.com/rob-smallshire/oaknut. It is
 MIT licensed, copyright © 2026 Robert Smallshire. Please see
 [the oaknut license](third_party/java/org/rob_smallshire/oaknut/LICENSE) for the

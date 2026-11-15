@@ -1,7 +1,7 @@
 # oaknut Java port
 
 This is a standalone Java 21 port of the floppy-disc functionality of
-Robert Smallshire's oaknut-adfs 13.6.1, with the shared oaknut utilities it
+Robert Smallshire's oaknut-adfs 13.6.1 and oaknut-dfs, with the shared oaknut utilities they
 uses. The upstream source is https://github.com/rob-smallshire/oaknut at
 revision `570d8a4f97abc31d2ce64dc5e2e7bceb1f797cb2`.
 
@@ -11,6 +11,8 @@ The source and translated tests retain oaknut's [MIT license](LICENSE).
 
 - `org.rob_smallshire.oaknut.adfs`: floppy image creation, detection,
   directories, old/new allocation maps, paths, validation and repair.
+- `org.rob_smallshire.oaknut.dfs`: Acorn and Watford catalogues, flat filenames,
+  floppy creation, allocation, compaction, metadata, validation and repair.
 - `org.rob_smallshire.oaknut.discimage`: random-access storage, lazy write-through
   sector views, and physical/logical surface mapping.
 - `org.rob_smallshire.oaknut.file`: Acorn attributes, metadata, timestamps,
@@ -18,7 +20,7 @@ The source and translated tests retain oaknut's [MIT license](LICENSE).
 - `org.rob_smallshire.oaknut.filesystem`: validation findings and explicit fixes.
   This contains no filesystem adapter or plugin registry.
 
-Supported formats are S, M, L (interleaved or sequential), D, E/E+, F/F+,
+Supported ADFS formats are S, M, L (interleaved or sequential), D, E/E+, F/F+,
 and G/G+. Hard-disc geometries, hard-disc sidecars and partitions, the oaknut
 filesystem adapter, command-line programs, and BASIC conversion are excluded.
 Old-map AFS info-sector pointers can be preserved and manipulated, but this
@@ -130,3 +132,66 @@ metadata, host import/export and sector views. No disk images or captured image
 snapshots are checked in. See
 `third_party/javatests/org/rob_smallshire/oaknut/adfs/TEST_COVERAGE.md` for
 coverage. Python is not required to run the Java tests.
+
+## DFS
+
+Depend on `//third_party/java/org/rob_smallshire/oaknut/dfs`. The DFS port comes
+from `packages/oaknut-dfs` at the same upstream revision listed above.
+
+```java
+try (Dfs disc = Dfs.create(DfsFormat.ACORN_DFS_80T_SINGLE_SIDED, "Title"))
+{
+    disc.writeFile("A.Hello", bytes, new AcornMeta(0xffff1900L, 0xffff8023L, Access.WR));
+    byte[] contents = disc.readFile("a.hello");
+}
+```
+
+Names are flat: `A.Hello` includes its directory character. Bare `Hello`
+means `$.Hello`. Names preserve case and match case-insensitively. There are
+no path objects, directory navigation, or drive prefixes. New names normally
+require `$` or a letter as their directory character. Existing unusual
+characters such as `&` remain readable; the explicit `verbatimName` write
+overload also allows them when copying archival files.
+
+Acorn catalogues hold 31 files and Watford catalogues hold 62. Both support
+40/80 tracks, one/two independent sides, and interleaved/sequential image
+layouts. A handle selects one side; creation initializes every side. Watford
+extensions for discs above 256 KiB per side are not supported by upstream or
+this port. Addresses expand DFS's `0x3xxxx` host values to `0xffffxxxx`;
+`0x2xxxx` parasite addresses remain unchanged. Only the canonical access
+lock bit is writable; reading a locked file reports locked/readable, and an
+unlocked file reports readable/writable.
+
+`Dfs.fromStorage(storage, format, side, false)` borrows random-access storage
+and disables whole-image rollback for callers that already own a transaction.
+File contents are read on demand. Closing flushes storage but does not close
+it or commit its owner's transaction. Failed writes in this mode require the
+owner to discard its transaction before reopening. Enabling rollback takes
+an image snapshot before each mutation. Buffer and file factories enable it
+by default.
+
+`fromBuffer` pads trimmed captures with zeroes, as upstream does, and preserves
+read-only status. If padding is needed, writes affect the padded copy.
+`fromFile` uses positional file I/O and reads missing tail bytes as zeroes;
+writes can extend the file. External `Storage` is strict and never synthesizes
+missing sectors. `expand` explicitly extends an image to its format's full
+size. `createFile` refuses to overwrite an existing file. SSD/DSD filenames
+allow automatic geometry and catalogue detection when opening a file; use
+an explicit format and side for other layouts or ambiguous captures.
+
+`validate` reports overlapping files, duplicate names, out-of-image extents,
+and defective sector counts. Count repair is explicit. Compaction accepts a
+partial filename order and preserves file metadata, including locks. Mutation
+preflight checks avoid losing an existing file when an overwrite cannot fit.
+
+The shared host bridge provides INF/xattr metadata import/export and text
+conversion. BASIC conversion, the Python filesystem adapter, CLI, and multipart
+path operations are excluded. No FluxEngine VFS integration is included.
+
+The Watford writer preserves the documented eight-byte marker and split
+8+2-byte title even after catalogue rebuilds; it does not reproduce upstream
+rebuild bugs that overwrite those fields. Each section retains its independent
+sequence number.
+
+DFS coverage is described in
+`third_party/javatests/org/rob_smallshire/oaknut/dfs/TEST_COVERAGE.md`.
