@@ -26,3 +26,4 @@ fluxengine.iml
 images/
 .bazelbsp/
 .bazelproject
+*.scp
