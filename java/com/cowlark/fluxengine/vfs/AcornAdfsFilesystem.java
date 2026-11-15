@@ -62,6 +62,13 @@ public class AcornAdfsFilesystem extends Filesystem
         attributes.put(FileAttributes.FILE_TYPE.name(), stat.directory() ? "dir" : "file");
         String mode = Access.format(stat.access());
         attributes.put(FileAttributes.MODE.name(), mode);
+
+        /* Preserve raw addresses even when they encode a RISC OS file type and timestamp. */
+        attributes.put("acornadfs.load_address", String.format("0x%x", stat.loadAddress()));
+        attributes.put("acornadfs.exec_address", String.format("0x%x", stat.executionAddress()));
+        Integer filetype = stat.metadata().filetype();
+        if (filetype != null)
+            attributes.put("acornadfs.filetype", String.format("0x%03x", filetype));
         Dirent.DirentBuilder builder = Dirent
                 .builder()
                 .setFilename(stat.name())
@@ -334,19 +341,29 @@ public class AcornAdfsFilesystem extends Filesystem
     public void putFileMetadata(VfsPath path, ImmutableMap<String, String> metadata)
     {
         if (!ImmutableSet
-                .of(FileAttributes.MODE.name(), FileAttributes.CTIME.name())
+                .of(FileAttributes.MODE.name(), FileAttributes.CTIME.name(),
+                        "acornadfs.load_address", "acornadfs.exec_address", "acornadfs.filetype")
                 .containsAll(metadata.keySet()))
             throw new IllegalArgumentException("can't set this metadata key");
+        /* File types occupy the load address, so callers must choose one representation. */
+        if (metadata.containsKey("acornadfs.filetype") &&
+                (metadata.containsKey("acornadfs.load_address") ||
+                        metadata.containsKey("acornadfs.exec_address")))
+            throw new IllegalArgumentException("cannot set addresses and file type together");
         access(
                 path, () -> {
                     AdfsPath file = path(path);
                     AcornMeta previous = file.stat().metadata();
                     AcornMeta updated = new AcornMeta(
-                            previous.loadAddress(),
-                            previous.executionAddress(),
+                            metadata.containsKey("acornadfs.load_address") ?
+                                    Long.decode(metadata.get("acornadfs.load_address")) : previous.loadAddress(),
+                            metadata.containsKey("acornadfs.exec_address") ?
+                                    Long.decode(metadata.get("acornadfs.exec_address")) : previous.executionAddress(),
                             metadata.containsKey(FileAttributes.MODE.name()) ?
                                     Access.parse(metadata.get(FileAttributes.MODE.name())) :
                                     previous.access());
+                    if (metadata.containsKey("acornadfs.filetype"))
+                        updated = updated.withFiletype(Integer.decode(metadata.get("acornadfs.filetype")));
                     if (metadata.containsKey(FileAttributes.CTIME.name()))
                         updated =
                                 updated.withDatestamp(Instant.parse(metadata.get(FileAttributes.CTIME.name())));

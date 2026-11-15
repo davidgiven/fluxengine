@@ -18,6 +18,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.rob_smallshire.oaknut.adfs.Adfs;
 import org.rob_smallshire.oaknut.adfs.AdfsFormat;
+import org.rob_smallshire.oaknut.file.AcornMeta;
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.InvalidPathException;
@@ -46,6 +47,68 @@ public class AcornAdfsFilesystemTest extends GenericTreeFilesystemTest
     {
         blockDevice = new InMemoryBlockDevice(layout, image);
         impl = new AcornAdfsFilesystem(config.getFilesystem().getAcornadfs(), blockDevice);
+    }
+
+    /* Both listing and individual lookups expose raw addresses and optional RISC OS types. */
+    @Test
+    public void acornMetadataAttributes() throws IOException
+    {
+        AcornMeta untyped = new AcornMeta(0x12345678L, 0x8023, null);
+        AcornMeta typed = new AcornMeta(0, 0, null).withFiletype(0xabc)
+                .withDatestamp(Instant.parse("2024-02-03T12:34:56.780Z"));
+        try (Adfs disc = Adfs.create(AdfsFormat.F))
+        {
+            disc.path(List.of("untyped")).writeBytes(new byte[0], untyped);
+            disc.path(List.of("typed")).writeBytes(new byte[0], typed);
+            blockDevice.putBytes(0, new Bytes(disc.toByteArray()));
+        }
+        for (String name : List.of("untyped", "typed"))
+        {
+            AcornMeta expected = name.equals("typed") ? typed : untyped;
+            ImmutableMap<String, String> attributes = impl.getDirent(VfsPath.root().resolve(name)).attributes();
+            assertThat(attributes.get("acornadfs.load_address"))
+                    .isEqualTo(String.format("0x%x", expected.loadAddress()));
+            assertThat(attributes.get("acornadfs.exec_address"))
+                    .isEqualTo(String.format("0x%x", expected.executionAddress()));
+            if (name.equals("typed"))
+                assertThat(attributes.get("acornadfs.filetype")).isEqualTo("0xabc");
+            else
+                assertThat(attributes).doesNotContainKey("acornadfs.filetype");
+            assertThat(impl.list(VfsPath.root()).get(name).attributes()).isEqualTo(attributes);
+        }
+    }
+
+    /* Address and type updates preserve other metadata and survive remounting. */
+    @Test
+    public void updateAcornMetadataAttributes() throws IOException
+    {
+        impl.create(true, "LABEL");
+        VfsPath path = VfsPath.of("/data");
+        impl.putFile(path, new Bytes("payload"));
+        impl.putFileMetadata(path, ImmutableMap.of(
+                "acornadfs.load_address", "0xffffffff", "acornadfs.exec_address", "0xffffffff"));
+        assertThat(impl.getDirent(path).attributes().get("acornadfs.load_address")).isEqualTo("0xffffffff");
+        impl.putFileMetadata(path, ImmutableMap.of("acornadfs.load_address", "0x12345678"));
+        impl.putFileMetadata(path, ImmutableMap.of("acornadfs.exec_address", "32768"));
+        assertThat(impl.getDirent(path).attributes().get("acornadfs.load_address")).isEqualTo("0x12345678");
+        assertThat(impl.getDirent(path).attributes().get("acornadfs.exec_address")).isEqualTo("0x8000");
+        String timestamp = "2024-02-03T12:34:56.780Z";
+        impl.putFileMetadata(path, ImmutableMap.of(
+                "acornadfs.filetype", "0xabc", FileAttributes.CTIME.name(), timestamp));
+        impl.putFileMetadata(path, ImmutableMap.of("acornadfs.filetype", "0x123"));
+        ImmutableMap<String, String> before = impl.getDirent(path).attributes();
+        for (String address : List.of("acornadfs.load_address", "acornadfs.exec_address"))
+            assertThrows(IllegalArgumentException.class, () -> impl.putFileMetadata(path,
+                    ImmutableMap.of(address, "0", "acornadfs.filetype", "0xfff")));
+        assertThrows(IllegalArgumentException.class, () -> impl.putFileMetadata(path,
+                ImmutableMap.of("acornadfs.load_address", "0", "acornadfs.exec_address", "0",
+                        "acornadfs.filetype", "0xfff")));
+        assertThat(impl.getDirent(path).attributes()).isEqualTo(before);
+        impl.flushChanges();
+        createTestFilesystem();
+        assertThat(impl.getDirent(path).attributes().get("acornadfs.filetype")).isEqualTo("0x123");
+        assertThat(impl.getDirent(path).attributes().get(FileAttributes.CTIME.name())).isEqualTo(timestamp);
+        assertThat(impl.getFile(path)).isEqualTo(new Bytes("payload"));
     }
 
     @Test
