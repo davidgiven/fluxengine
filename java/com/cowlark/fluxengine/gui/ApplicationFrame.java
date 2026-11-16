@@ -20,6 +20,7 @@ import static swingtree.UILayoutConstants.TOP;
 import com.cowlark.fluxengine.gui.UiUtils.SplitPanelAction;
 import io.reactivex.rxjava3.disposables.Disposable;
 import org.jspecify.annotations.NonNull;
+import sprouts.From;
 import sprouts.Val;
 import sprouts.Var;
 import sprouts.Viewable;
@@ -90,6 +91,16 @@ public class ApplicationFrame extends JFrame
                 .add(tab("Log").add(of(logPanel)))
                 .add(tab("Flux").add(of(fluxPanel)))
                 .add(tab("Files").add(of(filesystemPanel))).get(JTabbedPane.class);
+
+        /* Start on the image, and open the editor when the custom format is selected. */
+        centreTabs.setSelectedComponent(imagePanel);
+        Viewable.cast(model.getSelectedFormat()).onChange(From.ALL, change -> {
+            if (ImageViewModel.CUSTOM_FORMAT.equals(change.currentValue().orElseThrowUnchecked()))
+                EDT_EXECUTOR.execute(() -> {
+                    if (ImageViewModel.CUSTOM_FORMAT.equals(model.getSelectedFormat().get()))
+                        centreTabs.setSelectedComponent(formatEditorPanel);
+                });
+        });
 
         UIForSplitPane<JSplitPane> topPane =
                 splitPane(HORIZONTAL).peek(pane -> pane.setResizeWeight(1.0))

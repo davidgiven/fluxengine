@@ -108,8 +108,7 @@ public class FormatEditorPanel extends JPanel
                                                 .isEnabledIf(notBusy)
                                                 .isVisibleIfNot(customSelected)
                                                 .onClick(event -> model.onCopyFromCurrentFormat())
-                                                .peek(button -> JLayeredPane.putLayer(
-                                                        button,
+                                                .peek(button -> JLayeredPane.putLayer(button,
                                                         JLayeredPane.PALETTE_LAYER)))
                                 .withPrefSize(0, 0)
                                 .withMinSize(0, 0));

@@ -2,7 +2,6 @@ package com.cowlark.fluxengine.gui;
 
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.google.common.collect.ImmutableList;
-import swingtree.UI;
 import swingtree.threading.EventProcessor;
 import javax.swing.UIManager;
 import java.util.prefs.Preferences;

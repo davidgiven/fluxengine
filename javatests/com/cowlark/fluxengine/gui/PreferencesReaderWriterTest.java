@@ -5,8 +5,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.cowlark.fluxengine.gui.ApplicationFrame.Workflow;
-import org.junit.Test;
 import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -241,8 +241,9 @@ public class PreferencesReaderWriterTest
 
         assertThat(Files.readString(directory.resolve("custom_format_text.dat"))).isEqualTo(text);
         PreferencesReaderWriter restored = new PreferencesReaderWriter(preferences, directory);
-        assertThat(restored.getStringPreference(PreferencesReaderWriter.CUSTOM_FORMAT_TEXT, ""))
-                .isEqualTo(text);
+        assertThat(restored.getStringPreference(
+                PreferencesReaderWriter.CUSTOM_FORMAT_TEXT,
+                "")).isEqualTo(text);
         Mockito.verifyNoInteractions(preferences);
     }
 

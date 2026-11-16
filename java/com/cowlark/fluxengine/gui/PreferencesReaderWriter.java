@@ -40,15 +40,19 @@ public class PreferencesReaderWriter
     static final String DEVICE_SERIALPORT = "serialport";
 
     /* Large text values live in configuration files instead of the size-limited store. */
-    private static final ImmutableSet<String> FILE_PREFERENCES = ImmutableSet.of(CUSTOM_FORMAT_TEXT);
+    private static final ImmutableSet<String> FILE_PREFERENCES =
+            ImmutableSet.of(CUSTOM_FORMAT_TEXT);
 
     private final Preferences preferences;
     private final Path configDirectory;
 
     PreferencesReaderWriter(Preferences preferences)
     {
-        this(preferences, Path.of(AppDirsFactory.getInstance()
-                .getUserConfigDir("FluxEngine", null, "Cowlark")));
+        this(
+                preferences,
+                Path.of(AppDirsFactory
+                        .getInstance()
+                        .getUserConfigDir("FluxEngine", null, "Cowlark")));
     }
 
     /* Allow callers to select an isolated configuration directory for tests. */
@@ -87,7 +91,8 @@ public class PreferencesReaderWriter
         return rawMap
                 .entrySet()
                 .stream()
-                .map(e -> Pair.of(URLDecoder.decode(e.getKey(), StandardCharsets.UTF_8),
+                .map(e -> Pair.of(
+                        URLDecoder.decode(e.getKey(), StandardCharsets.UTF_8),
                         URLDecoder.decode(e.getValue(), StandardCharsets.UTF_8)))
                 .collect(Association.collectorOf(String.class, String.class));
     }
@@ -121,7 +126,8 @@ public class PreferencesReaderWriter
     <E extends Enum<E>> Var<E> makeEnumPreference(String name, E defaultValue)
     {
         E initial = Enums
-                .getIfPresent(defaultValue.getDeclaringClass(),
+                .getIfPresent(
+                        defaultValue.getDeclaringClass(),
                         getStringPreference(name, defaultValue.name()))
                 .or(defaultValue);
         Var<E> value = Var.of(initial);

@@ -3,15 +3,15 @@ package com.cowlark.fluxengine.gui;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
-import com.cowlark.fluxengine.core.FluxEngineException;
 import com.cowlark.fluxengine.config.ConfigBuilder;
+import com.cowlark.fluxengine.core.FluxEngineException;
 import com.cowlark.fluxengine.data.Formats;
 import com.cowlark.fluxengine.usb.UsbFinder;
 import com.google.common.collect.ImmutableList;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
 import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -32,10 +32,10 @@ import java.util.prefs.Preferences;
 @RunWith(JUnit4.class)
 public class CustomFormatTest
 {
+    @Rule public TemporaryFolder temporaryFolder = new TemporaryFolder();
     private Preferences preferences;
     private PreferencesReaderWriter writer;
     private ImageViewModel model;
-    @Rule public TemporaryFolder temporaryFolder = new TemporaryFolder();
     private EventProcessor previousEventProcessor;
 
     private static JButton button(java.awt.Container panel, String text)
@@ -121,8 +121,9 @@ public class CustomFormatTest
     @Test
     public void ignoresRemovedSavedOptionsWhenBuildingConfig()
     {
-        writer.setOptionsForFormat("acornadfs", Association.between(String.class, String.class)
-                .put("f", "").put("160", ""));
+        writer.setOptionsForFormat(
+                "acornadfs",
+                Association.between(String.class, String.class).put("f", "").put("160", ""));
         model.getSelectedFormat().set(From.VIEW, "acornadfs");
         ConfigBuilder builder = model.makeConfigBuilderWithFormat();
         builder.build();
@@ -134,9 +135,10 @@ public class CustomFormatTest
     public void editorTextProvidesConfigurationAndOptions() throws Exception
     {
         SwingUtilities.invokeAndWait(() -> {
-            model.getCustomFormatText().set(From.VIEW,
+            model.getCustomFormatText().set(
+                    From.VIEW,
                     "shortname = \"ibm\"\ncomment = \"custom data\"\n" +
-                    "option = [{ name = \"test\" comment = \"First choice\" }]\n");
+                            "option = [{ name = \"test\" comment = \"First choice\" }]\n");
             model.getSelectedFormat().set(From.VIEW, ImageViewModel.CUSTOM_FORMAT);
             ConfigurationPanel panel = new ConfigurationPanel(model);
             assertThat(button(panel, "Select file")).isNull();
@@ -145,8 +147,9 @@ public class CustomFormatTest
             assertThat(model.makeConfigBuilderWithFormat().get("comment")).isEqualTo("custom data");
             assertThat(model.getFormatConfig("ibm").getComment()).isNotEqualTo("custom data");
 
-            model.getCustomFormatText().set(From.VIEW,
-                    "option = [{ name = \"test\" comment = \"Second choice\" }]\n");
+            model
+                    .getCustomFormatText()
+                    .set(From.VIEW, "option = [{ name = \"test\" comment = \"Second choice\" }]\n");
             assertThat(hasLabel(panel, "Second choice")).isTrue();
             assertThat(hasLabel(panel, "First choice")).isFalse();
         });
@@ -181,21 +184,26 @@ public class CustomFormatTest
     {
         model.onCopyFromCurrentFormat();
         assertThat(model.getSelectedFormat().get()).isEqualTo(ImageViewModel.CUSTOM_FORMAT);
-        assertThat(model.getCustomFormatText().get()).isEqualTo(
-                Formats.loadText("ibm"));
+        assertThat(model.getCustomFormatText().get()).isEqualTo(Formats.loadText("ibm"));
     }
 
     /* Valid source changes retain compatible choices and discard options that disappeared. */
     @Test
     public void sourceChangesReconcileSavedOptions()
     {
-        writer.setOptionsForFormat(ImageViewModel.CUSTOM_FORMAT,
-                Association.between(String.class, String.class)
-                        .put("keep", "").put("removed", "").put("density", "hd"));
-        model.getCustomFormatText().set(From.VIEW,
+        writer.setOptionsForFormat(
+                ImageViewModel.CUSTOM_FORMAT,
+                Association
+                        .between(String.class, String.class)
+                        .put("keep", "")
+                        .put("removed", "")
+                        .put("density", "hd"));
+        model.getCustomFormatText().set(
+                From.VIEW,
                 "option = [{ name = \"keep\" }]\n" +
-                "option_group = [{ name = \"density\" option = [{ name = \"dd\" }] }]\n");
-        assertThat(writer.getOptionsForFormat(ImageViewModel.CUSTOM_FORMAT).toMap())
-                .containsExactly("keep", "");
+                        "option_group = [{ name = \"density\" option = [{ name = \"dd\" }] }]\n");
+        assertThat(writer
+                .getOptionsForFormat(ImageViewModel.CUSTOM_FORMAT)
+                .toMap()).containsExactly("keep", "");
     }
 }
