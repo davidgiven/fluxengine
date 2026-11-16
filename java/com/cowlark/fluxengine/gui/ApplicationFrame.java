@@ -94,13 +94,18 @@ public class ApplicationFrame extends JFrame
 
         /* Start on the image, and open the editor when the custom format is selected. */
         centreTabs.setSelectedComponent(imagePanel);
-        Viewable.cast(model.getSelectedFormat()).onChange(From.ALL, change -> {
-            if (ImageViewModel.CUSTOM_FORMAT.equals(change.currentValue().orElseThrowUnchecked()))
-                EDT_EXECUTOR.execute(() -> {
-                    if (ImageViewModel.CUSTOM_FORMAT.equals(model.getSelectedFormat().get()))
-                        centreTabs.setSelectedComponent(formatEditorPanel);
+        Viewable.cast(model.getSelectedFormat()).onChange(
+                From.ALL, change -> {
+                    if (ImageViewModel.CUSTOM_FORMAT.equals(change
+                            .currentValue()
+                            .orElseThrowUnchecked()))
+                        EDT_EXECUTOR.execute(() -> {
+                            if (ImageViewModel.CUSTOM_FORMAT.equals(model
+                                    .getSelectedFormat()
+                                    .get()))
+                                centreTabs.setSelectedComponent(formatEditorPanel);
+                        });
                 });
-        });
 
         UIForSplitPane<JSplitPane> topPane =
                 splitPane(HORIZONTAL).peek(pane -> pane.setResizeWeight(1.0))

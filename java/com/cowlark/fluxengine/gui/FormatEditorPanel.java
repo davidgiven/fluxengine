@@ -8,15 +8,21 @@ import static swingtree.UIFactoryMethods.panel;
 
 import com.cowlark.fluxengine.data.Formats;
 import com.formdev.flatlaf.util.UIScale;
+import org.fife.ui.rsyntaxtextarea.AbstractTokenMakerFactory;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rsyntaxtextarea.Theme;
+import org.fife.ui.rsyntaxtextarea.TokenMakerFactory;
 import org.fife.ui.rtextarea.RTextScrollPane;
+import org.jspecify.annotations.NonNull;
 import sprouts.From;
 import sprouts.Val;
 import sprouts.Viewable;
 import swingtree.UI;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
+import javax.swing.KeyStroke;
+import javax.swing.text.DefaultEditorKit;
 import javax.swing.UIManager;
 import java.awt.Color;
 import java.awt.Font;
@@ -28,6 +34,14 @@ import java.io.UncheckedIOException;
 
 public class FormatEditorPanel extends JPanel
 {
+    /* Register the custom lexer once for all format editor documents. */
+    static
+    {
+        AbstractTokenMakerFactory factory =
+                (AbstractTokenMakerFactory) TokenMakerFactory.getDefaultInstance();
+        factory.putMapping(PxfTokenMaker.SYNTAX_STYLE, PxfTokenMaker.class.getName());
+    }
+
     private final RSyntaxTextArea textEditor;
     private final Val<Boolean> customSelected;
     private String displayedFormat;
@@ -40,11 +54,15 @@ public class FormatEditorPanel extends JPanel
                 .getSelectedFormat()
                 .viewAs(Boolean.class, ImageViewModel.CUSTOM_FORMAT::equals);
 
-        /* Provide code editing features for PXF source. A PXF syntax highlighter can be
-         * added when format loading is implemented. */
+        /* Provide code editing features for PXF source. */
         textEditor = new RSyntaxTextArea();
         textEditor.setTabSize(4);
         textEditor.setAutoIndentEnabled(true);
+
+        /* Insert double quotes literally so triple-quoted PXF strings can be typed without
+         * RSyntaxTextArea adding matching quotes. */
+        textEditor.getInputMap().put(KeyStroke.getKeyStroke('"'),
+                DefaultEditorKit.defaultKeyTypedAction);
 
         /* Follow the selected format while preserving the editor's document notifications.
          * Only the custom slot follows the editable source property. */
@@ -89,24 +107,7 @@ public class FormatEditorPanel extends JPanel
 
         /* Mute read-only source without disabling selection or copying. Restore the theme's
          * original colours when the custom format becomes editable again. */
-        Color editableForeground = textEditor.getForeground();
-        Color editableBackground = textEditor.getBackground();
-        Color gutterForeground = editorScrollPane.getGutter().getLineNumberColor();
-        Color gutterBackground = editorScrollPane.getGutter().getBackground();
-        Runnable updateReadOnlyAppearance = () -> {
-            Color readOnlyForeground = firstNonNull(
-                    UIManager.getColor("TextArea.inactiveForeground"),
-                    textEditor.getDisabledTextColor());
-            Color readOnlyBackground = firstNonNull(
-                    UIManager.getColor("TextArea.inactiveBackground"), editableBackground);
-            boolean editable = textEditor.isEditable();
-            textEditor.setForeground(editable ? editableForeground : readOnlyForeground);
-            textEditor.setBackground(editable ? editableBackground : readOnlyBackground);
-            editorScrollPane.getGutter().setLineNumberColor(
-                    editable ? gutterForeground : readOnlyForeground);
-            editorScrollPane.getGutter().setBackground(
-                    editable ? gutterBackground : readOnlyBackground);
-        };
+        Runnable updateReadOnlyAppearance = getUpdateReadOnlyAppearance(editorScrollPane);
         textEditor.addPropertyChangeListener("editable", event -> updateReadOnlyAppearance.run());
         updateReadOnlyAppearance.run();
 
@@ -134,10 +135,41 @@ public class FormatEditorPanel extends JPanel
                                                 .isEnabledIf(notBusy)
                                                 .isVisibleIfNot(customSelected)
                                                 .onClick(event -> model.onCopyFromCurrentFormat())
-                                                .peek(button -> JLayeredPane.putLayer(button,
+                                                .peek(button -> JLayeredPane.putLayer(
+                                                        button,
                                                         JLayeredPane.PALETTE_LAYER)))
                                 .withPrefSize(0, 0)
                                 .withMinSize(0, 0));
+    }
+
+    private @NonNull Runnable getUpdateReadOnlyAppearance(RTextScrollPane editorScrollPane)
+    {
+        Color editableForeground = textEditor.getForeground();
+        Color editableBackground = textEditor.getBackground();
+        Color gutterForeground = editorScrollPane.getGutter().getLineNumberColor();
+        Color gutterBackground = editorScrollPane.getGutter().getBackground();
+        return () -> {
+            Color readOnlyForeground =
+                    firstNonNull(
+                            UIManager.getColor("TextArea.inactiveForeground"),
+                            textEditor.getDisabledTextColor());
+            Color readOnlyBackground =
+                    firstNonNull(
+                            UIManager.getColor("TextArea.inactiveBackground"),
+                            editableBackground);
+            boolean editable = textEditor.isEditable();
+            textEditor.setSyntaxEditingStyle(editable ?
+                    PxfTokenMaker.SYNTAX_STYLE :
+                    SyntaxConstants.SYNTAX_STYLE_NONE);
+            textEditor.setForeground(editable ? editableForeground : readOnlyForeground);
+            textEditor.setBackground(editable ? editableBackground : readOnlyBackground);
+            editorScrollPane
+                    .getGutter()
+                    .setLineNumberColor(editable ? gutterForeground : readOnlyForeground);
+            editorScrollPane
+                    .getGutter()
+                    .setBackground(editable ? gutterBackground : readOnlyBackground);
+        };
     }
 
     /* Save pending custom edits before a selection change replaces the document, even if

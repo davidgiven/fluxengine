@@ -8,6 +8,8 @@ import com.cowlark.fluxengine.core.FluxEngineException;
 import com.cowlark.fluxengine.data.Formats;
 import com.cowlark.fluxengine.usb.UsbFinder;
 import com.google.common.collect.ImmutableList;
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -60,6 +62,60 @@ public class CustomFormatTest
             if (component instanceof JLabel label && label.getText().contains(text))
                 return true;
         return false;
+    }
+
+    private static RSyntaxTextArea editor(java.awt.Container panel)
+    {
+        for (Component component : panel.getComponents())
+        {
+            if (component instanceof RSyntaxTextArea area)
+                return area;
+            if (component instanceof java.awt.Container container)
+            {
+                RSyntaxTextArea found = editor(container);
+                if (found != null)
+                    return found;
+            }
+        }
+        return null;
+    }
+
+    /* Double quotes must be inserted literally, including consecutive triple delimiters. */
+    @Test
+    public void typingQuotesDoesNotInsertMatchingQuotes() throws Exception
+    {
+        SwingUtilities.invokeAndWait(() -> {
+            model.getSelectedFormat().set(From.VIEW, ImageViewModel.CUSTOM_FORMAT);
+            RSyntaxTextArea area = editor(new FormatEditorPanel(model));
+            area.setText("");
+            Object actionKey = area.getInputMap().get(javax.swing.KeyStroke.getKeyStroke('"'));
+            javax.swing.Action action = area.getActionMap().get(actionKey);
+            for (int count = 1; count <= 3; count++)
+            {
+                action.actionPerformed(new java.awt.event.ActionEvent(
+                        area, java.awt.event.ActionEvent.ACTION_PERFORMED, "\""));
+                assertThat(area.getText()).isEqualTo("\"".repeat(count));
+            }
+        });
+    }
+
+    /* Highlighting is active only while editing is allowed, including busy-state changes. */
+    @Test
+    public void syntaxHighlightingFollowsEditability() throws Exception
+    {
+        SwingUtilities.invokeAndWait(() -> {
+            FormatEditorPanel panel = new FormatEditorPanel(model);
+            RSyntaxTextArea area = editor(panel);
+            assertThat(area.getSyntaxEditingStyle()).isEqualTo(SyntaxConstants.SYNTAX_STYLE_NONE);
+            model.getSelectedFormat().set(From.VIEW, ImageViewModel.CUSTOM_FORMAT);
+            assertThat(area.getSyntaxEditingStyle()).isEqualTo(PxfTokenMaker.SYNTAX_STYLE);
+            area.setEditable(false);
+            assertThat(area.getSyntaxEditingStyle()).isEqualTo(SyntaxConstants.SYNTAX_STYLE_NONE);
+            area.setEditable(true);
+            assertThat(area.getSyntaxEditingStyle()).isEqualTo(PxfTokenMaker.SYNTAX_STYLE);
+            model.getSelectedFormat().set(From.VIEW, "ibm");
+            assertThat(area.getSyntaxEditingStyle()).isEqualTo(SyntaxConstants.SYNTAX_STYLE_NONE);
+        });
     }
 
     @Before

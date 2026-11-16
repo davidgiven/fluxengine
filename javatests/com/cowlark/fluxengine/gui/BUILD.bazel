@@ -12,6 +12,7 @@ java_test(
         "//java/com/cowlark/fluxengine/data",
         "//java/com/cowlark/fluxengine/gui",
         "//java/com/cowlark/fluxengine/usb",
+        "@maven//:com_fifesoft_rsyntaxtextarea",
         "@maven//:com_google_guava_guava",
         "@maven//:com_google_truth_truth",
         "@maven//:io_github_globaltcad_sprouts",
