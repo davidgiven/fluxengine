@@ -81,8 +81,8 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel
     {
         this.model = model;
 
-        /* Initialize after all fields so IDE member rearrangement cannot create a forward
-         * reference to filesystemExecutor in a field initializer. */
+        /* Initialise after all fields so IDE member rearrangement cannot create a forward
+         * reference to filesystemExecutor in a field initialiser. */
         executor = task -> {
             getFilesystem();
             filesystemExecutor.execute(task);

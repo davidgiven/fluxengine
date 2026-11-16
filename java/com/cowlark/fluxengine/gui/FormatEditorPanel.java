@@ -2,6 +2,7 @@ package com.cowlark.fluxengine.gui;
 
 import static com.cowlark.fluxengine.gui.UiUtils.and;
 import static com.cowlark.fluxengine.gui.UiUtils.not;
+import static com.google.common.base.MoreObjects.firstNonNull;
 import static swingtree.UIFactoryMethods.button;
 import static swingtree.UIFactoryMethods.panel;
 
@@ -16,6 +17,8 @@ import sprouts.Viewable;
 import swingtree.UI;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
+import javax.swing.UIManager;
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -83,6 +86,29 @@ public class FormatEditorPanel extends JPanel
             throw new UncheckedIOException("Cannot load the format editor's dark theme", e);
         }
         textEditor.setFont(new Font(Font.MONOSPACED, Font.PLAIN, UIScale.scale(14)));
+
+        /* Mute read-only source without disabling selection or copying. Restore the theme's
+         * original colours when the custom format becomes editable again. */
+        Color editableForeground = textEditor.getForeground();
+        Color editableBackground = textEditor.getBackground();
+        Color gutterForeground = editorScrollPane.getGutter().getLineNumberColor();
+        Color gutterBackground = editorScrollPane.getGutter().getBackground();
+        Runnable updateReadOnlyAppearance = () -> {
+            Color readOnlyForeground = firstNonNull(
+                    UIManager.getColor("TextArea.inactiveForeground"),
+                    textEditor.getDisabledTextColor());
+            Color readOnlyBackground = firstNonNull(
+                    UIManager.getColor("TextArea.inactiveBackground"), editableBackground);
+            boolean editable = textEditor.isEditable();
+            textEditor.setForeground(editable ? editableForeground : readOnlyForeground);
+            textEditor.setBackground(editable ? editableBackground : readOnlyBackground);
+            editorScrollPane.getGutter().setLineNumberColor(
+                    editable ? gutterForeground : readOnlyForeground);
+            editorScrollPane.getGutter().setBackground(
+                    editable ? gutterBackground : readOnlyBackground);
+        };
+        textEditor.addPropertyChangeListener("editable", event -> updateReadOnlyAppearance.run());
+        updateReadOnlyAppearance.run();
 
         /* Keep the copy action above the viewport without covering its scrollbars or
          * intercepting mouse events elsewhere in the editor. */
