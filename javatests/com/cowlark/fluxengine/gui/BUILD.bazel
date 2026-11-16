@@ -9,6 +9,7 @@ java_test(
         "//java/com/cowlark/fluxengine/config",
         "//java/com/cowlark/fluxengine/config:config_java_proto",
         "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/data",
         "//java/com/cowlark/fluxengine/gui",
         "//java/com/cowlark/fluxengine/usb",
         "@maven//:com_google_guava_guava",

@@ -20,7 +20,6 @@ import com.cowlark.fluxengine.config.ConfigProto;
 import com.cowlark.fluxengine.config.OptionApplicabilityHint;
 import com.cowlark.fluxengine.config.OptionGroupProto;
 import com.cowlark.fluxengine.config.OptionProto;
-import com.cowlark.fluxengine.core.FluxEngineException;
 import com.cowlark.fluxengine.data.Formats;
 import com.cowlark.fluxengine.usb.UsbFinder;
 import com.google.common.collect.ImmutableList;
@@ -45,7 +44,6 @@ import javax.swing.ListCellRenderer;
 import javax.swing.Scrollable;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentListener;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -92,7 +90,7 @@ public class ConfigurationPanel extends JPanel implements Scrollable
                 .cast(model.getUsbDevices())
                 .onChange(From.ALL, it -> EDT_EXECUTOR.execute(this::rebuildUi));
         Viewable
-                .cast(model.getCustomFormatFilename())
+                .cast(model.getCustomFormatText())
                 .onChange(From.ALL, it -> EDT_EXECUTOR.execute(this::rebuildUi));
         rebuildUi();
     }
@@ -337,72 +335,12 @@ public class ConfigurationPanel extends JPanel implements Scrollable
                                 this::formatRenderer).onSelection(it -> model
                                 .getSelectedFormat()
                                 .set(From.VIEW, (String) it.get().getSelectedItem())));
-        if (model.getSelectedFormat().get().equals(ImageViewModel.CUSTOM_FORMAT))
-        {
-            /* Custom-file controls belong to the selected format, above its options. */
-            String filename = model.getCustomFormatFilename().get();
-            panel = panel
-                    .add(LABEL_FORMAT, label("Path:"))
-                    .add(
-                            SETTING_FORMAT + ", wmin 0, wrap",
-                            UI.textField(filename).isEditableIf(false).peek(field -> {
-                                /* A fixed column count keeps long paths out of layout sizing.
-                                 * Pin the caret to the end to show the filename when clipped. */
-                                field.setName("customFormatPath");
-                                field.setColumns(1);
-                                field.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-                                field.setToolTipText(filename);
-                                field.setCaretPosition(field.getDocument().getLength());
-                            }))
-                    .add(
-                            SETTING_FORMAT + ", skip 1, wrap",
-                            panel(
-                                    "fillx, insets 0",
-                                    "[0:pref:, grow, fill, sg buttons][0:pref:, grow, fill, sg " +
-                                            "buttons]")
-                                    .add(
-                                            "wmin 0",
-                                            button("Select file").onClick(it -> EDT_EXECUTOR.execute(
-                                                    this::onSelectCustomFormat)))
-                                    .add(
-                                            "wmin 0",
-                                            button("Reload file")
-                                                    .isEnabledIf(!filename.isEmpty())
-                                                    .onClick(it -> EDT_EXECUTOR.execute(() -> loadCustomFormat(
-                                                            model
-                                                                    .getCustomFormatFilename()
-                                                                    .get())))));
-        }
         panel = emitOptions(
                 panel,
                 model.getOptionsForFormat(model.getSelectedFormat().get()),
                 model.getFormatConfig(model.getSelectedFormat().get()),
                 ImmutableSet.of());
         return panel;
-    }
-
-    /* Reuse the remembered chooser directory and allow reselecting the current file. */
-    private void onSelectCustomFormat()
-    {
-        JFileChooser chooser = model.getPreferencesReaderWriter().createFileChooser();
-        chooser.setDialogTitle("Select custom format file");
-        chooser.setFileFilter(new FileNameExtensionFilter("PXF format files (*.pxf)", "pxf"));
-        String filename = model.getCustomFormatFilename().get();
-        if (!filename.isEmpty())
-            chooser.setSelectedFile(new File(filename));
-        if (chooser.showOpenDialog(this) == APPROVE_OPTION)
-            loadCustomFormat(chooser.getSelectedFile().getAbsolutePath());
-    }
-
-    private void loadCustomFormat(String filename)
-    {
-        try
-        {
-            model.onCustomFormatChanged(filename);
-        } catch (FluxEngineException e)
-        {
-            UI.message(e.getMessage()).showAsError();
-        }
     }
 
     private UIForPanel<ConfigurationPanel> buildDevicesPane(UIForPanel<ConfigurationPanel> panel)

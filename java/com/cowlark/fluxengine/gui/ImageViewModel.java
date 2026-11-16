@@ -58,9 +58,7 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.InvalidPathException;
-import java.nio.file.Path;
+import java.nio.charset.StandardCharsets;
 import java.util.function.Supplier;
 
 public class ImageViewModel
@@ -76,10 +74,7 @@ public class ImageViewModel
             PublishSubject.<ImmutableList<Track>>create().toSerialized();
     @Getter(lazy = true) private final FilesystemTreeTableModel filesystemTreeTableModel =
             new FilesystemTreeTableModel(this);
-    /* The custom slot has a stable identity independent of the loaded file's metadata. */
-    @Getter private Var<String> customFormatFilename;
     @Getter private Var<String> customFormatText;
-    private volatile ConfigProto customFormat;
     @Getter private Var<String> statusMessage = Var.of("Ready");
     @Getter private Var<String> selectedFormat;
     @Getter private Var<String> selectedDevice;
@@ -102,14 +97,16 @@ public class ImageViewModel
         this.preferencesReaderWriter = preferencesReaderWriter;
 
         selectedFormat = makeStringPreference(FORMAT, "ibm");
-        customFormatFilename =
-                makeStringPreference(PreferencesReaderWriter.CUSTOM_FORMAT_FILENAME, "");
         customFormatText = makeStringPreference(PreferencesReaderWriter.CUSTOM_FORMAT_TEXT, "");
         selectedDevice = makeStringPreference(DEVICE, DEVICE_FLUXFILE);
         selectedFluxFile = makeStringPreference(DEVICE_FLUXFILE, "");
         selectedSerialPort = makeStringPreference(DEVICE_SERIALPORT, "");
         advancedSettings = makeStringPreference(ADVANCED_SETTINGS, DEFAULT_ADVANCED_SETTINGS);
         selectedDrive = makeIntegerPreference(DRIVE, 0);
+
+        /* Reconcile custom options before UI listeners observe source changes. */
+        Viewable.cast(customFormatText).onChange(From.ALL, change -> onCustomFormatChanged());
+        onCustomFormatChanged();
 
         refreshUsbDevices();
     }
@@ -133,11 +130,19 @@ public class ImageViewModel
                 .build();
     }
 
-    /* Unloaded custom formats expose no options until a file is selected successfully. */
+    /* Incomplete editor text has no options; engine operations report its parse error. */
     ConfigProto getFormatConfig(String name)
     {
         if (name.equals(CUSTOM_FORMAT))
-            return customFormat != null ? customFormat : ConfigProto.getDefaultInstance();
+        {
+            try
+            {
+                return parseCustomFormat();
+            } catch (FluxEngineException e)
+            {
+                return ConfigProto.getDefaultInstance();
+            }
+        }
         ConfigProto config = Formats.get(name);
         return config != null ? config : ConfigProto.getDefaultInstance();
     }
@@ -149,31 +154,35 @@ public class ImageViewModel
         try
         {
             if (selectedFormat.get().equals(CUSTOM_FORMAT))
-                text = Files.readString(Path.of(customFormatFilename.get()));
+                return;
             else
                 text = Formats.loadText(selectedFormat.get());
-        } catch (IOException | InvalidPathException e)
+        } catch (IOException e)
         {
             throw new FluxEngineException("cannot read format source: " + e, e);
         }
 
         /* Update the editor only after the source has been read successfully. */
         customFormatText.set(From.VIEW, text);
+        selectedFormat.set(From.VIEW, CUSTOM_FORMAT);
     }
 
-    /* Parse before publishing changes; explicit notifications also support same-path reloads.
-     * GUI callers invoke this method on the EDT. */
-    public void onCustomFormatChanged(String filename)
+    /* Parse the editor source for both option controls and engine configuration. */
+    private ConfigProto parseCustomFormat()
+    {
+        return Formats.parse(customFormatText.get().getBytes(StandardCharsets.UTF_8));
+    }
+
+    /* Keep saved options compatible with valid edits, while allowing unfinished source. */
+    private void onCustomFormatChanged()
     {
         ConfigProto config;
         try
         {
-            config = Formats.parse(Files.readAllBytes(Path.of(filename)));
-        } catch (IOException | FluxEngineException | InvalidPathException e)
+            config = parseCustomFormat();
+        } catch (FluxEngineException e)
         {
-            throw new FluxEngineException(
-                    "cannot load custom format '" + filename + "': " + e.getMessage(),
-                    e);
+            return;
         }
 
         /* Keep only choices still represented by the new format definition. */
@@ -203,16 +212,7 @@ public class ImageViewModel
                 compatible = compatible.put(choice.first(), choice.second());
         }
 
-        /* Listeners must see the complete snapshot and filtered preferences when notified. */
         preferencesReaderWriter.setOptionsForFormat(CUSTOM_FORMAT, compatible);
-        customFormat = config;
-        preferencesReaderWriter.setStringPreference(
-                PreferencesReaderWriter.CUSTOM_FORMAT_FILENAME,
-                filename);
-        if (customFormatFilename.get().equals(filename))
-            customFormatFilename.fireChange(From.VIEW_MODEL);
-        else
-            customFormatFilename.set(From.VIEW_MODEL, filename);
     }
 
     /* Entry point for opening the selected captures in a flux view. */
@@ -517,9 +517,7 @@ public class ImageViewModel
         builder.loadConfigFile("_global_options");
         if (selectedFormat.get().equals(CUSTOM_FORMAT))
         {
-            if (customFormat == null)
-                throw new FluxEngineException("Select a custom format file first");
-            builder.mergeConfig(customFormat);
+            builder.mergeConfig(parseCustomFormat());
         } else
             builder.loadConfigFile(selectedFormat.get());
 

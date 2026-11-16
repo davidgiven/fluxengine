@@ -1,12 +1,12 @@
 package com.cowlark.fluxengine.gui;
 
-import static com.cowlark.fluxengine.gui.UiUtils.not;
 import static com.cowlark.fluxengine.gui.UiUtils.and;
+import static com.cowlark.fluxengine.gui.UiUtils.not;
 import static swingtree.UIFactoryMethods.button;
 import static swingtree.UIFactoryMethods.panel;
 
-import com.formdev.flatlaf.util.UIScale;
 import com.cowlark.fluxengine.data.Formats;
+import com.formdev.flatlaf.util.UIScale;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.Theme;
 import org.fife.ui.rtextarea.RTextScrollPane;
@@ -14,8 +14,8 @@ import sprouts.From;
 import sprouts.Val;
 import sprouts.Viewable;
 import swingtree.UI;
-import javax.swing.JPanel;
 import javax.swing.JLayeredPane;
+import javax.swing.JPanel;
 import java.awt.Font;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -33,7 +33,8 @@ public class FormatEditorPanel extends JPanel
     {
         /* Editing requires an idle engine and the custom format slot. */
         Val<Boolean> notBusy = not(model.getBusy());
-        customSelected = model.getSelectedFormat()
+        customSelected = model
+                .getSelectedFormat()
                 .viewAs(Boolean.class, ImageViewModel.CUSTOM_FORMAT::equals);
 
         /* Provide code editing features for PXF source. A PXF syntax highlighter can be
@@ -45,15 +46,19 @@ public class FormatEditorPanel extends JPanel
         /* Follow the selected format while preserving the editor's document notifications.
          * Only the custom slot follows the editable source property. */
         showSelectedFormat(model);
-        Viewable.cast(model.getSelectedFormat()).onChange(From.ALL,
-                change -> UI.run(() -> showSelectedFormat(model)));
-        Viewable.cast(model.getCustomFormatText()).onChange(From.ALL, change -> {
-            UI.run(() -> {
-                if (ImageViewModel.CUSTOM_FORMAT.equals(displayedFormat) &&
-                        ImageViewModel.CUSTOM_FORMAT.equals(model.getSelectedFormat().get()))
-                    replaceText(model.getCustomFormatText().get());
-            });
-        });
+        Viewable
+                .cast(model.getSelectedFormat())
+                .onChange(From.ALL, change -> UI.run(() -> showSelectedFormat(model)));
+        Viewable.cast(model.getCustomFormatText()).onChange(
+                From.ALL, change -> {
+                    UI.run(() -> {
+                        if (ImageViewModel.CUSTOM_FORMAT.equals(displayedFormat) &&
+                                ImageViewModel.CUSTOM_FORMAT.equals(model
+                                        .getSelectedFormat()
+                                        .get()))
+                            replaceText(model.getCustomFormatText().get());
+                    });
+                });
         UI.of(textEditor).isEditableIf(and(notBusy, customSelected));
         textEditor.addFocusListener(new FocusAdapter()
         {
@@ -70,11 +75,10 @@ public class FormatEditorPanel extends JPanel
 
         /* Apply the bundled dark theme after attaching the gutter so both are styled. */
         try (InputStream themeStream = RSyntaxTextArea.class.getResourceAsStream(
-                     "/org/fife/ui/rsyntaxtextarea/themes/dark.xml"))
+                "/org/fife/ui/rsyntaxtextarea/themes/dark.xml"))
         {
             Theme.load(themeStream).apply(textEditor);
-        }
-        catch (IOException e)
+        } catch (IOException e)
         {
             throw new UncheckedIOException("Cannot load the format editor's dark theme", e);
         }
@@ -92,19 +96,23 @@ public class FormatEditorPanel extends JPanel
                                 .add("align left", button("Load").isEnabledIf(notBusy))
                                 .add("align left", button("Save").isEnabledIf(notBusy)))
                 /* Let the existing window layout determine the viewport size instead of
-                 * deriving it from the length and number of lines in the document. */
-                .add("grow, push", UI.of(new JLayeredPane())
-                        .withLayout("fill, insets 0, hidemode 3")
-                        .add("grow, push", UI.of(editorScrollPane))
-                        .add("pos (container.w-pref-" + inset + "px) " + inset + "px",
-                                button("Customise")
-                                        .isEnabledIf(notBusy)
-                                        .isVisibleIfNot(customSelected)
-                                        .onClick(event -> model.onCopyFromCurrentFormat())
-                                        .peek(button -> JLayeredPane.putLayer(
-                                                button, JLayeredPane.PALETTE_LAYER)))
-                        .withPrefSize(0, 0)
-                        .withMinSize(0, 0));
+                 * deriving it from the length and number of lines in the document. */.add(
+                        "grow, push",
+                        UI
+                                .of(new JLayeredPane())
+                                .withLayout("fill, insets 0, hidemode 3")
+                                .add("grow, push", UI.of(editorScrollPane))
+                                .add(
+                                        "pos (container.w-pref-" + inset + "px) " + inset + "px",
+                                        button("Customise")
+                                                .isEnabledIf(notBusy)
+                                                .isVisibleIfNot(customSelected)
+                                                .onClick(event -> model.onCopyFromCurrentFormat())
+                                                .peek(button -> JLayeredPane.putLayer(
+                                                        button,
+                                                        JLayeredPane.PALETTE_LAYER)))
+                                .withPrefSize(0, 0)
+                                .withMinSize(0, 0));
     }
 
     /* Save pending custom edits before a selection change replaces the document, even if
