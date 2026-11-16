@@ -80,6 +80,11 @@ public class FormatEditorPanel extends JPanel
                             replaceText(model.getCustomFormatText().get());
                     });
                 });
+
+        /* Schedule syntax diagnostics through the editor without an intentional typing delay. */
+        textEditor.setParserDelay(0);
+        textEditor.addParser(new PxfParser());
+
         UI.of(textEditor).isEditableIf(and(notBusy, customSelected));
         textEditor.addFocusListener(new FocusAdapter()
         {

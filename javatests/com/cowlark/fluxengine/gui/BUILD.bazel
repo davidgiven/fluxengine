@@ -149,3 +149,15 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "PxfParserTest",
+    srcs = ["PxfParserTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/gui",
+        "@maven//:com_fifesoft_rsyntaxtextarea",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+        "@maven//:org_protowire_protowire_pxf_runtime",
+    ],
+)
