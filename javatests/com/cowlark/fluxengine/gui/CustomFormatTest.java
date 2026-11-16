@@ -108,6 +108,24 @@ public class CustomFormatTest
         SwingUtilities.invokeAndWait(() -> model.onCustomFormatChanged(file.toString()));
     }
 
+    /* The floating action follows format selection both initially and after changes. */
+    @Test
+    public void customiseButtonIsVisibleOnlyForBuiltInFormats() throws Exception
+    {
+        SwingUtilities.invokeAndWait(() -> {
+            model.getSelectedFormat().set(From.VIEW, ImageViewModel.CUSTOM_FORMAT);
+            FormatEditorPanel panel = new FormatEditorPanel(model);
+            JButton customise = button(panel, "Customise");
+            assertThat(customise.isVisible()).isFalse();
+
+            model.getSelectedFormat().set(From.VIEW, "ibm");
+            assertThat(customise.isVisible()).isTrue();
+
+            model.getSelectedFormat().set(From.VIEW, ImageViewModel.CUSTOM_FORMAT);
+            assertThat(customise.isVisible()).isFalse();
+        });
+    }
+
     @Test
     public void customSelectionUsesLoadedSnapshotRegardlessOfMetadata() throws Exception
     {
