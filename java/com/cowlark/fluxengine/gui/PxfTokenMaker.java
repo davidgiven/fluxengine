@@ -140,11 +140,14 @@ public class PxfTokenMaker extends AbstractTokenMaker implements TokenTypes
         /* End tokens retain multiline state, including through empty lines. */
         if (embedded != null)
             finishMarkdown(embedded);
-        else
+        else if (finalType == COMMENT_MULTILINE)
         {
+            /* A continuing comment ends with its real token, not a null token relabelled
+             * as paintable. Empty lines need a zero-length token with a valid text span. */
+            if (firstToken == null)
+                addToken(line.array, line.offset, line.offset - 1, COMMENT_MULTILINE, startOffset);
+        } else
             addNullToken();
-            currentToken.setType(finalType);
-        }
         return firstToken;
     }
 

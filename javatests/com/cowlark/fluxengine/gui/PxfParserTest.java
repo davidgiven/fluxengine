@@ -53,14 +53,14 @@ public class PxfParserTest
         String nested = parser.getIdentifierToolTip(text, text.indexOf("comment", 10));
         assertThat(nested).contains("OptionProto.comment");
         assertThat(nested).contains("help text for option");
-        assertThat(nested).contains("optional string");
+        assertThat(nested).contains("<br>string<br>");
     }
 
     @Test
-    public void identifierTooltipsHandleDottedFieldsAndEnums() throws Exception
+    public void identifierTooltipsHandleNestedFieldsAndEnums() throws Exception
     {
-        /* Each dotted path component and an enum value has its own schema information. */
-        String text = "drive.drive_type = DRIVETYPE_UNKNOWN\n";
+        /* Nested block keys and enum values resolve through their enclosing message. */
+        String text = "drive { drive_type = DRIVETYPE_UNKNOWN }\n";
         PxfParser parser = parse(text);
         assertThat(parser.getIdentifierToolTip(text, 0)).contains("ConfigProto.drive");
         String field = parser.getIdentifierToolTip(text, text.indexOf("drive_type"));
@@ -70,6 +70,18 @@ public class PxfParserTest
         assertThat(field).contains("Choices:");
         assertThat(parser.getIdentifierToolTip(text, text.indexOf("DRIVETYPE_UNKNOWN")))
                 .contains("Value: 0");
+    }
+
+    @Test
+    public void dottedKeysDoNotResolveAsNestedFields() throws Exception
+    {
+        /* Neither keys nor nested blocks may treat literal dots as schema traversal. */
+        String text = "drive.drive_type = DRIVETYPE_UNKNOWN\noption.config { verify_writes = true }";
+        PxfParser parser = parse(text);
+        assertThat(parser.getIdentifierToolTip(text, 0)).isNull();
+        assertThat(parser.getIdentifierToolTip(text, text.indexOf("drive_type"))).isNull();
+        assertThat(parser.getIdentifierToolTip(text, text.indexOf("DRIVETYPE_UNKNOWN"))).isNull();
+        assertThat(parser.getIdentifierToolTip(text, text.indexOf("verify_writes"))).isNull();
     }
 
     @Test

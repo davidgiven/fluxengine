@@ -6,10 +6,10 @@ import com.google.common.html.HtmlEscapers;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Descriptors.EnumValueDescriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor;
+import org.protowire.pxf.Ast;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Locale;
-import org.protowire.pxf.Ast;
 
 /* Resolve source identifiers through the recovered AST and the enclosing protobuf message. */
 final class PxfIdentifierToolTips
@@ -31,11 +31,15 @@ final class PxfIdentifierToolTips
         {
             if (entry instanceof Ast.Block block)
             {
-                String tooltip = key(block.name(), block.nameQuoted(), block.pos().offset(),
-                        message, offset);
+                String tooltip = key(
+                        block.name(),
+                        block.nameQuoted(),
+                        block.pos().offset(),
+                        message,
+                        offset);
                 if (tooltip != null)
                     return tooltip;
-                FieldDescriptor field = resolve(message, block.name());
+                FieldDescriptor field = message.findFieldByName(block.name());
                 if (field != null && field.getJavaType() == FieldDescriptor.JavaType.MESSAGE)
                 {
                     tooltip = find(block.entries(), field.getMessageType(), offset);
@@ -44,11 +48,15 @@ final class PxfIdentifierToolTips
                 }
             } else if (entry instanceof Ast.Assignment assignment)
             {
-                String tooltip = key(assignment.key(), assignment.keyQuoted(),
-                        assignment.pos().offset(), message, offset);
+                String tooltip = key(
+                        assignment.key(),
+                        assignment.keyQuoted(),
+                        assignment.pos().offset(),
+                        message,
+                        offset);
                 if (tooltip != null)
                     return tooltip;
-                FieldDescriptor field = resolve(message, assignment.key());
+                FieldDescriptor field = message.findFieldByName(assignment.key());
                 if (field != null)
                 {
                     tooltip = value(assignment.value(), field, offset);
@@ -62,42 +70,12 @@ final class PxfIdentifierToolTips
 
     private static String key(String key, boolean quoted, int start, Descriptor message, int offset)
     {
-        /* Dotted keys resolve one component at a time, so each component has its own hover. */
+        /* Match the complete literal key against the enclosing message's schema. */
         if (quoted)
             return null;
-        for (String component : key.split("\\."))
-        {
-            FieldDescriptor field = message.findFieldByName(component);
-            if (field == null)
-                return null;
-            int end = start + component.getBytes(StandardCharsets.UTF_8).length;
-            if (offset >= start && offset < end)
-                return describe(field);
-            if (field.getJavaType() != FieldDescriptor.JavaType.MESSAGE)
-                return null;
-            message = field.getMessageType();
-            start = end + 1;
-        }
-        return null;
-    }
-
-    private static FieldDescriptor resolve(Descriptor message, String key)
-    {
-        FieldDescriptor field = null;
-        String[] components = key.split("\\.");
-        for (int index = 0; index < components.length; index++)
-        {
-            field = message.findFieldByName(components[index]);
-            if (field == null)
-                return null;
-            if (index + 1 < components.length)
-            {
-                if (field.getJavaType() != FieldDescriptor.JavaType.MESSAGE)
-                    return null;
-                message = field.getMessageType();
-            }
-        }
-        return field;
+        FieldDescriptor field = message.findFieldByName(key);
+        int end = start + key.getBytes(StandardCharsets.UTF_8).length;
+        return field != null && offset >= start && offset < end ? describe(field) : null;
     }
 
     private static String value(Ast.Value value, FieldDescriptor field, int offset)
@@ -117,9 +95,8 @@ final class PxfIdentifierToolTips
         }
         if (value instanceof Ast.IdentVal identifier &&
                 field.getJavaType() == FieldDescriptor.JavaType.ENUM &&
-                offset >= identifier.pos().offset() &&
-                offset < identifier.pos().offset() +
-                        identifier.name().getBytes(StandardCharsets.UTF_8).length)
+                offset >= identifier.pos().offset() && offset < identifier.pos().offset() +
+                identifier.name().getBytes(StandardCharsets.UTF_8).length)
         {
             EnumValueDescriptor enumValue = field.getEnumType().findValueByName(identifier.name());
             if (enumValue != null)
@@ -129,7 +106,7 @@ final class PxfIdentifierToolTips
         return null;
     }
 
-    private static String describe(FieldDescriptor field)
+    static String describe(FieldDescriptor field)
     {
         /* Escape all schema text before presenting it as Swing HTML. */
         String type = switch (field.getJavaType())

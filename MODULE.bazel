@@ -23,6 +23,7 @@ maven.install(
         "com.formdev:flatlaf:3.7.2",
         "com.formdev:flatlaf-swingx:3.7.2",
         "com.fifesoft:rsyntaxtextarea:3.6.2",
+        "com.fifesoft:autocomplete:3.3.2",
         "org.exbin.bined:bined-core:0.2.2",
         "org.exbin.bined:bined-swing:0.2.2",
         "org.exbin.auxiliary:binary_data:0.2.2",

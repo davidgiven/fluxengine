@@ -8,6 +8,7 @@ import static swingtree.UIFactoryMethods.panel;
 
 import com.cowlark.fluxengine.data.Formats;
 import com.formdev.flatlaf.util.UIScale;
+import org.fife.ui.autocomplete.AutoCompletion;
 import org.fife.ui.rsyntaxtextarea.AbstractTokenMakerFactory;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
@@ -22,8 +23,8 @@ import swingtree.UI;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
-import javax.swing.text.DefaultEditorKit;
 import javax.swing.UIManager;
+import javax.swing.text.DefaultEditorKit;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.FocusAdapter;
@@ -61,8 +62,9 @@ public class FormatEditorPanel extends JPanel
 
         /* Insert double quotes literally so triple-quoted PXF strings can be typed without
          * RSyntaxTextArea adding matching quotes. */
-        textEditor.getInputMap().put(KeyStroke.getKeyStroke('"'),
-                DefaultEditorKit.defaultKeyTypedAction);
+        textEditor
+                .getInputMap()
+                .put(KeyStroke.getKeyStroke('"'), DefaultEditorKit.defaultKeyTypedAction);
 
         /* Follow the selected format while preserving the editor's document notifications.
          * Only the custom slot follows the editable source property. */
@@ -86,7 +88,14 @@ public class FormatEditorPanel extends JPanel
         PxfParser parser = new PxfParser();
         textEditor.addParser(parser);
         textEditor.setToolTipSupplier((editor, event) -> parser.getIdentifierToolTip(
-                editor.getText(), editor.viewToModel2D(event.getPoint())));
+                editor.getText(),
+                editor.viewToModel2D(event.getPoint())));
+
+        /* Offer schema fields and literal values through Ctrl+Space and automatic activation. */
+        AutoCompletion completion = new AutoCompletion(new PxfCompletionProvider(parser));
+        completion.setShowDescWindow(true);
+        completion.setAutoActivationEnabled(true);
+        completion.install(textEditor);
 
         UI.of(textEditor).isEditableIf(and(notBusy, customSelected));
         textEditor.addFocusListener(new FocusAdapter()
