@@ -120,8 +120,7 @@ public final class PxfCompletionProvider extends DefaultCompletionProvider
             if (entry instanceof Ast.Block block &&
                     contains(block.bracePos().offset(), block.end().offset(), offset, bytes))
             {
-                FieldDescriptor field =
-                        parent.message().findFieldByName(block.name());
+                FieldDescriptor field = parent.message().findFieldByName(block.name());
                 Scope child = child(field, block.bracePos().offset() + 1, bytes);
                 return child.message() == null ?
                         child :
@@ -129,8 +128,7 @@ public final class PxfCompletionProvider extends DefaultCompletionProvider
             }
             if (entry instanceof Ast.Assignment assignment)
             {
-                FieldDescriptor field =
-                        parent.message().findFieldByName(assignment.key());
+                FieldDescriptor field = parent.message().findFieldByName(assignment.key());
                 Scope child = valueScope(assignment.value(), field, offset, bytes);
                 if (child != null)
                     return child;
@@ -210,8 +208,7 @@ public final class PxfCompletionProvider extends DefaultCompletionProvider
         if (statement.isEmpty() || statement.size() == 1)
         {
             String key = statement.isEmpty() ? "" : statement.get(0);
-            if (!key.matches("[A-Za-z_][A-Za-z_0-9]*|") ||
-                    (!key.isEmpty() && prefix.isEmpty()))
+            if (!key.matches("[A-Za-z_][A-Za-z_0-9]*|") || (!key.isEmpty() && prefix.isEmpty()))
                 return new ArrayList<>();
             for (FieldDescriptor field : scope.message().getFields())
                 add(completions, field.getName(), prefix, PxfIdentifierToolTips.describe(field));
@@ -220,8 +217,7 @@ public final class PxfCompletionProvider extends DefaultCompletionProvider
         {
             /* Only enum and boolean values have schema-defined literal candidates. A list
              * retains its owning field across commas and line breaks. */
-            FieldDescriptor field =
-                    scope.message().findFieldByName(statement.get(0));
+            FieldDescriptor field = scope.message().findFieldByName(statement.get(0));
             if (field == null || !valuePosition(statement, prefix))
                 return new ArrayList<>();
             String summary = PxfIdentifierToolTips.describe(field);

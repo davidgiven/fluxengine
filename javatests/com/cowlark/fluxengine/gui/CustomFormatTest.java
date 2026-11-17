@@ -10,6 +10,7 @@ import com.cowlark.fluxengine.usb.UsbFinder;
 import com.google.common.collect.ImmutableList;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
+import org.fife.ui.rsyntaxtextarea.TextEditorPane;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -25,6 +26,7 @@ import swingtree.SwingTree;
 import swingtree.threading.EventProcessor;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import java.awt.Component;
 import java.util.HashMap;
@@ -93,7 +95,9 @@ public class CustomFormatTest
             for (int count = 1; count <= 3; count++)
             {
                 action.actionPerformed(new java.awt.event.ActionEvent(
-                        area, java.awt.event.ActionEvent.ACTION_PERFORMED, "\""));
+                        area,
+                        java.awt.event.ActionEvent.ACTION_PERFORMED,
+                        "\""));
                 assertThat(area.getText()).isEqualTo("\"".repeat(count));
             }
         });
@@ -170,6 +174,70 @@ public class CustomFormatTest
 
             model.getSelectedFormat().set(From.VIEW, ImageViewModel.CUSTOM_FORMAT);
             assertThat(customise.isVisible()).isFalse();
+        });
+    }
+
+    /* Cancelling or closing the discard prompt preserves dirty text; confirming replaces it. */
+    @Test
+    public void customisePromptsBeforeDiscardingDirtyText() throws Exception
+    {
+        SwingUtilities.invokeAndWait(() -> {
+            model.getSelectedFormat().set(From.VIEW, ImageViewModel.CUSTOM_FORMAT);
+            FormatEditorPanel panel = new FormatEditorPanel(model);
+            RSyntaxTextArea area = editor(panel);
+            String dirtyText = "comment = \"unsaved draft\"\n# edited";
+            area.setText(dirtyText);
+            model.getSelectedFormat().set(From.VIEW, "ibm");
+            String previewText = area.getText();
+            String customText = model.getCustomFormatText().get();
+            assertThat(customText).isEqualTo(dirtyText);
+            try (MockedStatic<JOptionPane> dialogs = Mockito.mockStatic(JOptionPane.class))
+            {
+                dialogs.when(() -> JOptionPane.showConfirmDialog(
+                        panel,
+                        "You have unsaved changes. Do you want to discard them?",
+                        "Unsaved changes",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.WARNING_MESSAGE))
+                        .thenReturn(JOptionPane.NO_OPTION, JOptionPane.CLOSED_OPTION, JOptionPane.YES_OPTION);
+                for (int attempt = 0; attempt < 2; attempt++)
+                {
+                    button(panel, "Customise").doClick();
+                    assertThat(area.getText()).isEqualTo(previewText);
+                    assertThat(model.getSelectedFormat().get()).isEqualTo("ibm");
+                    assertThat(model.getCustomFormatText().get()).isEqualTo(customText);
+                }
+                dialogs.verify(() -> JOptionPane.showConfirmDialog(
+                        panel,
+                        "You have unsaved changes. Do you want to discard them?",
+                        "Unsaved changes",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.WARNING_MESSAGE), Mockito.times(2));
+                button(panel, "Customise").doClick();
+                assertThat(model.getSelectedFormat().get()).isEqualTo(ImageViewModel.CUSTOM_FORMAT);
+                assertThat(area.getText()).doesNotContain("# edited");
+            }
+        });
+    }
+
+    /* Previewing built-in formats must not mark the custom draft as saved. */
+    @Test
+    public void customDirtyStateSurvivesFormatChanges() throws Exception
+    {
+        SwingUtilities.invokeAndWait(() -> {
+            model.getSelectedFormat().set(From.VIEW, ImageViewModel.CUSTOM_FORMAT);
+            FormatEditorPanel panel = new FormatEditorPanel(model);
+            TextEditorPane area = (TextEditorPane) editor(panel);
+            assertThat(area.isDirty()).isFalse();
+            String draft = "comment = \"draft\"";
+            area.setText(draft);
+            assertThat(area.isDirty()).isTrue();
+            model.getSelectedFormat().set(From.VIEW, "ibm");
+            assertThat(area.isDirty()).isFalse();
+            model.getSelectedFormat().set(From.VIEW, "amiga");
+            model.getSelectedFormat().set(From.VIEW, ImageViewModel.CUSTOM_FORMAT);
+            assertThat(area.getText()).isEqualTo(draft);
+            assertThat(area.isDirty()).isTrue();
         });
     }
 

@@ -12,6 +12,16 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class PxfParserTest
 {
+    private static PxfParser parse(String text) throws Exception
+    {
+        /* Exercise the actual tolerant parser rather than constructing synthetic AST nodes. */
+        RSyntaxDocument document = new RSyntaxDocument(SyntaxConstants.SYNTAX_STYLE_NONE);
+        document.insertString(0, text, null);
+        PxfParser parser = new PxfParser();
+        parser.parse(document, PxfTokenMaker.SYNTAX_STYLE);
+        return parser;
+    }
+
     @Test
     public void recoversAndClearsErrorsAfterEditing() throws Exception
     {
@@ -68,15 +78,16 @@ public class PxfParserTest
         assertThat(field).contains("Type of drive");
         assertThat(field).contains("Default: DRIVETYPE_UNKNOWN");
         assertThat(field).contains("Choices:");
-        assertThat(parser.getIdentifierToolTip(text, text.indexOf("DRIVETYPE_UNKNOWN")))
-                .contains("Value: 0");
+        assertThat(parser.getIdentifierToolTip(text, text.indexOf("DRIVETYPE_UNKNOWN"))).contains(
+                "Value: 0");
     }
 
     @Test
     public void dottedKeysDoNotResolveAsNestedFields() throws Exception
     {
         /* Neither keys nor nested blocks may treat literal dots as schema traversal. */
-        String text = "drive.drive_type = DRIVETYPE_UNKNOWN\noption.config { verify_writes = true }";
+        String text =
+                "drive.drive_type = DRIVETYPE_UNKNOWN\noption.config { verify_writes = true }";
         PxfParser parser = parse(text);
         assertThat(parser.getIdentifierToolTip(text, 0)).isNull();
         assertThat(parser.getIdentifierToolTip(text, text.indexOf("drive_type"))).isNull();
@@ -108,16 +119,6 @@ public class PxfParserTest
         String tooltip = parser.getIdentifierToolTip(text, text.indexOf("verify_writes"));
         assertThat(tooltip).contains("ConfigProto.verify_writes");
         assertThat(tooltip).contains("verify writes where possible");
-    }
-
-    private static PxfParser parse(String text) throws Exception
-    {
-        /* Exercise the actual tolerant parser rather than constructing synthetic AST nodes. */
-        RSyntaxDocument document = new RSyntaxDocument(SyntaxConstants.SYNTAX_STYLE_NONE);
-        document.insertString(0, text, null);
-        PxfParser parser = new PxfParser();
-        parser.parse(document, PxfTokenMaker.SYNTAX_STYLE);
-        return parser;
     }
 
 }

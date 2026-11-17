@@ -12,6 +12,7 @@ import org.fife.ui.autocomplete.AutoCompletion;
 import org.fife.ui.rsyntaxtextarea.AbstractTokenMakerFactory;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
+import org.fife.ui.rsyntaxtextarea.TextEditorPane;
 import org.fife.ui.rsyntaxtextarea.Theme;
 import org.fife.ui.rsyntaxtextarea.TokenMakerFactory;
 import org.fife.ui.rtextarea.RTextScrollPane;
@@ -21,6 +22,8 @@ import sprouts.Val;
 import sprouts.Viewable;
 import swingtree.UI;
 import javax.swing.JLayeredPane;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 import javax.swing.UIManager;
@@ -43,9 +46,10 @@ public class FormatEditorPanel extends JPanel
         factory.putMapping(PxfTokenMaker.SYNTAX_STYLE, PxfTokenMaker.class.getName());
     }
 
-    private final RSyntaxTextArea textEditor;
+    private final TextEditorPane textEditor;
     private final Val<Boolean> customSelected;
     private String displayedFormat;
+    private boolean customDirty;
 
     public FormatEditorPanel(ImageViewModel model)
     {
@@ -56,7 +60,7 @@ public class FormatEditorPanel extends JPanel
                 .viewAs(Boolean.class, ImageViewModel.CUSTOM_FORMAT::equals);
 
         /* Provide code editing features for PXF source. */
-        textEditor = new RSyntaxTextArea();
+        textEditor = new TextEditorPane();
         textEditor.setTabSize(4);
         textEditor.setAutoIndentEnabled(true);
 
@@ -132,13 +136,19 @@ public class FormatEditorPanel extends JPanel
          * intercepting mouse events elsewhere in the editor. */
         int inset = Math.round(2 * textEditor.getFont().getSize2D());
 
+        /* Reflect the editor's dirty state beside the file actions. */
+        JLabel unsavedIndicator = new JLabel(textEditor.isDirty() ? " [unsaved]" : "");
+        textEditor.addPropertyChangeListener(TextEditorPane.DIRTY_PROPERTY,
+                event -> unsavedIndicator.setText(textEditor.isDirty() ? " [unsaved]" : ""));
+
         /* Toolbar. */
         UI.of(this).withLayout("fill, wrap 1, insets 5, hidemode 3")
                 .add(
                         "growx",
                         panel("insets 2")
                                 .add("align left", button("Load").isEnabledIf(notBusy))
-                                .add("align left", button("Save").isEnabledIf(notBusy)))
+                                .add("align left", button("Save").isEnabledIf(notBusy))
+                                .add("align left", UI.of(unsavedIndicator)))
                 /* Let the existing window layout determine the viewport size instead of
                  * deriving it from the length and number of lines in the document. */.add(
                         "grow, push",
@@ -151,12 +161,27 @@ public class FormatEditorPanel extends JPanel
                                         button("Customise")
                                                 .isEnabledIf(notBusy)
                                                 .isVisibleIfNot(customSelected)
-                                                .onClick(event -> model.onCopyFromCurrentFormat())
+                                                .onClick(event -> customise(model))
                                                 .peek(button -> JLayeredPane.putLayer(
                                                         button,
                                                         JLayeredPane.PALETTE_LAYER)))
                                 .withPrefSize(0, 0)
                                 .withMinSize(0, 0));
+    }
+
+    private void customise(ImageViewModel model)
+    {
+        /* Preserve dirty source unless the user explicitly agrees to replace it. */
+        if ((customDirty || textEditor.isDirty()) && JOptionPane.showConfirmDialog(
+                this,
+                "You have unsaved changes. Do you want to discard them?",
+                "Unsaved changes",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE) != JOptionPane.YES_OPTION)
+            return;
+        model.onCopyFromCurrentFormat();
+        customDirty = false;
+        textEditor.setDirty(false);
     }
 
     private @NonNull Runnable getUpdateReadOnlyAppearance(RTextScrollPane editorScrollPane)
@@ -194,7 +219,12 @@ public class FormatEditorPanel extends JPanel
     private void saveCustomText(ImageViewModel model)
     {
         if (ImageViewModel.CUSTOM_FORMAT.equals(displayedFormat))
+        {
+            /* The built-in preview has its own document state. Retain the custom draft's
+             * dirty flag before replacing that document or committing it to preferences. */
+            customDirty = textEditor.isDirty();
             model.getCustomFormatText().set(From.VIEW, textEditor.getText());
+        }
     }
 
     private void showSelectedFormat(ImageViewModel model)
@@ -213,8 +243,13 @@ public class FormatEditorPanel extends JPanel
         {
             throw new UncheckedIOException("Cannot load format source " + format, e);
         }
+        /* Restore the draft's dirty state when returning from a clean built-in preview. */
+        boolean dirty = custom && customDirty;
         displayedFormat = format;
         replaceText(text);
+        textEditor.setDirty(dirty);
+        if (custom)
+            customDirty = dirty;
     }
 
     /* Avoid resetting the caret when committing unchanged text on focus loss. */
@@ -224,6 +259,9 @@ public class FormatEditorPanel extends JPanel
         {
             textEditor.setText(text);
             textEditor.setCaretPosition(0);
+            textEditor.setDirty(false);
+            if (ImageViewModel.CUSTOM_FORMAT.equals(displayedFormat))
+                customDirty = false;
         }
     }
 }
