@@ -21,8 +21,10 @@ import sprouts.From;
 import sprouts.Val;
 import sprouts.Viewable;
 import swingtree.UI;
-import javax.swing.JLayeredPane;
 import javax.swing.JLabel;
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
@@ -32,9 +34,13 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.Locale;
 
 public class FormatEditorPanel extends JPanel
 {
@@ -138,7 +144,8 @@ public class FormatEditorPanel extends JPanel
 
         /* Reflect the editor's dirty state beside the file actions. */
         JLabel unsavedIndicator = new JLabel(textEditor.isDirty() ? " [unsaved]" : "");
-        textEditor.addPropertyChangeListener(TextEditorPane.DIRTY_PROPERTY,
+        textEditor.addPropertyChangeListener(
+                TextEditorPane.DIRTY_PROPERTY,
                 event -> unsavedIndicator.setText(textEditor.isDirty() ? " [unsaved]" : ""));
 
         /* Toolbar. */
@@ -146,8 +153,10 @@ public class FormatEditorPanel extends JPanel
                 .add(
                         "growx",
                         panel("insets 2")
-                                .add("align left", button("Load").isEnabledIf(notBusy))
-                                .add("align left", button("Save").isEnabledIf(notBusy))
+                                .add("align left", button("Load").isEnabledIf(notBusy)
+                                        .onClick(event -> load(model)))
+                                .add("align left", button("Save").isEnabledIf(notBusy)
+                                        .onClick(event -> save(model)))
                                 .add("align left", UI.of(unsavedIndicator)))
                 /* Let the existing window layout determine the viewport size instead of
                  * deriving it from the length and number of lines in the document. */.add(
@@ -169,19 +178,92 @@ public class FormatEditorPanel extends JPanel
                                 .withMinSize(0, 0));
     }
 
-    private void customise(ImageViewModel model)
+    private boolean confirmDiscard()
     {
-        /* Preserve dirty source unless the user explicitly agrees to replace it. */
-        if ((customDirty || textEditor.isDirty()) && JOptionPane.showConfirmDialog(
+        /* The hidden custom draft must also be protected while previewing a built-in format. */
+        return !(customDirty || textEditor.isDirty()) || JOptionPane.showConfirmDialog(
                 this,
                 "You have unsaved changes. Do you want to discard them?",
                 "Unsaved changes",
                 JOptionPane.YES_NO_OPTION,
-                JOptionPane.WARNING_MESSAGE) != JOptionPane.YES_OPTION)
+                JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION;
+    }
+
+    private void customise(ImageViewModel model)
+    {
+        /* Preserve dirty source unless the user explicitly agrees to replace it. */
+        if (!confirmDiscard())
             return;
         model.onCopyFromCurrentFormat();
         customDirty = false;
         textEditor.setDirty(false);
+    }
+
+    private JFileChooser createPxfFileChooser(ImageViewModel model, String title)
+    {
+        /* Use the shared chooser so directory navigation persists across file operations. */
+        JFileChooser chooser = model.getPreferencesReaderWriter().createFileChooser();
+        chooser.setDialogTitle(title);
+        chooser.setFileFilter(new FileNameExtensionFilter("PXF files (*.pxf)", "pxf"));
+        return chooser;
+    }
+
+    private void load(ImageViewModel model)
+    {
+        /* Cancelling either dialogue leaves both the preview and the custom draft intact. */
+        if (!confirmDiscard())
+            return;
+        JFileChooser chooser = createPxfFileChooser(model, "Load PXF file");
+        if (chooser.showOpenDialog(this) != JFileChooser.APPROVE_OPTION)
+            return;
+
+        try
+        {
+            /* Read completely before changing the model; incomplete PXF remains editable. */
+            String text = Files.readString(chooser.getSelectedFile().toPath(), StandardCharsets.UTF_8);
+            model.getCustomFormatText().set(From.VIEW, text);
+            model.getSelectedFormat().set(From.VIEW, ImageViewModel.CUSTOM_FORMAT);
+            replaceText(text);
+            customDirty = false;
+            textEditor.setDirty(false);
+        } catch (IOException e)
+        {
+            UiUtils.reportError("Cannot load PXF file").apply(e);
+        }
+    }
+
+    private void save(ImageViewModel model)
+    {
+        /* Save the displayed source verbatim, including unfinished drafts and comments. */
+        JFileChooser chooser = createPxfFileChooser(model, "Save PXF file");
+        String name = customSelected.get() ? "format" : displayedFormat;
+        chooser.setSelectedFile(new File(chooser.getCurrentDirectory(), name + ".pxf"));
+        if (chooser.showSaveDialog(this) != JFileChooser.APPROVE_OPTION)
+            return;
+
+        File file = chooser.getSelectedFile();
+        if (!file.getName().toLowerCase(Locale.ROOT).endsWith(".pxf"))
+            file = new File(file.getParentFile(), file.getName() + ".pxf");
+        if (file.exists() && JOptionPane.showConfirmDialog(
+                this,
+                file.getName() + " already exists. Overwrite it?",
+                "Confirm Overwrite",
+                JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION)
+            return;
+
+        try
+        {
+            /* Clear dirty state only after the file has been written successfully. Saving a
+             * built-in preview must not clear the hidden custom draft's dirty state. */
+            Files.writeString(file.toPath(), textEditor.getText(), StandardCharsets.UTF_8);
+            saveCustomText(model);
+            if (customSelected.get())
+                customDirty = false;
+            textEditor.setDirty(false);
+        } catch (IOException e)
+        {
+            UiUtils.reportError("Cannot save PXF file").apply(e);
+        }
     }
 
     private @NonNull Runnable getUpdateReadOnlyAppearance(RTextScrollPane editorScrollPane)

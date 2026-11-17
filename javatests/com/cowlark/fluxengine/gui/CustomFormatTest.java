@@ -19,16 +19,21 @@ import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.MockedStatic;
+import org.mockito.MockedConstruction;
 import org.mockito.Mockito;
 import sprouts.Association;
 import sprouts.From;
 import swingtree.SwingTree;
 import swingtree.threading.EventProcessor;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import java.awt.Component;
+import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.prefs.Preferences;
@@ -193,13 +198,17 @@ public class CustomFormatTest
             assertThat(customText).isEqualTo(dirtyText);
             try (MockedStatic<JOptionPane> dialogs = Mockito.mockStatic(JOptionPane.class))
             {
-                dialogs.when(() -> JOptionPane.showConfirmDialog(
-                        panel,
-                        "You have unsaved changes. Do you want to discard them?",
-                        "Unsaved changes",
-                        JOptionPane.YES_NO_OPTION,
-                        JOptionPane.WARNING_MESSAGE))
-                        .thenReturn(JOptionPane.NO_OPTION, JOptionPane.CLOSED_OPTION, JOptionPane.YES_OPTION);
+                dialogs
+                        .when(() -> JOptionPane.showConfirmDialog(
+                                panel,
+                                "You have unsaved changes. Do you want to discard them?",
+                                "Unsaved changes",
+                                JOptionPane.YES_NO_OPTION,
+                                JOptionPane.WARNING_MESSAGE))
+                        .thenReturn(
+                                JOptionPane.NO_OPTION,
+                                JOptionPane.CLOSED_OPTION,
+                                JOptionPane.YES_OPTION);
                 for (int attempt = 0; attempt < 2; attempt++)
                 {
                     button(panel, "Customise").doClick();
@@ -207,12 +216,13 @@ public class CustomFormatTest
                     assertThat(model.getSelectedFormat().get()).isEqualTo("ibm");
                     assertThat(model.getCustomFormatText().get()).isEqualTo(customText);
                 }
-                dialogs.verify(() -> JOptionPane.showConfirmDialog(
-                        panel,
-                        "You have unsaved changes. Do you want to discard them?",
-                        "Unsaved changes",
-                        JOptionPane.YES_NO_OPTION,
-                        JOptionPane.WARNING_MESSAGE), Mockito.times(2));
+                dialogs.verify(
+                        () -> JOptionPane.showConfirmDialog(
+                                panel,
+                                "You have unsaved changes. Do you want to discard them?",
+                                "Unsaved changes",
+                                JOptionPane.YES_NO_OPTION,
+                                JOptionPane.WARNING_MESSAGE), Mockito.times(2));
                 button(panel, "Customise").doClick();
                 assertThat(model.getSelectedFormat().get()).isEqualTo(ImageViewModel.CUSTOM_FORMAT);
                 assertThat(area.getText()).doesNotContain("# edited");
@@ -239,6 +249,98 @@ public class CustomFormatTest
             assertThat(area.getText()).isEqualTo(draft);
             assertThat(area.isDirty()).isTrue();
         });
+    }
+
+    /* Load arbitrary PXF text without reformatting it, including Unicode and syntax errors. */
+    @Test
+    public void loadsPxfIntoTheCustomSlot() throws Exception
+    {
+        File source = temporaryFolder.newFile("source.pxf");
+        String text = "# é😀\ncomment = \"loaded\"\nbroken =";
+        Files.writeString(source.toPath(), text, StandardCharsets.UTF_8);
+        SwingUtilities.invokeAndWait(() -> {
+            model.getSelectedFormat().set(From.VIEW, "ibm");
+            FormatEditorPanel panel = new FormatEditorPanel(model);
+            try (MockedConstruction<JFileChooser> choosers = Mockito.mockConstruction(
+                    JFileChooser.class, (chooser, context) -> {
+                        Mockito.when(chooser.showOpenDialog(panel)).thenReturn(JFileChooser.APPROVE_OPTION);
+                        Mockito.when(chooser.getSelectedFile()).thenReturn(source);
+                    }))
+            {
+                button(panel, "Load").doClick();
+                assertThat(model.getSelectedFormat().get()).isEqualTo(ImageViewModel.CUSTOM_FORMAT);
+                assertThat(model.getCustomFormatText().get()).isEqualTo(text);
+                assertThat(editor(panel).getText()).isEqualTo(text);
+                assertThat(((TextEditorPane) editor(panel)).isDirty()).isFalse();
+                assertThat(choosers.constructed()).hasSize(1);
+            }
+        });
+    }
+
+    /* Declining discard or cancelling the chooser must preserve the hidden dirty draft. */
+    @Test
+    public void cancellingLoadPreservesDirtyDraft() throws Exception
+    {
+        SwingUtilities.invokeAndWait(() -> {
+            model.getSelectedFormat().set(From.VIEW, ImageViewModel.CUSTOM_FORMAT);
+            FormatEditorPanel panel = new FormatEditorPanel(model);
+            String draft = "comment = \"unsaved\"";
+            editor(panel).setText(draft);
+            model.getSelectedFormat().set(From.VIEW, "ibm");
+            try (MockedStatic<JOptionPane> dialogs = Mockito.mockStatic(JOptionPane.class);
+                    MockedConstruction<JFileChooser> choosers = Mockito.mockConstruction(
+                            JFileChooser.class, (chooser, context) -> Mockito.when(
+                                    chooser.showOpenDialog(panel)).thenReturn(JFileChooser.CANCEL_OPTION)))
+            {
+                dialogs.when(() -> JOptionPane.showConfirmDialog(
+                        panel, "You have unsaved changes. Do you want to discard them?",
+                        "Unsaved changes", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE))
+                        .thenReturn(JOptionPane.NO_OPTION, JOptionPane.YES_OPTION);
+                button(panel, "Load").doClick();
+                assertThat(choosers.constructed()).isEmpty();
+                button(panel, "Load").doClick();
+                assertThat(choosers.constructed()).hasSize(1);
+                model.getSelectedFormat().set(From.VIEW, ImageViewModel.CUSTOM_FORMAT);
+                assertThat(editor(panel).getText()).isEqualTo(draft);
+                assertThat(((TextEditorPane) editor(panel)).isDirty()).isTrue();
+            }
+        });
+    }
+
+    /* Save writes the exact UTF-8 draft and only clears dirty state after approval. */
+    @Test
+    public void savesPxfAndClearsDirtyState() throws Exception
+    {
+        File destination = new File(temporaryFolder.getRoot(), "saved");
+        String text = "# é😀\ncomment = \"saved\"\nbroken =";
+        SwingUtilities.invokeAndWait(() -> {
+            model.getSelectedFormat().set(From.VIEW, ImageViewModel.CUSTOM_FORMAT);
+            FormatEditorPanel panel = new FormatEditorPanel(model);
+            TextEditorPane area = (TextEditorPane) editor(panel);
+            area.setText(text);
+            try (MockedConstruction<JFileChooser> choosers = Mockito.mockConstruction(
+                    JFileChooser.class, (chooser, context) -> {
+                        Mockito.when(chooser.showSaveDialog(panel))
+                                .thenReturn(JFileChooser.CANCEL_OPTION, JFileChooser.APPROVE_OPTION);
+                        Mockito.when(chooser.getSelectedFile()).thenReturn(destination);
+                    }))
+            {
+                button(panel, "Save").doClick();
+                assertThat(area.isDirty()).isTrue();
+            }
+            try (MockedConstruction<JFileChooser> choosers = Mockito.mockConstruction(
+                    JFileChooser.class, (chooser, context) -> {
+                        Mockito.when(chooser.showSaveDialog(panel)).thenReturn(JFileChooser.APPROVE_OPTION);
+                        Mockito.when(chooser.getSelectedFile()).thenReturn(destination);
+                    }))
+            {
+                button(panel, "Save").doClick();
+                assertThat(area.isDirty()).isFalse();
+                assertThat(model.getCustomFormatText().get()).isEqualTo(text);
+            }
+        });
+        assertThat(Files.readString(new File(destination.getPath() + ".pxf").toPath(),
+                StandardCharsets.UTF_8)).isEqualTo(text);
     }
 
     /* Built-in format preferences must survive option renames just like custom formats. */
