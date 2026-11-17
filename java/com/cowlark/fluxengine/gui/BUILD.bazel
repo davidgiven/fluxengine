@@ -14,6 +14,7 @@ java_library(
     deps = [
         "//java/com/cowlark/fluxengine/algorithms",
         "//java/com/cowlark/fluxengine/config",
+        "//java/com/cowlark/fluxengine/config:common_java_proto",
         "//java/com/cowlark/fluxengine/config:config_java_proto",
         "//java/com/cowlark/fluxengine/core",
         "//java/com/cowlark/fluxengine/data",
@@ -26,6 +27,7 @@ java_library(
         "//java/com/cowlark/fluxengine/vfs",
         "//java/com/cowlark/fluxengine/wiring",
         "//third_party/java/org/protowire/pxf:lexer_access",
+        "@com_google_protobuf//java/core",
         "@maven//:com_fifesoft_rsyntaxtextarea",
         "@maven//:com_formdev_flatlaf",
         "@maven//:com_formdev_flatlaf_swingx",

@@ -14,6 +14,16 @@ import javax.swing.text.BadLocationException;
 public final class PxfParser extends AbstractParser
 {
     private Parser.TolerantResult syntaxTree;
+    private String parsedText;
+
+    /* Reject stale positions while the editor's scheduled parse is still pending. */
+    public String getIdentifierToolTip(String text, int offset)
+    {
+        if (syntaxTree == null || !text.equals(parsedText) || offset < 0 || offset >= text.length())
+            return null;
+        int byteOffset = text.substring(0, offset).getBytes(StandardCharsets.UTF_8).length;
+        return PxfIdentifierToolTips.find(syntaxTree.document().entries(), byteOffset);
+    }
 
     public Parser.TolerantResult getSyntaxTree()
     {
@@ -36,6 +46,7 @@ public final class PxfParser extends AbstractParser
         /* Retain the recovered AST for future completion queries. */
         byte[] bytes = text.getBytes(StandardCharsets.UTF_8);
         syntaxTree = Parser.parseTolerant(bytes);
+        parsedText = text;
         DefaultParseResult result = new DefaultParseResult(this);
         result.setParsedLines(0, document.getDefaultRootElement().getElementCount() - 1);
 

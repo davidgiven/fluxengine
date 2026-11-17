@@ -83,7 +83,10 @@ public class FormatEditorPanel extends JPanel
 
         /* Schedule syntax diagnostics through the editor without an intentional typing delay. */
         textEditor.setParserDelay(0);
-        textEditor.addParser(new PxfParser());
+        PxfParser parser = new PxfParser();
+        textEditor.addParser(parser);
+        textEditor.setToolTipSupplier((editor, event) -> parser.getIdentifierToolTip(
+                editor.getText(), editor.viewToModel2D(event.getPoint())));
 
         UI.of(textEditor).isEditableIf(and(notBusy, customSelected));
         textEditor.addFocusListener(new FocusAdapter()
