@@ -81,6 +81,8 @@ Useful commands:
 
 ## Code style
 
+- Prefer UK spelling in comments, documentation, and user-facing text (e.g. "dialogue",
+  "optimise"); preserve existing API names.
 - Explicit types, no `var`.
 - Divide code into logical paragraphs separated by blank lines, with a block comment
   introducing each paragraph to explain its purpose.
