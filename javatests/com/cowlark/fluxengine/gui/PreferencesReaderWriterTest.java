@@ -5,7 +5,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.cowlark.fluxengine.gui.ApplicationFrame.Workflow;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
@@ -19,11 +21,14 @@ import javax.swing.JFileChooser;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.prefs.Preferences;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PreferencesReaderWriterTest
 {
+    @Rule public TemporaryFolder temporaryFolder = new TemporaryFolder();
     @Mock private Preferences preferences;
     private PreferencesReaderWriter writer = null;
 
@@ -222,5 +227,38 @@ public class PreferencesReaderWriterTest
         writer = new PreferencesReaderWriter(preferences);
 
         assertThat(writer.getStringPreference("missing", "default")).isEqualTo("default");
+    }
+
+    /* File-backed values preserve large Unicode source text across reader instances. */
+    @Test
+    public void filePreferenceRoundTripsLargeText() throws Exception
+    {
+        Path directory = temporaryFolder.getRoot().toPath().resolve("config");
+        writer = new PreferencesReaderWriter(preferences, directory);
+        String text = "# A comment with Unicode: ä\n".repeat(1000);
+
+        writer.setStringPreference(PreferencesReaderWriter.CUSTOM_FORMAT_TEXT, text);
+
+        assertThat(Files.readString(directory.resolve("custom_format_text.dat"))).isEqualTo(text);
+        PreferencesReaderWriter restored = new PreferencesReaderWriter(preferences, directory);
+        assertThat(restored.getStringPreference(
+                PreferencesReaderWriter.CUSTOM_FORMAT_TEXT,
+                "")).isEqualTo(text);
+        Mockito.verifyNoInteractions(preferences);
+    }
+
+    /* Missing files use defaults, while saving an empty value replaces existing content. */
+    @Test
+    public void filePreferenceSupportsDefaultsAndEmptyValues()
+    {
+        writer = new PreferencesReaderWriter(preferences, temporaryFolder.getRoot().toPath());
+        String name = PreferencesReaderWriter.CUSTOM_FORMAT_TEXT;
+        assertThat(writer.getStringPreference(name, "default")).isEqualTo("default");
+
+        writer.setStringPreference(name, "previous contents");
+        writer.setStringPreference(name, "");
+
+        assertThat(writer.getStringPreference(name, "default")).isEmpty();
+        Mockito.verifyNoInteractions(preferences);
     }
 }

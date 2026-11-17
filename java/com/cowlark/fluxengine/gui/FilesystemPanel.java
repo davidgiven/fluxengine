@@ -1,6 +1,8 @@
 package com.cowlark.fluxengine.gui;
 
 import static com.cowlark.fluxengine.gui.UiUtils.EDT_EXECUTOR;
+import static com.cowlark.fluxengine.gui.UiUtils.and;
+import static com.cowlark.fluxengine.gui.UiUtils.not;
 import static com.cowlark.fluxengine.gui.UiUtils.reportError;
 import static com.cowlark.fluxengine.gui.UiUtils.wrapIOException;
 import static com.cowlark.fluxengine.vfs.Filesystem.Capability.OP_CREATEDIR;
@@ -291,21 +293,6 @@ public class FilesystemPanel extends JPanel
             }
         }
         return true;
-    }
-
-    private static Val<Boolean> and(Val<Boolean> v1, Val<Boolean> v2)
-    {
-        return Viewable.of(v1, v2, (b1, b2) -> b1 && b2);
-    }
-
-    private static Val<Boolean> or(Val<Boolean> v1, Val<Boolean> v2)
-    {
-        return Viewable.of(v1, v2, (b1, b2) -> b1 || b2);
-    }
-
-    private static Val<Boolean> not(Val<Boolean> v1)
-    {
-        return v1.viewAs(Boolean.class, b -> !b);
     }
 
     JXTreeTable getTreeTable()

@@ -73,16 +73,21 @@ public class FilesystemTreeTableModel extends DefaultTreeTableModel
     @Getter private final Var<ValueSet<Capability>> capabilities =
             Var.of(ValueSet.of(Capability.class));
     @Getter private final Var<Boolean> hasPendingChanges = Var.of(false);
+    private final Executor executor;
     Supplier<Set<VfsPath>> expandedSupplier;
     private FilesystemExecutor filesystemExecutor = new FilesystemExecutor();
-    private final Executor executor = task -> {
-        getFilesystem();
-        filesystemExecutor.execute(task);
-    };
 
     public FilesystemTreeTableModel(ImageViewModel model)
     {
         this.model = model;
+
+        /* Initialise after all fields so IDE member rearrangement cannot create a forward
+         * reference to filesystemExecutor in a field initialiser. */
+        executor = task -> {
+            getFilesystem();
+            filesystemExecutor.execute(task);
+        };
+
         /* Initial empty root so JXTreeTable has something before first mount. */
         DirNode root = new DirNode(ROOT_DIRENT);
         setRoot(root);

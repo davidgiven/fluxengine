@@ -1,11 +1,13 @@
 package com.cowlark.fluxengine.data;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertThrows;
 
 import com.cowlark.fluxengine.config.ConfigProto;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import java.io.FileNotFoundException;
 
 @RunWith(JUnit4.class)
 public class FormatsTest
@@ -30,6 +32,15 @@ public class FormatsTest
     public void returnsNullForUnknownName()
     {
         assertThat(Formats.get("not a real format")).isNull();
+    }
+
+    /* Source loading reports the missing resource path to callers. */
+    @Test
+    public void missingSourceThrowsFileNotFoundException()
+    {
+        FileNotFoundException exception = assertThrows(
+                FileNotFoundException.class, () -> Formats.loadText("not a real format"));
+        assertThat(exception).hasMessageThat().isEqualTo("/formats/not a real format.pxf");
     }
 
     @Test

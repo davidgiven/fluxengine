@@ -15,6 +15,7 @@ import org.apache.commons.io.function.IOSupplier;
 import sprouts.Tuple;
 import sprouts.Val;
 import sprouts.Var;
+import sprouts.Viewable;
 import swingtree.ComponentDelegate;
 import swingtree.UIForAnySwing;
 import swingtree.layout.Size;
@@ -69,6 +70,22 @@ public class UiUtils
     static final Color NO_DATA_COLOUR = new Color(0x5c5c5c);
     static final Color DATA_BUT_NO_FLUX_COLOUR = DATA_OK_COLOUR.darker();
     private static final Map<String, Icon> TINTED_ICONS = new ConcurrentHashMap<>();
+
+    /* Combine boolean properties into views which track changes to their inputs. */
+    public static Val<Boolean> and(Val<Boolean> v1, Val<Boolean> v2)
+    {
+        return Viewable.of(v1, v2, (b1, b2) -> b1 && b2);
+    }
+
+    public static Val<Boolean> or(Val<Boolean> v1, Val<Boolean> v2)
+    {
+        return Viewable.of(v1, v2, (b1, b2) -> b1 || b2);
+    }
+
+    public static Val<Boolean> not(Val<Boolean> v1)
+    {
+        return v1.viewAs(Boolean.class, b -> !b);
+    }
 
     /* Fires the given action with the clicked component as its source, so that
      * actions which resolve their target from the event source work correctly.

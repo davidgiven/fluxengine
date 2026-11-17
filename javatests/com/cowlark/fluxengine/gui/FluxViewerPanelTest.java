@@ -186,8 +186,8 @@ public class FluxViewerPanelTest
             assertThat(image.getRGB(260, 50)).isEqualTo(UiUtils.DATA_BAD_COLOUR.darker().getRGB());
             JPopupMenu menu = panel.contextMenuAt(new Point(80, 10));
             assertThat(menu.getComponentCount()).isEqualTo(3);
-            assertThat(((JMenuItem) menu.getComponent(0)).getText()).isEqualTo("Show sector " +
-                    "summary");
+            assertThat(((JMenuItem) menu.getComponent(0)).getText()).isEqualTo(
+                    "Show sector " + "summary");
             assertThat(panel.contextMenuAt(new Point(80, 50)).getComponentCount()).isEqualTo(1);
             assertThat(panel.contextMenuAt(new Point(80, 110))).isNull();
 
@@ -197,8 +197,8 @@ public class FluxViewerPanelTest
             assertThat(panel.sectorSummary(first.allSectors.getFirst())).contains("bad checksum");
             assertThat(panel.sectorData(first.allSectors.getFirst(), false)).contains("ab cd");
             assertThat(panel.sectorData(first.allSectors.getFirst(), true)).contains("12 34");
-            assertThat(FluxViewerPanel.recordData(first.records.getFirst())).contains("Data " +
-                    "CRC16:");
+            assertThat(FluxViewerPanel.recordData(first.records.getFirst())).contains(
+                    "Data " + "CRC16:");
             panel.dispose();
         });
     }

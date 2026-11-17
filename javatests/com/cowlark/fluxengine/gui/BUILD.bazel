@@ -9,8 +9,10 @@ java_test(
         "//java/com/cowlark/fluxengine/config",
         "//java/com/cowlark/fluxengine/config:config_java_proto",
         "//java/com/cowlark/fluxengine/core",
+        "//java/com/cowlark/fluxengine/data",
         "//java/com/cowlark/fluxengine/gui",
         "//java/com/cowlark/fluxengine/usb",
+        "@maven//:com_fifesoft_rsyntaxtextarea",
         "@maven//:com_google_guava_guava",
         "@maven//:com_google_truth_truth",
         "@maven//:io_github_globaltcad_sprouts",
@@ -143,6 +145,43 @@ java_test(
         "//java/com/cowlark/fluxengine/gui",
         "@maven//:com_formdev_flatlaf",
         "@maven//:com_google_guava_guava",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "PxfParserTest",
+    srcs = ["PxfParserTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/gui",
+        "@maven//:com_fifesoft_rsyntaxtextarea",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+        "@maven//:org_protowire_protowire_pxf_runtime",
+    ],
+)
+
+java_test(
+    name = "PxfCompletionProviderTest",
+    srcs = ["PxfCompletionProviderTest.java"],
+    jvm_flags = ["-Djava.awt.headless=true"],
+    deps = [
+        "//java/com/cowlark/fluxengine/gui",
+        "@maven//:com_fifesoft_autocomplete",
+        "@maven//:com_fifesoft_rsyntaxtextarea",
+        "@maven//:com_google_guava_guava",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "PxfTokenMakerTest",
+    srcs = ["PxfTokenMakerTest.java"],
+    deps = [
+        "//java/com/cowlark/fluxengine/gui",
+        "@maven//:com_fifesoft_rsyntaxtextarea",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],

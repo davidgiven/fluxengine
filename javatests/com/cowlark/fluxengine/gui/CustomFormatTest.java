@@ -3,41 +3,48 @@ package com.cowlark.fluxengine.gui;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
-import com.cowlark.fluxengine.core.FluxEngineException;
 import com.cowlark.fluxengine.config.ConfigBuilder;
+import com.cowlark.fluxengine.core.FluxEngineException;
+import com.cowlark.fluxengine.data.Formats;
 import com.cowlark.fluxengine.usb.UsbFinder;
 import com.google.common.collect.ImmutableList;
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
+import org.fife.ui.rsyntaxtextarea.TextEditorPane;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.MockedStatic;
+import org.mockito.MockedConstruction;
 import org.mockito.Mockito;
 import sprouts.Association;
 import sprouts.From;
-import sprouts.Viewable;
 import swingtree.SwingTree;
 import swingtree.threading.EventProcessor;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import java.awt.Component;
+import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.prefs.Preferences;
 
 @RunWith(JUnit4.class)
 public class CustomFormatTest
 {
+    @Rule public TemporaryFolder temporaryFolder = new TemporaryFolder();
     private Preferences preferences;
     private PreferencesReaderWriter writer;
     private ImageViewModel model;
-    private Path file;
     private EventProcessor previousEventProcessor;
 
     private static JButton button(java.awt.Container panel, String text)
@@ -64,6 +71,62 @@ public class CustomFormatTest
         return false;
     }
 
+    private static RSyntaxTextArea editor(java.awt.Container panel)
+    {
+        for (Component component : panel.getComponents())
+        {
+            if (component instanceof RSyntaxTextArea area)
+                return area;
+            if (component instanceof java.awt.Container container)
+            {
+                RSyntaxTextArea found = editor(container);
+                if (found != null)
+                    return found;
+            }
+        }
+        return null;
+    }
+
+    /* Double quotes must be inserted literally, including consecutive triple delimiters. */
+    @Test
+    public void typingQuotesDoesNotInsertMatchingQuotes() throws Exception
+    {
+        SwingUtilities.invokeAndWait(() -> {
+            model.getSelectedFormat().set(From.VIEW, ImageViewModel.CUSTOM_FORMAT);
+            RSyntaxTextArea area = editor(new FormatEditorPanel(model));
+            area.setText("");
+            Object actionKey = area.getInputMap().get(javax.swing.KeyStroke.getKeyStroke('"'));
+            javax.swing.Action action = area.getActionMap().get(actionKey);
+            for (int count = 1; count <= 3; count++)
+            {
+                action.actionPerformed(new java.awt.event.ActionEvent(
+                        area,
+                        java.awt.event.ActionEvent.ACTION_PERFORMED,
+                        "\""));
+                assertThat(area.getText()).isEqualTo("\"".repeat(count));
+            }
+        });
+    }
+
+    /* Highlighting is active only while editing is allowed, including busy-state changes. */
+    @Test
+    public void syntaxHighlightingFollowsEditability() throws Exception
+    {
+        SwingUtilities.invokeAndWait(() -> {
+            FormatEditorPanel panel = new FormatEditorPanel(model);
+            RSyntaxTextArea area = editor(panel);
+            assertThat(area.getSyntaxEditingStyle()).isEqualTo(SyntaxConstants.SYNTAX_STYLE_NONE);
+            model.getSelectedFormat().set(From.VIEW, ImageViewModel.CUSTOM_FORMAT);
+            assertThat(area.getSyntaxEditingStyle()).isEqualTo(PxfTokenMaker.SYNTAX_STYLE);
+            area.setEditable(false);
+            assertThat(area.getSyntaxEditingStyle()).isEqualTo(SyntaxConstants.SYNTAX_STYLE_NONE);
+            area.setEditable(true);
+            assertThat(area.getSyntaxEditingStyle()).isEqualTo(PxfTokenMaker.SYNTAX_STYLE);
+            model.getSelectedFormat().set(From.VIEW, "ibm");
+            assertThat(area.getSyntaxEditingStyle()).isEqualTo(SyntaxConstants.SYNTAX_STYLE_NONE);
+        });
+    }
+
     @Before
     public void setUp() throws Exception
     {
@@ -82,9 +145,8 @@ public class CustomFormatTest
             savedPreferences.put(call.getArgument(0), call.getArgument(1));
             return null;
         }).when(preferences).put(Mockito.anyString(), Mockito.anyString());
-        writer = new PreferencesReaderWriter(preferences);
+        writer = new PreferencesReaderWriter(preferences, temporaryFolder.getRoot().toPath());
         model = newModel();
-        file = Files.createTempFile("custom-format", ".pxf");
     }
 
     private ImageViewModel newModel()
@@ -99,113 +161,262 @@ public class CustomFormatTest
     @After
     public void tearDown() throws Exception
     {
-        Files.deleteIfExists(file);
         SwingTree.get().setEventProcessor(previousEventProcessor);
     }
 
-    private void load() throws Exception
+    /* The floating action follows format selection both initially and after changes. */
+    @Test
+    public void customiseButtonIsVisibleOnlyForBuiltInFormats() throws Exception
     {
-        SwingUtilities.invokeAndWait(() -> model.onCustomFormatChanged(file.toString()));
+        SwingUtilities.invokeAndWait(() -> {
+            model.getSelectedFormat().set(From.VIEW, ImageViewModel.CUSTOM_FORMAT);
+            FormatEditorPanel panel = new FormatEditorPanel(model);
+            JButton customise = button(panel, "Customise");
+            assertThat(customise.isVisible()).isFalse();
+
+            model.getSelectedFormat().set(From.VIEW, "ibm");
+            assertThat(customise.isVisible()).isTrue();
+
+            model.getSelectedFormat().set(From.VIEW, ImageViewModel.CUSTOM_FORMAT);
+            assertThat(customise.isVisible()).isFalse();
+        });
     }
 
+    /* Cancelling or closing the discard prompt preserves dirty text; confirming replaces it. */
     @Test
-    public void customSelectionUsesLoadedSnapshotRegardlessOfMetadata() throws Exception
+    public void customisePromptsBeforeDiscardingDirtyText() throws Exception
     {
-        Files.writeString(file, "shortname = \"ibm\"\ncomment = \"custom data\"\n");
-        load();
-        model.getSelectedFormat().set(From.VIEW, ImageViewModel.CUSTOM_FORMAT);
-
-        /* Editing the file does not affect operations until an explicit reload. */
-        Files.writeString(file, "comment = \"not reloaded\"\n");
-        assertThat(model.makeConfigBuilderWithFormat().get("comment")).isEqualTo("custom data");
-        assertThat(model.getFormatConfig("ibm").getComment()).isNotEqualTo("custom data");
-        assertThat(model.getFormatNames()).contains(ImageViewModel.CUSTOM_FORMAT);
-        assertThat(preferences.get("custom_format_filename", "")).isEqualTo(file.toString());
+        SwingUtilities.invokeAndWait(() -> {
+            model.getSelectedFormat().set(From.VIEW, ImageViewModel.CUSTOM_FORMAT);
+            FormatEditorPanel panel = new FormatEditorPanel(model);
+            RSyntaxTextArea area = editor(panel);
+            String dirtyText = "comment = \"unsaved draft\"\n# edited";
+            area.setText(dirtyText);
+            model.getSelectedFormat().set(From.VIEW, "ibm");
+            String previewText = area.getText();
+            String customText = model.getCustomFormatText().get();
+            assertThat(customText).isEqualTo(dirtyText);
+            try (MockedStatic<JOptionPane> dialogs = Mockito.mockStatic(JOptionPane.class))
+            {
+                dialogs
+                        .when(() -> JOptionPane.showConfirmDialog(
+                                panel,
+                                "You have unsaved changes. Do you want to discard them?",
+                                "Unsaved changes",
+                                JOptionPane.YES_NO_OPTION,
+                                JOptionPane.WARNING_MESSAGE))
+                        .thenReturn(
+                                JOptionPane.NO_OPTION,
+                                JOptionPane.CLOSED_OPTION,
+                                JOptionPane.YES_OPTION);
+                for (int attempt = 0; attempt < 2; attempt++)
+                {
+                    button(panel, "Customise").doClick();
+                    assertThat(area.getText()).isEqualTo(previewText);
+                    assertThat(model.getSelectedFormat().get()).isEqualTo("ibm");
+                    assertThat(model.getCustomFormatText().get()).isEqualTo(customText);
+                }
+                dialogs.verify(
+                        () -> JOptionPane.showConfirmDialog(
+                                panel,
+                                "You have unsaved changes. Do you want to discard them?",
+                                "Unsaved changes",
+                                JOptionPane.YES_NO_OPTION,
+                                JOptionPane.WARNING_MESSAGE), Mockito.times(2));
+                button(panel, "Customise").doClick();
+                assertThat(model.getSelectedFormat().get()).isEqualTo(ImageViewModel.CUSTOM_FORMAT);
+                assertThat(area.getText()).doesNotContain("# edited");
+            }
+        });
     }
 
+    /* Previewing built-in formats must not mark the custom draft as saved. */
     @Test
-    public void sameFilenameAndIdenticalContentsStillNotify() throws Exception
+    public void customDirtyStateSurvivesFormatChanges() throws Exception
     {
-        Files.writeString(file, "comment = \"first\"\n");
-        load();
-        AtomicInteger notifications = new AtomicInteger();
-        Viewable.cast(model.getCustomFormatFilename()).onChange(
-                From.ALL, change -> {
-                    assertThat(model
-                            .getFormatConfig(ImageViewModel.CUSTOM_FORMAT)
-                            .getComment()).isNotEmpty();
-                    notifications.incrementAndGet();
-                });
-        Files.writeString(file, "comment = \"second\"\n");
-        load();
-        load();
-
-        assertThat(notifications.get()).isEqualTo(2);
-        assertThat(model.getFormatConfig(ImageViewModel.CUSTOM_FORMAT).getComment()).isEqualTo(
-                "second");
+        SwingUtilities.invokeAndWait(() -> {
+            model.getSelectedFormat().set(From.VIEW, ImageViewModel.CUSTOM_FORMAT);
+            FormatEditorPanel panel = new FormatEditorPanel(model);
+            TextEditorPane area = (TextEditorPane) editor(panel);
+            assertThat(area.isDirty()).isFalse();
+            String draft = "comment = \"draft\"";
+            area.setText(draft);
+            assertThat(area.isDirty()).isTrue();
+            model.getSelectedFormat().set(From.VIEW, "ibm");
+            assertThat(area.isDirty()).isFalse();
+            model.getSelectedFormat().set(From.VIEW, "amiga");
+            model.getSelectedFormat().set(From.VIEW, ImageViewModel.CUSTOM_FORMAT);
+            assertThat(area.getText()).isEqualTo(draft);
+            assertThat(area.isDirty()).isTrue();
+        });
     }
 
+    /* Load arbitrary PXF text without reformatting it, including Unicode and syntax errors. */
     @Test
-    public void failedReloadPreservesWorkingSnapshotAndFilename() throws Exception
+    public void loadsPxfIntoTheCustomSlot() throws Exception
     {
-        Files.writeString(file, "comment = \"working\"\n");
-        load();
-        Files.writeString(file, "invalid [");
-        assertThrows(FluxEngineException.class, () -> model.onCustomFormatChanged(file.toString()));
-        assertThrows(
-                FluxEngineException.class,
-                () -> model.onCustomFormatChanged(file + ".missing"));
-
-        assertThat(model.getFormatConfig(ImageViewModel.CUSTOM_FORMAT).getComment()).isEqualTo(
-                "working");
-        assertThat(model.getCustomFormatFilename().get()).isEqualTo(file.toString());
+        File source = temporaryFolder.newFile("source.pxf");
+        String text = "# é😀\ncomment = \"loaded\"\nbroken =";
+        Files.writeString(source.toPath(), text, StandardCharsets.UTF_8);
+        SwingUtilities.invokeAndWait(() -> {
+            model.getSelectedFormat().set(From.VIEW, "ibm");
+            FormatEditorPanel panel = new FormatEditorPanel(model);
+            try (MockedConstruction<JFileChooser> choosers = Mockito.mockConstruction(
+                    JFileChooser.class, (chooser, context) -> {
+                        Mockito.when(chooser.showOpenDialog(panel)).thenReturn(JFileChooser.APPROVE_OPTION);
+                        Mockito.when(chooser.getSelectedFile()).thenReturn(source);
+                    }))
+            {
+                button(panel, "Load").doClick();
+                assertThat(model.getSelectedFormat().get()).isEqualTo(ImageViewModel.CUSTOM_FORMAT);
+                assertThat(model.getCustomFormatText().get()).isEqualTo(text);
+                assertThat(editor(panel).getText()).isEqualTo(text);
+                assertThat(((TextEditorPane) editor(panel)).isDirty()).isFalse();
+                assertThat(choosers.constructed()).hasSize(1);
+            }
+        });
     }
 
+    /* Declining discard or cancelling the chooser must preserve the hidden dirty draft. */
     @Test
-    public void loadingAnotherFileReplacesOnlyTheCustomSlot() throws Exception
+    public void cancellingLoadPreservesDirtyDraft() throws Exception
     {
-        Files.writeString(file, "shortname = \"first\"\n");
-        load();
-        Path replacement = Files.createTempFile("replacement-format", ".pxf");
-        try
-        {
-            Files.writeString(replacement, "shortname = \"second\"\n");
-            SwingUtilities.invokeAndWait(() -> model.onCustomFormatChanged(replacement.toString()));
-            assertThat(model
-                    .getFormatConfig(ImageViewModel.CUSTOM_FORMAT)
-                    .getShortname()).isEqualTo("second");
-            assertThat(model.getCustomFormatFilename().get()).isEqualTo(replacement.toString());
-            assertThat(model
-                    .getFormatNames()
-                    .stream()
-                    .filter(ImageViewModel.CUSTOM_FORMAT::equals)
-                    .count()).isEqualTo(1);
-        } finally
-        {
-            Files.deleteIfExists(replacement);
-        }
+        SwingUtilities.invokeAndWait(() -> {
+            model.getSelectedFormat().set(From.VIEW, ImageViewModel.CUSTOM_FORMAT);
+            FormatEditorPanel panel = new FormatEditorPanel(model);
+            String draft = "comment = \"unsaved\"";
+            editor(panel).setText(draft);
+            model.getSelectedFormat().set(From.VIEW, "ibm");
+            try (MockedStatic<JOptionPane> dialogs = Mockito.mockStatic(JOptionPane.class);
+                    MockedConstruction<JFileChooser> choosers = Mockito.mockConstruction(
+                            JFileChooser.class, (chooser, context) -> Mockito.when(
+                                    chooser.showOpenDialog(panel)).thenReturn(JFileChooser.CANCEL_OPTION)))
+            {
+                dialogs.when(() -> JOptionPane.showConfirmDialog(
+                        panel, "You have unsaved changes. Do you want to discard them?",
+                        "Unsaved changes", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE))
+                        .thenReturn(JOptionPane.NO_OPTION, JOptionPane.YES_OPTION);
+                button(panel, "Load").doClick();
+                assertThat(choosers.constructed()).isEmpty();
+                button(panel, "Load").doClick();
+                assertThat(choosers.constructed()).hasSize(1);
+                model.getSelectedFormat().set(From.VIEW, ImageViewModel.CUSTOM_FORMAT);
+                assertThat(editor(panel).getText()).isEqualTo(draft);
+                assertThat(((TextEditorPane) editor(panel)).isDirty()).isTrue();
+            }
+        });
+    }
+
+    /* Save writes the exact UTF-8 draft and only clears dirty state after approval. */
+    @Test
+    public void savesPxfAndClearsDirtyState() throws Exception
+    {
+        File destination = new File(temporaryFolder.getRoot(), "saved");
+        String text = "# é😀\ncomment = \"saved\"\nbroken =";
+        SwingUtilities.invokeAndWait(() -> {
+            model.getSelectedFormat().set(From.VIEW, ImageViewModel.CUSTOM_FORMAT);
+            FormatEditorPanel panel = new FormatEditorPanel(model);
+            TextEditorPane area = (TextEditorPane) editor(panel);
+            area.setText(text);
+            try (MockedConstruction<JFileChooser> choosers = Mockito.mockConstruction(
+                    JFileChooser.class, (chooser, context) -> {
+                        Mockito.when(chooser.showSaveDialog(panel))
+                                .thenReturn(JFileChooser.CANCEL_OPTION, JFileChooser.APPROVE_OPTION);
+                        Mockito.when(chooser.getSelectedFile()).thenReturn(destination);
+                    }))
+            {
+                button(panel, "Save").doClick();
+                assertThat(area.isDirty()).isTrue();
+            }
+            try (MockedConstruction<JFileChooser> choosers = Mockito.mockConstruction(
+                    JFileChooser.class, (chooser, context) -> {
+                        Mockito.when(chooser.showSaveDialog(panel)).thenReturn(JFileChooser.APPROVE_OPTION);
+                        Mockito.when(chooser.getSelectedFile()).thenReturn(destination);
+                    }))
+            {
+                button(panel, "Save").doClick();
+                assertThat(area.isDirty()).isFalse();
+                assertThat(model.getCustomFormatText().get()).isEqualTo(text);
+            }
+        });
+        assertThat(Files.readString(new File(destination.getPath() + ".pxf").toPath(),
+                StandardCharsets.UTF_8)).isEqualTo(text);
     }
 
     /* Built-in format preferences must survive option renames just like custom formats. */
     @Test
     public void ignoresRemovedSavedOptionsWhenBuildingConfig()
     {
-        writer.setOptionsForFormat("acornadfs", Association.between(String.class, String.class)
-                .put("f", "").put("160", ""));
+        writer.setOptionsForFormat(
+                "acornadfs",
+                Association.between(String.class, String.class).put("f", "").put("160", ""));
         model.getSelectedFormat().set(From.VIEW, "acornadfs");
         ConfigBuilder builder = model.makeConfigBuilderWithFormat();
         builder.build();
         assertThat(builder.get("layout.tracks")).isEqualTo("40");
     }
 
+    /* Editor text drives custom options and engine configuration without an external file. */
     @Test
-    public void keepsCompatibleChoicesAndDropsRemovedOptions() throws Exception
+    public void editorTextProvidesConfigurationAndOptions() throws Exception
     {
-        Files.writeString(
-                file, """
-                        option = [{ name = "keep" }]
-                        option_group = [{ name = "density" option = [{ name = "dd" }] }]
-                        """);
+        SwingUtilities.invokeAndWait(() -> {
+            model.getCustomFormatText().set(
+                    From.VIEW,
+                    "shortname = \"ibm\"\ncomment = \"custom data\"\n" +
+                            "option = [{ name = \"test\" comment = \"First choice\" }]\n");
+            model.getSelectedFormat().set(From.VIEW, ImageViewModel.CUSTOM_FORMAT);
+            ConfigurationPanel panel = new ConfigurationPanel(model);
+            assertThat(button(panel, "Select file")).isNull();
+            assertThat(button(panel, "Reload file")).isNull();
+            assertThat(hasLabel(panel, "First choice")).isTrue();
+            assertThat(model.makeConfigBuilderWithFormat().get("comment")).isEqualTo("custom data");
+            assertThat(model.getFormatConfig("ibm").getComment()).isNotEqualTo("custom data");
+
+            model
+                    .getCustomFormatText()
+                    .set(From.VIEW, "option = [{ name = \"test\" comment = \"Second choice\" }]\n");
+            assertThat(hasLabel(panel, "Second choice")).isTrue();
+            assertThat(hasLabel(panel, "First choice")).isFalse();
+        });
+    }
+
+    /* Invalid drafts remain editable but cannot start an engine operation. */
+    @Test
+    public void invalidEditorTextDoesNotBreakConfigurationPanel() throws Exception
+    {
+        SwingUtilities.invokeAndWait(() -> {
+            model.getSelectedFormat().set(From.VIEW, ImageViewModel.CUSTOM_FORMAT);
+            ConfigurationPanel panel = new ConfigurationPanel(model);
+            model.getCustomFormatText().set(From.VIEW, "invalid [");
+            assertThrows(FluxEngineException.class, () -> model.makeConfigBuilderWithFormat());
+            assertThat(button(panel, "Select file")).isNull();
+        });
+    }
+
+    /* File-backed editor contents are restored without explicitly loading a format file. */
+    @Test
+    public void restoresCustomSourceOnStartup()
+    {
+        model.getCustomFormatText().set(From.VIEW, "shortname: \"legacy\"\n");
+        model.getSelectedFormat().set(From.VIEW, ImageViewModel.CUSTOM_FORMAT);
+        model = newModel();
+        assertThat(model.makeConfigBuilderWithFormat().get("shortname")).isEqualTo("legacy");
+    }
+
+    /* Customising preserves the source and selects the editable custom slot. */
+    @Test
+    public void customiseCopiesOriginalSource() throws Exception
+    {
+        model.onCopyFromCurrentFormat();
+        assertThat(model.getSelectedFormat().get()).isEqualTo(ImageViewModel.CUSTOM_FORMAT);
+        assertThat(model.getCustomFormatText().get()).isEqualTo(Formats.loadText("ibm"));
+    }
+
+    /* Valid source changes retain compatible choices and discard options that disappeared. */
+    @Test
+    public void sourceChangesReconcileSavedOptions()
+    {
         writer.setOptionsForFormat(
                 ImageViewModel.CUSTOM_FORMAT,
                 Association
@@ -213,112 +424,12 @@ public class CustomFormatTest
                         .put("keep", "")
                         .put("removed", "")
                         .put("density", "hd"));
-        load();
+        model.getCustomFormatText().set(
+                From.VIEW,
+                "option = [{ name = \"keep\" }]\n" +
+                        "option_group = [{ name = \"density\" option = [{ name = \"dd\" }] }]\n");
         assertThat(writer
                 .getOptionsForFormat(ImageViewModel.CUSTOM_FORMAT)
                 .toMap()).containsExactly("keep", "");
-
-        writer.setOptionsForFormat(
-                ImageViewModel.CUSTOM_FORMAT,
-                Association.between(String.class, String.class).put("density", "dd"));
-        load();
-        assertThat(writer
-                .getOptionsForFormat(ImageViewModel.CUSTOM_FORMAT)
-                .toMap()).containsExactly("density", "dd");
-    }
-
-    @Test
-    public void restoresPreferencesAndSupportsLegacyTextproto() throws Exception
-    {
-        Files.writeString(file, "shortname: \"legacy\"\n");
-        load();
-        model.getSelectedFormat().set(From.VIEW, ImageViewModel.CUSTOM_FORMAT);
-        model = newModel();
-        assertThat(model.getSelectedFormat().get()).isEqualTo(ImageViewModel.CUSTOM_FORMAT);
-        assertThat(model.getCustomFormatFilename().get()).isEqualTo(file.toString());
-        assertThrows(FluxEngineException.class, () -> model.makeConfigBuilderWithFormat());
-        load();
-        assertThat(model.makeConfigBuilderWithFormat().get("shortname")).isEqualTo("legacy");
-    }
-
-    @Test
-    public void controlsAppearOnlyInCustomModeAndReloadRebuildsOptions() throws Exception
-    {
-        SwingUtilities.invokeAndWait(() -> {
-            ConfigurationPanel panel = new ConfigurationPanel(model);
-            assertThat(button(panel, "Select file")).isNull();
-            model.getSelectedFormat().set(From.VIEW, ImageViewModel.CUSTOM_FORMAT);
-            assertThat(button(panel, "Select file")).isNotNull();
-            assertThat(button(panel, "Reload file").isEnabled()).isFalse();
-        });
-
-        Files.writeString(file, "option = [{ name = \"test\" comment = \"First choice\" }]\n");
-        load();
-        SwingUtilities.invokeAndWait(() -> {
-            ConfigurationPanel panel = new ConfigurationPanel(model);
-            assertThat(button(panel, "Reload file").isEnabled()).isTrue();
-            assertThat(hasLabel(panel, "First choice")).isTrue();
-            try
-            {
-                Files.writeString(
-                        file,
-                        "option = [{ name = \"test\" comment = \"Second choice\" }]\n");
-            } catch (java.io.IOException e)
-            {
-                throw new AssertionError(e);
-            }
-            button(panel, "Reload file").doClick();
-            assertThat(hasLabel(panel, "Second choice")).isTrue();
-            assertThat(hasLabel(panel, "First choice")).isFalse();
-            model.getSelectedFormat().set(From.VIEW, "ibm");
-            assertThat(button(panel, "Select file")).isNull();
-        });
-    }
-
-    @Test
-    public void selectingAndCancellingFileChooser() throws Exception
-    {
-        Files.writeString(file, "comment = \"chosen\"\n");
-        SwingUtilities.invokeAndWait(() -> {
-            model.getSelectedFormat().set(From.VIEW, ImageViewModel.CUSTOM_FORMAT);
-            ConfigurationPanel panel = new ConfigurationPanel(model);
-            try (org.mockito.MockedConstruction<JFileChooser> choosers = Mockito.mockConstruction(
-                    JFileChooser.class, (chooser, context) -> {
-                        Mockito
-                                .when(chooser.showOpenDialog(panel))
-                                .thenReturn(JFileChooser.APPROVE_OPTION);
-                        Mockito.when(chooser.getSelectedFile()).thenReturn(file.toFile());
-                    }))
-            {
-                button(panel, "Select file").doClick();
-                assertThat(model
-                        .getFormatConfig(ImageViewModel.CUSTOM_FORMAT)
-                        .getComment()).isEqualTo("chosen");
-                JFileChooser chooser = choosers.constructed().getFirst();
-                Mockito
-                        .verify(chooser)
-                        .setFileFilter(Mockito.any(javax.swing.filechooser.FileNameExtensionFilter.class));
-            }
-
-            /* Canceling leaves the working configuration, filename, and notifications alone. */
-            AtomicInteger notifications = new AtomicInteger();
-            Viewable
-                    .cast(model.getCustomFormatFilename())
-                    .onChange(From.ALL, change -> notifications.incrementAndGet());
-            try (org.mockito.MockedConstruction<JFileChooser> choosers = Mockito.mockConstruction(
-                    JFileChooser.class,
-                    (chooser, context) -> Mockito
-                            .when(chooser.showOpenDialog(panel))
-                            .thenReturn(JFileChooser.CANCEL_OPTION)))
-            {
-                button(panel, "Select file").doClick();
-                Mockito.verify(choosers.constructed().getFirst()).setSelectedFile(file.toFile());
-                assertThat(notifications.get()).isEqualTo(0);
-                assertThat(model.getCustomFormatFilename().get()).isEqualTo(file.toString());
-                assertThat(model
-                        .getFormatConfig(ImageViewModel.CUSTOM_FORMAT)
-                        .getComment()).isEqualTo("chosen");
-            }
-        });
     }
 }

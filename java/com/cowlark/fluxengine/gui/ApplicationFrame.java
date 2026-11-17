@@ -20,6 +20,7 @@ import static swingtree.UILayoutConstants.TOP;
 import com.cowlark.fluxengine.gui.UiUtils.SplitPanelAction;
 import io.reactivex.rxjava3.disposables.Disposable;
 import org.jspecify.annotations.NonNull;
+import sprouts.From;
 import sprouts.Val;
 import sprouts.Var;
 import sprouts.Viewable;
@@ -51,6 +52,7 @@ public class ApplicationFrame extends JFrame
     private final FluxPanel fluxPanel;
     private final SummaryPanel summaryPanel;
     private final FilesystemPanel filesystemPanel;
+    private final FormatEditorPanel formatEditorPanel;
     private final JTabbedPane centreTabs;
     private final ImageViewModel model;
     private final Var<Workflow> currentWorkflow;
@@ -67,6 +69,7 @@ public class ApplicationFrame extends JFrame
         visualiserPanel = new VisualiserPanel(model);
         configurationPanel = new ConfigurationPanel(model);
         filesystemPanel = new FilesystemPanel(model);
+        formatEditorPanel = new FormatEditorPanel(model);
 
         URL iconUrl = ApplicationFrame.class.getResource("/icon.png");
         if (iconUrl != null)
@@ -82,12 +85,27 @@ public class ApplicationFrame extends JFrame
                         .withVerticalScrollBarPolicy(UI.Active.ALWAYS)
                         .add(of(configurationPanel))));
 
-        /* Retain the centre tabs so flux-view requests can select their destination. */
         centreTabs = tabbedPane().withMinSize(100, 0)
+                .add(tab("Format").add(of(formatEditorPanel)))
                 .add(tab("Image").add(of(imagePanel)))
                 .add(tab("Log").add(of(logPanel)))
                 .add(tab("Flux").add(of(fluxPanel)))
                 .add(tab("Files").add(of(filesystemPanel))).get(JTabbedPane.class);
+
+        /* Start on the image, and open the editor when the custom format is selected. */
+        centreTabs.setSelectedComponent(imagePanel);
+        Viewable.cast(model.getSelectedFormat()).onChange(
+                From.ALL, change -> {
+                    if (ImageViewModel.CUSTOM_FORMAT.equals(change
+                            .currentValue()
+                            .orElseThrowUnchecked()))
+                        EDT_EXECUTOR.execute(() -> {
+                            if (ImageViewModel.CUSTOM_FORMAT.equals(model
+                                    .getSelectedFormat()
+                                    .get()))
+                                centreTabs.setSelectedComponent(formatEditorPanel);
+                        });
+                });
 
         UIForSplitPane<JSplitPane> topPane =
                 splitPane(HORIZONTAL).peek(pane -> pane.setResizeWeight(1.0))
